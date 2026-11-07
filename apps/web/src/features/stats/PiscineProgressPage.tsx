@@ -13,7 +13,8 @@ import { PersonInput } from '../../shared/ui/PersonInput'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
 import { PiscineProgressChart } from './PiscineProgressChart'
 import type { Line, PiscineShown } from './PiscineProgressChart'
-import { usePoolLines } from './PiscinePools'
+import { PoolWhoPicker, usePoolLines } from './PiscinePools'
+import type { PoolWho } from './PiscinePools'
 import { PiscineTop, useTopLines } from './PiscineTop'
 import { MAX_OTHERS, PERSON_COLORS } from './progressSeries'
 
@@ -59,9 +60,11 @@ export function PiscineProgressPage({ me }: { me: string }) {
     data === undefined ? [] : others.filter((login) => !data.others.some((o) => o.login === login))
   // La vista sin límites del dueño: los más avanzados, la media de los mejores
   // y quien cae entre dos percentiles (`docs/piscineros.md`).
-  const top = useTopLines(data)
+  // Quién cuenta en las medias y en los más avanzados (sin límites, 2026-11-07).
+  const [who, setWho] = useState<PoolWho>('all')
+  const top = useTopLines(data, who)
   // Y las últimas piscinas del campus, cada una y todas juntas (2026-11-07).
-  const pools = usePoolLines(data)
+  const pools = usePoolLines(data, who)
   const extra: Line[] = [...(pools?.lines ?? []), ...(top?.lines ?? [])]
   const toggle = (key: keyof PiscineShown) => (
     <label className="progress-toggle">
@@ -107,6 +110,7 @@ export function PiscineProgressPage({ me }: { me: string }) {
           <span className="eyebrow">{t('piscine.chart.compareWith')}</span>
           {toggle('cohort')}
         </div>
+        <PoolWhoPicker data={data} value={who} onChange={setWho} />
         {top?.options}
         {pools?.options}
         <PoolOnly k="avance.compare">

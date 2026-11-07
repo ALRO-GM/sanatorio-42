@@ -531,6 +531,53 @@
   fill: var(--piscine-c);
   opacity: 0.08;
 }
+/* «Otras piscinas» es un grupo de casillas (`fieldset`), sin el marco que le
+   pone el navegador: dentro de una tarjeta no va otra con borde. */
+fieldset.progress-option {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+fieldset.progress-option > legend {
+  padding: 0;
+}
+/* Por semanas (2026-11-07): una raya al empezar cada semana, su nombre debajo
+   y los viernes de examen a trazos con un punto en el eje; el examen final,
+   más marcado. Recesivo: las líneas de avance siguen mandando. */
+.piscine-weeks line {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+.piscine-weeks text {
+  fill: var(--text-2);
+  font-size: 11px;
+  font-weight: 600;
+}
+.piscine-fridays line {
+  stroke: var(--text-3);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0.7;
+}
+.piscine-fridays circle {
+  fill: var(--surface);
+  stroke: var(--text-2);
+  stroke-width: 2;
+}
+.piscine-fridays .final line {
+  stroke: var(--text-2);
+  stroke-dasharray: none;
+  opacity: 1;
+}
+.piscine-fridays .final circle {
+  fill: var(--text-2);
+}
+@media (max-width: 640px) {
+  .piscine-weeks text {
+    font-size: 14px;
+  }
+}
 .piscine-summary {
   margin: 0;
   font-weight: 700;

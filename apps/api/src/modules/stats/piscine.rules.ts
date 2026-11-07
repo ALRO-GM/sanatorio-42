@@ -9,6 +9,7 @@
 import type {
   PiscineMilestone,
   PiscinePoolLine,
+  PiscinePoolPart,
   PiscineTrace,
   ProgressLine,
 } from '@sanatorio/contracts'
@@ -156,18 +157,14 @@ const MIN_POOL = 20
 const MAX_POOLS = 10
 
 /**
- * Las últimas piscinas de un campus para compararlas en el Avance (pedido por
- * Alberto el 2026-11-07): los días en que empezaron `MIN_POOL` personas o más,
- * de la más nueva a la más vieja, cada una con la media de lo aprobado cada
- * día de piscina (`minPeople` como en `meanLine`). Sin nada aprobado aún
- * (el historial no la ha copiado), `copied: false`.
+ * Las últimas piscinas de un campus: los días en que empezaron `MIN_POOL`
+ * personas o más, de la más nueva a la más vieja, con su primer día
+ * (`YYYY-MM-DD`) y el inicio del primero que empezó.
  */
-export function poolLinesOf(
+export function poolDaysOf(
   swimmers: readonly Swimmer[],
   now: number,
-  names: ReadonlyMap<number, string>,
-  minPeople: number,
-): PiscinePoolLine[] {
+): { start: string; first: number }[] {
   const firstOf = new Map<number, number>()
   const count = new Map<number, number>()
 
@@ -185,17 +182,49 @@ export function poolLinesOf(
     .slice(0, MAX_POOLS)
     .map(([day]) => {
       const first = firstOf.get(day) ?? day * DAY_MS
-      const members = swimmers.filter((swimmer) => samePool(swimmer.start, first))
 
-      return {
-        start: new Date(first).toISOString().slice(0, 10),
-        people: members.length,
-        line: meanLine(
-          members.map((swimmer) => swimOf(swimmer, now, names).line),
-          POOL_AXIS.length,
-          minPeople,
-        ),
-        copied: members.some((swimmer) => swimmer.done.size > 0),
-      }
+      return { start: new Date(first).toISOString().slice(0, 10), first }
     })
+}
+
+/**
+ * Las últimas piscinas de un campus para compararlas en el Avance (pedido por
+ * Alberto el 2026-11-07, `poolDaysOf`), cada una con la media de lo aprobado
+ * cada día de piscina (`minPeople` como en `meanLine`). Sin nada aprobado aún
+ * (el historial no la ha copiado), `copied: false`. Con quién abandonó cada
+ * una (`left`, primer día → logins), también la media de quien sigue y la de
+ * quien abandonó.
+ */
+export function poolLinesOf(
+  swimmers: readonly Swimmer[],
+  now: number,
+  names: ReadonlyMap<number, string>,
+  minPeople: number,
+  left: ReadonlyMap<string, ReadonlySet<string>> = new Map(),
+): PiscinePoolLine[] {
+  const partOf = (list: readonly Swimmer[]): PiscinePoolPart => ({
+    people: list.length,
+    line: meanLine(
+      list.map((swimmer) => swimOf(swimmer, now, names).line),
+      POOL_AXIS.length,
+      minPeople,
+    ),
+  })
+
+  return poolDaysOf(swimmers, now).map(({ start, first }) => {
+    const members = swimmers.filter((swimmer) => samePool(swimmer.start, first))
+    const gone = left.get(start)
+
+    return {
+      start,
+      ...partOf(members),
+      copied: members.some((swimmer) => swimmer.done.size > 0),
+      ...(gone === undefined
+        ? {}
+        : {
+            stayed: partOf(members.filter((swimmer) => !gone.has(swimmer.login))),
+            left: partOf(members.filter((swimmer) => gone.has(swimmer.login))),
+          }),
+    }
+  })
 }

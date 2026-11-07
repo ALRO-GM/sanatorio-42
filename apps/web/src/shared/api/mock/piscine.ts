@@ -132,6 +132,8 @@ const everyone = (): NonNullable<PiscineProgress['everyone']> =>
       login,
       image: portrait(login),
       ...swim(1.5 + ((index * 7) % 40) / 6, index % 3, ELAPSED),
+      // Uno de cada cinco ya lo ha dejado.
+      left: index % 5 === 4,
     }
   })
 
@@ -157,11 +159,27 @@ const pools = (): NonNullable<PiscineProgress['pools']> =>
   POOLS.map(([back, people, every], index) => {
     const copied = index < POOLS.length - 1
 
+    const until = back === 0 ? ELAPSED : DAYS.length
+    // Uno de cada cinco abandona: se queda en lo que aprobó la primera semana.
+    const gone = Math.round(people / 5)
+
     return {
       start: new Date(Date.now() - (ELAPSED + back) * DAY).toISOString().slice(0, 10),
       people,
-      line: copied ? swim(every, 0, back === 0 ? ELAPSED : DAYS.length).line : DAYS.map(() => 0),
+      line: copied ? swim(every, 0, until).line : DAYS.map(() => 0),
       copied,
+      stayed: {
+        people: people - gone,
+        line: copied ? swim(every * 0.85, 0, until).line : DAYS.map(() => 0),
+      },
+      left: {
+        people: gone,
+        line: copied
+          ? swim(every, 0, until).line.map((value, day) =>
+              value === null ? null : Math.min(value, 2 + Math.floor(day / 10)),
+            )
+          : DAYS.map(() => 0),
+      },
     }
   })
 

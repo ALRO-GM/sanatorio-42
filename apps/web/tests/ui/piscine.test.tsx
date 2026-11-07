@@ -70,6 +70,20 @@ describe('un piscinero ve la piscina (docs/piscineros.md)', () => {
     ).toBeTruthy()
     expect(screen.queryByText(text('stats.progress.plan'))).toBeNull()
     expect(screen.queryByText(text('stats.progress.paces'))).toBeNull()
+    // Por semanas: las cuatro, cada viernes de examen marcado y el último, el final.
+    const chart = must(document.querySelector('.piscine-chart svg'), 'la gráfica')
+
+    expect(
+      [...chart.querySelectorAll('.piscine-weeks text')].map((each) => each.textContent),
+    ).toEqual(['Semana 1', 'Semana 2', 'Semana 3', 'Semana 4'])
+    expect(
+      [...chart.querySelectorAll('.piscine-fridays title')].map((each) => each.textContent),
+    ).toEqual([
+      'Viernes de examen, día 5',
+      'Viernes de examen, día 12',
+      'Viernes de examen, día 19',
+      'Examen final, día 26',
+    ])
     // Sin la vista sin límites, ni la lista de los más avanzados ni los percentiles.
     expect(screen.queryByRole('heading', { name: text('piscine.top.listTitle') })).toBeNull()
     // Ni otras piscinas: un piscinero se compara solo con la suya.
@@ -139,5 +153,28 @@ describe('un piscinero ve la piscina (docs/piscineros.md)', () => {
     // Y sin la media, una menos.
     await user.click(within(pools).getByRole('checkbox', { name: /^Media de todas/ }))
     expect(document.querySelectorAll('.piscine-chart path.progress-line')).toHaveLength(before + 1)
+  }, 20_000)
+
+  it('sin límites: quién cuenta, todos, quien sigue o quien abandonó', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/avance', { preview: 'full' })
+
+    const list = await screen.findByRole('list', { name: text('piscine.top.listTitle') }, WAIT)
+    const pools = screen.getByRole('group', { name: text('piscine.pools.title') })
+    const overall = (): string =>
+      within(pools).getByRole('checkbox', { name: /^Media de todas/ }).parentElement?.textContent ??
+      ''
+    const all = overall()
+
+    await user.click(screen.getByRole('button', { name: text('piscine.who.left') }))
+    // Ocho de los cuarenta lo dejaron: la lista y la media cambian.
+    expect(within(list).getAllByRole('listitem')).toHaveLength(8)
+    expect(overall()).not.toBe(all)
+
+    await user.click(screen.getByRole('button', { name: text('piscine.who.stayed') }))
+    expect(within(list).getAllByRole('listitem')).toHaveLength(15)
+    await user.click(screen.getByRole('button', { name: text('piscine.who.all') }))
+    expect(overall()).toBe(all)
   }, 20_000)
 })

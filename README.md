@@ -42,7 +42,7 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
 | **Tamaño**      | 35 módulos de API con 258 rutas, 85 migraciones, 6 paquetes compartidos; 4 categorías con 18 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
-| **Calidad**     | 7 160 tests en 260 ficheros (6 216 de la API y 944 de la web, con 73 ficheros de pantallas; medido el 2026-11-07), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
+| **Calidad**     | 7 162 tests en 260 ficheros (6 217 de la API y 945 de la web, con 73 ficheros de pantallas; medido el 2026-11-07), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
 | **Coste**       | 0 € al mes. La web y la máquina se cortan solas antes de pasar de la capa gratuita                                                                   |
@@ -113,6 +113,8 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-07 | Abandono | En las piscinas terminadas el abandono ya no se estima: quien vino hasta dos días antes del examen final la terminó; el resto la dejó tras el último día que vino a un puesto, examen o corrección ([docs/abandono.md](docs/abandono.md)) |
+| 2026-11-07 | Avance | La gráfica de la piscina va por semanas, hasta el viernes del examen final, con cada viernes de examen marcado; y en la vista sin límites, «Quién cuenta»: todos, quien sigue o quien abandonó ([docs/piscineros.md](docs/piscineros.md)) |
 | 2026-11-07 | Red | En la vista de piscinero sin límites, la Red abre por la de toda la piscina en curso o la última, desde su primer día ([docs/piscineros.md](docs/piscineros.md)) |
 | 2026-11-07 | Avance | Arreglo: las líneas de las otras piscinas salían sin color (sus colores solo existían en la página de Abandono) |
 | 2026-11-07 | Avance | En la vista sin límites de la piscina, las últimas 10 piscinas del campus para compararlas, cada una y la media de todas ([docs/piscineros.md](docs/piscineros.md)) |

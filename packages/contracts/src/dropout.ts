@@ -79,6 +79,11 @@ export type DropoutReason =
   | 'weekendOnly'
   /** Vino hoy o ayer. */
   | 'recent'
+  /**
+   * La piscina ya terminó y no vino al final: la dejó tras el último día que
+   * vino (a un puesto, a un examen o a una corrección). Seguro, no estimado.
+   */
+  | 'ended'
   /** Llegó hasta el examen final: terminó la piscina. */
   | 'finished'
   /** Está en el examen de hoy o lo ha hecho: no ha abandonado. */

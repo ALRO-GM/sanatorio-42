@@ -1,10 +1,56 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 
-import type { PiscinePoolLine, PiscineProgress, ProgressLine } from '@sanatorio/contracts'
+import type {
+  PiscinePoolLine,
+  PiscinePoolPart,
+  PiscineProgress,
+  ProgressLine,
+} from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
+import { PillGroup } from '../../shared/ui/PillGroup'
 import type { Line } from './PiscineProgressChart'
+
+/**
+ * Quién cuenta en las medias de las piscinas y en los más avanzados (pedido
+ * por Alberto el 2026-11-07): todos, solo quien sigue o solo quien abandonó.
+ */
+export type PoolWho = 'all' | 'stayed' | 'left'
+const WHO: readonly PoolWho[] = ['all', 'stayed', 'left']
+
+/** La parte de una piscina que cuenta; sin saber quién abandonó, toda. */
+const partOf = (pool: PiscinePoolLine, who: PoolWho): PiscinePoolPart =>
+  (who === 'all' ? undefined : pool[who]) ?? pool
+
+/** El selector de quién cuenta, si la API sabe quién abandonó. */
+export function PoolWhoPicker({
+  data,
+  value,
+  onChange,
+}: {
+  data: PiscineProgress | undefined
+  value: PoolWho
+  onChange: (next: PoolWho) => void
+}) {
+  const { t } = useI18n()
+
+  if (data?.pools?.some((pool) => pool.left !== undefined) !== true) return null
+
+  return (
+    <div className="progress-option">
+      <span className="eyebrow">{t('piscine.who.title')}</span>
+      <PillGroup
+        options={WHO}
+        value={value}
+        onChange={onChange}
+        label={t('piscine.who.title')}
+        text={(option) => t(`piscine.who.${option}`)}
+      />
+      <p className="hint">{t('piscine.who.hint')}</p>
+    </div>
+  )
+}
 
 /**
  * El color de cada piscina, por su sitio en la lista (como en la comparación
@@ -16,8 +62,12 @@ const poolColor = (index: number): string => `var(--pool-${String((index % 10) +
  * La media de todas, por persona: cada piscina pesa lo que su gente. Solo las
  * ya copiadas, y cada día con las que lo han vivido.
  */
-function overallLine(pools: readonly PiscinePoolLine[], length: number): ProgressLine {
-  const copied = pools.filter((pool) => pool.copied)
+function overallLine(
+  pools: readonly PiscinePoolLine[],
+  length: number,
+  who: PoolWho,
+): ProgressLine {
+  const copied = pools.filter((pool) => pool.copied).map((pool) => partOf(pool, who))
 
   return Array.from({ length }, (_, index) => {
     let sum = 0
@@ -44,6 +94,7 @@ function overallLine(pools: readonly PiscinePoolLine[], length: number): Progres
  */
 export function usePoolLines(
   data: PiscineProgress | undefined,
+  who: PoolWho = 'all',
 ): { lines: Line[]; options: ReactNode } | null {
   const { t, tn } = useI18n()
   const [chosen, setChosen] = useState<string[]>([])
@@ -52,14 +103,16 @@ export function usePoolLines(
   if (data?.pools === undefined || data.pools.length === 0) return null
 
   const pools = data.pools
-  const total = pools.filter((pool) => pool.copied).reduce((sum, pool) => sum + pool.people, 0)
+  const total = pools
+    .filter((pool) => pool.copied)
+    .reduce((sum, pool) => sum + partOf(pool, who).people, 0)
   const lines: Line[] = [
     ...pools.flatMap((pool, index): Line[] =>
       chosen.includes(pool.start)
         ? [
             {
               key: `pool-${pool.start}`,
-              line: pool.line,
+              line: partOf(pool, who).line,
               stroke: poolColor(index),
               width: 1.75,
               label: t('piscine.pools.name', { start: pool.start }),
@@ -71,7 +124,7 @@ export function usePoolLines(
       ? [
           {
             key: 'pools-overall',
-            line: overallLine(pools, data.days.length),
+            line: overallLine(pools, data.days.length, who),
             stroke: 'var(--text)',
             width: 3,
             dash: '8 4',
@@ -108,7 +161,7 @@ export function usePoolLines(
           />{' '}
           <i className="progress-chip-dot" style={{ background: poolColor(index) }} />
           {t('piscine.pools.name', { start: pool.start })} ·{' '}
-          {tn('piscine.chart.people', pool.people)}
+          {tn('piscine.chart.people', partOf(pool, who).people)}
           {!pool.copied && ` · ${t('piscine.pools.copying')}`}
         </label>
       ))}

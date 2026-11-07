@@ -119,6 +119,13 @@ desde el último que vino hasta ayer.
 
   Quien vino el día del examen final (día 25) o después terminó la piscina:
   `active`, sin riesgo. Las faltas se miran hasta el lunes siguiente (día 28).
+- **Piscina terminada** (pasado el lunes de después del examen final, día 28;
+  pedido por Alberto el 2026-11-07): ya no se estima, se sabe. Quien vino
+  (a un puesto, a un examen o a una corrección) hasta dos días antes del examen
+  final o después, la terminó (`finished`), aunque faltara al examen: puede
+  que no pudiera ir. El resto lo dejó tras el último día que vino: `gone`,
+  100 %, razón `ended`, y «cuándo lo dejó» es ese día y el siguiente. Los
+  ajustes no cambian nada de esto; quien no vino nunca sigue siendo `never`.
 - **Cuándo lo dejó**: entre su último día y el siguiente
   (`leftBetween`; «del jueves 8 al viernes 9»), nunca un solo día. Solo con
   el abandono confirmado o probable. La semana de piscina (1–4) es la de ese
@@ -129,7 +136,9 @@ desde el último que vino hasta ayer.
   - `heavyUser` y `lightUser`: venía 6 h o más, o 2 h o menos;
   - `weekendOnly`: solo ha faltado el fin de semana;
   - `recent`: vino hoy o ayer;
-  - `finished`: llegó al examen final;
+  - `finished`: vino hasta el final (en una piscina terminada, también
+    hasta dos días antes del examen final);
+  - `ended`: la piscina terminó y dejó de venir antes del final;
   - `inExam`: está hoy en el examen.
 
 ## Ajustar el cálculo

@@ -181,14 +181,21 @@ export function createStatsModule(deps: {
     ...given({ campusIds: deps.campusIds, now: deps.now }),
   })
 
-  const piscine = createPiscineProgressService({
-    piscine: createPiscineRepository(deps.db),
-    ...given({ now: deps.now }),
-  })
   const dropout = createDropoutService({
     db: deps.db,
     piscine: createPiscineRepository(deps.db),
     ...given({ now: deps.now }),
+  })
+  const piscine = createPiscineProgressService({
+    piscine: createPiscineRepository(deps.db),
+    ...given({ now: deps.now }),
+    // Abandonó: el abandono confirmado o no vino nunca (`docs/abandono.md`).
+    leftOf: async (campusId, start) =>
+      new Set(
+        (await dropout.report(campusId, start, () => true)).people
+          .filter((person) => person.status === 'gone' || person.status === 'never')
+          .map((person) => person.login),
+      ),
   })
 
   return {

@@ -36,6 +36,11 @@ import type {
 const FINAL_EXAM_DAY = 25
 /** Hasta qué día se miran las faltas: el lunes después del examen final. */
 export const LAST_COUNTED_DAY = 28
+/**
+ * En una piscina terminada, quien vino hasta estos días antes del examen final
+ * la acabó aunque faltara a él: puede que no pudiera ir (2026-11-07).
+ */
+const CLOSE_TO_FINAL = 2
 /** Hasta qué día se dibuja: una semana después del examen final. */
 export const LAST_SHOWN_DAY = 32
 
@@ -211,6 +216,26 @@ export function assess(
       leftBetween: null,
       leftWeek: null,
       reasons: [],
+      attendance,
+    }
+  }
+
+  // Piscina terminada (pedido por Alberto el 2026-11-07): ya no se estima, se
+  // sabe. Quien vino hasta dos días antes del examen final la acabó, aunque
+  // faltara a él; el resto la dejó tras el último día que vino a un puesto, a
+  // un examen o a una corrección. Los ajustes no cambian nada de esto.
+  if (today > LAST_COUNTED_DAY) {
+    const stayed = lastSeen >= FINAL_EXAM_DAY - CLOSE_TO_FINAL
+
+    return {
+      status: stayed ? 'active' : 'gone',
+      risk: stayed ? 0 : 100,
+      lastSeen,
+      missedDays: missed.length,
+      missedWeekdays,
+      leftBetween: stayed ? null : [lastSeen, lastSeen + 1],
+      leftWeek: stayed ? null : Math.min(4, Math.floor((lastSeen + 1) / 7) + 1),
+      reasons: [stayed ? 'finished' : 'ended'],
       attendance,
     }
   }

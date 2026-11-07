@@ -25,6 +25,7 @@ import {
   leaderOf,
   meanLine,
   poolAnchorOf,
+  poolDaysOf,
   poolLinesOf,
   samePool,
   swimOf,
@@ -51,6 +52,12 @@ type Pool = {
 export function createPiscineProgressService(options: {
   piscine: PiscineRepository
   now?: () => number
+  /**
+   * Quién abandonó una piscina del campus (su primer día, `YYYY-MM-DD`), como
+   * en la pestaña Abandono: para separar quien sigue de quien no en la vista
+   * sin límites. Sin ella, o si falla, no se separa.
+   */
+  leftOf?: (campusId: number, start: string) => Promise<ReadonlySet<string>>
 }) {
   const now = options.now ?? Date.now
   // Un campus cambia despacio: varias visitas seguidas comparten la misma carga.
@@ -163,6 +170,22 @@ export function createPiscineProgressService(options: {
       )
 
       const trace = (person: Swimmer) => swimOf(person, t, pool.names)
+      // Quién abandonó cada piscina, solo en la vista sin límites (2026-11-07).
+      const days = view.everyone === true ? poolDaysOf(pool.everybody, t) : []
+      const left = new Map<string, ReadonlySet<string>>()
+
+      if (options.leftOf !== undefined) {
+        const leftOf = options.leftOf
+
+        try {
+          for (const day of days) left.set(day.start, await leftOf(home, day.start))
+        } catch {
+          // Sin saber quién abandonó, todo junto: el Avance se ve igual.
+          left.clear()
+        }
+      }
+      const ownDay = days.find((day) => anchor !== null && samePool(day.first, anchor))?.start
+      const ownLeft = ownDay === undefined ? undefined : left.get(ownDay)
       const averageOf = (list: readonly Swimmer[]): PiscineAverage => {
         const traces = list.map((person) => ({ login: person.login, ...trace(person) }))
         const first = Math.min(...list.map((person) => person.start))
@@ -209,9 +232,14 @@ export function createPiscineProgressService(options: {
               // La piscina entera: también quien hace de ti en la vista previa.
               everyone: (standIn === null ? cohort : [standIn, ...cohort])
                 .filter((person) => sees(person.login))
-                .map((person) => ({ login: person.login, image: person.image, ...trace(person) })),
+                .map((person) => ({
+                  login: person.login,
+                  image: person.image,
+                  ...trace(person),
+                  ...(ownLeft === undefined ? {} : { left: ownLeft.has(person.login) }),
+                })),
               // Medias de cada piscina: sin nombres, así que entra todo el mundo.
-              pools: poolLinesOf(pool.everybody, t, pool.names, MIN_PEOPLE),
+              pools: poolLinesOf(pool.everybody, t, pool.names, MIN_PEOPLE, left),
             }
           : {}),
       }

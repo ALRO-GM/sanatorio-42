@@ -258,7 +258,17 @@ export type PiscinePoolLine = {
   line: ProgressLine
   /** `false` si aún no hay nada aprobado copiado de ella: su línea aún no dice nada. */
   copied: boolean
+  /**
+   * La misma media solo con quien sigue y solo con quien abandonó (el abandono
+   * confirmado o no vino nunca, como en `docs/abandono.md`). Sin ellas si no
+   * se pudo saber quién abandonó.
+   */
+  stayed?: PiscinePoolPart
+  left?: PiscinePoolPart
 }
+
+/** Una parte de una piscina (`PiscinePoolLine`): cuánta gente y su media. */
+export type PiscinePoolPart = { people: number; line: ProgressLine }
 
 /**
  * `GET /stats/progress/piscine?with=a,b`: el Avance de un piscinero
@@ -285,7 +295,12 @@ export type PiscineProgress = {
    * de cada piscinero de la piscina, con su foto, para la lista de los más
    * avanzados, la media de los mejores y quién cae entre dos percentiles.
    */
-  everyone?: (PiscineTrace & { login: string; image: string | null })[]
+  everyone?: (PiscineTrace & {
+    login: string
+    image: string | null
+    /** Si abandonó la piscina (como en `PiscinePoolLine.left`); sin saberlo, no viene. */
+    left?: boolean
+  })[]
   /**
    * Solo en la vista de piscinero de quien administra (`docs/piscineros.md`):
    * no es de la piscina, así que `me`, `startedAt` y la piscina son los del

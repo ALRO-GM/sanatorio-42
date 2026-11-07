@@ -9,6 +9,14 @@ const HEIGHT = 320
 const PAD = { left: 62, right: 16, top: 12, bottom: 34 }
 /** Cada cuántos días va una marca del eje: una por semana. */
 const WEEK = 7
+/**
+ * Hasta dónde se dibuja (pedido por Alberto el 2026-11-07): cuatro semanas
+ * que empiezan en lunes, y la última acaba el viernes del examen final (el
+ * día 25 contando desde 0).
+ */
+const LAST_DAY = 3 * WEEK + 4
+/** Los viernes de examen: el 4.º día de cada semana contando desde 0. */
+const FRIDAYS = [4, 11, 18, 25]
 
 /** Qué medias se ven. */
 export type PiscineShown = { cohort: boolean }
@@ -41,7 +49,7 @@ export function PiscineProgressChart(props: {
 }) {
   const { t } = useI18n()
   const { data } = props
-  const last = data.days.at(-1) ?? 30
+  const last = Math.min(data.days.at(-1) ?? LAST_DAY, LAST_DAY)
   const total = data.steps.length
   const x = (day: number): number => PAD.left + (day / last) * (WIDTH - PAD.left - PAD.right)
   const y = (value: number): number =>
@@ -53,7 +61,7 @@ export function PiscineProgressChart(props: {
     line.forEach((value, index) => {
       const day = data.days[index]
 
-      if (value === null || day === undefined) {
+      if (value === null || day === undefined || day > last) {
         open = false
         return
       }
@@ -139,14 +147,43 @@ export function PiscineProgressChart(props: {
               </text>
             </g>
           ))}
-          {data.days
-            .filter((day) => day % WEEK === 0)
-            .map((day) => (
-              // El día 1 es el primero: las marcas caen en el primer día de cada semana.
-              <text key={day} x={x(day)} y={HEIGHT - PAD.bottom + 16} textAnchor="middle">
-                {day + 1}
-              </text>
-            ))}
+        </g>
+        {/* Las semanas: una raya al empezar cada una y su nombre en medio. */}
+        <g className="piscine-weeks">
+          {[0, 1, 2, 3].map((week) => {
+            const from = week * WEEK
+            const to = Math.min(from + WEEK - 1, last)
+
+            return (
+              <g key={week}>
+                {week > 0 && (
+                  <line x1={x(from)} x2={x(from)} y1={PAD.top} y2={HEIGHT - PAD.bottom} />
+                )}
+                <text x={(x(from) + x(to)) / 2} y={HEIGHT - PAD.bottom + 16} textAnchor="middle">
+                  {t('piscine.chart.week', { n: week + 1 })}
+                </text>
+              </g>
+            )
+          })}
+        </g>
+        {/* Los viernes de examen, y el último, el examen final, más marcado. */}
+        <g className="piscine-fridays">
+          {FRIDAYS.filter((day) => day <= last).map((day) => {
+            const final = day === LAST_DAY
+
+            return (
+              <g key={day} className={final ? 'final' : undefined}>
+                <line x1={x(day)} x2={x(day)} y1={PAD.top} y2={HEIGHT - PAD.bottom} />
+                <circle cx={x(day)} cy={HEIGHT - PAD.bottom} r={final ? 5 : 4}>
+                  <title>
+                    {t(final ? 'piscine.chart.finalExam' : 'piscine.chart.friday', {
+                      n: day + 1,
+                    })}
+                  </title>
+                </circle>
+              </g>
+            )
+          })}
         </g>
         <text
           className="progress-axis"

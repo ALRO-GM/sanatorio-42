@@ -93,8 +93,11 @@ su valor en claro y en oscuro y su color de texto encima, `--on-piscine-*`).
 - **Avance** (`GET /stats/progress/piscine`, `stats/piscine.service.ts` y
   `piscine.rules.ts`; en la web `PiscineProgressPage.tsx`, que sale en vez de
   la del common core): cuántos de los 16 proyectos de shell y C lleva
-  aprobados al acabar cada día de piscina (eje de 0 a 30 días; el día 1 es el
-  primero). Los rushes, BSQ y exámenes no suman nunca. Sin plan, pace, black
+  aprobados al acabar cada día de piscina. El eje va **por semanas**
+  (2026-11-07): las cuatro, de lunes a lunes, hasta el viernes de la
+  semana 4, el examen final (día 26 contando desde 1); cada semana con su raya
+  y su nombre, y cada viernes de examen marcado (a trazos, con un punto en el
+  eje que dice qué día es; el final, más marcado). Los rushes, BSQ y exámenes no suman nunca. Sin plan, pace, black
   hole, horas, campus a elegir ni «quién va más rápido»: en la piscina no
   significan nada. Se compara solo con la media de **tu piscina**: los
   piscineros en curso de tu campus (`pool_members`) que empezaron a menos de
@@ -222,6 +225,13 @@ restricción, con exámenes y todo lo de un estudiante, y que solo él pueda.
     línea dorada a trazos con la media de esa gente.
   - **Piscineros entre dos percentiles** (deslizador doble, P75–P90 de
     entrada, apagada): la línea fina de cada uno.
+  - **Quién cuenta** (pedido por Alberto el 2026-11-07): todos, solo quien
+    sigue o solo quien abandonó. Abandonar es lo mismo que en la pestaña
+    Abandono (abandono confirmado o no vino nunca): la API pide a
+    `dropout.service.ts` quién abandonó cada piscina (`leftOf`) y trae, de
+    cada una, `stayed` y `left` con su gente y su media, y en `everyone`,
+    `left` de cada cual. Cambia las medias de las piscinas, la media de todas
+    y los más avanzados; tu línea y la de tu piscina, no.
   - **Otras piscinas** (pedido por Alberto el 2026-11-07; `pools`,
     `PiscinePools.tsx`, regla `poolLinesOf`): las últimas 10 piscinas del
     campus (los días con 20 o más empezando), cada una con la media de lo

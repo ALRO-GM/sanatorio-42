@@ -361,9 +361,18 @@ describe('el avance de la piscina', () => {
       ]).flat(),
       'write',
     )
+    // Abandonaron los diez que no aprobaron nada.
+    const asked: string[] = []
     const service = createPiscineProgressService({
       piscine: createPiscineRepository(db),
       now: () => START + 3 * DAY,
+      leftOf: (campusId, start) => {
+        asked.push(`${String(campusId)} ${start}`)
+
+        return Promise.resolve(
+          new Set(Array.from({ length: 10 }, (_, n) => `old${String(n + 10)}`)),
+        )
+      },
     })
     const data = await service.progress(actor('albrodri', { pool: true }), 22, [], () => true, {
       everyone: true,
@@ -372,6 +381,23 @@ describe('el avance de la piscina', () => {
     expect(data.pools).toHaveLength(1)
     expect(data.pools?.[0]).toMatchObject({ start: '2026-07-06', people: 20, copied: true })
     expect(data.pools?.[0]?.line.slice(0, 4)).toEqual([0, 0, 0.5, 0.5])
+    // Quien sigue y quien abandonó, cada cual con su media.
+    expect(asked).toEqual(['22 2026-07-06'])
+    expect(data.pools?.[0]?.stayed).toMatchObject({ people: 10 })
+    expect(data.pools?.[0]?.stayed?.line.slice(0, 4)).toEqual([0, 0, 1, 1])
+    expect(data.pools?.[0]?.left?.line.slice(0, 4)).toEqual([0, 0, 0, 0])
+
+    // Si no se puede saber quién abandonó, todo junto, sin fallar.
+    const failing = createPiscineProgressService({
+      piscine: createPiscineRepository(db),
+      now: () => START + 3 * DAY,
+      leftOf: () => Promise.reject(new Error('sin abandono')),
+    })
+    const plain = await failing.progress(actor('albrodri', { pool: true }), 22, [], () => true, {
+      everyone: true,
+    })
+
+    expect(plain.pools?.[0]).not.toHaveProperty('left')
   })
 
   it('en la vista de piscinero de quien administra lo ve como el más avanzado, con la piscina entera', async () => {

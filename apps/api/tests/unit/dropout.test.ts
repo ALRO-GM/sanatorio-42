@@ -99,6 +99,37 @@ describe('si alguien ha dejado la piscina', () => {
     expect(finished.reasons).toEqual(['finished'])
   })
 
+  it('piscina terminada: el último día que vino es su abandono, seguro; cerca del final, la acabó', () => {
+    const days = axis(33)
+    const after = 33
+
+    // Dejó de venir a mitad de piscina (el miércoles de la segunda semana, día 9).
+    const half = assess({ hours: weekdays(33, 8, 9) }, days, after)
+
+    expect(half).toMatchObject({ status: 'gone', risk: 100, leftBetween: [9, 10], leftWeek: 2 })
+    expect(half.reasons).toEqual(['ended'])
+    // Un examen o una corrección también cuentan como venir: el viernes 18.
+    expect(
+      assess({ hours: weekdays(33, 8, 9), present: new Set([18]) }, days, after).leftBetween,
+    ).toEqual([18, 19])
+    // Vino hasta el miércoles de antes del examen final (día 23) y faltó a él:
+    // puede que no pudiera ir, no lo dejó.
+    const close = assess({ hours: weekdays(33, 8, 23) }, days, after)
+
+    expect(close).toMatchObject({ status: 'active', risk: 0, leftBetween: null })
+    expect(close.reasons).toEqual(['finished'])
+    // Hasta el martes (día 22), sí.
+    expect(assess({ hours: weekdays(33, 8, 22) }, days, after).status).toBe('gone')
+    // Aunque solo faltara días sueltos que en curso no lo confirmarían, ni los ajustes.
+    expect(
+      assess({ hours: weekdays(33, 1, 18) }, days, after, {
+        ...DEFAULT_TUNING,
+        weekMissed: 30,
+        fridayToMonday: false,
+      }).status,
+    ).toBe('gone')
+  })
+
   it('lo de antes de que empezara su piscina no cuenta como falta', () => {
     const days = axis(14)
     const hours: (number | null)[] = weekdays(14, 8, 9).map((value, index) =>

@@ -254,7 +254,7 @@ Detalle: [asientos.md](asientos.md).
 | «Ver a fondo»: quién cuenta, campus, todos juntos (abierto de fábrica en datos) | N | Estudiantes | `ProgressPage.tsx` |
 | Comparar con hasta 5 personas y «los más rápidos» | N | Todos `[avance.compare]` | `ProgressCompare.tsx` |
 | Quién va más rápido: por círculo o %, plan, kickoff, rangos; tu fila fija. Las kickoffs son las reales de cada campus (los días con muchas entradas); quien entró a destiempo va con la anterior a su entrada | N | Estudiantes | `ProgressRanking.tsx` |
-| Avance de la piscina: aprobado por día frente a la media de su piscina y los más avanzados; en la vista sin límites, las últimas 10 piscinas y la media de todas | N | Piscineros | `PiscineProgressPage.tsx`, `PiscineTop.tsx`, `PiscinePools.tsx` |
+| Avance de la piscina: aprobado por día frente a la media de su piscina y los más avanzados; en la vista sin límites, las últimas 10 piscinas, la media de todas y quién cuenta (todos, quien sigue o quien abandonó); por semanas, con los viernes de examen marcados | N | Piscineros | `PiscineProgressPage.tsx`, `PiscineTop.tsx`, `PiscinePools.tsx` |
 | Demostración | N | Todos | `ProgressTour.tsx` |
 
 Detalle: [blackhole.md](blackhole.md).
@@ -301,6 +301,7 @@ Pedido por Alberto el 2026-11-06 ([abandono.md](abandono.md)). Solo quien admini
 | Tabla de correlaciones (0–100) entre factores que se pueden quitar y poner, y dispersión de dos factores elegidos | N | Admins `[abandono]` | `features/dropout/` |
 | Factores comunes: parejas juntas frente al abandono y grupos de factores que van juntos | N | Admins `[abandono]` | `features/dropout/` |
 | Elegir piscina entre las 10 últimas de Madrid (copiadas de fondo por el historial de piscinas) | N | Admins `[abandono]` | `features/dropout/`, `replica/piscine-history.ts` |
+| En las piscinas terminadas, el abandono seguro: el último día que vino (puesto, examen o corrección); quien llegó hasta dos días antes del examen final, la terminó | N | Admins `[abandono]` | `dropout.rules.ts` |
 | Comparar piscinas: elegir varias de las 10 últimas y ver cuánta gente sigue cada día, abandonos por semana y día de la semana, y cómo eran quienes lo dejaron frente a quienes siguen, de cada una y de todas juntas | N | Admins `[abandono]` | `features/dropout/` |
 | Ajustar el cálculo en vivo: deslizadores para lo que pesa faltar entre semana, el viernes y el fin de semana, cuándo se confirma, los umbrales y un peso por factor (horas, asistencia, aislamiento, correcciones, aprobados); «Volver a lo de fábrica» | N | Admins `[abandono]` | `DropoutTuningPanel.tsx` |
 | Totales arriba: piscineros, abandonaron, probables, en duda, siguen, no vinieron nunca y en el examen; cada uno filtra la tabla | N | Admins `[abandono]` | `DropoutPage.tsx` |

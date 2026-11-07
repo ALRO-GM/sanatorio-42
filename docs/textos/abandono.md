@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/abandono.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-184 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+185 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -101,7 +101,8 @@ Generado desde `apps/web/src/shared/i18n/textos/abandono.csv` con
 | `dropout.reason.lightUser` | Abandono de la piscina: por qué: venía poco | features/dropout/DropoutPage | Venía poco y a ratos: un día sin venir dice poco. | Came little and on and off: one day away says little. | Venia poc i a estones: un dia sense venir diu poc. | Gutxi eta tarteka etortzen zen: egun bat ez etortzeak gutxi esaten du. | Venait peu et par moments : un jour d’absence en dit peu. |
 | `dropout.reason.weekendOnly` | Abandono de la piscina: por qué: solo faltó el fin de semana | features/dropout/DropoutPage | Solo ha faltado el fin de semana: no cuenta. | Only missed the weekend: it does not count. | Només ha faltat el cap de setmana: no compta. | Asteburuan bakarrik ez da etorri: ez du balio. | Absent seulement le week-end : ça ne compte pas. |
 | `dropout.reason.recent` | Abandono de la piscina: por qué: vino hoy o ayer | features/dropout/DropoutPage | Vino hoy o ayer. | Came today or yesterday. | Va venir avui o ahir. | Gaur edo atzo etorri zen. | Venu aujourd’hui ou hier. |
-| `dropout.reason.finished` | Abandono de la piscina: por qué: llegó al examen final | features/dropout/DropoutPage | Llegó hasta el examen final: terminó la piscina. | Made it to the final exam: finished the pool. | Va arribar fins a l’examen final: va acabar la piscina. | Azken azterketara iritsi zen: igerilekua amaitu zuen. | Est allé jusqu’à l’examen final : a terminé la piscine. |
+| `dropout.reason.finished` | Abandono de la piscina: por qué: vino hasta el final (el examen final o hasta dos días antes) | features/dropout/DropoutPage | Vino hasta el final: terminó la piscina. | Came until the end: finished the pool. | Va venir fins al final: va acabar la piscina. | Amaierara arte etorri zen: piscina amaitu zuen. | Est venu jusqu’à la fin : a terminé la piscine. |
+| `dropout.reason.ended` | Abandono de la piscina: por qué: la piscina ya terminó y dejó de venir antes del final | features/dropout/DropoutPage | La piscina ya terminó: dejó de venir después de su último día. Seguro. | The pool is over: stopped coming after their last day. Certain. | La piscina ja va acabar: va deixar de venir després del seu últim dia. Segur. | Piscina amaitu da: azken egunaren ondoren ez zen gehiago etorri. Ziur. | La piscine est finie : n’est plus venu après son dernier jour. Certain. |
 | `dropout.scatter.label` | Abandono de la piscina: descripción de la dispersión | features/dropout/DropoutCharts | {x} frente a {y}: relación {r} | {x} versus {y}: correlation {r} | {x} davant de {y}: relació {r} | {x} {y}(r)en aurrean: erlazioa {r} | {x} face à {y} : corrélation {r} |
 | `dropout.scatter.point` | Abandono de la piscina: al pasar por un punto | features/dropout/DropoutCharts | {login}: {x} · {y} | {login}: {x} · {y} | {login}: {x} · {y} | {login}: {x} · {y} | {login} : {x} · {y} |
 | `dropout.scatter.y` | Abandono de la piscina: qué va en el eje vertical | features/dropout/DropoutCharts | En vertical: {y} | Vertical: {y} | En vertical: {y} | Bertikalean: {y} | En vertical : {y} |

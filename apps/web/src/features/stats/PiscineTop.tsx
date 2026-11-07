@@ -8,6 +8,7 @@ import { RangeSlider, Slider } from '../../shared/ui/RangeSlider'
 import { RankingList } from '../../shared/ui/RankingList'
 import type { Line } from './PiscineProgressChart'
 import { bestOf, between, meanOf, rankPool } from './piscineTop'
+import type { PoolWho } from './PiscinePools'
 import type { Ranked } from './piscineTop'
 
 /** Cuántos se ven de entrada en la lista de los más avanzados; el resto, al pedirlo. */
@@ -22,6 +23,8 @@ const FIRST = 15
  */
 export function useTopLines(
   data: PiscineProgress | undefined,
+  /** Quién cuenta (`PiscinePools.tsx`): todos, quien sigue o quien abandonó. */
+  who: PoolWho = 'all',
 ): { ranked: Ranked[]; lines: Line[]; options: ReactNode } | null {
   const { t, tn } = useI18n()
   const [best, setBest] = useState({ on: true, percent: 10 })
@@ -29,7 +32,11 @@ export function useTopLines(
 
   if (data?.everyone === undefined) return null
 
-  const ranked = rankPool(data.everyone)
+  const ranked = rankPool(
+    data.everyone.filter(
+      (each) => who === 'all' || each.left === undefined || each.left === (who === 'left'),
+    ),
+  )
   const leaders = bestOf(ranked, best.percent)
   const inBand = between(ranked, band.low, band.high)
   const lines: Line[] = [
