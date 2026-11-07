@@ -2213,8 +2213,10 @@ DELETE /admin/hidden/:login     → HiddenPerson[]: la vuelve a enseñar (solo a
   Firma además `unrestricted: true`, que solo cuenta con `preview` y ese login:
   el corte de piscineros no se aplica (todo lo de un estudiante, exámenes
   incluidos), pero `/admin/…` sigue cerrado porque no administra.
-  `GET /pool/access` devuelve `allow: null`, `preview` y `unrestricted`, y al
-  dueño en su sesión de estudiante, `owner: true`.
+  `GET /pool/access` devuelve `allow: null`, `preview`, `unrestricted` y
+  `poolStart` (el primer día de la piscina en curso o la última del campus,
+  para que la Red abra por la de toda la piscina), y al dueño en su sesión de
+  estudiante, `owner: true`.
 - En esa vista, `GET /exams/live` y `POST /exams/live/refresh` aceptan
   `?world=student|pool`: el examen (y quién sale) de los estudiantes o de la
   piscina (`liveWorld` en `modules/exams/index.ts`). A cualquier otro el

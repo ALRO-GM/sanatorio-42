@@ -85,6 +85,11 @@ export type PoolAccess = {
    * (`POST /admin/pool/preview/full`): un piscinero con todo permitido.
    */
   unrestricted?: boolean
+  /**
+   * Solo sin límites: el primer día (`YYYY-MM-DD`) de la piscina en curso o la
+   * última del campus, para que la Red abra por la de toda esa piscina.
+   */
+  poolStart?: string
   /** `true` si es el dueño de la web, que puede entrar en esa vista. */
   owner?: boolean
 }

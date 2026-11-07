@@ -133,6 +133,19 @@ describe('la vista de piscinero de quien administra', () => {
       preview: true,
       unrestricted: true,
     })
+    // Con una piscina en el campus (20 o más empezando el mismo día), su primer
+    // día: la Red abre por la de toda la piscina.
+    await built.db.batch(
+      Array.from({ length: 20 }, (_, n) => ({
+        sql: `INSERT INTO piscine_members (campus_id, user_id, login, image, begin_at)
+              VALUES (22, ?, ?, NULL, '2026-10-26T09:04:59.000Z')`,
+        args: [9000 + n, `pisci${String(n)}`],
+      })),
+      'write',
+    )
+    expect((json(await send(built, 'GET', '/pool/access', full)) as PoolAccess).poolStart).toBe(
+      '2026-10-26',
+    )
 
     // Lo que los permisos no abren (exámenes, la clasificación) pasa; el panel, no.
     expect((await send(built, 'GET', '/exams/stats', full)).statusCode).not.toBe(403)

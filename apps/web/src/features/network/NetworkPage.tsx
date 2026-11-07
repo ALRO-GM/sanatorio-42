@@ -43,6 +43,7 @@ import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { NetworkTour } from './NetworkTour'
 import { decodePart, networkHref } from '../../shared/links'
+import { usePoolAccess } from '../../shared/pool'
 
 /** «Todas»: lo más que acepta la API (`MAX_LIMIT` en `network.service.ts`). */
 const ALL_PEOPLE = 20_000
@@ -157,14 +158,29 @@ const NO_LINKS: NetworkLink[] = []
 export function NetworkPage({ me }: { me: CurrentUser }) {
   const { t, tn } = useI18n()
   const { number } = useFormat()
+  // En la vista de piscinero sin límites (pedido por Alberto el 2026-11-07):
+  // de partida, la red de toda la piscina en curso o la última, desde su primer
+  // día y sin nadie elegido. Quien mira no es de la piscina: su red sale vacía.
+  const { unrestricted, poolStart } = usePoolAccess()
+  const poolHome = useMemo(
+    (): Filters | null =>
+      unrestricted === true && poolStart !== undefined
+        ? { ...startFilters(null, 'custom'), from: poolStart }
+        : null,
+    [unrestricted, poolStart],
+  )
   const [filters, setFilters] = useState<Filters>(() =>
     // Un enlace a una persona enseña su historia entera; el campus, el último año.
-    startFilters(loginInUrl() ?? me.login, loginInUrl() === null ? '12' : 'all'),
+    loginInUrl() === null && poolHome !== null
+      ? poolHome
+      : startFilters(loginInUrl() ?? me.login, loginInUrl() === null ? '12' : 'all'),
   )
   // `true` cuando unos filtros no dejaban a nadie y se ha vuelto a la vista de partida.
   const [wasEmpty, setWasEmpty] = useState(false)
   const [mode, setMode] = useState<ColorMode>('community')
-  const [selected, setSelected] = useState<string | null>(() => loginInUrl() ?? me.login)
+  const [selected, setSelected] = useState<string | null>(
+    () => loginInUrl() ?? (poolHome === null ? me.login : null),
+  )
   // El grafo anterior se sigue viendo mientras llega el nuevo: así se recoloca
   // en vez de desaparecer y volver a aparecer.
   const [graph, setGraph] = useState<NetworkGraph | null>(null)
@@ -185,8 +201,12 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   // mira como piscinero desde el panel y no está en esa red), la de partida
   // pasa a ser la del campus en el último año y, si tampoco, la de siempre.
   const homes = useMemo(
-    () => [startFilters(me.login, '12'), startFilters(null, '12'), startFilters(null, 'all')],
-    [me.login],
+    () => [
+      ...(poolHome === null ? [startFilters(me.login, '12')] : [poolHome]),
+      startFilters(null, '12'),
+      startFilters(null, 'all'),
+    ],
+    [me.login, poolHome],
   )
   const [homeStep, setHomeStep] = useState(0)
   const home = homes[homeStep] ?? startFilters(me.login, '12')

@@ -398,8 +398,9 @@
 
 /* Comparar piscinas. Un color por piscina, el mismo en claro y en oscuro
    (tonos medios que se leen sobre los dos), por su sitio en la lista: no
-   cambia al elegir otras. El total va en el color del texto, más grueso. */
-.dropout-page {
+   cambia al elegir otras. El total va en el color del texto, más grueso.
+   En la raíz: también los usa el Avance de la piscina (`PiscinePools.tsx`). */
+:root {
   --pool-1: #1c7ed6;
   --pool-2: #f08c00;
   --pool-3: #0ca678;
@@ -411,7 +412,7 @@
   --pool-9: #ae3ec9;
   --pool-10: #868e96;
 }
-:root[data-cvd='on'] .dropout-page {
+:root[data-cvd='on'] {
   --pool-1: #0072b2;
   --pool-2: #e69f00;
   --pool-3: #009e73;

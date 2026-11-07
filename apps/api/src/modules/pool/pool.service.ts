@@ -82,6 +82,27 @@ export function createPoolService(options: PoolServiceOptions) {
     return cached
   }
 
+  /**
+   * El primer día de la piscina en curso o la última del campus (pedido por
+   * Alberto el 2026-11-07, para la Red sin límites): el día más reciente en que
+   * empezaron 20 personas o más, de los de ahora y del historial de piscinas.
+   */
+  async function latestPool(campusId: number): Promise<string | null> {
+    const result = await db.execute({
+      sql: `SELECT substr(begin_at, 1, 10) AS day, COUNT(*) AS n FROM (
+              SELECT login, begin_at FROM pool_members WHERE campus_id = ?
+              UNION
+              SELECT login, begin_at FROM piscine_members WHERE campus_id = ?
+            )
+            WHERE begin_at <= ?
+            GROUP BY day HAVING n >= 20 ORDER BY day DESC LIMIT 1`,
+      args: [campusId, campusId, isoAt(now())],
+    })
+    const day = result.rows[0]?.day
+
+    return typeof day === 'string' ? day : null
+  }
+
   return {
     /**
      * Si alguien puede entrar y como qué, con su perfil de `/v2/me`. Quien
@@ -120,14 +141,23 @@ export function createPoolService(options: PoolServiceOptions) {
      * enseñe el botón de esa vista.
      */
     async access(
-      user: Pick<SessionUser, 'login' | 'role' | 'preview' | 'unrestricted'>,
+      user: Pick<SessionUser, 'login' | 'role' | 'preview' | 'unrestricted' | 'campusId'>,
     ): Promise<PoolAccess> {
       if (user.role !== 'pool')
         return isOwner(user.login)
           ? { pool: false, allow: null, owner: true }
           : { pool: false, allow: null }
-      if (user.unrestricted === true)
-        return { pool: true, allow: null, preview: true, unrestricted: true }
+      if (user.unrestricted === true) {
+        const start = user.campusId === null ? null : await latestPool(user.campusId)
+
+        return {
+          pool: true,
+          allow: null,
+          preview: true,
+          unrestricted: true,
+          ...(start === null ? {} : { poolStart: start }),
+        }
+      }
 
       const allow = [...(await current()).allowed]
 

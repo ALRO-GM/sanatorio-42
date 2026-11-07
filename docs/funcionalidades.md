@@ -265,6 +265,7 @@ Detalle: [blackhole.md](blackhole.md).
 | --- | --- | --- | --- |
 | Grafo de burbujas de quién ha corregido a quién; de entrada, tu red del último año. Con más de 150 burbujas solo se pintan las uniones más fuertes (1,5 por burbuja; las de quien eliges, todas) | N | Todos | `features/network/ForceGraph.tsx` |
 | Unos filtros que no dejan a nadie vuelven solos a la vista de partida con un aviso; si tu red sale vacía (aún sin correcciones, o viendo la web como piscinero), la de partida es la del campus | N | Todos | `NetworkPage.tsx` |
+| En la vista de piscinero sin límites, de partida la red de toda la piscina en curso o la última, desde su primer día | N | Dueño | `NetworkPage.tsx`, `pool.service.ts` |
 | Filtros: campus (uno, varios, todos), meses en una línea que se arrastra, proyecto, mínimos por pareja y persona, cuántas personas, veredicto, solo mutuas, solo de dentro | N | Todos | `NetworkPage.tsx`, `Timeline.tsx` |
 | Color por comunidad, endogamia, suspensos dados o recibidos, promoción, balance, origen o campus | N | Todos | `NetworkPage.tsx` |
 | Buscar a alguien en el grafo; atajo a tu red | N | Todos | `PersonSearch.tsx` |

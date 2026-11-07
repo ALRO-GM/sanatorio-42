@@ -107,7 +107,14 @@ export const poolMock: Pick<
     await delay(40)
 
     if (poolUnrestricted()) {
-      return { pool: true, allow: null, preview: true, unrestricted: true }
+      return {
+        pool: true,
+        allow: null,
+        preview: true,
+        unrestricted: true,
+        // La piscina inventada empezó hace once días (`mock/piscine.ts`).
+        poolStart: new Date(Date.now() - 11 * 86_400_000).toISOString().slice(0, 10),
+      }
     }
     if (poolPreviewing()) return { pool: true, allow: effective(settings.allow), preview: true }
 

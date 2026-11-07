@@ -242,7 +242,11 @@ piscineros en curso de cada campus se copian de 42 cada seis horas
 correcciones de la piscina y el calendario guarda los cursus de cada evento.
 Quién ve a quién está en `core/audience.ts` (`seesFor`, `visibleTo`). La Red
 de un piscinero abre por la red de asientos (`docs/asientos.md`, permiso
-`red.seats`).
+`red.seats`). En la vista sin límites del dueño (pedido por Alberto el
+2026-11-07), la Red de correcciones abre por la de **toda la piscina en curso
+o la última**: desde su primer día (`poolStart` de `GET /pool/access`, el día
+más reciente con 20 o más empezando) y sin nadie elegido, porque quien mira no
+es de la piscina y su propia red sale vacía.
 
 Lo que no separa nada porque no enseña a nadie: las cifras sueltas de las
 estadísticas (totales de cada sección). El avance de un piscinero es el de la
