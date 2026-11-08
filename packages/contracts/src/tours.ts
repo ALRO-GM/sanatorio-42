@@ -15,6 +15,7 @@ export type TourName =
   | 'exams'
   | 'gitCourse'
   | 'shellCourse'
+  | 'dockerCourse'
   | 'guard'
   | 'helpStats'
   | 'inbox'

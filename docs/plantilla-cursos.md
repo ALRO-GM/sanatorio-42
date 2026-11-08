@@ -3,8 +3,14 @@
 Hasta octubre de 2026 había un solo curso (git) y cada cosa estaba hecha a su
 medida. Con el de shell aparece la plantilla: lo que tiene que cumplir
 cualquier curso nuevo y las piezas que ya están hechas para reutilizarlas.
-Los dos cursos que la siguen son [el de git](curso-git.md) y
-[el de shell](curso-shell.md).
+Los cursos que la siguen:
+
+| Curso | Motor | Doc |
+| --- | --- | --- |
+| Git | `packages/gitsim` | [curso-git.md](curso-git.md) |
+| Shell de Linux | `packages/shellsim` | [curso-shell.md](curso-shell.md) |
+| Docker | `packages/dockersim` (encima de la shell) | [curso-docker.md](curso-docker.md) |
+| Kubernetes | (siguiente) parte de lo que publica el de Docker | [curso-docker.md](curso-docker.md#enlace-con-kubernetes) |
 
 ## Las reglas
 
@@ -23,6 +29,12 @@ Los dos cursos que la siguen son [el de git](curso-git.md) y
 2. **Se apoya en lo anterior.** El camino se abre de uno en uno (`unlocked` y
    `firstOpen` de `@sanatorio/course`): una unidad solo usa lo enseñado antes
    y lo combina.
+   **Entre cursos no se bloquea** (decidido con Alberto el 2026-11-08): el
+   orden sugerido es shell → git → Docker → Kubernetes. Si alguien abre un
+   curso sin haber hecho lo que conviene antes (en Docker, al menos el nivel
+   principiante de shell), arriba del camino sale una sugerencia clara con
+   qué terminar antes y el enlace (`CourseOrderHint` de `shared/course`), y
+   puede seguir igualmente.
 3. **Bloques con jefe.** Cada bloque (de tres a seis unidades) acaba en un
    **jefe contrarreloj** que junta todo lo del bloque en una historia de
    trabajo («el disco está al 97 %»), sin teoría ni ejemplo: historia, tareas
@@ -86,6 +98,7 @@ Los dos cursos que la siguen son [el de git](curso-git.md) y
 | Certificados | `apps/web/src/shared/course/Certificates.tsx` | Los niveles superados, en el curso y en el perfil |
 | Estimación | `packages/course/src/estimate.ts`, `apps/web/src/shared/course/Estimate.tsx` | `estimateSeconds`, `ESTIMATE`, `wordsIn`; `CourseEstimate`, `EstimateBadge`, `useDuration` |
 | Tiempo activo | `apps/web/src/shared/course/activeTime.ts`, `apps/api/src/modules/shellcourse/course-times.ts` | `useActiveTime`, `activeSecondsOf`, `clearActiveTime`; `course_times` |
+| Orden entre cursos | `apps/web/src/shared/course/CourseOrderHint.tsx` | Sugerencia (no bloquea) de qué curso o nivel hacer antes, con enlace; nada si ya está hecho |
 | Capítulos | `apps/web/src/shared/course/Chapter.tsx` | `CourseChapter` y `useChapters`: cada mundo o bloque, plegado con su número, de qué trata, para qué sirve en la industria, lo hecho y la gente que pide; de entrada solo el que toca, y uno sin alcanzar no se despliega (pedido por Alberto, 2026-10-30). En git, cada mundo con su color y, en sus pruebas de grupo, quién de tu campus las espera (`GET /gitcourse/gates/:id/people`); en shell, la salida de `tree` en una terminal |
 | Estilos | `course-*` en `styles/notgames.css` | Terminal, estrellas, recuento, capítulos |
 | Textos comunes | `course.*` en `textos/notgames.csv` | Estrellas, recuento, terminal, tiempo |
@@ -94,13 +107,18 @@ Los dos cursos que la siguen son [el de git](curso-git.md) y
 
 1. Un paquete `packages/<tema>sim` con el motor (puro, con `LIMITS`) y las
    unidades: preparación, ejemplo, solución, qué se comprueba y textos en
-   castellano e inglés. Copia la forma de `packages/shellsim/src/course`.
+   castellano e inglés. Copia la forma de `packages/shellsim/src/course`. Si
+   se juega en una shell, se apoya en `@sanatorio/shellsim` con su punto de
+   extensión (`extend.ts`, como hace `packages/dockersim`).
 2. Tests del motor: cada unidad se gana con su solución con ★★★ y no empieza
    ganada; formas equivalentes; topes; que el motor no importe nada del
    sistema.
 3. Un módulo de la API (`modules/<tema>course`) que vuelve a ejecutar y
    guarda el progreso (migración nueva), con sus rutas en `docs/api.md`,
-   en `POOL_ROUTES` y sus tablas en `personal`.
+   en `POOL_ROUTES` y sus tablas en `personal`. Un curso de terminal reutiliza
+   el servicio del de shell (`createShellCourseService` con su motor y sus
+   tablas, como `modules/dockercourse`).
 4. Una pestaña en Not-games con el camino, la unidad (las tres pestañas) y
    los jefes, usando las piezas de `shared/course`; textos en su tabla; un
-   recorrido en `tests/ui` y su demostración animada.
+   recorrido en `tests/ui` y su demostración animada. Si conviene hacer antes
+   otro curso, `CourseOrderHint` arriba del camino.

@@ -22,6 +22,7 @@ import { LevelButton } from './LevelButton'
 import { TitlePicker } from './TitlePicker'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
 import { MyShellCertificates } from '../../shared/course/Certificates'
+import { MyDockerCertificates } from '../../shared/course/Certificates'
 
 type ExpedienteProps = {
   me: CurrentUser
@@ -111,6 +112,10 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                 {/* Los niveles del curso de shell superados (jefes finales). */}
                 <PoolOnly k="shellcourse">
                   <MyShellCertificates />
+                </PoolOnly>
+                {/* Y los del curso de Docker. */}
+                <PoolOnly k="dockercourse">
+                  <MyDockerCertificates />
                 </PoolOnly>
                 <Show from="normal">
                   <PoolOnly k="expediente.hours">

@@ -9,6 +9,7 @@
  */
 
 import { COMMANDS } from './commands/index.js'
+import type { Extension } from './extend.js'
 import type { Io, ShellApi } from './commands/types.js'
 import { getopts, Stream } from './commands/types.js'
 import { ArithError, arith, expandPattern, expandWord, globMatch, UnboundError } from './expand.js'
@@ -72,7 +73,11 @@ export class Shell implements ShellApi {
   /** Las tuberías de la orden que cuentan para las estrellas (ver `pipeline`). */
   counted = 0
 
-  constructor(readonly world: World) {}
+  constructor(
+    readonly world: World,
+    /** Los programas de otro motor (Docker), si los hay: se buscan antes que los de la shell. */
+    readonly ext?: Extension,
+  ) {}
 
   /* ---------- Lo que ven los comandos ---------- */
 
@@ -431,7 +436,7 @@ export class Shell implements ShellApi {
       if (top) this.nest--
     }
     if (pipe.neg) code = code === 0 ? 1 : 0
-    if (top && code === 0 && !lookingOnly(pipe)) this.counted++
+    if (top && code === 0 && !lookingOnly(pipe, this.ext)) this.counted++
     this.world.session.status = code
     if (code !== 0 && this.world.session.opts.errexit && this.guarded === 0 && !pipe.neg)
       throw new Exit(code)
@@ -805,6 +810,10 @@ export class Shell implements ShellApi {
 
       if (script !== null) return this.runFile(script, args, io)
 
+      const added = this.ext === undefined ? undefined : own(this.ext.commands, name)
+
+      if (added !== undefined) return added({ name, args, io, sh: this })
+
       const program = own(COMMANDS, name)
 
       if (program !== undefined) {
@@ -1006,7 +1015,7 @@ const LOOKING = new Set([
   ':',
 ])
 
-function lookingOnly(pipe: Pipeline): boolean {
+function lookingOnly(pipe: Pipeline, ext?: Extension): boolean {
   const [only] = pipe.cmds
 
   return (
@@ -1014,7 +1023,7 @@ function lookingOnly(pipe: Pipeline): boolean {
     only?.t === 'simple' &&
     only.redirs.length === 0 &&
     only.assigns.length === 0 &&
-    LOOKING.has(only.words[0] ?? '')
+    (LOOKING.has(only.words[0] ?? '') || ext?.looking?.(only.words) === true)
   )
 }
 

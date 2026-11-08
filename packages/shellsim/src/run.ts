@@ -6,6 +6,7 @@
  * caen por nada de lo que se escriba.
  */
 
+import type { Extension } from './extend.js'
 import { Fail } from './fs.js'
 import { Shell } from './interp.js'
 import type { RunResult } from './interp.js'
@@ -31,8 +32,11 @@ export function isIncomplete(entry: string): boolean {
   }
 }
 
-/** Ejecuta una orden (puede tener varias líneas). */
-export function run(world: World, entry: string): RunResult {
+/**
+ * Ejecuta una orden (puede tener varias líneas). Con `ext`, la shell tiene
+ * además los programas de otro motor (`extend.ts`).
+ */
+export function run(world: World, entry: string, ext?: Extension): RunResult {
   if (entry.length > LIMITS.entry)
     return failed(
       world,
@@ -55,7 +59,7 @@ export function run(world: World, entry: string): RunResult {
   }
 
   const next = cloneWorld(world)
-  const shell = new Shell(next)
+  const shell = new Shell(next, ext)
 
   next.clock += 1
   next.session.history = [...next.session.history, entry].slice(-HISTORY)

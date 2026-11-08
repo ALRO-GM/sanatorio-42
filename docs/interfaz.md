@@ -18,7 +18,7 @@ abajo).
 | --- | --- | --- | --- |
 | **Yo** | Lo tuyo | Expediente (la portada) · Agenda · Calendario | `app/sections.ts` |
 | **Ayuda** | Pedir y dar ayuda, quedar con gente | Sala de espera · Tablón · Terapia · Pizarras · Guardia | |
-| **Aprender** | Practicar y concentrarse | Curso de git · Curso de shell · Not-games · Pomodoro | |
+| **Aprender** | Practicar y concentrarse | Curso de git · Curso de shell · Curso de Docker · Not-games · Pomodoro | |
 | **Campus** | Cómo va el campus y cómo vas tú | Clústeres · Asientos · Avance · Red · Exámenes · Abandono · Clasificaciones | Abandono, solo quien administra, la vista sin límites y piscineros con permiso (`docs/abandono.md`) |
 
 Los cursos eran pestañas de Not-games (sus direcciones viejas,
@@ -89,12 +89,13 @@ de datos.
 | Tablón | En el álbum: el siguiente objetivo (colección más cercana, cromo más raro a tu alcance, nivel más cercano) y tu puesto en cada grupo, resumido | N | Motiva sin abrumar: una línea por cosa |
 | Tablón | En el álbum: la rareza de cada cromo y la clasificación de completitud por grupo (tu gente cercana, kickoff, círculo, campus) | D | Son rankings y cifras |
 | Terapia y Pizarras | Todo | S | Son quedar |
-| Pestañas | Not-games, Curso de git y Curso de shell (en Aprender) | N | Aprender jugando: no hace falta para pedir ni dar ayuda. En el simplificado, Aprender es solo el Pomodoro |
+| Pestañas | Not-games, Curso de git, Curso de shell y Curso de Docker (en Aprender) | N | Aprender jugando: no hace falta para pedir ni dar ayuda. En el simplificado, Aprender es solo el Pomodoro |
 | Not-games | Salas, crear sala, partida y marcador | N | La sección en sí |
 | Curso de git | Camino, animación, teoría y terminal | N | Aprender jugando; desde el 2026-10-29, su propia pestaña de Aprender (antes, de Not-games) |
 | Curso de git | Pruebas de grupo (sala, misiones, origin común) | N | Va con el curso: después del test previo de cada prueba |
 | Curso de shell | Camino por niveles, unidad (teoría, ejemplo, prueba), jefes contrarreloj | N | Como el curso de git: su propia pestaña de Aprender |
-| Perfil | Certificados del curso de shell (jefes finales superados), en la tarjeta del perfil | S | Lo ganado se enseña donde está el resto de lo tuyo; si no hay ninguno, no ocupa nada |
+| Curso de Docker | Camino por niveles, unidad (teoría, ejemplo, prueba), jefes contrarreloj y, arriba, la sugerencia de hacer antes el de shell | N | Pedido el 2026-11-08: sección propia de Aprender, junto a la de shell (no un bloque: es un curso entero) y en el mismo modo que los otros cursos; la sugerencia de orden no bloquea |
+| Perfil | Certificados de los cursos de shell y de Docker (jefes finales superados), en la tarjeta del perfil | S | Lo ganado se enseña donde está el resto de lo tuyo; si no hay ninguno, no ocupa nada |
 | Toda la web | Aviso para quien entra desde un campus que aún no se copia (#92) | S | Se ve una vez, arriba, y se cierra: explica por qué ve datos de otro campus |
 | Not-games | Repaso: lo fallado con definición y ejemplo | N | Para estudiar después de jugar |
 | Not-games | Ajedrez: tablero, relojes, pregunta encima del tablero, estilos de tablero, sonido | N | Un juego más de la sección |

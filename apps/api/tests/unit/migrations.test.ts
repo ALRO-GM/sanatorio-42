@@ -71,6 +71,8 @@ describe('migraciones', () => {
       'course_remote',
       'course_times',
       'curriculum_votes',
+      'docker_progress',
+      'docker_runs',
       'doubt_answers',
       'doubts',
       'event_alerts',

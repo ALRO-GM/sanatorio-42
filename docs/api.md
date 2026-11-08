@@ -1879,6 +1879,30 @@ POST /shellcourse/bosses/:id/start  → ShellBossStart { unit, run: { startedAt,
   404. Topes: 30 intentos por persona cada diez minutos y 20 salidas de
   contrarreloj (429). No pide estar en un puesto del clúster.
 
+## Curso de Docker (`modules/dockercourse`)
+
+```
+GET  /dockercourse                   → DockerCourse { stars: { [punto]: 1–3 }, best: { [punto]: { commands, seconds } }, runs: { [jefe]: { startedAt, deadline } }, certificates: { tier, stars, seconds, at }[] }
+POST /dockercourse/units/:id         → DockerAttemptInput { entries: string[] (≤ 300, ≤ 2000 caracteres), activeSeconds?: entero 0–21600 } → DockerAttemptResult { done, stars, commands, seconds, misses, course }
+POST /dockercourse/bosses/:id/start  → DockerBossStart { unit, run: { startedAt, deadline }, course }
+```
+
+- Las mismas reglas y el mismo servicio que el curso de shell (`createShellCourseService`
+  con el motor de `@sanatorio/dockersim` y sus tablas): las formas (`DockerCourse`…)
+  son las de shell con otro nombre. Ver `docs/curso-docker.md`.
+- El intento se corrige **volviendo a ejecutar** `entries` en la terminal simulada
+  (la shell con `docker`, `docker compose` y `git` encima) desde el mundo de partida
+  de la unidad. Hecho si el estado final coincide con el de la solución en lo que mira
+  la unidad (`misses`: `container:web`, `gone:legacy`, `image:api:1.0`,
+  `inspect:web {{…}}`, `http:localhost:8080/`, `exec:db …`, `volume:`, `network:`,
+  `registry:ghcr.io/…`, `file:`, `exists:`, `size:api 200`, `probe:cache`, `output`,
+  `requires:logs|inspect`, `time`).
+- Progreso en `docker_progress` y relojes de los jefes en `docker_runs`
+  (migración 87); el tiempo activo, en `course_times` con `course = 'docker'`.
+  Jefes finales: `docker-final-beginner`, `docker-final-intermediate`,
+  `docker-final-advanced`. Topes y códigos (404, 409, 400, 429), como en shell.
+  No pide estar en un puesto del clúster.
+
 ## Mapa de calor de clics (`modules/usage/clicks.ts`)
 
 ```

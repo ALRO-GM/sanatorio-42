@@ -92,6 +92,7 @@ import { goalTimeSchema } from './0083-goal-time.js'
 import { welcomedSchema } from './0084-welcomed.js'
 import { piscineHistorySchema } from './0085-piscine-history.js'
 import { courseRemoteSchema } from './0086-course-remote.js'
+import { dockerCourseSchema } from './0087-docker-course.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -181,6 +182,7 @@ export const MIGRATIONS: readonly Migration[] = [
   welcomedSchema,
   piscineHistorySchema,
   courseRemoteSchema,
+  dockerCourseSchema,
 ]
 
 /** Versión más alta que existe en el código. */

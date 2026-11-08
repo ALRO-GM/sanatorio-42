@@ -280,6 +280,11 @@ function request(
     }
 
   const [, scheme = 'http', host = '', port, path = '/'] = parsed
+  const added = ctx.sh.ext?.http?.(ctx.sh.world, host, Number(port ?? 80), path)
+
+  if (added !== undefined && added !== null)
+    return { response: { ...added, reason: REASONS[added.status] ?? '' }, error: null, code: 0 }
+
   const machine = resolveHost(ctx, host)
 
   if (machine === null)

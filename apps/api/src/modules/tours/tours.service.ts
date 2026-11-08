@@ -45,6 +45,7 @@ const TOURS: Record<TourName, true> = {
   exams: true,
   gitCourse: true,
   shellCourse: true,
+  dockerCourse: true,
   guard: true,
   helpStats: true,
   inbox: true,

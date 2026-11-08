@@ -26,6 +26,7 @@
     "@sanatorio/clicker": "*",
     "@sanatorio/startup": "*",
     "@sanatorio/gitsim": "*",
+    "@sanatorio/dockersim": "*",
     "@sanatorio/shellsim": "*",
     "chess.js": "1.4.0",
     "fastify": "^5.2.1",

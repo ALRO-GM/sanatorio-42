@@ -190,6 +190,11 @@ export const realApi: Api = {
     sendJson('POST', `/shellcourse/units/${encodeURIComponent(unit)}`, input),
   startShellBoss: (unit) =>
     sendJson('POST', `/shellcourse/bosses/${encodeURIComponent(unit)}/start`),
+  getDockerCourse: () => getJson('/dockercourse'),
+  submitDockerAttempt: (unit, input) =>
+    sendJson('POST', `/dockercourse/units/${encodeURIComponent(unit)}`, input),
+  startDockerBoss: (unit) =>
+    sendJson('POST', `/dockercourse/bosses/${encodeURIComponent(unit)}/start`),
   getGitGatePeople: (gate) => getJson(`/gitcourse/gates/${encodeURIComponent(gate)}/people`),
   getGitRooms: (gate) => getJson(`/gitcourse/rooms?gate=${encodeURIComponent(gate)}`),
   createGitRoom: (gate) => sendJson('POST', '/gitcourse/rooms', { gate }),

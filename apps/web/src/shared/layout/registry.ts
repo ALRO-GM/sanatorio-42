@@ -21,6 +21,7 @@ export const NAV_DEFAULT = [
   'guardia',
   'cursogit',
   'cursoshell',
+  'cursodocker',
   'notgames',
   'pomodoro',
   'clusters',
