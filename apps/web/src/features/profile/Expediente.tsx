@@ -23,6 +23,7 @@ import { TitlePicker } from './TitlePicker'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
 import { MyShellCertificates } from '../../shared/course/Certificates'
 import { MyDockerCertificates } from '../../shared/course/Certificates'
+import { MyK8sCertificates } from '../../shared/course/Certificates'
 
 type ExpedienteProps = {
   me: CurrentUser
@@ -116,6 +117,10 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                 {/* Y los del curso de Docker. */}
                 <PoolOnly k="dockercourse">
                   <MyDockerCertificates />
+                </PoolOnly>
+                {/* Y los del curso de Kubernetes. */}
+                <PoolOnly k="k8scourse">
+                  <MyK8sCertificates />
                 </PoolOnly>
                 <Show from="normal">
                   <PoolOnly k="expediente.hours">

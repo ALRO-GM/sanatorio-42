@@ -1903,6 +1903,30 @@ POST /dockercourse/bosses/:id/start  → DockerBossStart { unit, run: { startedA
   `docker-final-advanced`. Topes y códigos (404, 409, 400, 429), como en shell.
   No pide estar en un puesto del clúster.
 
+## Curso de Kubernetes (`modules/k8scourse`)
+
+```
+GET  /k8scourse                   → K8sCourse { stars: { [punto]: 1–3 }, best: { [punto]: { commands, seconds } }, runs: { [jefe]: { startedAt, deadline } }, certificates: { tier, stars, seconds, at }[] }
+POST /k8scourse/units/:id         → K8sAttemptInput { entries: string[] (≤ 300, ≤ 2000 caracteres), activeSeconds?: entero 0–21600 } → K8sAttemptResult { done, stars, commands, seconds, misses, course }
+POST /k8scourse/bosses/:id/start  → K8sBossStart { unit, run: { startedAt, deadline }, course }
+```
+
+- Las mismas reglas y el mismo servicio que los cursos de shell y Docker
+  (`createShellCourseService` con el motor de `@sanatorio/k8ssim` y sus tablas): las
+  formas (`K8sCourse`…) son las de shell con otro nombre. Ver `docs/curso-kubernetes.md`.
+- El intento se corrige **volviendo a ejecutar** `entries` en la terminal simulada
+  (la shell con `kubectl`, `helm`, `kustomize` y `base64` encima, y dos clústeres)
+  desde el mundo de partida de la unidad; después se dejan pasar diez minutos de
+  reloj en una copia. Hecho si el estado coincide con el de la solución en lo que
+  mira la unidad (`misses`: `ready:tienda deploy/api`, `get:tienda deploy/api {.spec.replicas}`,
+  `gone:default pod/prueba`, `exists:tienda secret/db`, `http:localhost:8080/`,
+  `reach:tienda api:3000/health`, `exec:tienda deploy/db psql …`, `context`, `file:`,
+  `probe:diff`, `output`, `requires:logs|describe`, `time`).
+- Progreso en `k8s_progress` y relojes de los jefes en `k8s_runs` (migración 88); el
+  tiempo activo, en `course_times` con `course = 'k8s'`. Jefes finales:
+  `k8s-final-principiante`, `k8s-final-intermedio`, `k8s-final-avanzado`. Topes y
+  códigos (404, 409, 400, 429), como en shell. No pide estar en un puesto del clúster.
+
 ## Mapa de calor de clics (`modules/usage/clicks.ts`)
 
 ```

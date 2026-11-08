@@ -59,6 +59,11 @@ const DockerCoursePage = lazy(() =>
     default: m.DockerCoursePage,
   })),
 )
+const K8sCoursePage = lazy(() =>
+  import('../features/k8scourse/K8sCoursePage').then((m) => ({
+    default: m.K8sCoursePage,
+  })),
+)
 const FocusPage = lazy(() =>
   import('../features/focus/FocusPage').then((m) => ({ default: m.FocusPage })),
 )
@@ -199,6 +204,7 @@ export function SectionView({
       {section === 'cursogit' && <GitCoursePage me={me.login} />}
       {section === 'cursoshell' && <ShellCoursePage />}
       {section === 'cursodocker' && <DockerCoursePage />}
+      {section === 'cursok8s' && <K8sCoursePage />}
       {section === 'pomodoro' && <FocusPage />}
       {section === 'avance' &&
         (pool ? (

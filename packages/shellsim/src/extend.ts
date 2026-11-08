@@ -22,7 +22,15 @@ export type Extension = {
   looking?: (words: readonly string[]) => boolean
   /**
    * Quién contesta en un puerto antes que los servicios de la máquina (los
-   * puertos publicados de los contenedores): `null` si no es suyo.
+   * puertos publicados de los contenedores): `null` si no es suyo. `headers`
+   * trae las cabeceras de `curl -H` (el `Host:` de un Ingress, en el motor de
+   * Kubernetes), en minúsculas.
    */
-  http?: (world: World, host: string, port: number, path: string) => HttpReply | null
+  http?: (
+    world: World,
+    host: string,
+    port: number,
+    path: string,
+    headers?: Readonly<Record<string, string>>,
+  ) => HttpReply | null
 }

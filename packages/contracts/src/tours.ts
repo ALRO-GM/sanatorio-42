@@ -16,6 +16,7 @@ export type TourName =
   | 'gitCourse'
   | 'shellCourse'
   | 'dockerCourse'
+  | 'kubernetesCourse'
   | 'guard'
   | 'helpStats'
   | 'inbox'

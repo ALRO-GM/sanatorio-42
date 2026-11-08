@@ -11,6 +11,7 @@ import { clock, starText } from './Stars'
 const TEXTS = {
   shell: { title: 'shell.certs.title', name: 'shell.certs.name' },
   docker: { title: 'docker.certs.title', name: 'docker.certs.name' },
+  k8s: { title: 'k8s.certs.title', name: 'k8s.certs.name' },
 } as const
 
 /**
@@ -22,8 +23,8 @@ export function Certificates({
   course = 'shell',
 }: {
   certificates: CourseCertificate[]
-  /** De qué curso son (sus textos: `shell.certs.*`, `docker.certs.*`). */
-  course?: 'shell' | 'docker'
+  /** De qué curso son (sus textos: `shell.certs.*`, `docker.certs.*`, `k8s.certs.*`). */
+  course?: 'shell' | 'docker' | 'k8s'
 }) {
   const { t } = useI18n()
   const format = useFormat()
@@ -60,4 +61,11 @@ export function MyDockerCertificates() {
   const course = useAsync(() => api.getDockerCourse(), [])
 
   return <Certificates certificates={course.data?.certificates ?? []} course="docker" />
+}
+
+/** Los certificados de Kubernetes de quien mira, para su perfil (nada si aún no tiene). */
+export function MyK8sCertificates() {
+  const course = useAsync(() => api.getK8sCourse(), [])
+
+  return <Certificates certificates={course.data?.certificates ?? []} course="k8s" />
 }
