@@ -6,16 +6,11 @@ En producción hasta 7a69796. Si la CI falla: `gh run view --job <id> --log-fail
 
 ## Cola del 2026-11-08 (push y despliegue autorizados)
 
-En producción hasta e911260 (secreto de 42 con relevo, git fuera del clúster,
-instalar como app, cargas con progreso, eje 1–26 del abandono).
+Docker (999aecd) y Kubernetes (7466e8a) unidos; puntos 1–3 y 6 hechos.
+Agentes en worktrees: repaso de textos de los cursos (punto 4) y gamificación
+(punto 5, migración 89 reservada). Al acabar: unir, check, push, desplegar;
+luego el punto 7.
 
-1. **Curso de Docker**: lo construye un agente en un worktree (migración 87).
-   Al acabar: revisar, `git merge --no-ff`, `npm install` (paquete nuevo
-   `packages/dockersim`), `npm run check`, push y despliegue. Investigación en
-   `docs/referencia/curso-docker-investigacion.md`.
-2. **Curso de Kubernetes**: después del de Docker, misma forma (migración 88).
-   Investigación hecha en `docs/referencia/curso-kubernetes-investigacion.md`.
-   Su examen 1 despliega lo del examen A de Docker.
 3. **Orden de cursos sin bloqueo** (Alberto): sugerir shell → git → Docker →
    Kubernetes y cuál terminar antes, con enlace; nunca bloquear
    (`shared/course`, regla en `docs/plantilla-cursos.md`).
