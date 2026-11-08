@@ -256,6 +256,16 @@ respuesta a quien la pidió):
 
 Antes de escribir una a mano, se usa la que ya existe en `apps/web/src/shared/`:
 
+- **Lo que puede tardar** (pedido por Alberto el 2026-11-08): nada que se
+  calcule o cargue mucho se queda en blanco ni quieto. La primera carga lleva
+  `HeavyLoad` (o `LoadingActivity` con sus fases y cifras) y una recarga con
+  los datos de antes a la vista lleva `ReloadState` (franja con la fase y una
+  barra; enseña también el error si la recarga falla), todo en
+  `ui/Refreshing.tsx`. `Async` ya lo hace solo. Las lecturas que tardan no se
+  dan por «sin conexión»: `http.ts` las repite con 15, 30 y 60 s, y si aun así
+  no llegan dice que el servidor está tardando (`error.slow`), no que no hay
+  conexión.
+
 - **Elegir entre pocas opciones**: con 4 opciones o menos y sitio en la fila,
   pastillas (`ui/PillGroup`; `kind="tabs"` si cambian lo que hay debajo). Con
   más opciones, o dentro de un formulario, un `<select>`. Un desplegable de dos

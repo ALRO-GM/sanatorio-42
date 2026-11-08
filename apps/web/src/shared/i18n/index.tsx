@@ -352,7 +352,8 @@ export function errorText(t: Translate, lang: Lang, error: unknown): string {
   }
 
   if (error.network) {
-    return t('error.network')
+    // Tardar mucho no es estar sin conexión: el servidor sigue calculando.
+    return t(error.timeout ? 'error.slow' : 'error.network')
   }
 
   if (lang === 'es' && error.serverMessage !== undefined) {

@@ -44,6 +44,7 @@ import { PillGroup } from '../../shared/ui/PillGroup'
 import { NetworkTour } from './NetworkTour'
 import { decodePart, networkHref } from '../../shared/links'
 import { usePoolAccess } from '../../shared/pool'
+import { Refreshing } from '../../shared/ui/Refreshing'
 
 /** «Todas»: lo más que acepta la API (`MAX_LIMIT` en `network.service.ts`). */
 const ALL_PEOPLE = 20_000
@@ -992,6 +993,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
 
         {graph !== null && (
           <>
+            {loading && <Refreshing />}
             <div className={`net-stage ${loading ? 'loading' : ''}`}>
               {(shownGraph ?? graph).nodes.length === 0 ? (
                 <p className="estado">

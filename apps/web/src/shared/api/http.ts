@@ -16,6 +16,16 @@ const BASE = import.meta.env.VITE_API_URL ?? '/api'
  */
 const TIMEOUT_MS = 15_000
 
+/**
+ * Las lecturas que tardan no se rinden a los 15 s: se vuelven a pedir con más
+ * margen (2026-11-08). Los cálculos pesados de la API (Avance, Abandono, Red,
+ * asientos) guardan su promesa en curso, así que repetir la petición no vuelve
+ * a empezar: recoge lo que ya estaba calculando. Antes, el corte a los 15 s
+ * salía como «No se puede conectar» y un «Volver a probar» lo traía al momento.
+ * Mientras tanto, la vista sigue enseñando su animación de carga.
+ */
+const READ_TIMEOUTS_MS = [TIMEOUT_MS, 30_000, 60_000]
+
 /** Sin tocar la web este rato, sus peticiones van con `x-idle`: las de la API (`ACTIVITY_WINDOW_MS`). */
 const IDLE_MS = 10 * 60_000
 
@@ -29,17 +39,26 @@ const IDLE_MS = 10 * 60_000
  */
 export class ApiError extends Error {
   readonly network: boolean
+  /** `true` si hubo servidor pero no contestó a tiempo (no es falta de conexión). */
+  readonly timeout: boolean
   readonly status: number | undefined
   /** Motivo que explica el servidor ("El grupo está completo"), en español. */
   readonly serverMessage: string | undefined
 
   constructor(
     message: string,
-    details: { network?: boolean; status?: number; serverMessage?: string; cause?: unknown } = {},
+    details: {
+      network?: boolean
+      timeout?: boolean
+      status?: number
+      serverMessage?: string
+      cause?: unknown
+    } = {},
   ) {
     super(message, { cause: details.cause })
     this.name = 'ApiError'
     this.network = details.network ?? false
+    this.timeout = details.timeout ?? false
     this.status = details.status
     this.serverMessage = details.serverMessage
   }
@@ -68,7 +87,6 @@ export function apiUrl(path: string): string {
 
 /** Una petición ya comprobada: devuelve la respuesta o lanza `ApiError`. */
 export async function fetchApi(path: string, init: RequestInit = {}): Promise<Response> {
-  let response: Response
   // El idioma de la web (lo pone el proveedor de textos en <html lang>), para
   // lo que llega ya escrito del servidor, como las preguntas de Not-games.
   const headers = new Headers(init.headers)
@@ -82,16 +100,37 @@ export async function fetchApi(path: string, init: RequestInit = {}): Promise<Re
   // copia de 42 puede entrar en su modo noche (`modules/replica/budget.ts`).
   if (typeof document !== 'undefined' && isIdle(IDLE_MS)) headers.set('x-idle', '1')
 
-  try {
-    response = await fetch(BASE + path, {
-      credentials: 'include',
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-      ...init,
-      headers,
-    })
-  } catch (cause) {
-    throw new ApiError('No se puede conectar con el servidor', { network: true, cause })
-  }
+  const read =
+    (init.method ?? 'GET').toUpperCase() === 'GET' &&
+    (init.signal === undefined || init.signal === null)
+  const limits = read ? READ_TIMEOUTS_MS : [TIMEOUT_MS]
+
+  const response = await (async () => {
+    for (const [attempt, limit] of limits.entries()) {
+      try {
+        return await fetch(BASE + path, {
+          credentials: 'include',
+          signal: AbortSignal.timeout(limit),
+          ...init,
+          headers,
+        })
+      } catch (cause) {
+        const timedOut = cause instanceof DOMException && cause.name === 'TimeoutError'
+        const last = attempt === limits.length - 1
+
+        // Sin red de verdad, una lectura se repite una vez (un corte de un
+        // momento); lo que tarda se repite con más margen hasta el último tope.
+        if (read && !last && (timedOut || attempt === 0)) continue
+
+        throw new ApiError(
+          timedOut ? 'El servidor está tardando demasiado' : 'No se puede conectar con el servidor',
+          { network: true, timeout: timedOut, cause },
+        )
+      }
+    }
+
+    throw new ApiError('No se puede conectar con el servidor', { network: true })
+  })()
 
   if (!response.ok) {
     let serverMessage: string | undefined

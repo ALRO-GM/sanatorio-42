@@ -27,6 +27,7 @@ import { seatLinks, seatNodes } from './seat-view'
 import { SeatsTour } from './SeatsTour'
 import { DEFAULT_TRIM, MOST_OPTIONS, SHARE_OPTIONS, trimSeats } from './seat-trim'
 import type { SeatTrim } from './seat-trim'
+import { ReloadState } from '../../shared/ui/Refreshing'
 
 /** «Todo»: los días más que acepta la API (diez años). */
 const ALL_DAYS = 3650
@@ -82,7 +83,7 @@ export function SeatsPage({ me, image = null }: { me?: string; image?: string | 
   // De fábrica, tu propia red: con quién te sientas tú (pedido por Alberto, 2026-10-30).
   const [selected, setSelected] = useState<string | null>(me ?? null)
   const loadId = `seats.${key}`
-  const { data, error } = useAsync<SeatGraph>(
+  const { data, error, loading } = useAsync<SeatGraph>(
     () =>
       timedLoad(
         loadId,
@@ -508,6 +509,7 @@ export function SeatsPage({ me, image = null }: { me?: string; image?: string | 
           </div>
         )}
 
+        {data !== undefined && <ReloadState loading={loading} error={error} />}
         {data !== undefined && (
           <div className="net-stage">
             {nodes.length === 0 ? (

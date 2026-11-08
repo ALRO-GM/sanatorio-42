@@ -9,6 +9,7 @@ import { Show } from '../../shared/detail'
 import { openCustomize } from '../../shared/layout/customize'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { LangSelect } from '../../shared/ui/LangSelect'
+import { Refreshing } from '../../shared/ui/Refreshing'
 
 type SettingsProps = {
   /** Campus que se está mirando. `undefined` mientras carga el perfil. */
@@ -66,6 +67,8 @@ export function Settings({ campusId, onCampusChange }: SettingsProps) {
               ))}
             </select>
           </label>
+          {/* Cambiar de campus recarga toda la web: que se vea que va. */}
+          {saving && <Refreshing />}
         </Show>
       )}
       <Show from="datos">

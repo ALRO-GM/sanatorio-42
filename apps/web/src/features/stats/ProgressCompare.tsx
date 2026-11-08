@@ -6,10 +6,10 @@ import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 import { PersonInput } from '../../shared/ui/PersonInput'
 import { MAX_OTHERS, PERSON_COLORS, SCOPES, TRACKS } from './progressSeries'
+import { HeavyLoad } from '../../shared/ui/Refreshing'
 
 /** Días en un mes, como en el eje de la gráfica (dos años en 24 marcas). */
 const MONTH = 730 / 24
@@ -137,7 +137,7 @@ function Fastest(props: {
   const { number } = useFormat()
   const { data, error } = useAsync(() => api.getStatsFastest(), [])
 
-  if (data === undefined) return <ErrorNote error={error} retry />
+  if (data === undefined) return <HeavyLoad id="progress-fastest" error={error} />
 
   // Sin plan o alcance encendido, se sugiere de todos: mejor algo que nada.
   const tracks = TRACKS.filter((track) => props.tracks.size === 0 || props.tracks.has(track))

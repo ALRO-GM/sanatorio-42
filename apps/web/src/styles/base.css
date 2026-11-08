@@ -767,6 +767,19 @@ button.link {
   background: var(--accent);
   transition: width 0.2s linear;
 }
+.refreshing {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.refreshing .activity-bar {
+  flex: 1 1 8rem;
+  max-width: 16rem;
+}
 @media (prefers-reduced-motion: reduce) {
   .activity-ring {
     animation: none;

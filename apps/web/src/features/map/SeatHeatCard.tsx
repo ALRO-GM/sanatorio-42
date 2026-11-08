@@ -8,9 +8,10 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { daysOf } from '../../shared/period'
 import type { Period } from '../../shared/period'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PeriodPicker } from '../../shared/ui/PeriodPicker'
 import { SeatHeatMap } from './SeatHeatMap'
+import { HeavyLoad, ReloadState } from '../../shared/ui/Refreshing'
+import { timedLoad } from '../../shared/loadMemory'
 
 /** «Todo»: los días más que acepta la API (diez años). */
 const ALL_DAYS = 3650
@@ -28,7 +29,15 @@ export function SeatHeatCard() {
   const custom = period === 'custom' && dates.from !== '' ? dates : undefined
   const days = period === 'custom' ? 30 : (daysOf(period) ?? ALL_DAYS)
   const key = custom === undefined ? String(days) : `${custom.from}..${custom.to}`
-  const heat = useAsync<SeatHeat>(() => api.getSeatHeat(days, custom), [key])
+  const heat = useAsync<SeatHeat>(
+    () =>
+      timedLoad(
+        'seat-heat',
+        () => api.getSeatHeat(days, custom),
+        () => ({}),
+      ),
+    [key],
+  )
 
   return (
     <article className="card seat-heat-card">
@@ -46,8 +55,14 @@ export function SeatHeatCard() {
           />
         </div>
       </div>
-      <ErrorNote error={heat.error} retry />
-      {heat.data !== undefined && <SeatHeatMap heat={heat.data} />}
+      {heat.data === undefined ? (
+        <HeavyLoad id="seat-heat" error={heat.error} />
+      ) : (
+        <>
+          <ReloadState loading={heat.loading} error={heat.error} />
+          <SeatHeatMap heat={heat.data} />
+        </>
+      )}
     </article>
   )
 }

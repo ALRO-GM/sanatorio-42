@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import type { AsyncState } from '../hooks/useAsync'
 import { useI18n } from '../i18n'
 import { ErrorNote } from './ErrorNote'
+import { Refreshing } from './Refreshing'
 
 type AsyncProps<T> = {
   /** Lo que devuelve `useAsync`. */
@@ -42,8 +43,17 @@ export function Async<T>({ state, children, empty, emptyText, loadingText }: Asy
     return <p className="estado">{emptyText}</p>
   }
 
-  return <>{children(data)}</>
+  return (
+    <>
+      {/* Una recarga que tarda (otro filtro, otro periodo): se ve que avanza. */}
+      {loading && <Refreshing delayMs={RELOAD_QUIET_MS} />}
+      {children(data)}
+    </>
+  )
 }
+
+/** Lo que puede tardar una recarga sin que se diga nada. */
+const RELOAD_QUIET_MS = 1_500
 
 /** A partir de cuándo se dice que sigue en marcha, y que ya casi está. */
 const SLOW_MS = 2_500
@@ -54,7 +64,6 @@ const ALMOST_MS = 8_000
  * web se ha quedado colgada (pedido por Alberto, 2026-11-02).
  */
 function Waiting({ text }: { text: string }) {
-  const { t } = useI18n()
   const [more, setMore] = useState<string | null>(null)
 
   useEffect(() => {
@@ -72,14 +81,9 @@ function Waiting({ text }: { text: string }) {
   }, [])
 
   return (
-    <p className="estado">
-      {text}
-      {more !== null && (
-        <>
-          <br />
-          <small>{t(more)}</small>
-        </>
-      )}
-    </p>
+    <div className="estado">
+      <p>{text}</p>
+      {more !== null && <Refreshing steps={[more]} expectedMs={ALMOST_MS} />}
+    </div>
   )
 }

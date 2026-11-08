@@ -846,7 +846,8 @@ flowchart LR
 
 `shared/api`. Solo esta carpeta habla con la API. `types.ts` declara la
 interfaz `Api` (unos 235 métodos); la cumplen `client.ts` (real, sobre
-`http.ts`: `fetch` con cookie, 15 s de tope, cabeceras `x-lang` y `x-idle`, y
+`http.ts`: `fetch` con cookie, 15 s de tope (las lecturas se repiten con 30 y
+60 s antes de rendirse, y un corte por tiempo es `timeout`, no falta de red), cabeceras `x-lang` y `x-idle`, y
 errores como `ApiError` de red, de estado o de mantenimiento) y `mock/` (unas
 30 partes en memoria, con datos inventados). `index.ts` elige con
 `VITE_USE_MOCK`; el *mock* se importa dinámicamente y no viaja en la web real.

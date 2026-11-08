@@ -202,6 +202,40 @@ describe('cliente de la API', () => {
     await expect(realApi.getMe()).rejects.toMatchObject({ status: 503, serverMessage: undefined })
 
     vi.stubGlobal('fetch', () => Promise.reject(new TypeError('Failed to fetch')))
-    await expect(realApi.getMe()).rejects.toMatchObject({ network: true, status: undefined })
+    await expect(realApi.getMe()).rejects.toMatchObject({
+      network: true,
+      timeout: false,
+      status: undefined,
+    })
+  })
+
+  it('una lectura que tarda se vuelve a pedir con más margen y no se da por «sin conexión»', async () => {
+    const timeout = (): Promise<Response> =>
+      Promise.reject(new DOMException('The operation timed out.', 'TimeoutError'))
+    let calls = 0
+
+    // Dos cortes por tiempo y, a la tercera, la API ya tenía el cálculo hecho.
+    vi.stubGlobal('fetch', () => {
+      calls += 1
+
+      return calls < 3 ? timeout() : Promise.resolve(Response.json({ ok: true }))
+    })
+    await expect(realApi.getMe()).resolves.toEqual({ ok: true })
+    expect(calls).toBe(3)
+
+    // Si nunca llega, es «tarda demasiado», no «no hay conexión».
+    calls = 0
+    vi.stubGlobal('fetch', () => {
+      calls += 1
+
+      return timeout()
+    })
+    await expect(realApi.getMe()).rejects.toMatchObject({ network: true, timeout: true })
+    expect(calls).toBe(3)
+
+    // Lo que escribe no se repite: podría hacerse dos veces.
+    calls = 0
+    await expect(realApi.setGitPlace('remote')).rejects.toMatchObject({ timeout: true })
+    expect(calls).toBe(1)
   })
 })

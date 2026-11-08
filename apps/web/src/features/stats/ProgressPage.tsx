@@ -34,6 +34,7 @@ import { ProgressTour } from './ProgressTour'
 import { progressAnswer } from './progressAnswer'
 import type { ProgressAnswer } from './progressAnswer'
 import { POPULATIONS, TRACKS } from './progressSeries'
+import { ReloadState } from '../../shared/ui/Refreshing'
 
 const RANGE_KEY = 'sanatorio_progress_range'
 /** Los meses de «a mano» (`desde,hasta`), aparte del periodo. */
@@ -275,15 +276,22 @@ export function ProgressPage({ me, image = null }: { me: string; image?: string 
               <ErrorNote error={fetched.error} retry />
             )
           ) : (
-            <ProgressChart
-              data={data}
-              measure={measure}
-              picked={picked}
-              paces={paces}
-              span={spanOf(range, months)}
-              mine={mine}
-              shape={shape}
-            />
+            <>
+              {/* Otra escuela u otra persona: lo de antes sigue a la vista mientras llega. */}
+              <ReloadState
+                loading={fetched.loading}
+                error={fetched.data === undefined ? fetched.error : null}
+              />
+              <ProgressChart
+                data={data}
+                measure={measure}
+                picked={picked}
+                paces={paces}
+                span={spanOf(range, months)}
+                mine={mine}
+                shape={shape}
+              />
+            </>
           )
         }
       >
@@ -390,6 +398,7 @@ export function ProgressPage({ me, image = null }: { me: string; image?: string 
                 available={data.available}
                 current={campuses}
                 label={t('stats.progress.scope')}
+                loading={fetched.loading}
                 allowEmpty
                 onApply={(next) => {
                   setChosen(next === 'all' ? data.available.map((campus) => campus.id) : next)

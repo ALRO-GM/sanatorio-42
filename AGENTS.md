@@ -202,6 +202,10 @@ regla de aquí, cambia también la skill que la repite.
   códigos de color del mapa y del grafo).
 - Paleta: la pone el estilo. "No disponible" va en gris neutro, nunca en rojo.
 - La cabecera tiene que caber en una sola fila y todo verse bien en móvil.
+- Lo que pueda tardar (análisis, muchos datos) enseña cómo avanza: `HeavyLoad` en la
+  primera carga y `ReloadState` al recargar (`shared/ui/Refreshing.tsx`), nunca una zona
+  en blanco ni un «sin conexión» porque tarde (pedido por Alberto el 2026-11-08; regla en
+  `docs/interfaz.md`, «Piezas comunes»).
 - Gráficas con opciones: la gráfica a la izquierda, quieta a la vista, y sus
   opciones en un panel a la derecha (como Red y Avance); en el móvil, la gráfica
   primero y las opciones debajo. Un periodo o escalón se elige con

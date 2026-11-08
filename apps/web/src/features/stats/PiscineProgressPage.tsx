@@ -7,7 +7,6 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { ChartWithRail } from '../../shared/ui/ChartWithRail'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
 import { PersonInput } from '../../shared/ui/PersonInput'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
@@ -17,6 +16,8 @@ import { PoolWhoPicker, usePoolLines } from './PiscinePools'
 import type { PoolWho } from './PiscinePools'
 import { PiscineTop, useTopLines } from './PiscineTop'
 import { MAX_OTHERS, PERSON_COLORS } from './progressSeries'
+import { HeavyLoad, ReloadState } from '../../shared/ui/Refreshing'
+import { timedLoad } from '../../shared/loadMemory'
 
 /**
  * El Avance de un piscinero (`docs/piscineros.md`), en vez del del common
@@ -35,7 +36,15 @@ export function PiscineProgressPage({ me }: { me: string }) {
   const [others, setOthers] = useState<string[]>([])
   const [shown, setShown] = useState<PiscineShown>({ cohort: true })
   const [typed, setTyped] = useState('')
-  const fetched = useAsync(() => api.getPiscineProgress(others), [others.join(',')])
+  const fetched = useAsync(
+    () =>
+      timedLoad(
+        'piscine-progress',
+        () => api.getPiscineProgress(others),
+        () => ({}),
+      ),
+    [others.join(',')],
+  )
   // Mientras llega lo nuevo (otra persona), se queda lo de antes: la gráfica no se vacía.
   const [kept, setKept] = useState<PiscineProgress | undefined>(undefined)
 
@@ -91,9 +100,13 @@ export function PiscineProgressPage({ me }: { me: string }) {
         railLabel={t('stats.progress.options')}
         chart={
           data === undefined ? (
-            <ErrorNote error={fetched.error} retry />
+            <HeavyLoad id="piscine-progress" error={fetched.error} />
           ) : (
             <>
+              <ReloadState
+                loading={fetched.loading}
+                error={fetched.data === undefined ? fetched.error : null}
+              />
               <p className="piscine-summary">
                 {t('piscine.done', { done: data.me?.done ?? 0, total: data.steps.length })}
               </p>

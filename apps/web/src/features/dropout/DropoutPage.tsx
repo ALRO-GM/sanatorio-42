@@ -14,7 +14,6 @@ import { useI18n } from '../../shared/i18n'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ChartWithRail } from '../../shared/ui/ChartWithRail'
 import { DataTable } from '../../shared/ui/DataTable'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PersonLink } from '../../shared/ui/PersonLink'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { SectionTitle } from '../../shared/ui/SectionTitle'
@@ -37,6 +36,8 @@ import { DeparturesChart, PersonHoursChart, STATUS_COLOR, TransitionsChart } fro
 import { DropoutCompare } from './DropoutCompare'
 import { DropoutCorrelations, DropoutFactorsPanel } from './DropoutCorrelations'
 import { DropoutTuningPanel } from './DropoutTuningPanel'
+import { HeavyLoad, ReloadState } from '../../shared/ui/Refreshing'
+import { timedLoad } from '../../shared/loadMemory'
 
 /** Dónde se guarda el ajuste en este navegador: no se pierde al cambiar de piscina ni al volver. */
 const STORAGE = 'sanatorio_dropout_tuning'
@@ -90,7 +91,15 @@ export function DropoutPage() {
     }
   }, [tweaks])
 
-  const fetched = useAsync(() => api.getDropout(start, asked), [start, JSON.stringify(asked)])
+  const fetched = useAsync(
+    () =>
+      timedLoad(
+        'dropout',
+        () => api.getDropout(start, asked),
+        () => ({}),
+      ),
+    [start, JSON.stringify(asked)],
+  )
   // Mientras llega lo nuevo (otro ajuste, otra piscina), se queda lo de antes: no parpadea.
   const [kept, setKept] = useState<DropoutReport | undefined>(undefined)
 
@@ -138,8 +147,14 @@ export function DropoutPage() {
         onChange={setView}
         text={(option) => t(`dropout.view.${option}`)}
       />
+      {data !== undefined && (
+        <ReloadState
+          loading={fetched.loading}
+          error={fetched.data === undefined ? fetched.error : null}
+        />
+      )}
       {data === undefined ? (
-        <ErrorNote error={fetched.error} retry />
+        <HeavyLoad id="dropout" error={fetched.error} />
       ) : data.people.length === 0 ? (
         <p className="empty">{t('dropout.empty')}</p>
       ) : (

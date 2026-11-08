@@ -8,12 +8,13 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { ChartWithRail } from '../../shared/ui/ChartWithRail'
 import { DataTable } from '../../shared/ui/DataTable'
-import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { INCLUDES } from './dropout'
 import type { DropoutInclude } from './dropout'
 import { GroupedBars, poolColor, SurvivalChart } from './DropoutCompareCharts'
 import type { CompareSeries } from './DropoutCompareCharts'
+import { HeavyLoad, ReloadState } from '../../shared/ui/Refreshing'
+import { timedLoad } from '../../shared/loadMemory'
 
 /** Dónde se guardan las piscinas elegidas en este navegador. */
 const STORAGE = 'sanatorio_dropout_compare'
@@ -71,7 +72,11 @@ export function DropoutCompare({ tweaks }: { tweaks: DropoutTweaks }) {
     () =>
       picked !== null && picked.length === 0
         ? Promise.resolve(null)
-        : api.getDropoutComparison(asked, tweaks),
+        : timedLoad(
+            'dropout-compare',
+            () => api.getDropoutComparison(asked, tweaks),
+            () => ({}),
+          ),
     [asked.join(','), picked === null, JSON.stringify(tweaks)],
   )
   const [kept, setKept] = useState<DropoutComparison | undefined>(undefined)
@@ -85,12 +90,13 @@ export function DropoutCompare({ tweaks }: { tweaks: DropoutTweaks }) {
     storePicked(next)
   }
 
-  if (data === undefined) return <ErrorNote error={fetched.error} retry />
+  if (data === undefined) return <HeavyLoad id="dropout-compare" error={fetched.error} />
 
   const chosen = picked ?? data.available.map((pool) => pool.start)
 
   return (
     <div className="dropout-compare">
+      <ReloadState loading={fetched.loading} error={fetched.error} />
       <fieldset className="card dropout-block dropout-pools">
         <legend className="eyebrow">{t('dropout.compare.pools')}</legend>
         <div className="dropout-pool-list">
