@@ -156,7 +156,23 @@ function leaversOf(
 }
 
 /** Una barra de la gráfica de abandonos: cuántos ese día (o semana) y cuántos hasta entonces. */
-export type DepartureBar = { key: string; week: number; count: number; total: number }
+export type DepartureBar = {
+  key: string
+  week: number
+  count: number
+  total: number
+  /** Por días: el día de piscina, desde 1 (el lunes del inicio). Por semanas, `null`. */
+  poolDay: number | null
+}
+
+/**
+ * El último día de piscina del eje: el viernes de la cuarta semana, el del
+ * examen final (todas empiezan en lunes: 4 semanas menos el fin de semana).
+ */
+export const LAST_POOL_DAY = 26
+
+/** Si el día de piscina `poolDay` (desde 1) es de examen: el 5 y luego cada 7. */
+export const isExamDay = (poolDay: number): boolean => poolDay >= 5 && (poolDay - 5) % 7 === 0
 
 /**
  * Los abandonos por día (el primer día que ya no vinieron) o por semana de
@@ -178,13 +194,16 @@ export function departures(
   let total = 0
 
   if (grouping === 'day') {
-    return report.days.slice(1).map((day) => {
-      const count = byDay.get(day.day) ?? 0
+    // Del día 1 al 26 de piscina (pedido por Alberto el 2026-11-08), no días del mes.
+    return report.days
+      .filter((day) => day.index < LAST_POOL_DAY)
+      .map((day) => {
+        const count = byDay.get(day.day) ?? 0
 
-      total += count
+        total += count
 
-      return { key: day.day, week: day.week, count, total }
-    })
+        return { key: day.day, week: day.week, count, total, poolDay: day.index + 1 }
+      })
   }
 
   const weeks = [...new Set(report.days.map((day) => day.week))]
@@ -196,7 +215,7 @@ export function departures(
 
     total += count
 
-    return { key: String(week), week, count, total }
+    return { key: String(week), week, count, total, poolDay: null }
   })
 }
 

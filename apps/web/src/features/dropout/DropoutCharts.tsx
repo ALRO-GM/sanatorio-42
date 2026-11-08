@@ -6,7 +6,7 @@ import type {
 } from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
-import { dateOf, trendOf } from './dropout'
+import { dateOf, isExamDay, trendOf } from './dropout'
 import type { DepartureBar, DropoutGrouping } from './dropout'
 
 const WIDTH = 640
@@ -49,9 +49,10 @@ export function DeparturesChart({
   const x = (index: number): number => PAD.left + index * slot + slot / 2
   const y = (value: number, max: number): number => PAD.top + INNER_H - (value / max) * INNER_H
   const label = (bar: DepartureBar): string =>
-    grouping === 'day'
-      ? String(dateOf(bar.key))
+    bar.poolDay !== null
+      ? String(bar.poolDay)
       : t('dropout.chart.weekShort', { n: bar.week > 4 ? '4+' : bar.week })
+  const exam = (bar: DepartureBar): boolean => bar.poolDay !== null && isExamDay(bar.poolDay)
   const line = bars
     .map(
       (bar, index) =>
@@ -66,6 +67,19 @@ export function DeparturesChart({
         role="img"
         aria-label={t('dropout.chart.departuresLabel', { total: bars.at(-1)?.total ?? 0 })}
       >
+        {/* Los días de examen (5, 12, 19 y 26), resaltados de arriba abajo. */}
+        {bars.map((bar, index) =>
+          exam(bar) ? (
+            <rect
+              key={bar.key}
+              className="dropout-exam-band"
+              x={x(index) - slot / 2}
+              y={PAD.top}
+              width={slot}
+              height={INNER_H}
+            />
+          ) : null,
+        )}
         <g className="progress-grid">
           {ticksOf(top).map((tick) => (
             <g key={tick}>
@@ -80,13 +94,17 @@ export function DeparturesChart({
               {tick}
             </text>
           ))}
-          {bars.map((bar, index) =>
-            grouping === 'week' || index % 2 === 0 ? (
-              <text key={bar.key} x={x(index)} y={HEIGHT - PAD.bottom + 16} textAnchor="middle">
-                {label(bar)}
-              </text>
-            ) : null,
-          )}
+          {bars.map((bar, index) => (
+            <text
+              key={bar.key}
+              className={exam(bar) ? 'dropout-exam-label' : undefined}
+              x={x(index)}
+              y={HEIGHT - PAD.bottom + 16}
+              textAnchor="middle"
+            >
+              {label(bar)}
+            </text>
+          ))}
         </g>
         {bars.map((bar, index) => (
           <rect
@@ -100,7 +118,12 @@ export function DeparturesChart({
           >
             <title>
               {t('dropout.chart.barTitle', {
-                when: label(bar),
+                when:
+                  bar.poolDay === null
+                    ? label(bar)
+                    : t(exam(bar) ? 'dropout.chart.examDay' : 'dropout.chart.poolDay', {
+                        n: bar.poolDay,
+                      }),
                 count: bar.count,
                 total: bar.total,
               })}
@@ -118,6 +141,12 @@ export function DeparturesChart({
           <span className="dropout-key total" aria-hidden="true" />
           {t('dropout.chart.total')}
         </li>
+        {grouping === 'day' && (
+          <li>
+            <span className="dropout-key exam" aria-hidden="true" />
+            {t('dropout.chart.exams')}
+          </li>
+        )}
       </ul>
     </div>
   )
@@ -203,15 +232,17 @@ export function PersonHoursChart({
               </text>
             </g>
           ))}
+          {/* Días de piscina (1 = el lunes del inicio): el primero y los de examen. */}
           {days.map((day, index) =>
-            day.weekday === 1 || index === 0 ? (
+            index === 0 || isExamDay(day.index + 1) ? (
               <text
                 key={day.day}
+                className={index === 0 ? undefined : 'dropout-exam-label'}
                 x={x(index) + slot / 2}
                 y={HEIGHT - PAD.bottom + 16}
                 textAnchor="middle"
               >
-                {dateOf(day.day)}
+                {day.index + 1}
               </text>
             ) : null,
           )}

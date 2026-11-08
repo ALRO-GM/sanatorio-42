@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/abandono.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-185 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+188 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -32,6 +32,9 @@ Generado desde `apps/web/src/shared/i18n/textos/abandono.csv` con
 | `dropout.chart.perDay` | Abandono de la piscina: leyenda: barras por día | features/dropout/DropoutCharts | Abandonos de ese día | Dropouts that day | Abandonaments d’aquell dia | Egun horretako uzteak | Abandons ce jour-là |
 | `dropout.chart.perWeek` | Abandono de la piscina: leyenda: barras por semana | features/dropout/DropoutCharts | Abandonos de esa semana | Dropouts that week | Abandonaments d’aquella setmana | Aste horretako uzteak | Abandons cette semaine-là |
 | `dropout.chart.total` | Abandono de la piscina: leyenda: línea del acumulado | features/dropout/DropoutCharts | Total acumulado | Running total | Total acumulat | Guztira metatuta | Total cumulé |
+| `dropout.chart.poolDay` | Abandono de la piscina: gráfica de bajas por día; el eje va por días de piscina, del 1 (el lunes del inicio) al 26 (el viernes del examen final). Al pasar por una barra; {n} es el día de piscina. | features/dropout/DropoutCharts | Día {n} de piscina | Pool day {n} | Dia {n} de piscina | Igerilekuaren {n}. eguna | Jour {n} de piscine |
+| `dropout.chart.examDay` | Abandono de la piscina: gráfica de bajas por día; el eje va por días de piscina, del 1 (el lunes del inicio) al 26 (el viernes del examen final). Al pasar por la barra de un día de examen; {n} es el día de piscina. | features/dropout/DropoutCharts | Día {n} de piscina (examen) | Pool day {n} (exam) | Dia {n} de piscina (examen) | Igerilekuaren {n}. eguna (azterketa) | Jour {n} de piscine (examen) |
+| `dropout.chart.exams` | Abandono de la piscina: gráfica de bajas por día; el eje va por días de piscina, del 1 (el lunes del inicio) al 26 (el viernes del examen final). Leyenda de las franjas que marcan los días de examen (5, 12, 19 y 26). | features/dropout/DropoutCharts | Día de examen | Exam day | Dia d'examen | Azterketa eguna | Jour d'examen |
 | `dropout.grouping.day` | Abandono de la piscina: agrupar por día | features/dropout/DropoutPage | Por día | By day | Per dia | Egunka | Par jour |
 | `dropout.grouping.week` | Abandono de la piscina: agrupar por semana de piscina | features/dropout/DropoutPage | Por semana | By week | Per setmana | Asteka | Par semaine |
 | `dropout.include.gone` | Abandono de la piscina: contar solo confirmados | features/dropout/DropoutCompare, features/dropout/DropoutPage | Confirmados | Confirmed | Confirmats | Baieztatuak | Confirmés |

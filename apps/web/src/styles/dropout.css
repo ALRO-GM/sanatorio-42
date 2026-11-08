@@ -77,6 +77,15 @@
 .dropout-day.exam {
   fill: var(--gold);
 }
+/* Días de examen en el eje de días de piscina: franja y número resaltados. */
+.dropout-exam-band {
+  fill: var(--gold);
+  opacity: 0.18;
+}
+.progress-grid text.dropout-exam-label {
+  fill: var(--text);
+  font-weight: 700;
+}
 .dropout-day.empty {
   fill: var(--danger);
 }
