@@ -2,7 +2,7 @@
  * API de mentira: buzón, panel de gestión, presupuesto y uso.
  */
 
-import type { DataWipe, Ticket } from '@sanatorio/contracts'
+import type { CourseRemoteAccess, DataWipe, Ticket } from '@sanatorio/contracts'
 import { ME } from './data'
 import { portrait } from './portrait'
 import type { Api } from '../types'
@@ -43,6 +43,16 @@ function openPanel(code: string): void {
 const clickCells = new Map<string, number>()
 const clickElements = new Map<string, number>()
 
+/** Quién puede hacer el curso de git fuera del clúster (demo). */
+const remoteCourse: CourseRemoteAccess['people'] = [
+  {
+    login: 'mgarcia',
+    grantedBy: 'demo',
+    grantedAt: '2026-11-01T10:00:00Z',
+    place: 'remote',
+    placeAt: '2026-11-08T09:30:00Z',
+  },
+]
 export const adminMock: Pick<
   Api,
   | 'openTicket'
@@ -70,6 +80,8 @@ export const adminMock: Pick<
   | 'getAdminConsumption'
   | 'getAdminPeople'
   | 'setAdminRole'
+  | 'getCourseRemote'
+  | 'setCourseRemote'
   | 'blockUser'
   | 'unblockUser'
   | 'setUserLimit'
@@ -415,6 +427,29 @@ export const adminMock: Pick<
       blocks,
       limits: [...limits].map(([login, perHour]) => ({ login, perHour })),
     }
+  },
+
+  async getCourseRemote() {
+    await delay(80)
+
+    return { people: remoteCourse.map((person) => ({ ...person })) }
+  },
+
+  async setCourseRemote(login, allowed) {
+    await delay(120)
+
+    const at = remoteCourse.findIndex((person) => person.login === login)
+
+    if (allowed && at === -1) {
+      remoteCourse.push({
+        login,
+        grantedBy: 'demo',
+        grantedAt: new Date().toISOString(),
+        place: null,
+        placeAt: null,
+      })
+    }
+    if (!allowed && at !== -1) remoteCourse.splice(at, 1)
   },
 
   async setAdminRole(login, admin) {

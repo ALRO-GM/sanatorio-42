@@ -11,6 +11,26 @@ export type GitCourse = {
   stars: Record<string, 1 | 2 | 3>
   /** El test previo de cada prueba de grupo (`group1`…, `boss`) que se ha intentado. */
   gates: Record<string, GitGateState>
+  /**
+   * Permiso para jugar fuera del clúster (lo da quien administra) y el sitio
+   * que dijiste. Sin puesto, con permiso y con sitio dicho, se juega y cuenta.
+   */
+  remote: { allowed: boolean; place: CoursePlace | null }
+}
+
+/** Dónde dice estar quien juega fuera del clúster. */
+export type CoursePlace = 'campus' | 'remote' | 'outside'
+
+/** `GET /admin/course-remote`: quién puede hacer el curso fuera del clúster. */
+export type CourseRemoteAccess = {
+  people: {
+    login: string
+    grantedBy: string
+    grantedAt: string
+    /** El último sitio que dijo y cuándo, o `null` si aún no ha jugado así. */
+    place: CoursePlace | null
+    placeAt: string | null
+  }[]
 }
 
 export type GitGateState = {

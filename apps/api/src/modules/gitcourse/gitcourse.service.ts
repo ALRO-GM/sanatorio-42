@@ -2,10 +2,12 @@
  * Curso de git (#42 del buzón): el camino de puntos. La web juega cada reto
  * con el git simulado y manda los comandos que escribiste; aquí se vuelven a
  * ejecutar con el mismo motor antes de dar el punto, así que no vale mandar
- * «hecho» sin hacerlo. Solo se juega sentado en un puesto del clúster.
+ * «hecho» sin hacerlo. Solo se juega sentado en un puesto del clúster, salvo
+ * quien tiene permiso para hacerlo fuera y dice dónde está (`remote.ts`).
  */
 
 import type {
+  CoursePlace,
   GitAttemptResult,
   GitCourse,
   GitGatePeople,
@@ -24,6 +26,7 @@ import { parse } from '../../core/validation.js'
 import { activeSecondsSchema } from '../shellcourse/index.js'
 import type { CourseTimes } from '../shellcourse/index.js'
 import type { GateService } from './gates.js'
+import type { RemoteAccess } from './remote.js'
 import { isoAt } from '../../core/time.js'
 
 // Los mismos topes que la terminal: la API vuelve a ejecutar cada línea.
@@ -95,12 +98,15 @@ export function createGitCourseRepository(db: Db) {
       stars: Stars,
       commands: number,
       at: string,
+      /** Dónde dijo estar quien juega fuera del clúster; `null`, desde un puesto. */
+      place: CoursePlace | null = null,
     ): Promise<void> {
       await db.execute({
-        sql: `INSERT INTO git_progress (login, level, stars, commands, done_at) VALUES (?, ?, ?, ?, ?)
+        sql: `INSERT INTO git_progress (login, level, stars, commands, done_at, place) VALUES (?, ?, ?, ?, ?, ?)
               ON CONFLICT (login, level) DO UPDATE SET
-                stars = MAX(stars, excluded.stars), commands = MIN(commands, excluded.commands)`,
-        args: [login, level, stars, commands, at],
+                stars = MAX(stars, excluded.stars), commands = MIN(commands, excluded.commands),
+                place = excluded.place`,
+        args: [login, level, stars, commands, at, place],
       })
     },
   }
@@ -115,26 +121,35 @@ export function createGitCourseService(deps: {
   seatOf: (login: string) => Promise<string | null>
   /** Dónde se apunta el tiempo activo de cada punto superado. */
   times?: CourseTimes
+  /** Quién puede jugar fuera del clúster y desde dónde dice estar. */
+  remote?: Pick<RemoteAccess, 'status' | 'placeToPlay'>
   now?: () => number
 }) {
   const now = deps.now ?? Date.now
   const attempts = createRateLimit({ max: ATTEMPTS_PER_WINDOW, windowMs: ATTEMPT_WINDOW_MS, now })
 
   async function course(login: string): Promise<GitCourse> {
-    const [seat, stars, gates] = await Promise.all([
+    const [seat, stars, gates, remote] = await Promise.all([
       deps.seatOf(login),
       deps.progress.stars(login),
       deps.gates.states(login),
+      deps.remote?.status(login) ?? { allowed: false, place: null },
     ])
 
-    return { seat, stars, gates }
+    return { seat, stars, gates, remote }
   }
 
+  /** Lo que llevas, si puedes jugar: desde un puesto, o fuera con permiso y sitio dicho. */
   async function seated(login: string): Promise<GitCourse> {
     const current = await course(login)
 
-    if (current.seat === null) {
-      throw domainError('forbidden', 'El curso de git se juega desde un ordenador del clúster')
+    if (current.seat === null && current.remote.place === null) {
+      throw domainError(
+        'forbidden',
+        current.remote.allowed
+          ? 'Antes di dónde estás para hacer el curso fuera del clúster'
+          : 'El curso de git se juega desde un ordenador del clúster',
+      )
     }
 
     return current
@@ -184,6 +199,7 @@ export function createGitCourseService(deps: {
           result.stars as Stars,
           result.commands,
           isoAt(now()),
+          before.seat === null ? before.remote.place : null,
         )
         if (activeSeconds !== undefined) {
           await deps.times?.record({

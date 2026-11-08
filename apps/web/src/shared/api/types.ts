@@ -37,6 +37,8 @@ import type {
   ShellCourse,
   GitAttemptResult,
   GitCourse,
+  CoursePlace,
+  CourseRemoteAccess,
   GitGateAnswerInput,
   GitGatePeople,
   GitGateQuiz,
@@ -355,6 +357,9 @@ export type Api = {
   setAdminBudget: (changes: Partial<BudgetSettings>) => Promise<BudgetStatus>
   getAdminPeople: () => Promise<AdminPeople>
   setAdminRole: (login: string, admin: boolean) => Promise<void>
+  /** Quién puede hacer el curso de git fuera del clúster. */
+  getCourseRemote: () => Promise<CourseRemoteAccess>
+  setCourseRemote: (login: string, allowed: boolean) => Promise<void>
   /** `days: null` bloquea sin fecha de fin. */
   blockUser: (login: string, reason: string, days: number | null) => Promise<void>
   unblockUser: (login: string) => Promise<void>
@@ -393,6 +398,8 @@ export type Api = {
   /** El Pomodoro: si estás concentrado y tus ajustes. */
   getFocus: () => Promise<Focus>
   getGitCourse: () => Promise<GitCourse>
+  /** Dónde estás, para hacer el curso de git fuera del clúster (con permiso). */
+  setGitPlace: (place: CoursePlace) => Promise<GitCourse>
   submitGitAttempt: (level: string, input: GitAttemptInput) => Promise<GitAttemptResult>
   startGitGate: (gate: string) => Promise<GitGateQuiz>
   answerGitGate: (gate: string, input: GitGateAnswerInput) => Promise<GitGateResult>

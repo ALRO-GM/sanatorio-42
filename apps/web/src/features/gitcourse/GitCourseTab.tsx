@@ -27,6 +27,7 @@ import { PersonLink } from '../../shared/ui/PersonLink'
 import { GateView } from './GateView'
 import { GitCourseTour } from './GitCourseTour'
 import { LevelView } from './LevelView'
+import { PlacePicker, playingFrom } from './PlacePicker'
 
 /** Un color por mundo: cada mundo es una rama que sale del tronco y vuelve. */
 const WORLD_COLORS = ['#e8590c', '#2f9e44', '#1971c2', '#ae3ec9', '#f08c00', '#0c8599']
@@ -106,6 +107,8 @@ export function GitCourseTab({ me, onReview }: { me: string; onReview: () => voi
   if (loaded.error !== null) return <ErrorNote error={loaded.error} />
   if (current === null) return <p className="muted">{t('app.loading')}</p>
 
+  // Fuera del clúster con permiso y sitio dicho, se juega «desde» ese sitio.
+  const from = playingFrom(current, (place) => t(`git.place.${place}`))
   const found = LEVELS.find((each) => each.id === open)
   const level = found === undefined ? undefined : levelIn(found, lang)
   const gate = GATES.find((each) => each.id === open)
@@ -115,7 +118,7 @@ export function GitCourseTab({ me, onReview }: { me: string; onReview: () => voi
       <GateView
         gate={gate}
         me={me}
-        course={current}
+        course={{ ...current, seat: from }}
         onCourse={setCourse}
         onReview={onReview}
         onBack={() => {
@@ -131,7 +134,7 @@ export function GitCourseTab({ me, onReview }: { me: string; onReview: () => voi
         key={level.id}
         level={level}
         best={current.stars[level.id] ?? 0}
-        seat={current.seat}
+        seat={from}
         onDone={(result) => {
           setCourse(result.course)
         }}
@@ -153,7 +156,9 @@ export function GitCourseTab({ me, onReview }: { me: string; onReview: () => voi
           <GitCourseTour />
         </InfoTip>
       </p>
-      {current.seat === null ? (
+      {current.seat === null && current.remote.allowed ? (
+        <PlacePicker course={current} onCourse={setCourse} />
+      ) : current.seat === null ? (
         <p className="notice">{t('git.needSeat')}</p>
       ) : (
         <p className="muted">{t('git.atSeat', { seat: current.seat })}</p>

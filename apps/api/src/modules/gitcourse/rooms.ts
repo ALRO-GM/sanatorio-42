@@ -203,6 +203,8 @@ type RoomRepository = ReturnType<typeof createRoomRepository>
 export function createRoomService(deps: {
   rooms: RoomRepository
   seatOf: (login: string) => Promise<string | null>
+  /** Si puede jugar fuera del clúster, desde dónde dice estar (`remote.ts`). */
+  placeToPlay?: (login: string) => Promise<string | null>
   imagesOf: (logins: readonly string[]) => Promise<Map<string, string | null>>
   /** Si `login` pasó el test previo de `gate`. */
   passedQuiz: (login: string, gate: string) => Promise<boolean>
@@ -230,17 +232,20 @@ export function createRoomService(deps: {
     return room
   }
 
-  async function mustSeat(login: string): Promise<string> {
-    const seat = await deps.seatOf(login)
+  /** Sentado en un puesto, o fuera del clúster con permiso y sitio dicho. */
+  async function canPlay(login: string): Promise<boolean> {
+    if ((await deps.seatOf(login)) !== null) return true
 
-    if (seat === null) {
+    return ((await deps.placeToPlay?.(login)) ?? null) !== null
+  }
+
+  async function mustSeat(login: string): Promise<void> {
+    if (!(await canPlay(login))) {
       throw domainError(
         'forbidden',
         'Las pruebas de grupo se juegan desde un ordenador del clúster',
       )
     }
-
-    return seat
   }
 
   /** Por qué `actor` no puede entrar (o `null` si puede, o si ya está). */
@@ -468,9 +473,7 @@ export function createRoomService(deps: {
           throw domainError('conflict', `Hacen falta ${gate.min} personas como poco`)
 
         const standing = (
-          await Promise.all(
-            logins.map(async (login) => ((await deps.seatOf(login)) === null ? login : null)),
-          )
+          await Promise.all(logins.map(async (login) => ((await canPlay(login)) ? null : login)))
         ).filter((login) => login !== null)
 
         if (standing.length > 0) {

@@ -15,6 +15,7 @@ import { PersonLink } from '../../shared/ui/PersonLink'
 import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
 import { QuotaCard } from './QuotaCard'
+import { CourseRemotePanel } from './CourseRemotePanel'
 import { SecretCard } from './SecretCard'
 import { ApiUsagePanel } from './ApiUsagePanel'
 import { BroadcastsTab } from './BroadcastsTab'
@@ -93,6 +94,7 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
       {tab === 'consumption' && <ConsumptionTab />}
       {tab === 'people' && <PeopleTab />}
       {tab === 'people' && <StaffAccounts />}
+      {tab === 'people' && <CourseRemotePanel />}
       {tab === 'people' && (
         <article className="card">
           <HoursReport everyone />

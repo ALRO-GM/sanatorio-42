@@ -25,11 +25,47 @@ describe('curso de git', () => {
   it('sin puesto en el clúster no se juega', async () => {
     const { gitCourse } = services
 
-    expect(await gitCourse.course(actor('ana'))).toEqual({ seat: null, stars: {}, gates: {} })
+    expect(await gitCourse.course(actor('ana'))).toEqual({
+      seat: null,
+      stars: {},
+      gates: {},
+      remote: { allowed: false, place: null },
+    })
     await expectCode(
       gitCourse.attempt(actor('ana'), first?.id ?? '', { lines: first?.solution ?? [] }),
       'forbidden',
     )
+  })
+
+  it('con permiso de quien administra, fuera del clúster cuenta si dices dónde estás', async () => {
+    const { gitCourse } = services
+    const { remote } = gitCourse
+    const admin = actor('jefa', { admin: true })
+    const play = () =>
+      gitCourse.attempt(actor('ana'), first?.id ?? '', { lines: first?.solution ?? [] })
+
+    // Sin permiso no se puede decir el sitio, y solo quien administra lo da.
+    await expectCode(remote.declare(actor('ana'), { place: 'remote' }), 'forbidden')
+    await expectCode(remote.set(actor('ana'), { login: 'ana', allowed: true }), 'forbidden')
+
+    await remote.set(admin, { login: 'Ana', allowed: true })
+    expect((await gitCourse.course(actor('ana'))).remote).toEqual({ allowed: true, place: null })
+    // Con permiso pero sin decir dónde está, aún no.
+    await expectCode(play(), 'forbidden')
+    await expectCode(remote.declare(actor('ana'), { place: 'luna' }), 'invalid_input')
+
+    await remote.declare(actor('ana'), { place: 'remote' })
+    expect((await play()).done).toBe(true)
+
+    const saved = await community.db.execute("SELECT place FROM git_progress WHERE login = 'ana'")
+    expect(toText(saved.rows[0]?.place)).toBe('remote')
+
+    const listed = await remote.list(admin)
+    expect(listed.people).toMatchObject([{ login: 'ana', grantedBy: 'jefa', place: 'remote' }])
+
+    // Al quitar el permiso se vuelve a necesitar un puesto.
+    await remote.set(admin, { login: 'ana', allowed: false })
+    await expectCode(play(), 'forbidden')
   })
 
   it('en una prueba de grupo, quién del campus la espera: sin ti y sin quien ya la hizo', async () => {

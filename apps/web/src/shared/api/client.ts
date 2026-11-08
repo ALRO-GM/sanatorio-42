@@ -149,6 +149,8 @@ export const realApi: Api = {
   setAdminBudget: (changes) => sendJson('PUT', '/admin/budget', changes),
   getAdminPeople: () => getJson('/admin/people'),
   setAdminRole: (login, admin) => send('PUT', '/admin/roles', { login, admin }),
+  getCourseRemote: () => getJson('/admin/course-remote'),
+  setCourseRemote: (login, allowed) => send('PUT', '/admin/course-remote', { login, allowed }),
   blockUser: (login, reason, days) =>
     send('PUT', '/admin/blocks', { login, reason, ...(days === null ? {} : { days }) }),
   unblockUser: (login) => send('DELETE', `/admin/blocks/${encodeURIComponent(login)}`),
@@ -177,6 +179,7 @@ export const realApi: Api = {
   getOnline: () => getJson('/admin/online'),
   getFocus: () => getJson('/me/focus'),
   getGitCourse: () => getJson('/gitcourse'),
+  setGitPlace: (place) => sendJson('PUT', '/gitcourse/place', { place }),
   submitGitAttempt: (level, input) =>
     sendJson('POST', `/gitcourse/levels/${encodeURIComponent(level)}`, input),
   startGitGate: (gate) => sendJson('POST', `/gitcourse/gates/${encodeURIComponent(gate)}/start`),

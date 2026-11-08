@@ -11,11 +11,17 @@ import { checkAttempt, gateOf, LEVELS } from '@sanatorio/gitsim'
 import { delay, fail } from './state'
 import type { Api } from '../types'
 
-const course: GitCourse = { seat: 'c1r4s2', stars: {}, gates: {} }
+const course: GitCourse = {
+  seat: 'c1r4s2',
+  stars: {},
+  gates: {},
+  remote: { allowed: false, place: null },
+}
 const snapshot = (): GitCourse => ({
   seat: course.seat,
   stars: { ...course.stars },
   gates: { ...course.gates },
+  remote: { ...course.remote },
 })
 
 const QUESTIONS: { prompt: string; options: string[]; answer: number; why: string }[] = [
@@ -94,8 +100,17 @@ let started: { gate: string; deadline: number } | null = null
 
 export const gitCourseMock: Pick<
   Api,
-  'getGitCourse' | 'submitGitAttempt' | 'startGitGate' | 'answerGitGate'
+  'getGitCourse' | 'setGitPlace' | 'submitGitAttempt' | 'startGitGate' | 'answerGitGate'
 > = {
+  async setGitPlace(place) {
+    await delay(80)
+
+    if (!course.remote.allowed)
+      throw fail(403, 'No tienes permiso para hacer el curso fuera del clúster')
+    course.remote = { allowed: true, place }
+
+    return snapshot()
+  },
   async getGitCourse() {
     await delay(80)
 

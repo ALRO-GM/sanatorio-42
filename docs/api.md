@@ -466,6 +466,9 @@ Con el panel abierto:
 - GET /admin/people · PUT /admin/roles `{ login, admin }` · PUT /admin/blocks
   `{ login, reason, days? }` · DELETE /admin/blocks/:login · PUT /admin/limits
   `{ login, perHour }` (`null` vuelve al tope automático).
+- GET /admin/course-remote → `CourseRemoteAccess` (quién puede hacer el curso de
+  git fuera del clúster y el último sitio que dijo) · PUT /admin/course-remote
+  `{ login, allowed }` (204).
 - GET /admin/tickets · POST /admin/tickets/:id/answer `{ answer, status? }` ·
   DELETE /admin/tickets/:id (spam, bromas; 204). Responder o borrar un mensaje
   da por leído su `ticket_new` a todo quien administra. Cada mensaje trae
@@ -1777,7 +1780,8 @@ descanso lo lleva la web.
 ## Curso de git (`modules/gitcourse`)
 
 ```
-GET  /gitcourse                   → GitCourse { seat, stars: { [punto]: 1–3 }, gates: { [prueba]: { passed, retryAt } } }
+GET  /gitcourse                   → GitCourse { seat, stars: { [punto]: 1–3 }, gates: { [prueba]: { passed, retryAt } }, remote: { allowed, place } }
+PUT  /gitcourse/place             → { place: 'campus' | 'remote' | 'outside' } → GitCourse (solo con permiso para jugar fuera del clúster; vale 8 h)
 POST /gitcourse/levels/:id        → GitAttemptInput { lines: string[] (≤ 300, ≤ 200 caracteres), activeSeconds?: entero 0–21600 } → GitAttemptResult { done, stars, commands, misses, course }
 POST /gitcourse/gates/:id/start   → GitGateQuiz { gate, questions: { prompt, code, options }[], deadline }
 POST /gitcourse/gates/:id/answer  → GitGateAnswerInput { answers: (number | null)[] } → GitGateResult

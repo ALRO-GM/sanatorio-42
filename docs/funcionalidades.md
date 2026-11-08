@@ -169,7 +169,7 @@ valoraciones.
 | Funcionalidad | Modo | Quién | Dónde |
 | --- | --- | --- | --- |
 | Camino con forma de ramas: mundos en capítulos plegables, puntos que se abren en orden, estrellas | N | Todos | `features/gitcourse/GitCourseTab.tsx` |
-| Cada punto: animación de la estructura, teoría y reto en una terminal con git simulado | N | Todos; solo cuenta sentado en un puesto del clúster | `LevelView.tsx`, `GitGraph.tsx` |
+| Cada punto: animación de la estructura, teoría y reto en una terminal con git simulado | N | Todos; solo cuenta sentado en un puesto del clúster, o fuera con permiso del panel diciendo dónde estás (en 42, teletrabajo, fuera de 42) | `LevelView.tsx`, `GitGraph.tsx`, `PlacePicker.tsx` |
 | Test previo a cada prueba de grupo: entero o una hora de espera | N | Sentado en un puesto | `GateView.tsx` |
 | Quién de tu campus espera esa prueba | N | Todos | `GatePeople` |
 | Salas de la prueba de grupo: crear, entrar, empezar, órdenes en un origin común | N | Tras el test `[gitcourse.groups]` | `GroupRoom.tsx` |
@@ -435,7 +435,7 @@ Detalle: [rendimiento.md](rendimiento.md#9-cargas-largas-2026-11-02).
 | Pestaña | Qué se hace |
 | --- | --- |
 | Consumo | Aviso si no hay secreto siguiente de la app de 42 puesto (el actual caduca cada cuatro semanas y la web pasa sola al siguiente); presupuesto de peticiones y sus ajustes; cuota de la API de 42 (modo, hasta dónde baja la copia, cola); uso de 42 por función y persona con topes; consumo por persona, últimas 48 h, quién más gasta y tope por hora a mano |
-| Permisos y bloqueos | Dar o quitar admin; bloquear 1, 7 o 30 días o siempre, con motivo; límites a mano; cuentas de staff (la clave se ve una vez); horas validadas de todo el mundo |
+| Permisos y bloqueos | Dar o quitar admin; bloquear 1, 7 o 30 días o siempre, con motivo; límites a mano; cuentas de staff (la clave se ve una vez); horas validadas de todo el mundo; quién puede hacer el curso de git fuera del clúster y el último sitio que dijo |
 | Incidencias | Pendientes y respondidas, denuncias por motivo, responder y borrar |
 | Mensajes | Registro de lo escrito en los chats de eventos, con filtro |
 | Qué se usa | Mapa de calor de cada elemento, recorridos entre secciones y mapa de clics |

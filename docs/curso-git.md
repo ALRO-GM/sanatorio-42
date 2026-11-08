@@ -134,6 +134,13 @@ tendrías tres estrellas: empieza de nuevo para mejorar».
 
 - **Solo desde un ordenador del clúster**: hace falta estar sentado en un
   puesto (la foto de puestos de 42).
+  **Salvo con permiso** (desde el 2026-11-08): en el panel de gestión,
+  pestaña de permisos, se elige a quién se deja hacerlo fuera del clúster y que
+  cuente. Sin puesto, esa persona dice antes dónde está: en 42 fuera del
+  clúster, teletrabajo o fuera de 42. Lo dicho vale 8 horas, se guarda en cada
+  punto (`git_progress.place`) y el panel enseña lo último
+  (`modules/gitcourse/remote.ts`, `PlacePicker.tsx`). Vale también para los
+  tests previos y las pruebas de grupo.
 - **Pruebas de grupo**: se elige entre el mínimo de personas o más; todas en
   puestos del clúster, en paralelo, cada una con su repositorio y un remoto
   común. Antes, cada cual pasa un **test de preguntas rápidas con el 100 % de

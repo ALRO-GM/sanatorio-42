@@ -13,10 +13,14 @@ import { createGateRepository, createGateService } from './gates.js'
 import type { GateQuestions } from './gates.js'
 import { createGitCourseRepository, createGitCourseService } from './gitcourse.service.js'
 import type { GitCourseService } from './gitcourse.service.js'
+import { createRemoteAccess } from './remote.js'
+import type { RemoteAccess } from './remote.js'
 import { createRoomRepository, createRoomService } from './rooms.js'
 import type { RoomService } from './rooms.js'
 
-export type GitCourseModule = AppModule & { service: GitCourseService & { rooms: RoomService } }
+export type GitCourseModule = AppModule & {
+  service: GitCourseService & { rooms: RoomService; remote: RemoteAccess }
+}
 
 export function createGitCourseModule(deps: {
   db: Db
@@ -37,9 +41,11 @@ export function createGitCourseModule(deps: {
   })
   const progress = createGitCourseRepository(deps.db)
   const now = deps.now ?? Date.now
+  const remote = createRemoteAccess(deps.db, now)
   const rooms = createRoomService({
     rooms: createRoomRepository(deps.db),
     seatOf: deps.seatOf,
+    placeToPlay: (login) => remote.placeToPlay(login),
     imagesOf: deps.imagesOf,
     passedQuiz: async (login, gate) => (await gates.states(login))[gate]?.passed === true,
     // Superar una prueba de grupo cuenta en el camino como un punto con tres estrellas.
@@ -52,9 +58,11 @@ export function createGitCourseModule(deps: {
       gates,
       seatOf: deps.seatOf,
       times: createCourseTimes(deps.db),
+      remote,
       now,
     }),
     rooms,
+    remote,
   }
 
   return {
@@ -67,6 +75,13 @@ export function createGitCourseModule(deps: {
       // la sala en `git_room_players`.
       { table: 'git_rooms', logins: ['host'], omit: ['state'] },
       { table: 'git_room_players', logins: ['login'] },
+      // El permiso para jugar fuera del clúster y el sitio que dijo cada cual.
+      {
+        table: 'course_remote',
+        logins: ['login', 'granted_by'],
+        give: { granted_by: ['granted_by', 'granted_at'] },
+      },
+      { table: 'course_places', logins: ['login'] },
     ],
     service,
     routes: (app, { session }) => {
@@ -77,6 +92,27 @@ export function createGitCourseModule(deps: {
       /** `GET /gitcourse` → `GitCourse`: tus estrellas y desde qué puesto juegas. */
       app.get('/gitcourse', async (request, reply) => {
         return reply.send(await service.course(await session.actor(request)))
+      })
+
+      /** `PUT /gitcourse/place` → `{ place }` → `GitCourse`: dónde estás, si juegas fuera del clúster. */
+      app.put('/gitcourse/place', async (request, reply) => {
+        const actor = await session.actor(request)
+
+        await remote.declare(actor, request.body)
+
+        return reply.send(await service.course(actor))
+      })
+
+      /** `GET /admin/course-remote` → `CourseRemoteAccess`: quién puede jugar fuera del clúster. */
+      app.get('/admin/course-remote', async (request, reply) => {
+        return reply.send(await remote.list(await session.actor(request)))
+      })
+
+      /** `PUT /admin/course-remote` → `{ login, allowed }`. 204. */
+      app.put('/admin/course-remote', async (request, reply) => {
+        await remote.set(await session.actor(request), request.body)
+
+        return reply.code(204).send()
       })
 
       /**

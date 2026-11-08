@@ -118,6 +118,7 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
   'notgames.review': ['/quiz/review'],
   gitcourse: [
     '/gitcourse',
+    '/gitcourse/place',
     '/gitcourse/gates/:id/answer',
     '/gitcourse/gates/:id/start',
     '/gitcourse/levels/:id',
