@@ -31,7 +31,8 @@ export const BASICS_FR: Readonly<Record<string, LevelText>> = {
       when: 'Toujours avant un commit. Avec add, tu peux faire plusieurs commits propres à partir des changements d’une même session de travail.',
       whenNot: 'git add . sans regarder : tu finis par committer des binaires, des .o ou des clés.',
       looks: 'L’index ne se voit pas dans l’arbre : c’est ce qui ira dans le prochain cercle.',
-      problems: 'Oublier le add : le commit part sans tes changements (git status te le dit).',
+      problems:
+        'Oublier le add : tes changements n’entrent pas dans le commit (git status te le dit).',
     },
   },
   'w0-status': {
@@ -55,7 +56,7 @@ export const BASICS_FR: Readonly<Record<string, LevelText>> = {
         'git add notas.txt',
         'git commit -m "notes"',
         'echo b >> notas.txt',
-        'git commit -am "encore des notes"',
+        'git commit -am "encore des notes"   # -a : prépare ce que git suit déjà',
       ],
       when: 'À partir d’ici, tout le reste se construit sur des commits.',
       looks: 'Trois cercles à la suite sur main.',
@@ -89,7 +90,7 @@ export const BASICS_FR: Readonly<Record<string, LevelText>> = {
       when: 'Tu changes de branche pour travailler sur autre chose sans tout mélanger.',
       looks: 'Deux chemins qui partent du même commit : l’historique bifurque.',
       problems:
-        'Changer de branche avec des changements non enregistrés : git refuse (ou les emporte avec toi). Fais d’abord un commit ou un stash.',
+        'Changer de branche avec des changements non enregistrés : git les emporte vers l’autre branche ou, s’ils entrent en conflit avec elle, refuse (dans ce cours, il refuse toujours). Fais d’abord un commit (ou un stash, dans le monde 4).',
     },
   },
   'w1-ff': {
@@ -143,10 +144,10 @@ export const BASICS_FR: Readonly<Record<string, LevelText>> = {
       what: 'Révision du monde : plusieurs branches en parallèle, chacune avec son travail, et main qui les fusionne une par une.',
       how: [
         'git switch -c a',
-        'git commit',
+        'git commit -m "a1"',
         'git switch main',
         'git switch -c b',
-        'git commit',
+        'git commit -m "b1"',
         'git switch main',
         'git merge a',
         'git merge b',

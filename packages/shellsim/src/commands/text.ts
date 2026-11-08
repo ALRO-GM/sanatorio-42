@@ -72,22 +72,15 @@ const wc: CommandFn = (ctx) => {
   const { flags, rest } = getopts(ctx.args, '', { lines: 'l', words: 'w', bytes: 'c', chars: 'm' })
   const all = !flags.has('l') && !flags.has('w') && !flags.has('c') && !flags.has('m')
   const totals = [0, 0, 0]
-  const rows: string[] = []
-  const format = (l: number, w: number, c: number, name: string) => {
+  const counts: { l: number; w: number; c: number; name: string }[] = []
+  const pick = (l: number, w: number, c: number): number[] => {
     const parts: number[] = []
 
     if (all || flags.has('l')) parts.push(l)
     if (all || flags.has('w')) parts.push(w)
     if (all || flags.has('c') || flags.has('m')) parts.push(c)
 
-    const single = parts.length === 1 && rest.length === 0
-    const width = single
-      ? 0
-      : rest.length === 0
-        ? 7
-        : Math.max(String(Math.max(...totals, c)).length, 1)
-
-    return `${parts.map((part) => String(part).padStart(width)).join(' ')}${name === '' ? '' : ` ${name}`}`
+    return parts
   }
   const code = eachInput(ctx, rest, ({ name, text }) => {
     const l = (text.match(/\n/g) ?? []).length
@@ -97,10 +90,24 @@ const wc: CommandFn = (ctx) => {
     totals[0] = (totals[0] ?? 0) + l
     totals[1] = (totals[1] ?? 0) + w
     totals[2] = (totals[2] ?? 0) + c
-    rows.push(format(l, w, c, rest.length === 0 ? '' : name))
+    counts.push({ l, w, c, name: rest.length === 0 ? '' : name })
   })
 
-  if (rest.length > 1) rows.push(format(totals[0] ?? 0, totals[1] ?? 0, totals[2] ?? 0, 'total'))
+  if (rest.length > 1)
+    counts.push({ l: totals[0] ?? 0, w: totals[1] ?? 0, c: totals[2] ?? 0, name: 'total' })
+
+  // Como GNU wc: con ficheros, el ancho sale del total de bytes (todas las
+  // filas alineadas); un solo número de un solo fichero, o de la entrada, va
+  // sin relleno; varios de la entrada, a 7.
+  const single = pick(0, 0, 0).length === 1 && rest.length <= 1
+  const width = single ? 0 : rest.length === 0 ? 7 : String(totals[2] ?? 0).length
+  const rows = counts.map(
+    ({ l, w, c, name }) =>
+      `${pick(l, w, c)
+        .map((part) => String(part).padStart(width))
+        .join(' ')}${name === '' ? '' : ` ${name}`}`,
+  )
+
   ctx.io.out(joinLines(rows))
 
   return code

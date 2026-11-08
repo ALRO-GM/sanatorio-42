@@ -185,6 +185,16 @@ function createFrom(
   const network = opts.one('network') ?? opts.one('net')
   const io = ioOf(ctx)
   const image = ensureImage(env, ref, io.out, io.err)
+  const mounts = opts.all('mount').map((spec) => mountOf(spec, cwd))
+
+  // Como en Docker: -v crea la carpeta que falta, pero --mount no; falla.
+  for (const mount of mounts)
+    if (mount.type === 'bind' && own(env.host.fs, mount.source) === undefined)
+      throw new Fail(
+        `docker: Error response from daemon: invalid mount config for type "bind": bind source path does not exist: ${mount.source}.`,
+        125,
+      )
+
   const entrypoint = opts.one('entrypoint')
   const container = createContainer(env, image, {
     ...(opts.has('name') ? { name: opts.one('name') ?? '' } : {}),
@@ -202,7 +212,7 @@ function createFrom(
     ],
     mounts: [
       ...opts.all('volume').map((spec) => volumeOf(spec, cwd)),
-      ...opts.all('mount').map((spec) => mountOf(spec, cwd)),
+      ...mounts,
       ...opts.all('tmpfs').map((spec) => ({
         type: 'tmpfs' as const,
         source: '',

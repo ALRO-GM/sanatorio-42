@@ -33,21 +33,22 @@ function labelsBlock(title: string, labels: Record<string, string>, width = 22):
 function eventsBlock(env: Env, events: readonly K8sEvent[]): string[] {
   if (events.length === 0) return ['Events:                <none>']
 
-  const rows = events
-    .slice(-12)
-    .map((e) => [
-      e.type,
-      e.reason,
-      e.count > 1
-        ? `${age(env.now - e.t)} (x${e.count} over ${age(env.now - (e.first ?? e.t))})`
-        : age(env.now - e.t),
-      e.object.startsWith('Pod/')
+  const rows = events.slice(-12).map((e) => [
+    e.type,
+    e.reason,
+    e.count > 1
+      ? `${age(env.now - e.t)} (x${e.count} over ${age(env.now - (e.first ?? e.t))})`
+      : age(env.now - e.t),
+    // Dónde poner un Pod lo decide el planificador, no el kubelet (como en un clúster de verdad).
+    e.object.startsWith('Pod/') && (e.reason === 'Scheduled' || e.reason === 'FailedScheduling')
+      ? 'default-scheduler'
+      : e.object.startsWith('Pod/')
         ? 'kubelet'
         : e.object.startsWith('Deployment/')
           ? 'deployment-controller'
           : 'controller',
-      e.message,
-    ])
+    e.message,
+  ])
   const widths = [6, 18, 22, 22]
 
   return [

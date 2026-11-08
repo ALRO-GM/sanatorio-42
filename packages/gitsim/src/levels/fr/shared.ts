@@ -8,7 +8,11 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
     goal: 'Clone origin, fais un commit sur main et pousse-le.',
     theory: {
       what: 'Un dépôt distant (origin) est une autre copie du dépôt, en général sur GitHub ou sur le GitLab de 42. clone le copie en entier ; push envoie tes commits.',
-      how: ['git clone', 'git commit -m "ma partie"', 'git push'],
+      how: [
+        'git clone git@github.com:equipo/peer4u.git   # ici, git clone suffit',
+        'git commit -m "ma partie"',
+        'git push',
+      ],
       when: 'clone une seule fois, au début ; push quand ton travail est prêt à être vu par les autres.',
       whenNot: 'Pousser du code qui ne compile pas sur une branche que d’autres utilisent.',
       looks:
@@ -86,7 +90,7 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
       how: [
         'git commit --amend -m "Arregla el parser"',
         'git add olvidado.c',
-        'git commit --amend',
+        'git commit --amend --no-edit   # même message',
       ],
       when: 'Juste après un commit avec une erreur bête, avant de le pousser.',
       whenNot: 'Si tu l’as déjà poussé : les autres ont l’ancien et tu devras forcer le push.',
@@ -240,7 +244,7 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
   },
   'w5-hotfix': {
     title: 'Gitflow : hotfix',
-    goal: 'Il y a un bug dans la v1.0 : crée hotfix depuis main, corrige-le, fusionne-la avec --no-ff dans main (v1.0.1) et dans develop.',
+    goal: 'Il y a un bug dans la v1.0 : crée hotfix depuis main, corrige-le, fusionne-la dans main avec --no-ff, marque-la comme v1.0.1 et fusionne-la aussi dans develop.',
     theory: {
       what: 'Un hotfix part de main (ce qui est publié), pas de develop (qui contient du travail en cours). On le fusionne aux deux endroits pour que la correction ne se perde pas.',
       how: [
@@ -264,7 +268,7 @@ export const SHARED_FR: Readonly<Record<string, LevelText>> = {
       what: 'Trunk-based : tout le monde fusionne dans main plusieurs fois par jour, avec des branches qui vivent quelques heures. Il faut des tests automatisés pour protéger main.',
       how: [
         'git switch -c mini',
-        'git commit',
+        'git commit -m "petit changement"',
         'git switch main',
         'git pull',
         'git switch mini',

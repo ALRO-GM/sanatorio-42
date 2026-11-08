@@ -25,7 +25,7 @@ export const GROUPS_EN: Readonly<Record<string, MissionText>> = {
   group2: {
     title: 'GitHub flow with conflicts',
     story:
-      'main is protected: the only way in is a pull request. Each of you adds your name at the end of equipo.txt from your branch. But while you work, someone changes that same ending on main: it will clash for all of you. You have to bring main into your branch, solve the conflict keeping every line, push it and accept the pull request.',
+      'main is protected: the only way in is a pull request. Each of you adds your name at the end of equipo.txt from your branch. But while you work, someone changes that same ending on main: it will clash for all of you. You have to bring main into your branch, resolve the conflict keeping every line, push it and accept the pull request.',
     tasks: [
       'git switch -c {login}',
       'echo "- {login}" >> equipo.txt, git add equipo.txt and git commit -m "Count me in"',
@@ -58,7 +58,7 @@ export const GROUPS_EN: Readonly<Record<string, MissionText>> = {
       'Feature: git switch develop, git switch -c feature/{login}, two commits in {login}.txt («uno» and then «dos» with >>)',
       'Squash them into one: git reset --soft HEAD~2 and git commit -m "Feature by {login}"',
       'Put it on top of the latest work: git fetch and git rebase origin/develop',
-      'git switch develop, git pull, git merge feature/{login} (it has to move forward without a merge) and git push origin develop. If develop moved: git reset --hard origin/develop, go back to your branch, rebase and try again',
+      'git switch develop, git pull, git merge feature/{login} (it has to move forward without a merge) and git push origin develop. If the push is rejected because develop moved: git fetch, git reset --hard origin/develop, go back to your branch, git rebase origin/develop and try again',
       'When develop has every feature and main no longer has any rompe-*.txt: gh pr merge develop, git switch main, git pull, git tag v2.{n} and git push --tags',
     ],
   },
@@ -71,7 +71,7 @@ export const MISSION_ITEMS_EN: Readonly<Record<string, string>> = {
   '{login} ha unido su rama en main con un merge y lo ha subido':
     '{login} has merged their branch into main with a merge and pushed it',
   '{login} ha traído main a su rama y ha resuelto el conflicto':
-    '{login} has brought main into their branch and solved the conflict',
+    '{login} has brought main into their branch and resolved the conflict',
   '{login} está en equipo.txt de main, por pull request':
     '{login} is in equipo.txt on main, through a pull request',
   'equipo.txt de main conserva «- coordinación» y no tiene marcas de conflicto':

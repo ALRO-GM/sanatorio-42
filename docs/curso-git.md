@@ -36,14 +36,14 @@ cierto número de conceptos hay una **prueba de grupo**.
 | Mundo | Conceptos | Pasos |
 | --- | --- | --- |
 | 0. Raíz | repositorio, commit, índice (`add`), `status`, `log` | 4 |
-| 1. Ramas | `branch`, `switch`, HEAD, merge fast-forward y de tres vías, borrar ramas | 5 |
+| 1. Ramas | `branch`, `switch`, HEAD, merge fast-forward y de tres vías, borrar ramas | 6 |
 | ★ Grupo 1 (2+) | remoto común: cada cual sube su rama y se une en main | — |
 | 2. Remotos | `clone`, `fetch`, `pull`, `push`, ramas de seguimiento, historia divergente | 5 |
 | 3. Reescribir | referencias relativas (`~`, `^`), HEAD separado, `rebase`, `cherry-pick`, `commit --amend` | 5 |
 | 4. Deshacer | `reset` (soft, mixed, hard), `revert`, `stash`, conflictos y cómo resolverlos | 5 |
-| ★ Grupo 2 (3+) | GitHub flow con un conflicto entre dos personas | — |
+| ★ Grupo 2 (3+) | GitHub flow: cada cual por pull request, con un conflicto con main | — |
 | 5. Flujos | GitHub flow, Gitflow (develop, release, hotfix), trunk-based, `tag` y versiones | 5 |
-| ★ Grupo 3 (3+) | Gitflow: una versión y un hotfix a la vez | — |
+| ★ Grupo 3 (3+) | Gitflow: cada cual su funcionalidad, su hotfix y su versión | — |
 | ☠ Jefe final (2+) | todo: cada cual en un puesto a 4 filas y 4 columnas o más del resto, sin hablar y con tiempo | — |
 
 ## Cada punto
@@ -185,7 +185,7 @@ tendrías tres estrellas: empieza de nuevo para mejorar».
     `merge --no-ff`; quien llega tarde tiene que traer main (pull) para subir.
   - Grupo 2: main protegida; cada cual se apunta en `equipo.txt` desde su rama.
     Cuando ya habéis clonado, la «compañera» cambia ese final en main, así que
-    a todas les choca el pull request: cada cual trae main, resuelve y vuelve.
+    a todo el mundo le choca el pull request: cada cual trae main, resuelve y vuelve.
   - Grupo 3: Gitflow entero para cada cual: su funcionalidad en develop, su
     hotfix `1.0.{n}` desde main y su versión `1.{n}` desde develop, con tags
     en main y unidas de vuelta en develop.
@@ -209,12 +209,12 @@ tendrías tres estrellas: empieza de nuevo para mejorar».
   después de que clones) y su objetivo sale de ejecutar la solución: así el
   objetivo nunca se desfasa del motor. Un test comprueba que todas las
   soluciones llegan y que ningún punto empieza ya resuelto. La teoría de los
-  puntos está solo en castellano (como el banco de preguntas).
+  puntos está en castellano, inglés y francés (`levels/en`, `levels/fr`).
 - [x] Fase 3: 23 conceptos de git en el banco de Not-games (`bank/git.ts`,
   con su Repaso), que también salen en las partidas normales, y el test previo
   a cada prueba de grupo (8 preguntas, 100 %, una hora de espera si se falla).
   La estrella de la prueba en el camino se abre al acabar su mundo.
-- [x] Fase 4: las tres pruebas de grupo: salas (una hora para la misión,
+- [x] Fase 4: las tres pruebas de grupo: salas (de 45 minutos a una hora para la misión,
   hasta 6 personas, papel por orden de llegada), origin común, misiones y la
   prueba superada para todo el grupo. En la API de mentira, las compañeras
   entran solas y hacen su parte.

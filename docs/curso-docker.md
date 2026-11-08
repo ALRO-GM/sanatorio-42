@@ -160,7 +160,8 @@ Dentro del curso, el camino se abre de uno en uno.
   multi-stage, `.dockerignore`, `ARG`/`ENV`/`LABEL`/`USER`/`HEALTHCHECK`;
   contenedores con `-d`, `-p` (también `127.0.0.1:`), `--name`, `-e`,
   `--env-file`, `--rm`, `--restart`, `--memory`, `--cpus`, `--entrypoint`,
-  `--user`, `--read-only`, volúmenes, bind mounts y tmpfs; códigos de salida
+  `--user`, `--read-only`, volúmenes, bind mounts (con `-v` se crea la carpeta
+  que falta; con `--mount`, falla) y tmpfs; códigos de salida
   (1, 125, 126, 127, 137 con `OOMKilled`, 143); puertos ocupados; redes de
   usuario con DNS por nombre (la `bridge` de siempre, solo por IP); registro
   con login, push, pull y varias plataformas; Compose; `prune` y `system df`.

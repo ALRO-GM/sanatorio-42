@@ -53,6 +53,11 @@ describe('shell simulada: lo básico', () => {
     expect(sh('cat ~/.secreto').out).toContain('commit-early-push-often')
     expect(sh('head -n 2 /etc/passwd').out.split('\n')).toHaveLength(2)
     expect(sh('wc -l < /var/log/nginx/access.log').out).toBe('60')
+    // Como GNU wc: un fichero y un número, sin relleno; varios, alineados por el total de bytes.
+    expect(sh('wc -l /etc/passwd').out).toBe('6 /etc/passwd')
+    expect(sh('wc -l /etc/passwd /etc/hostname').out).toBe(
+      '  6 /etc/passwd\n  1 /etc/hostname\n  7 total',
+    )
     expect(sh('ls /nada')).toMatchObject({
       code: 2,
       out: "ls: cannot access '/nada': No such file or directory",
@@ -148,6 +153,13 @@ describe('shell simulada: lo básico', () => {
     expect(
       sh("printf '#!/bin/bash\\necho $UNDEF\\n' > u.sh", "bash -c 'set -u; echo $UNDEF'").code,
     ).toBe(1)
+    // `bash -c` es una shell hija: solo ve lo exportado y lo que cambia no vuelve.
+    const child = 'bash -c \'echo "[$NOMBRE]"\''
+
+    expect(sh('NOMBRE=peer', child).out).toBe('[]')
+    expect(sh('NOMBRE=peer', 'export NOMBRE', child).out).toBe('[peer]')
+    expect(sh("bash -c 'cd /tmp; X=1'", 'echo "$PWD [$X]"').out).toBe('/home/peer []')
+    expect(sh("bash -c 'echo $0 $1' nombre uno").out).toBe('nombre uno')
     // Una orden a medias pide más.
     expect(run(startOf(START), 'if true; then').incomplete).toBe(true)
   })

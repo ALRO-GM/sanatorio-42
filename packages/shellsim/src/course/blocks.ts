@@ -132,7 +132,7 @@ export const BLOCKS: Block[] = [
     tier: 'advanced',
     es: {
       title: 'Servicios, registros y cron',
-      pitch: 'systemctl, journalctl y tareas programadas: la guardia de verdad.',
+      pitch: 'systemctl, journalctl y tareas programadas: el on-call de verdad.',
     },
     en: {
       title: 'Services, logs and cron',
