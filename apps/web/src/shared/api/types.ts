@@ -39,6 +39,10 @@ import type {
   DockerAttemptResult,
   DockerBossStart,
   DockerCourse,
+  K8sAttemptInput,
+  K8sAttemptResult,
+  K8sBossStart,
+  K8sCourse,
   GitAttemptResult,
   GitCourse,
   CoursePlace,
@@ -424,6 +428,9 @@ export type Api = {
   getDockerCourse: () => Promise<DockerCourse>
   submitDockerAttempt: (unit: string, input: DockerAttemptInput) => Promise<DockerAttemptResult>
   startDockerBoss: (unit: string) => Promise<DockerBossStart>
+  getK8sCourse: () => Promise<K8sCourse>
+  submitK8sAttempt: (unit: string, input: K8sAttemptInput) => Promise<K8sAttemptResult>
+  startK8sBoss: (unit: string) => Promise<K8sBossStart>
   startFocus: (settings: FocusSettings) => Promise<Focus>
   stopFocus: (reasons?: FocusReason[]) => Promise<Focus>
   /** Querías acabar el Pomodoro y sigues: se apunta con los motivos marcados. */

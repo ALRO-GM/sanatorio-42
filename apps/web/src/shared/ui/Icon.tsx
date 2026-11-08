@@ -245,6 +245,14 @@ const PATHS = {
       <path d="M6 15v2M8 15v2M16 15v2M18 15v2M11 8v2M13 8v2" />
     </>
   ),
+  /** Curso de Kubernetes: el timón de siete radios (kubernetes es «timonel»). */
+  timon: (
+    <>
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="1.8" />
+      <path d="M12 3v7.2M19.6 8.3l-6.2 2.9M18.3 18.1l-4.7-4.9M12 21v-7.2M5.7 18.1l4.7-4.9M4.4 8.3l6.2 2.9" />
+    </>
+  ),
 
   // --- Avisos de un evento ---------------------------------------------------
   visto: (

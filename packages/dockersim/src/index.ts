@@ -15,6 +15,11 @@ export type { RunResult, World }
 export { LIMITS } from './limits.js'
 export { registryImages } from './registry.js'
 export type { PublishedImage } from './registry.js'
+// Lo que reutiliza el curso de Kubernetes (`@sanatorio/k8ssim`): las imágenes
+// públicas del catálogo, cómo se escribe una referencia y el lector de YAML.
+export { fromCatalog, normalizeRef, repoDigest, validRef } from './catalog.js'
+export { parseYaml, YamlError } from './yaml.js'
+export type { Yaml } from './yaml.js'
 export {
   BLOCKS,
   blockOf,

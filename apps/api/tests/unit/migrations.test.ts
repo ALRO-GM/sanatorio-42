@@ -99,6 +99,8 @@ describe('migraciones', () => {
       'help_bookings',
       'help_days',
       'hidden_people',
+      'k8s_progress',
+      'k8s_runs',
       'legal_acceptances',
       'notices',
       'pace_refs',

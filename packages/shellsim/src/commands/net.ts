@@ -269,6 +269,7 @@ function handle(
 function request(
   ctx: Ctx,
   url: string,
+  headers: Readonly<Record<string, string>> = {},
 ): { response: Response | null; error: string | null; code: number } {
   const parsed = /^(?:(https?):\/\/)?([^/:]+)(?::(\d+))?(\/.*)?$/.exec(url)
 
@@ -280,7 +281,7 @@ function request(
     }
 
   const [, scheme = 'http', host = '', port, path = '/'] = parsed
-  const added = ctx.sh.ext?.http?.(ctx.sh.world, host, Number(port ?? 80), path)
+  const added = ctx.sh.ext?.http?.(ctx.sh.world, host, Number(port ?? 80), path, headers)
 
   if (added !== undefined && added !== null)
     return { response: { ...added, reason: REASONS[added.status] ?? '' }, error: null, code: 0 }
@@ -333,7 +334,13 @@ const curl: CommandFn = (ctx) => {
   if (url === undefined)
     throw new Fail("curl: try 'curl --help' or 'curl --manual' for more information", 2)
 
-  const { response, error, code } = request(ctx, url)
+  // Solo una cabecera (`getopts` se queda con la última): basta para el `Host:` de un Ingress.
+  const header = /^([^:]+):\s*(.*)$/.exec(values.get('H') ?? '')
+  const { response, error, code } = request(
+    ctx,
+    url,
+    header === null ? {} : { [(header[1] ?? '').trim().toLowerCase()]: header[2] ?? '' },
+  )
 
   if (response === null) {
     if (!flags.has('s') || flags.has('S')) ctx.io.err(`${error ?? ''}\n`)

@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-260 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+268 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -267,3 +267,11 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.dockerCourse.title.3` | Demostración animada del curso de Docker: título del paso 3 | shared/tour/Tour | La terminal | The terminal | El terminal | Terminala | Le terminal |
 | `tour.dockerCourse.4` | Demostración animada del curso de Docker: frase del paso 4 | shared/tour/Tour | Cada bloque acaba en un jefe contrarreloj. | Each block ends with a timed boss. | Cada bloc acaba amb un cap contrarellotge. | Bloke bakoitza erlojupeko buruzagi batekin amaitzen da. | Chaque bloc se termine par un boss contre la montre. |
 | `tour.dockerCourse.title.4` | Demostración animada del curso de Docker: título del paso 4 | shared/tour/Tour | Jefe contrarreloj | Timed boss | Cap contrarellotge | Erlojupeko buruzagia | Boss contre la montre |
+| `tour.kubernetesCourse.1` | Demostración animada del curso de Kubernetes: frase del paso 1 | shared/tour/Tour | Elige la siguiente unidad; la sugerencia de orden no bloquea. | Pick the next unit; the order suggestion does not block you. | Tria la unitat següent; el suggeriment d'ordre no bloqueja. | Aukeratu hurrengo unitatea; ordenaren iradokizunak ez du blokeatzen. | Choisis l'unité suivante ; la suggestion d'ordre ne bloque rien. |
+| `tour.kubernetesCourse.title.1` | Demostración animada del curso de Kubernetes: título del paso 1 | shared/tour/Tour | Las unidades | The units | Les unitats | Unitateak | Les unités |
+| `tour.kubernetesCourse.2` | Demostración animada del curso de Kubernetes: frase del paso 2 | shared/tour/Tour | Lees la teoría y ves un ejemplo en un clúster simulado. | Read the theory and watch an example on a simulated cluster. | Llegeixes la teoria i veus un exemple en un clúster simulat. | Teoria irakurri eta adibide bat ikusten duzu kluster simulatu batean. | Lis la théorie et regarde un exemple sur un cluster simulé. |
+| `tour.kubernetesCourse.title.2` | Demostración animada del curso de Kubernetes: título del paso 2 | shared/tour/Tour | Teoría y ejemplo | Theory and example | Teoria i exemple | Teoria eta adibidea | Théorie et exemple |
+| `tour.kubernetesCourse.3` | Demostración animada del curso de Kubernetes: frase del paso 3 | shared/tour/Tour | Usa kubectl en la terminal: los objetivos se marcan solos. | Use kubectl in the terminal: the goals tick themselves. | Fes servir kubectl al terminal: els objectius es marquen sols. | Erabili kubectl terminalean: helburuak bakarrik markatzen dira. | Utilise kubectl dans le terminal : les objectifs se cochent tout seuls. |
+| `tour.kubernetesCourse.title.3` | Demostración animada del curso de Kubernetes: título del paso 3 | shared/tour/Tour | La terminal | The terminal | El terminal | Terminala | Le terminal |
+| `tour.kubernetesCourse.4` | Demostración animada del curso de Kubernetes: frase del paso 4 | shared/tour/Tour | Cada bloque acaba en un jefe contrarreloj. | Each block ends with a timed boss. | Cada bloc acaba amb un cap contrarellotge. | Bloke bakoitza erlojupeko buruzagi batekin amaitzen da. | Chaque bloc se termine par un boss contre la montre. |
+| `tour.kubernetesCourse.title.4` | Demostración animada del curso de Kubernetes: título del paso 4 | shared/tour/Tour | Jefe contrarreloj | Timed boss | Cap contrarellotge | Erlojupeko buruzagia | Boss contre la montre |

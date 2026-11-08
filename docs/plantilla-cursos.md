@@ -10,7 +10,7 @@ Los cursos que la siguen:
 | Git | `packages/gitsim` | [curso-git.md](curso-git.md) |
 | Shell de Linux | `packages/shellsim` | [curso-shell.md](curso-shell.md) |
 | Docker | `packages/dockersim` (encima de la shell) | [curso-docker.md](curso-docker.md) |
-| Kubernetes | (siguiente) parte de lo que publica el de Docker | [curso-docker.md](curso-docker.md#enlace-con-kubernetes) |
+| Kubernetes | `packages/k8ssim` (encima de la shell; despliega lo que publica el de Docker) | [curso-kubernetes.md](curso-kubernetes.md) |
 
 ## Las reglas
 
@@ -34,7 +34,8 @@ Los cursos que la siguen:
    curso sin haber hecho lo que conviene antes (en Docker, al menos el nivel
    principiante de shell), arriba del camino sale una sugerencia clara con
    qué terminar antes y el enlace (`CourseOrderHint` de `shared/course`), y
-   puede seguir igualmente.
+   puede seguir igualmente. En Kubernetes, lo que se sugiere es el nivel
+   principiante de Docker.
 3. **Bloques con jefe.** Cada bloque (de tres a seis unidades) acaba en un
    **jefe contrarreloj** que junta todo lo del bloque en una historia de
    trabajo («el disco está al 97 %»), sin teoría ni ejemplo: historia, tareas

@@ -34,7 +34,7 @@ dirección (que conserva los nombres de antes de Peer4U).
 
 - [Yo](#yo): Perfil · Agenda · Calendario
 - [Ayuda](#ayuda): Peer to peer · Proyectos · Sprints · Pizarras · On-call
-- [Aprender](#aprender): Curso de git · Curso de shell · Curso de Docker · Not-games · Pomodoro
+- [Aprender](#aprender): Curso de git · Curso de shell · Curso de Docker · Curso de Kubernetes · Not-games · Pomodoro
 - [Campus](#campus): Clústeres · Amigos · Avance · Red · Exámenes · Clasificaciones
 - [Cabecera](#cabecera), [menú de la cuenta](#menú-de-la-cuenta) y [pie](#pie)
 - [En toda la web](#en-toda-la-web): ventanitas, avisos obligatorios, buzón, Personalizar
@@ -56,6 +56,7 @@ Sin el permiso, a un piscinero la portada solo le da la bienvenida.
 | Elegir título; cada título trae su banner, que ven los demás | S | Todos | `TitlePicker.tsx` |
 | Certificados del curso de shell | S | Con certificados `[shellcourse]` | `shared/course/Certificates.tsx` |
 | Certificados del curso de Docker | S | Con certificados `[dockercourse]` | `MyDockerCertificates` en `shared/course/Certificates.tsx` |
+| Certificados del curso de Kubernetes | S | Con certificados `[k8scourse]` | `MyK8sCertificates` en `shared/course/Certificates.tsx` |
 | Descargar las horas validadas (CSV con código de verificación) | N | Todos `[expediente.hours]` | `HoursReport.tsx` |
 | Health check: pace, cuándo caerías a cada pace, black hole, calculadora «si termino tal día»; la primera vez pregunta pace y fecha | S | Todos `[expediente.health]` | `HealthCard.tsx` (bloque `health`) |
 | Compararte en Avance desde el health check | N | Todos `[avance]` | `progressHref` |
@@ -201,6 +202,18 @@ No pide puesto en el clúster. Detalle: [curso-shell.md](curso-shell.md).
 | Demostración | N | Todos | `DockerCourseTour.tsx` |
 
 No pide puesto en el clúster. Detalle: [curso-docker.md](curso-docker.md).
+
+### Curso de Kubernetes (`#/cursok8s`) · N · `[k8scourse]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Árbol de 3 niveles y 9 bloques en capítulos plegables, como los de shell y Docker | N | Todos | `features/k8scourse/K8sCourseTab.tsx` |
+| Sugerencia de hacer antes el nivel principiante de Docker, con enlace; no bloquea | N | Quien aún no lo tiene | `shared/course/CourseOrderHint.tsx` |
+| Cada unidad: teoría, ejemplo que se ejecuta solo y prueba en una terminal con dos clústeres k3s simulados (kubectl, Kustomize y Helm) | N | Todos | `UnitView.tsx`, `Challenge.tsx`, `packages/k8ssim` |
+| Jefes contrarreloj por bloque y jefe final por nivel, con certificado | N | Todos | `shared/course/Certificates.tsx` |
+| Demostración | N | Todos | `KubernetesCourseTour.tsx` |
+
+No pide puesto en el clúster. Detalle: [curso-kubernetes.md](curso-kubernetes.md).
 
 ### Not-games (`#/notgames`) · N · `[notgames]`
 

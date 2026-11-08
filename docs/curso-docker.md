@@ -188,9 +188,9 @@ Dentro del curso, el camino se abre de uno en uno.
 
 ## Enlace con Kubernetes
 
-El curso de Kubernetes será el siguiente y parte de donde acaba este: el jefe
-final avanzado deja publicadas en el registro simulado las imágenes que
-desplegará su primer reto.
+El curso de Kubernetes ([curso-kubernetes.md](curso-kubernetes.md)) parte de
+donde acaba este: el jefe final avanzado deja publicadas en el registro
+simulado las imágenes que despliegan su bloque 2 y sus exámenes.
 
 - **Imágenes**: `ghcr.io/peer4u/api:1.0.0` (y la misma con el commit corto,
   `ghcr.io/peer4u/api:4f2a9c1`) y `ghcr.io/peer4u/front:1.0.0`. La API sale
