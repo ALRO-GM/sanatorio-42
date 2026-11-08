@@ -237,6 +237,29 @@ describe('Kubernetes simulado: lo básico', () => {
       ).out,
     ).toMatch(/cache\s+tienda\s+1/)
   })
+
+  it('explain y los eventos de planificar, como en un clúster de verdad', () => {
+    // El ejemplo del StatefulSet enseña sus campos (antes no tenía ayuda y se sugería a sí mismo).
+    const sts = sh(EMPTY, 'kubectl explain statefulset.spec').out
+
+    expect(sts).toContain('volumeClaimTemplates')
+    expect(sts).toContain('serviceName')
+
+    // Sin ayuda para ese campo, se sugiere uno que sí la tiene, nunca el mismo que se pidió.
+    expect(sh(EMPTY, 'kubectl explain cronjob.spec').out).toContain('kubectl explain pod.spec')
+    expect(sh(EMPTY, 'kubectl explain statefulset').out).toContain(
+      'kubectl explain statefulset.spec',
+    )
+
+    // Dónde va un Pod lo decide el planificador, no el kubelet.
+    const pending = sh('k8s-pending', 'kubectl describe pod -l app=db').out
+
+    expect(pending).toMatch(/FailedScheduling\s+\S+.*default-scheduler/)
+    expect(pending).not.toMatch(/FailedScheduling.*kubelet/)
+    expect(sh(EMPTY, 'kubectl run web --image=nginx:1.27', 'kubectl describe pod web').out).toMatch(
+      /Scheduled\s+\S+\s+default-scheduler/,
+    )
+  })
 })
 
 describe('Kubernetes simulado: formas equivalentes', () => {

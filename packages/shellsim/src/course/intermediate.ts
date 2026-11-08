@@ -83,7 +83,7 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Buscar texto: grep',
       goal: 'Enseña las líneas de /var/log/peer4u/app.log que tienen ERROR.',
       theory: {
-        what: 'grep enseña las líneas que encajan con un patrón (una expresión regular). -i sin mayúsculas, -v las que no, -c cuántas, -n con número, -r en carpetas, -E regex extendida.',
+        what: 'grep enseña las líneas que encajan con un patrón (una expresión regular). -i sin distinguir mayúsculas, -v las que no, -c cuántas, -n con número, -r en carpetas, -E regex extendida.',
         how: [
           'grep ERROR app.log',
           'grep -i error app.log',
@@ -290,7 +290,7 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Cambiar texto: sed',
       goal: 'En ~/app.env, cambia LOG_LEVEL=info por LOG_LEVEL=debug (en el propio fichero).',
       theory: {
-        what: "sed edita texto al vuelo: 's/viejo/nuevo/' cambia la primera vez de cada línea, con g todas. -i cambia el fichero. También borra (/patrón/d) o enseña rangos (-n '2,4p').",
+        what: "sed edita texto al vuelo: 's/viejo/nuevo/' cambia la primera coincidencia de cada línea; con g, todas. -i cambia el fichero. También borra (/patrón/d) o enseña rangos (-n '2,4p').",
         how: [
           "sed 's/ERROR/FALLO/' app.log",
           "sed -i 's/info/debug/' app.env",
@@ -485,7 +485,7 @@ export const INTERMEDIATE: Unit[] = [
         ],
         when: 'Cuando no sabes dónde está algo o quieres todo lo que cumple algo (viejo, grande, de alguien).',
         problems:
-          'Sin comillas, *.log lo expande la shell antes de que llegue a find y la búsqueda sale mal.',
+          'Sin comillas, *.log lo expande la shell antes de que llegue a find (si encaja con algo de la carpeta en la que estás) y la búsqueda sale mal.',
       },
       example: 'Buscas tus .txt, la carpeta de nginx y lo tocado en la última hora.',
     },
@@ -503,7 +503,7 @@ export const INTERMEDIATE: Unit[] = [
         ],
         when: 'When you do not know where something is or want everything matching a rule (old, big, someone’s).',
         problems:
-          'Without quotes, *.log is expanded by the shell before find sees it and the search goes wrong.',
+          'Without quotes, *.log is expanded by the shell before find sees it (if it matches something in your current directory) and the search goes wrong.',
       },
       example: 'You find your .txt files, the nginx directory and what changed in the last hour.',
     },
@@ -521,7 +521,7 @@ export const INTERMEDIATE: Unit[] = [
         ],
         when: 'Quand tu ne sais pas où se trouve quelque chose ou que tu veux tout ce qui remplit un critère (ancien, volumineux, appartenant à quelqu’un).',
         problems:
-          'Sans apostrophes, *.log est développé par le shell avant d’arriver à find, et la recherche se passe mal.',
+          'Sans apostrophes, *.log est développé par le shell avant d’arriver à find (s’il correspond à quelque chose dans le dossier courant), et la recherche se passe mal.',
       },
       example:
         'Tu cherches tes .txt, le dossier de nginx et ce qui a été modifié dans la dernière heure.',
@@ -790,7 +790,7 @@ export const INTERMEDIATE: Unit[] = [
         'Son las 4:12 y salta la alarma: el disco de web1 está casi lleno y la API empieza a fallar al escribir.',
       tasks: [
         'Encuentra qué se está comiendo el disco (df, du, find).',
-        'Vacía /var/log/peer4u/debug.log sin borrarlo: la API lo tiene abierto.',
+        'Vacía /var/log/peer4u/debug.log sin borrarlo, que la API lo tiene abierto: sudo truncate -s 0 lo deja a cero.',
         'Comprime con gzip los registros rotados de nginx (access.log.1 y access.log.2).',
         'Comprueba con df que el disco ha bajado del 80 %.',
       ],
@@ -802,7 +802,7 @@ export const INTERMEDIATE: Unit[] = [
         'It is 4:12 a.m. and the alarm fires: web1’s disk is nearly full and the API starts failing to write.',
       tasks: [
         'Find what is eating the disk (df, du, find).',
-        'Empty /var/log/peer4u/debug.log without deleting it: the API has it open.',
+        'Empty /var/log/peer4u/debug.log without deleting it, as the API has it open: sudo truncate -s 0 sets it to zero.',
         'Compress the rotated nginx logs (access.log.1 and access.log.2) with gzip.',
         'Check with df that the disk is below 80%.',
       ],
@@ -814,7 +814,7 @@ export const INTERMEDIATE: Unit[] = [
         'Il est 4 h 12 et l’alerte sonne : le disque de web1 est presque plein et l’API commence à échouer en écriture.',
       tasks: [
         'Trouve ce qui remplit le disque (df, du, find).',
-        'Vide /var/log/peer4u/debug.log sans le supprimer : l’API le garde ouvert.',
+        'Vide /var/log/peer4u/debug.log sans le supprimer, car l’API le garde ouvert : sudo truncate -s 0 le remet à zéro.',
         'Compresse avec gzip les logs de nginx déjà passés en rotation (access.log.1 et access.log.2).',
         'Vérifie avec df que le disque est passé sous les 80 %.',
       ],
@@ -1012,7 +1012,8 @@ export const INTERMEDIATE: Unit[] = [
         problems:
           'NOMBRE = peer (con espacios) es ejecutar la orden NOMBRE. Y lo de export solo dura en esta sesión: para siempre, en ~/.bashrc.',
       },
-      example: 'Ves tus variables, una sin exportar y otra exportada en una shell hija.',
+      example:
+        'Miras algunas variables y compruebas que una shell hija solo ve NOMBRE después de exportarla.',
     },
     en: {
       title: 'Variables, export and PATH',
@@ -1031,7 +1032,8 @@ export const INTERMEDIATE: Unit[] = [
         problems:
           'NAME = peer (with spaces) runs a command called NAME. And export only lasts for this session: put it in ~/.bashrc to keep it.',
       },
-      example: 'You look at your variables, one not exported and one exported in a child shell.',
+      example:
+        'You look at some variables and check that a child shell only sees NOMBRE once you export it.',
     },
     fr: {
       title: 'Variables, export et PATH',
@@ -1050,7 +1052,8 @@ export const INTERMEDIATE: Unit[] = [
         problems:
           'NOM = peer (avec des espaces) lance une commande appelée NOM. Et export ne dure que pour cette session : pour le garder, mets-le dans ~/.bashrc.',
       },
-      example: 'Tu regardes tes variables, une non exportée et une exportée, dans un shell enfant.',
+      example:
+        'Tu regardes quelques variables et tu vérifies qu’un shell enfant ne voit NOMBRE qu’après un export.',
     },
     example: [
       'echo $HOME $USER',

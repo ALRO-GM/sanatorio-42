@@ -121,6 +121,29 @@ describe('Docker simulado: contenedores', () => {
       ).out,
     ).toBe('137 true')
   })
+
+  it('bind mounts: -v crea la carpeta que falta, --mount falla, y un nombre es un volumen', () => {
+    expect(sh('docker run -d --name a -v /nueva:/x alpine:3.20 sleep 1', 'ls -d /nueva').out).toBe(
+      '/nueva',
+    )
+
+    const strict = sh(
+      'docker run -d --name a --mount type=bind,source=/nada,target=/x alpine:3.20 sleep 1',
+    )
+
+    expect(strict.code).toBe(125)
+    expect(strict.out).toContain('bind source path does not exist: /nada')
+    expect(run(strict.world, 'docker ps -aq').output).toEqual([])
+    expect(
+      sh(
+        'docker run -d --name a --mount type=bind,source=/home/peer/web,target=/x,readonly alpine:3.20 sleep 1',
+        "docker inspect -f '{{range .Mounts}}{{.Type}} {{.RW}}{{end}}' a",
+      ).out,
+    ).toBe('bind false')
+    expect(
+      sh('docker run -d --name a -v web:/x alpine:3.20 sleep 1', 'docker volume ls -q').out,
+    ).toBe('web')
+  })
 })
 
 describe('Docker simulado: imágenes y compose', () => {

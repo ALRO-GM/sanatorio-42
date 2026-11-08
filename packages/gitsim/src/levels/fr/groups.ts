@@ -58,7 +58,7 @@ export const GROUPS_FR: Readonly<Record<string, MissionText>> = {
       'Fonctionnalité : git switch develop, git switch -c feature/{login}, deux commits dans {login}.txt (« uno », puis « dos » avec >>)',
       'Regroupe-les en un seul : git reset --soft HEAD~2 et git commit -m "Fonctionnalité de {login}"',
       'Place-la au-dessus du travail le plus récent : git fetch et git rebase origin/develop',
-      'git switch develop, git pull, git merge feature/{login} (ça doit avancer sans merge) et git push origin develop. Si develop a bougé : git reset --hard origin/develop, reviens sur ta branche, rebase et recommence',
+      'git switch develop, git pull, git merge feature/{login} (ça doit avancer sans merge) et git push origin develop. Si le push est refusé parce que develop a bougé : git fetch, git reset --hard origin/develop, reviens sur ta branche, git rebase origin/develop et recommence',
       'Quand develop a toutes les fonctionnalités et que main n’a plus aucun rompe-*.txt : gh pr merge develop, git switch main, git pull, git tag v2.{n} et git push --tags',
     ],
   },

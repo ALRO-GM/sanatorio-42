@@ -141,7 +141,7 @@ const GROUP_1: GroupMission = {
     'git switch -c {login}',
     'echo "hola" > {login}.txt, git add {login}.txt y git commit -m "Mi fichero"',
     'git push origin {login}',
-    'git switch main y git pull (trae lo que hayan subido las demás)',
+    'git switch main y git pull (trae lo que haya subido el resto)',
     'git merge --no-ff {login} (un commit de merge, aunque pudiera avanzar sin él)',
     'git push. Si lo rechazan porque alguien subió antes: git pull y otra vez git push',
   ],
@@ -171,7 +171,7 @@ const GROUP_2: GroupMission = {
   gate: 'group2',
   title: 'GitHub flow con conflictos',
   story:
-    'main está protegida: solo se entra con un pull request. Cada cual se apunta al final de equipo.txt desde su rama. Pero mientras trabajáis, alguien cambia ese mismo final en main: a todas os va a chocar. Hay que traer main a la rama, resolver el conflicto dejando todas las líneas, subirla y aceptar el pull request.',
+    'main está protegida: solo se entra con un pull request. Cada cual se apunta al final de equipo.txt desde su rama. Pero mientras trabajáis, alguien cambia ese mismo final en main: os va a chocar a todo el mundo. Hay que traer main a la rama, resolver el conflicto dejando todas las líneas, subirla y aceptar el pull request.',
   minutes: 60,
   apart: false,
   setup: () => [
@@ -324,7 +324,7 @@ const BOSS: GroupMission = {
     'Funcionalidad: git switch develop, git switch -c feature/{login}, dos commits en {login}.txt («uno» y luego «dos» con >>)',
     'Júntalos en uno: git reset --soft HEAD~2 y git commit -m "Funcionalidad de {login}"',
     'Ponla encima de lo último: git fetch y git rebase origin/develop',
-    'git switch develop, git pull, git merge feature/{login} (tiene que avanzar sin merge) y git push origin develop. Si develop se movió: git reset --hard origin/develop, vuelve a la rama, rebase y otra vez',
+    'git switch develop, git pull, git merge feature/{login} (tiene que avanzar sin merge) y git push origin develop. Si el push sale rechazado porque develop se movió: git fetch, git reset --hard origin/develop, vuelve a tu rama, git rebase origin/develop y otra vez',
     'Cuando develop tenga todas las funcionalidades y main ya no tenga ningún rompe-*.txt: gh pr merge develop, git switch main, git pull, git tag v2.{n} y git push --tags',
   ],
   hints: [

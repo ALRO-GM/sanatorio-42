@@ -224,7 +224,7 @@ export const ADVANCED: Unit[] = [
         ],
         when: 'En toda imagen que vaya a producción. Kubernetes puede exigirlo (runAsNonRoot) y muchas empresas lo comprueban en CI.',
         problems:
-          'Sin root no se escucha en puertos por debajo de 1024 (usa 3000 u 8080) ni se escribe donde no es tuyo: si la app guarda ficheros, dale su carpeta con --chown. Las imágenes oficiales de Node ya traen el usuario node.',
+          'Sin root no se escribe donde no es tuyo: si la app guarda ficheros, dale su carpeta con --chown. Y escucha en un puerto alto (3000, 8080): Docker deja usar el 80 sin root, pero otros entornos, como Kubernetes, no siempre. Las imágenes oficiales de Node ya traen el usuario node.',
       },
       example: 'Miras con qué usuario corren las imágenes oficiales.',
       objectives: {
@@ -246,7 +246,7 @@ export const ADVANCED: Unit[] = [
         ],
         when: 'In every image that goes to production. Kubernetes can require it (runAsNonRoot) and many companies check it in CI.',
         problems:
-          'Without root you cannot listen below port 1024 (use 3000 or 8080) or write where you do not own: if the app saves files, give it its folder with --chown. The official Node images already include the node user.',
+          'Without root you cannot write where you do not own: if the app saves files, give it its folder with --chown. And listen on a high port (3000, 8080): Docker lets you use 80 without root, but other environments, like Kubernetes, do not always. The official Node images already include the node user.',
       },
       example: 'You check which user the official images run as.',
       objectives: {
@@ -643,7 +643,7 @@ export const ADVANCED: Unit[] = [
         ],
         when: 'En CI, en cada build: que la tubería falle si aparece una crítica. Y de vez en cuando sobre lo que ya está desplegado, porque salen CVE nuevas cada día.',
         problems:
-          'Cero críticas hoy no es para siempre. Una versión fija (node:22-alpine) hay que actualizarla; fijarla por digest (@sha256:…) da builds repetibles, pero también hay que moverla a mano.',
+          'Cero críticas hoy no es para siempre. Una etiqueta como node:22-alpine recibe parches: reconstruye a menudo para recogerlos. Fijarla por digest (@sha256:…) da builds repetibles, pero entonces el digest hay que moverlo a mano.',
       },
       example: 'Escaneas api:old y una base alpine para comparar.',
       objectives: { 'probe:critical': 'api:2.3 no tiene vulnerabilidades críticas' },
@@ -661,7 +661,7 @@ export const ADVANCED: Unit[] = [
         ],
         when: 'In CI, on every build: make the pipeline fail when a critical one shows up. And now and then on what is already deployed, because new CVEs appear every day.',
         problems:
-          'Zero critical today is not forever. A pinned version (node:22-alpine) must be updated; pinning by digest (@sha256:…) gives repeatable builds, but you still move it by hand.',
+          'Zero critical today is not forever. A tag like node:22-alpine receives patches: rebuild often to pick them up. Pinning by digest (@sha256:…) gives repeatable builds, but then you move the digest by hand.',
       },
       example: 'You scan api:old and an alpine base to compare.',
       objectives: { 'probe:critical': 'api:2.3 has no critical vulnerabilities' },
@@ -822,7 +822,7 @@ export const ADVANCED: Unit[] = [
         ],
         when: 'Cuando la imagen la usan máquinas distintas: el equipo con Mac y la producción en amd64, o nodos arm baratos en la nube.',
         problems:
-          'Varias plataformas no caben en la lista local de imágenes: hay que publicarlas a la vez (--push). Construir para la otra arquitectura va emulado y tarda más; en CI se cachea.',
+          'Con el almacén de imágenes clásico, varias plataformas no caben en la lista local: hay que publicarlas a la vez (--push). Construir para la otra arquitectura va emulado y tarda más; en CI se cachea.',
       },
       example: 'Ves qué constructores hay y qué pasa si pides dos plataformas sin publicar.',
       objectives: { 'probe:platforms': 'La etiqueta publicada tiene amd64 y arm64' },
@@ -839,7 +839,7 @@ export const ADVANCED: Unit[] = [
         ],
         when: 'When different machines use the image: the team on Macs and production on amd64, or cheap arm nodes in the cloud.',
         problems:
-          'Several platforms do not fit in the local image list: they must be pushed at once (--push). Building for the other architecture is emulated and slower; CI caches it.',
+          'With the classic image store, several platforms do not fit in the local image list: they must be pushed at once (--push). Building for the other architecture is emulated and slower; CI caches it.',
       },
       example:
         'You check the builders and what happens if you ask for two platforms without pushing.',
@@ -892,7 +892,7 @@ export const ADVANCED: Unit[] = [
         whenNot:
           'En producción nada de build ni bind mounts: se usa la imagen publicada, la misma que pasó CI.',
         problems:
-          'Con -f el override ya no entra solo: si lo quieres, hay que nombrarlo. Las listas (ports, volumes) se suman entre ficheros: un override no puede quitar un bind mount del común.',
+          'Con -f el override ya no entra solo: si lo quieres, hay que nombrarlo. Las listas (ports, volumes) se juntan entre ficheros: lo que pone el común no se quita con no escribirlo en el otro.',
       },
       example: 'Ves qué servicios hay y cómo queda la configuración de desarrollo.',
       objectives: {},
@@ -912,7 +912,7 @@ export const ADVANCED: Unit[] = [
         whenNot:
           'In production no build and no bind mounts: you use the published image, the same one that passed CI.',
         problems:
-          'With -f the override is no longer added on its own: name it if you want it. Lists (ports, volumes) add up across files: an override cannot remove a bind mount from the shared file.',
+          'With -f the override is no longer added on its own: name it if you want it. Lists (ports, volumes) are merged across files: leaving something out of the second file does not remove it from the shared one.',
       },
       example: 'You check the services and how the development configuration looks.',
       objectives: {},
@@ -1016,7 +1016,7 @@ export const ADVANCED: Unit[] = [
       title: 'Entrega para Kubernetes',
       goal: 'La API y el frontend 1.0.0 publicados como imágenes de producción y la pila de ~/deploy levantada con ellas.',
       story:
-        'Peer4U se muda a Kubernetes y el equipo de plataforma solo pide una cosa: imágenes de producción en el registro. Las que publiques hoy, ghcr.io/peer4u/api:1.0.0 y ghcr.io/peer4u/front:1.0.0, son las que desplegará el primer reto del curso de Kubernetes, y su HEALTHCHECK será allí la probe. Antes de dar el visto bueno, ensaya con el compose de producción de ~/deploy.',
+        'Peer4U se muda a Kubernetes y el equipo de plataforma solo pide una cosa: imágenes de producción en el registro. Las que publiques hoy, ghcr.io/peer4u/api:1.0.0 y ghcr.io/peer4u/front:1.0.0, son las que desplegará el primer reto del curso de Kubernetes, y lo que mira su HEALTHCHECK (/health) será allí la probe, escrita en el manifiesto. Antes de dar el visto bueno, ensaya con el compose de producción de ~/deploy.',
       tasks: [
         'Dockerfile de ~/api para producción: node:22-alpine, caché ordenada, sin node_modules ni .env en el contexto, sin dependencias de desarrollo, usuario sin privilegios y HEALTHCHECK a /health (menos de 300 MB).',
         'Publica la API como ghcr.io/peer4u/api:1.0.0 y con el commit corto de ~/api.',
@@ -1032,7 +1032,7 @@ export const ADVANCED: Unit[] = [
       title: 'Handover to Kubernetes',
       goal: 'API and frontend 1.0.0 published as production images and the ~/deploy stack running with them.',
       story:
-        'Peer4U is moving to Kubernetes and the platform team asks for one thing: production images in the registry. The ones you publish today, ghcr.io/peer4u/api:1.0.0 and ghcr.io/peer4u/front:1.0.0, are what the first challenge of the Kubernetes course will deploy, and their HEALTHCHECK becomes the probe there. Before signing off, rehearse with the production compose in ~/deploy.',
+        'Peer4U is moving to Kubernetes and the platform team asks for one thing: production images in the registry. The ones you publish today, ghcr.io/peer4u/api:1.0.0 and ghcr.io/peer4u/front:1.0.0, are what the first challenge of the Kubernetes course will deploy, and what their HEALTHCHECK checks (/health) becomes the probe there, written in the manifest. Before signing off, rehearse with the production compose in ~/deploy.',
       tasks: [
         'Production Dockerfile for ~/api: node:22-alpine, ordered cache, no node_modules or .env in the context, no dev dependencies, a non-privileged user and a HEALTHCHECK on /health (under 300 MB).',
         'Publish the API as ghcr.io/peer4u/api:1.0.0 and with the short commit of ~/api.',

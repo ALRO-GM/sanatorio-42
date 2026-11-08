@@ -919,6 +919,14 @@ export class Shell implements ShellApi {
     return this.script(text, path, args, io)
   }
 
+  /**
+   * `bash -c 'orden' [nombre args…]`: como un guion, en una shell hija. No ve
+   * las variables sin exportar y lo que cambie (variables, cd) no vuelve.
+   */
+  runCode(code: string, args: string[], io: Io): number {
+    return this.script(code, args[0] ?? 'bash', args.slice(1), io)
+  }
+
   private script(text: string, name: string, args: string[], io: Io): number {
     const saved = JSON.stringify(this.world.session)
     const savedName = this.name
@@ -1308,7 +1316,7 @@ const BUILTINS: Record<string, Builtin> = {
     const { values, rest } = getopts(args, 'c')
     const code = values.get('c')
 
-    if (code !== undefined) return sh.source(code, io)
+    if (code !== undefined) return sh.runCode(code, rest, io)
     if (rest[0] === undefined) {
       io.err('bash: ya estás en bash (aquí no se abre otra shell interactiva)\n')
 

@@ -125,7 +125,7 @@ export const INTERMEDIATE: Unit[] = [
         ],
         when: 'En cada despliegue de una versión nueva. En un equipo lo hace la CI o GitOps cambiando la etiqueta en el YAML (bloque 9).',
         problems:
-          'La anotación change-cause se queda en el Deployment y se copia a la revisión siguiente si no la cambias: ponla en cada despliegue.',
+          'La anotación change-cause se queda en el Deployment y se copia a la revisión siguiente si no la cambias: ponla en cada despliegue (con --overwrite si ya tiene uno).',
       },
       example: 'Subes la API a 1.0.1 y miras el rollout y las revisiones.',
       objectives: {
@@ -147,7 +147,7 @@ export const INTERMEDIATE: Unit[] = [
         ],
         when: 'On every release. In a team, CI or GitOps does it by changing the tag in the YAML (block 9).',
         problems:
-          'The change-cause annotation stays on the Deployment and is copied to the next revision unless you change it: set it on every release.',
+          'The change-cause annotation stays on the Deployment and is copied to the next revision unless you change it: set it on every release (with --overwrite if it already has one).',
       },
       example: 'You move the API to 1.0.1 and look at the rollout and the revisions.',
       objectives: {
@@ -231,7 +231,7 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Estrategias de despliegue',
       goal: 'Que la API no pierda nunca capacidad al actualizarse (maxSurge 1, maxUnavailable 0) y añade un canary api-canary con 1 réplica de la 1.0.2 detrás del mismo Service.',
       theory: {
-        what: 'El rolling update se regula con maxSurge (cuántos Pods de más puede haber) y maxUnavailable (cuántos pueden faltar). Recreate para todo y arranca lo nuevo (para lo que no aguanta dos versiones a la vez). Un canary es un segundo Deployment con pocas réplicas y las mismas etiquetas que mira el Service: le llega una parte del tráfico.',
+        what: 'El rolling update se regula con maxSurge (cuántos Pods de más puede haber) y maxUnavailable (cuántos pueden faltar). Recreate para todos los Pods viejos y luego arranca los nuevos (para lo que no aguanta dos versiones a la vez). Un canary es un segundo Deployment con pocas réplicas y las mismas etiquetas que mira el Service: le llega una parte del tráfico.',
         how: [
           'kubectl patch deployment api -p \'{"spec":{"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":0}}}}\'',
           'kubectl apply -f api-canary.yaml       # labels app: api, track: canary',
@@ -253,7 +253,7 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Deployment strategies',
       goal: 'Make sure the API never loses capacity while updating (maxSurge 1, maxUnavailable 0) and add a canary api-canary with 1 replica of 1.0.2 behind the same Service.',
       theory: {
-        what: 'A rolling update is tuned with maxSurge (how many extra Pods may exist) and maxUnavailable (how many may be missing). Recreate stops everything and starts the new one (for apps that cannot run two versions at once). A canary is a second Deployment with few replicas and the labels the Service selects: it gets a slice of the traffic.',
+        what: 'A rolling update is tuned with maxSurge (how many extra Pods may exist) and maxUnavailable (how many may be missing). Recreate stops all the old Pods and then starts the new ones (for apps that cannot run two versions at once). A canary is a second Deployment with few replicas and the labels the Service selects: it gets a slice of the traffic.',
         how: [
           'kubectl patch deployment api -p \'{"spec":{"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":0}}}}\'',
           'kubectl apply -f api-canary.yaml       # labels app: api, track: canary',
@@ -520,7 +520,10 @@ export const INTERMEDIATE: Unit[] = [
           'It still has a livenessProbe',
       },
     },
-    example: ['kubectl get pods', 'kubectl describe pod -l app=api | grep -A4 Events | head -n 8'],
+    example: [
+      'kubectl get pods -l app=api -w',
+      "kubectl describe pod -l app=api | grep -E 'Unhealthy|Killing' | head -n 2",
+    ],
     solution: [
       write('~/tienda/api.yaml', API_YAML('1.2.0', 3, BAD_LIVENESS + STARTUP)),
       'kubectl apply -f ~/tienda/api.yaml',
@@ -551,9 +554,9 @@ export const INTERMEDIATE: Unit[] = [
         ],
         when: 'Siempre en producción: sin requests el planificador no sabe dónde cabe nada y sin límites un Pod se come el nodo.',
         problems:
-          'Un OOMKilled se parece a un CrashLoopBackOff, pero describe dice OOMKilled y 137: no es un fallo de la app, es memoria. Sube el límite o arregla la fuga.',
+          'Un Pod que muere por OOMKilled también acaba en CrashLoopBackOff, pero describe dice OOMKilled y 137: no es un fallo de la app, es memoria. Sube el límite o arregla la fuga.',
       },
-      example: 'Ves informes reiniciándose y el OOMKilled en describe.',
+      example: 'Ves informes reiniciándose, el OOMKilled en describe y su memoria en el límite.',
       objectives: {
         'ready:tienda deploy/informes': 'informes en marcha sin OOMKilled',
         'get:tienda deploy/informes {.spec.template.spec.containers[0].resources.requests.memory} {.spec.template.spec.containers[0].resources.limits.memory}':
@@ -572,9 +575,9 @@ export const INTERMEDIATE: Unit[] = [
         ],
         when: 'Always in production: without requests the scheduler cannot tell where things fit and without limits one Pod can eat the node.',
         problems:
-          'An OOMKilled looks like a CrashLoopBackOff, but describe says OOMKilled and 137: it is not an app bug, it is memory. Raise the limit or fix the leak.',
+          'A Pod killed by OOMKilled also ends up in CrashLoopBackOff, but describe says OOMKilled and 137: it is not an app bug, it is memory. Raise the limit or fix the leak.',
       },
-      example: 'You see informes restarting and OOMKilled in describe.',
+      example: 'You see informes restarting, OOMKilled in describe and its memory at the limit.',
       objectives: {
         'ready:tienda deploy/informes': 'informes running without OOMKilled',
         'get:tienda deploy/informes {.spec.template.spec.containers[0].resources.requests.memory} {.spec.template.spec.containers[0].resources.limits.memory}':
@@ -582,7 +585,7 @@ export const INTERMEDIATE: Unit[] = [
       },
     },
     example: [
-      'kubectl get pods',
+      'kubectl get pods -w',
       "kubectl describe pod -l app=informes | grep -A3 'Last State'",
       'kubectl top pods',
     ],
@@ -610,7 +613,7 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Los lunes se cae',
       goal: 'API con readiness, liveness, startup y recursos, estable; informes sin OOMKilled.',
       story:
-        'Cada lunes, con el pico de tráfico, la API se reinicia sin parar (una liveness de 1 s sobre una app que tarda 20 en arrancar) y el informe semanal muere por memoria. Hoy es lunes.',
+        'Cada lunes, con el pico de tráfico, la API se reinicia sin parar (una liveness que la da por muerta a los 3 s, en una app que tarda 20 s en arrancar) y el informe semanal muere por memoria. Hoy es lunes.',
       tasks: [
         'API (~/tienda/api.yaml): readinessProbe, livenessProbe y startupProbe razonables sobre /health en el 3000.',
         'API: requests de 100m de CPU y 128Mi; límite de 256Mi de memoria.',
@@ -626,7 +629,7 @@ export const INTERMEDIATE: Unit[] = [
       title: 'It falls over on Mondays',
       goal: 'API with readiness, liveness, startup and resources, stable; informes without OOMKilled.',
       story:
-        'Every Monday, at the traffic peak, the API restarts non-stop (a 1 s liveness on an app that takes 20 to start) and the weekly report dies of memory. Today is Monday.',
+        'Every Monday, at the traffic peak, the API restarts non-stop (a liveness that gives up on it after 3 s, on an app that takes 20 s to start) and the weekly report dies of memory. Today is Monday.',
       tasks: [
         'API (~/tienda/api.yaml): sensible readinessProbe, livenessProbe and startupProbe on /health port 3000.',
         'API: requests of 100m CPU and 128Mi; 256Mi memory limit.',

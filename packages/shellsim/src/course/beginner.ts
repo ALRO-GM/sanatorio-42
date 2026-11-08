@@ -151,7 +151,11 @@ export const BEGINNER: Unit[] = [
       goal: 'En /srv/peer4u hay un fichero oculto. Enseña su contenido.',
       theory: {
         what: 'Los ficheros que empiezan por punto (.bashrc, .env) no salen con ls a secas: ls -a los enseña. cat imprime un fichero entero.',
-        how: ['ls -a ~', 'ls -la ~            # oculto y en formato largo', 'cat ~/.bashrc'],
+        how: [
+          'ls -a ~',
+          'ls -la ~            # con los ocultos, en formato largo',
+          'cat ~/.bashrc',
+        ],
         when: 'La configuración suele estar en ficheros ocultos: .bashrc, .ssh/, .env, .gitignore.',
         problems:
           'cat de un fichero enorme llena la pantalla: para eso están head, tail y less (siguiente unidad).',
@@ -163,7 +167,7 @@ export const BEGINNER: Unit[] = [
       goal: 'There is a hidden file in /srv/peer4u. Show its contents.',
       theory: {
         what: 'Files starting with a dot (.bashrc, .env) do not show with plain ls: ls -a shows them. cat prints a whole file.',
-        how: ['ls -a ~', 'ls -la ~            # hidden and long format', 'cat ~/.bashrc'],
+        how: ['ls -a ~', 'ls -la ~            # hidden files too, long format', 'cat ~/.bashrc'],
         when: 'Configuration usually lives in hidden files: .bashrc, .ssh/, .env, .gitignore.',
         problems:
           'cat on a huge file floods the screen: that is what head, tail and less are for (next unit).',
@@ -175,7 +179,7 @@ export const BEGINNER: Unit[] = [
       goal: 'Il y a un fichier caché dans /srv/peer4u. Affiche son contenu.',
       theory: {
         what: 'Les fichiers qui commencent par un point (.bashrc, .env) n’apparaissent pas avec ls tout court : ls -a les affiche. cat affiche un fichier en entier.',
-        how: ['ls -a ~', 'ls -la ~            # cachés et en format long', 'cat ~/.bashrc'],
+        how: ['ls -a ~', 'ls -la ~            # avec les cachés, en format long', 'cat ~/.bashrc'],
         when: 'La configuration se trouve souvent dans des fichiers cachés : .bashrc, .ssh/, .env, .gitignore.',
         problems:
           'cat sur un énorme fichier remplit l’écran : c’est à ça que servent head, tail et less (unité suivante).',
@@ -203,7 +207,7 @@ export const BEGINNER: Unit[] = [
           'wc -l fichero',
           'less fichero         # q para salir',
         ],
-        when: 'En un registro lo nuevo está al final: tail es lo que más se usa en una guardia.',
+        when: 'En un registro lo nuevo está al final: tail es lo que más se usa en un turno de on-call.',
         problems:
           'tail -f no acaba nunca (Ctrl+C para salir); en este simulador enseña lo último y vuelve.',
       },
@@ -761,7 +765,7 @@ export const BEGINNER: Unit[] = [
       title: 'Leer permisos: ls -l e id',
       goal: 'Averigua de quién es /etc/peer4u/app.env y enseña con id los grupos de ese usuario.',
       theory: {
-        what: 'ls -l enseña -rwxr-x---: tipo y tres tríos (dueño, grupo, resto) de leer (r), escribir (w) y ejecutar o entrar (x). Luego el dueño y el grupo. id dice quién eres y en qué grupos estás.',
+        what: 'ls -l enseña -rwxr-x---: tipo y tres tríos (dueño, grupo, resto) de leer (r), escribir (w) y ejecutar o entrar (x). Tras el número de enlaces, el dueño y el grupo. id dice quién eres y en qué grupos estás.',
         how: ['ls -l fichero', 'ls -ld carpeta', 'id', 'id deploy', 'groups'],
         when: 'Ante un «Permission denied»: mira los permisos y tus grupos antes de tirar de sudo.',
         problems:
@@ -773,7 +777,7 @@ export const BEGINNER: Unit[] = [
       title: 'Reading permissions: ls -l and id',
       goal: 'Find out who owns /etc/peer4u/app.env and show that user’s groups with id.',
       theory: {
-        what: 'ls -l shows -rwxr-x---: type and three triples (owner, group, others) of read (r), write (w) and execute or enter (x). Then owner and group. id tells you who you are and your groups.',
+        what: 'ls -l shows -rwxr-x---: type and three triples (owner, group, others) of read (r), write (w) and execute or enter (x). After the link count, owner and group. id tells you who you are and your groups.',
         how: ['ls -l file', 'ls -ld dir', 'id', 'id deploy', 'groups'],
         when: 'When you get «Permission denied»: check permissions and your groups before reaching for sudo.',
         problems:
@@ -785,7 +789,7 @@ export const BEGINNER: Unit[] = [
       title: 'Lire les permissions : ls -l et id',
       goal: 'Trouve à qui appartient /etc/peer4u/app.env et affiche avec id les groupes de cet utilisateur.',
       theory: {
-        what: 'ls -l affiche -rwxr-x--- : le type, puis trois triplets (propriétaire, groupe, autres) de lecture (r), écriture (w) et exécution ou accès (x). Ensuite, le propriétaire et le groupe. id te dit qui tu es et dans quels groupes tu es.',
+        what: 'ls -l affiche -rwxr-x--- : le type, puis trois triplets (propriétaire, groupe, autres) de lecture (r), écriture (w) et exécution ou accès (x). Après le nombre de liens, le propriétaire et le groupe. id te dit qui tu es et dans quels groupes tu es.',
         how: ['ls -l fichier', 'ls -ld dossier', 'id', 'id deploy', 'groups'],
         when: 'Face à un « Permission denied » : regarde les permissions et tes groupes avant de dégainer sudo.',
         problems:
@@ -1076,7 +1080,8 @@ export const BEGINNER: Unit[] = [
     es: {
       title: 'Jefe final: principiante',
       goal: 'Tu primer encargo en solitario: todo lo del nivel, contra el reloj. Si lo superas, tienes el certificado de principiante.',
-      story: 'Hoy no hay nadie más de guardia. Te han dejado un encargo en ~/ENCARGO.txt.',
+      story:
+        'Hoy haces el turno de on-call sin nadie más. Te han dejado un encargo en ~/ENCARGO.txt.',
       tasks: [
         'Crea ~/sitio con las carpetas css e img.',
         'Escribe ~/sitio/index.html con la línea «<h1>Hola, peers</h1>».',

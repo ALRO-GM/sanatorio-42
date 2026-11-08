@@ -264,7 +264,7 @@ export const ADVANCED: Unit[] = [
         whenNot:
           'En producción, la base de datos casi siempre es un servicio gestionado (RDS, Cloud SQL): operar Postgres en Kubernetes es un trabajo en sí.',
       },
-      example: 'Miras qué StorageClass hay y cómo se ve un StatefulSet.',
+      example: 'Miras qué StorageClass hay y qué campos tiene un StatefulSet.',
       objectives: {
         'ready:tienda sts/db': 'db-0 en marcha',
         'get:tienda pvc/data-db-0 {.status.phase}': 'data-db-0 enlazado',
@@ -285,14 +285,14 @@ export const ADVANCED: Unit[] = [
         whenNot:
           'In production the database is nearly always a managed service (RDS, Cloud SQL): running Postgres on Kubernetes is a job in itself.',
       },
-      example: 'You check which StorageClass exists and what a StatefulSet looks like.',
+      example: 'You check which StorageClass exists and which fields a StatefulSet has.',
       objectives: {
         'ready:tienda sts/db': 'db-0 running',
         'get:tienda pvc/data-db-0 {.status.phase}': 'data-db-0 bound',
         'get:tienda svc/db {.spec.clusterIP}': 'Service db is headless',
       },
     },
-    example: ['kubectl get storageclass', 'kubectl explain deployment.spec'],
+    example: ['kubectl get storageclass', 'kubectl explain statefulset.spec'],
     solution: [applyIt(STATEFUL_DB)],
     check: {
       ready: ['tienda sts/db'],
@@ -372,7 +372,7 @@ export const ADVANCED: Unit[] = [
       title: 'Contenedores init y sidecar',
       goal: 'Añade a la API (en ~/tienda/api.yaml) un contenedor init espera-db (busybox:1.36) que espere a que db:5432 conteste, y aplícalo.',
       theory: {
-        what: 'Los initContainers se ejecutan en orden antes que los de la app y tienen que acabar bien: esperar a otro servicio, migrar, preparar ficheros. Un sidecar es un contenedor más que acompaña a la app todo el rato (leer sus registros, un proxy).',
+        what: 'Los initContainers se ejecutan en orden antes que los de la app y tienen que acabar bien: esperar a otro servicio, migrar, preparar ficheros. Un sidecar es un contenedor más que acompaña a la app todo el rato (leer sus registros, un proxy); desde Kubernetes 1.29 se declara como un initContainer con restartPolicy: Always.',
         how: [
           'initContainers:',
           '- name: espera-db',
@@ -385,7 +385,8 @@ export const ADVANCED: Unit[] = [
         problems:
           'Un init que no acaba deja el Pod en Init:0/1 para siempre: mira sus registros con -c.',
       },
-      example: 'Paras la base de datos y ves qué hace la API mientras tanto.',
+      example:
+        'Paras la base de datos, reinicias la API y ves que arranca igual y no llega a ella (ECONNREFUSED); luego vuelves a levantarla.',
       objectives: {
         'get:tienda deploy/api {.spec.template.spec.initContainers[0].name} {.spec.template.spec.initContainers[0].image}':
           'espera-db con busybox:1.36',
@@ -396,7 +397,7 @@ export const ADVANCED: Unit[] = [
       title: 'Init and sidecar containers',
       goal: 'Add to the API (in ~/tienda/api.yaml) an init container espera-db (busybox:1.36) that waits until db:5432 answers, and apply it.',
       theory: {
-        what: 'initContainers run in order before the app ones and must finish successfully: wait for another service, migrate, prepare files. A sidecar is one more container that runs alongside the app all the time (reading its logs, a proxy).',
+        what: 'initContainers run in order before the app ones and must finish successfully: wait for another service, migrate, prepare files. A sidecar is one more container that runs alongside the app all the time (reading its logs, a proxy); since Kubernetes 1.29 it is declared as an initContainer with restartPolicy: Always.',
         how: [
           'initContainers:',
           '- name: espera-db',
@@ -409,7 +410,8 @@ export const ADVANCED: Unit[] = [
         problems:
           'An init that never finishes leaves the Pod at Init:0/1 forever: read its logs with -c.',
       },
-      example: 'You stop the database and see what the API does meanwhile.',
+      example:
+        'You stop the database, restart the API and see it starts anyway and cannot reach it (ECONNREFUSED); then you bring the database back.',
       objectives: {
         'get:tienda deploy/api {.spec.template.spec.initContainers[0].name} {.spec.template.spec.initContainers[0].image}':
           'espera-db with busybox:1.36',
@@ -419,7 +421,8 @@ export const ADVANCED: Unit[] = [
     example: [
       'kubectl scale deployment db --replicas=0',
       'kubectl rollout restart deployment/api',
-      'kubectl get pods',
+      'kubectl rollout status deployment/api',
+      'kubectl logs deploy/api',
       'kubectl scale deployment db --replicas=1',
     ],
     solution: [
@@ -576,7 +579,7 @@ export const ADVANCED: Unit[] = [
         problems:
           'Sin requests de CPU el HPA no puede calcular nada (<unknown>/70%). Y si el YAML del repositorio fija replicas, cada apply pelea con el HPA: quítalas del YAML.',
       },
-      example: 'Miras el uso de los Pods con top.',
+      example: 'Miras con top lo que usan los Pods y los nodos.',
       objectives: {
         'get:tienda hpa/api {.spec.minReplicas} {.spec.maxReplicas} {.spec.metrics[0].resource.target.averageUtilization}':
           'HPA de 2 a 6 réplicas al 70 %',
@@ -598,7 +601,7 @@ export const ADVANCED: Unit[] = [
         problems:
           'Without CPU requests the HPA cannot compute anything (<unknown>/70%). And if the repository YAML pins replicas, every apply fights the HPA: drop them from the YAML.',
       },
-      example: 'You look at the Pods usage with top.',
+      example: 'You look at what the Pods and the nodes use with top.',
       objectives: {
         'get:tienda hpa/api {.spec.minReplicas} {.spec.maxReplicas} {.spec.metrics[0].resource.target.averageUtilization}':
           'HPA from 2 to 6 replicas at 70 %',
@@ -672,7 +675,10 @@ export const ADVANCED: Unit[] = [
         'exec:tienda deploy/api nc -z -w 2 db 5432': 'The API does reach the database',
       },
     },
-    example: ['kubectl exec deploy/front -- nc -z -w 2 db 5432', 'kubectl get networkpolicies'],
+    example: [
+      'kubectl exec deploy/front -- nc -z -w 2 db 5432 && echo abierto',
+      'kubectl get networkpolicies',
+    ],
     solution: [applyIt(POLICIES)],
     check: {
       http: ['localhost:8080/api/health'],
@@ -763,7 +769,7 @@ export const ADVANCED: Unit[] = [
       title: 'Kustomize: un repo, varios entornos',
       goal: 'Crea ~/tienda/overlays/produccion encima de base/: namespace produccion, 4 réplicas de la API y la imagen 1.2.0. Aplícalo con kubectl apply -k.',
       theory: {
-        what: 'Kustomize junta manifiestos y los ajusta por entorno sin plantillas: una base común y un overlay por entorno que cambia namespace, réplicas, etiquetas de imagen o lo que haga falta (patches). Viene dentro de kubectl (-k).',
+        what: 'Kustomize junta manifiestos y los ajusta por entorno sin plantillas: una base común y un overlay por entorno que cambia namespace, réplicas, etiquetas de imagen o lo que haga falta (patches). Viene dentro de kubectl (-k); kustomize edit, que cambia el kustomization.yaml, es del binario kustomize.',
         how: [
           'base/kustomization.yaml:            resources: [api.yaml, front.yaml]',
           'overlays/produccion/kustomization.yaml: resources: [../../base], namespace,',
@@ -786,7 +792,7 @@ export const ADVANCED: Unit[] = [
       title: 'Kustomize: one repo, several environments',
       goal: 'Create ~/tienda/overlays/produccion on top of base/: namespace produccion, 4 API replicas and image 1.2.0. Apply it with kubectl apply -k.',
       theory: {
-        what: 'Kustomize gathers manifests and adjusts them per environment without templates: a shared base and an overlay per environment that changes namespace, replicas, image tags or whatever is needed (patches). It ships inside kubectl (-k).',
+        what: 'Kustomize gathers manifests and adjusts them per environment without templates: a shared base and an overlay per environment that changes namespace, replicas, image tags or whatever is needed (patches). It ships inside kubectl (-k); kustomize edit, which changes kustomization.yaml, belongs to the standalone kustomize binary.',
         how: [
           'base/kustomization.yaml:            resources: [api.yaml, front.yaml]',
           'overlays/produccion/kustomization.yaml: resources: [../../base], namespace,',

@@ -32,7 +32,7 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
       whenNot: 'git add . without looking: you end up committing binaries, .o files or keys.',
       looks: 'The index does not show in the tree: it is what will go inside the next circle.',
       problems:
-        'Forgetting the add: the commit comes out without your changes (git status tells you).',
+        'Forgetting the add: your changes do not go into the commit (git status tells you).',
     },
   },
   'w0-status': {
@@ -56,7 +56,7 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
         'git add notas.txt',
         'git commit -m "notes"',
         'echo b >> notas.txt',
-        'git commit -am "more notes"',
+        'git commit -am "more notes"   # -a: stages what git already tracks',
       ],
       when: 'From here on, everything else is built on commits.',
       looks: 'Three circles in a row on main.',
@@ -81,14 +81,14 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
   },
   'w1-head': {
     title: 'HEAD: where you are',
-    goal: 'Go back to main and make a commit: main and feature end up diverged.',
+    goal: 'Go back to main and make a commit: main and feature diverge.',
     theory: {
       what: 'HEAD is where you are: usually it points to a branch, and the branch to a commit. When you commit, the branch that HEAD points to moves forward.',
       how: ['git switch main', 'git log --oneline --all'],
       when: 'You switch branches to work on something else without mixing things.',
       looks: 'Two paths leaving the same commit: the history forks.',
       problems:
-        'Switching branches with unsaved changes: git does not let you (or carries them along). Commit or stash first.',
+        'Switching branches with uncommitted changes: git carries them over to the other branch or, if they clash with it, does not let you (in this course, it never does). Commit first (or stash, in world 4).',
     },
   },
   'w1-ff': {
@@ -141,10 +141,10 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
       what: 'World review: several branches in parallel, each with its own work, and main merging them one by one.',
       how: [
         'git switch -c a',
-        'git commit',
+        'git commit -m "a1"',
         'git switch main',
         'git switch -c b',
-        'git commit',
+        'git commit -m "b1"',
         'git switch main',
         'git merge a',
         'git merge b',

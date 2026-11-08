@@ -213,7 +213,7 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Aprovechar la caché',
       goal: 'Reordena el Dockerfile de ~/api para que cambiar el código no reinstale las dependencias, y construye api:1.1.',
       theory: {
-        what: 'Cada instrucción del Dockerfile es una capa. Si una instrucción y lo que copia no cambian, Docker reutiliza la capa (CACHED); en cuanto una cambia, todas las de debajo se rehacen.',
+        what: 'Cada instrucción del Dockerfile es un paso con su caché (RUN, COPY y ADD dejan además una capa). Si un paso y lo que copia no cambian, Docker lo reutiliza (CACHED); en cuanto uno cambia, todos los de debajo se rehacen.',
         how: [
           'COPY package*.json ./      # primero solo lo que define las dependencias',
           'RUN npm ci --omit=dev      # se rehace solo si cambian esos ficheros',
@@ -232,7 +232,7 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Using the cache',
       goal: 'Reorder the Dockerfile in ~/api so that changing the code does not reinstall the dependencies, and build api:1.1.',
       theory: {
-        what: 'Each Dockerfile instruction is a layer. If an instruction and what it copies do not change, Docker reuses the layer (CACHED); as soon as one changes, every layer below it is rebuilt.',
+        what: 'Each Dockerfile instruction is a cached step (RUN, COPY and ADD also leave a layer). If a step and what it copies do not change, Docker reuses it (CACHED); as soon as one changes, every step below it is rebuilt.',
         how: [
           'COPY package*.json ./      # first only what defines the dependencies',
           'RUN npm ci --omit=dev      # rebuilt only if those files change',
@@ -552,7 +552,7 @@ export const INTERMEDIATE: Unit[] = [
         whenNot:
           'Para el código en desarrollo es mejor un bind mount (siguiente unidad): ves y editas los ficheros desde tu máquina.',
         problems:
-          'docker volume rm, docker compose down -v y system prune --volumes borran datos de verdad. Montar el volumen en otra ruta es como no montarlo.',
+          'docker volume rm, docker volume prune -a y docker compose down -v borran datos de verdad. Montar el volumen en otra ruta es como no montarlo.',
       },
       example:
         'Sin volumen, creas una tabla, borras el contenedor y al recrearlo la tabla ya no está.',
@@ -574,7 +574,7 @@ export const INTERMEDIATE: Unit[] = [
         whenNot:
           'For code in development a bind mount is better (next unit): you see and edit the files from your machine.',
         problems:
-          'docker volume rm, docker compose down -v and system prune --volumes delete real data. Mounting the volume on another path is like not mounting it.',
+          'docker volume rm, docker volume prune -a and docker compose down -v delete real data. Mounting the volume on another path is like not mounting it.',
       },
       example:
         'Without a volume, you create a table, remove the container and when you recreate it the table is gone.',
@@ -613,7 +613,7 @@ export const INTERMEDIATE: Unit[] = [
         whenNot:
           'En producción el código va dentro de la imagen: un bind mount ata el contenedor a una carpeta de una máquina concreta.',
         problems:
-          'Docker usa la ruta del anfitrión tal cual: ./web en -v necesita una ruta absoluta o $PWD. Si la carpeta no existe, la crea vacía (y de root).',
+          'En -v, la ruta tiene que empezar por /, ./ o ~: web:/ruta, sin más, no es tu carpeta sino un volumen con nombre llamado web. Si la carpeta no existe, -v la crea vacía (y de root); --mount, en cambio, da error.',
       },
       example: 'Montas ~/web en un nginx y miras lo que sirve.',
       objectives: {},
@@ -633,7 +633,7 @@ export const INTERMEDIATE: Unit[] = [
         whenNot:
           'In production the code goes inside the image: a bind mount ties the container to a folder on one particular machine.',
         problems:
-          'Docker uses the host path as is: ./web in -v needs an absolute path or $PWD. If the folder does not exist, it creates it empty (and owned by root).',
+          'In -v, the path must start with /, ./ or ~: a bare web:/path is not your folder but a named volume called web. If the folder does not exist, -v creates it empty (and owned by root); --mount fails instead.',
       },
       example: 'You mount ~/web on an nginx and look at what it serves.',
       objectives: {},

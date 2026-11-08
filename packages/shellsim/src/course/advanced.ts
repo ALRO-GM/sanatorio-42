@@ -162,7 +162,7 @@ export const ADVANCED: Unit[] = [
         ],
         when: 'Siempre que un guion tenga que decidir: si existe, si responde, si hay errores.',
         problems:
-          'Hacen falta los espacios dentro de [ ] y las comillas en "$var": [ -f $f ] falla si f está vacía.',
+          'Hacen falta los espacios dentro de [ ] y las comillas en "$var": [ -f $f ] da verdadero si f está vacía.',
       },
       example: 'Pruebas condiciones con carpetas, números y patrones.',
     },
@@ -180,7 +180,7 @@ export const ADVANCED: Unit[] = [
         ],
         when: 'Whenever a script must decide: does it exist, does it respond, are there errors.',
         problems:
-          'The spaces inside [ ] are required and so are the quotes in "$var": [ -f $f ] breaks if f is empty.',
+          'The spaces inside [ ] are required and so are the quotes in "$var": [ -f $f ] is true when f is empty.',
       },
       example: 'You try conditions with directories, numbers and patterns.',
     },
@@ -198,7 +198,7 @@ export const ADVANCED: Unit[] = [
         ],
         when: 'Chaque fois qu’un script doit décider : est-ce que ça existe, est-ce que ça répond, est-ce qu’il y a des erreurs.',
         problems:
-          'Les espaces à l’intérieur de [ ] sont obligatoires, tout comme les guillemets dans "$var" : [ -f $f ] plante si f est vide.',
+          'Les espaces à l’intérieur de [ ] sont obligatoires, tout comme les guillemets dans "$var" : [ -f $f ] est vrai si f est vide.',
       },
       example: 'Tu testes des conditions sur des dossiers, des nombres et des motifs.',
     },
@@ -647,7 +647,7 @@ export const ADVANCED: Unit[] = [
       title: 'Jefe: caída a las tres de la mañana',
       goal: 'Vuelve a poner en pie nginx y la API y comprueba que la web contesta.',
       story:
-        'Alguien desplegó configuración a medianoche y se fue a dormir. Ahora no va ni la web ni la API. La guardia anterior dejó una copia buena de nginx en /etc/nginx/nginx.conf.bak.',
+        'Alguien desplegó configuración a medianoche y se fue a dormir. Ahora no va ni la web ni la API. El turno de on-call anterior dejó una copia buena de nginx en /etc/nginx/nginx.conf.bak.',
       tasks: [
         'Mira qué servicios han caído y por qué (systemctl, journalctl).',
         'Arregla nginx: vuelve a su configuración buena y pruébala con nginx -t.',
@@ -660,7 +660,7 @@ export const ADVANCED: Unit[] = [
       title: 'Boss: outage at three in the morning',
       goal: 'Get nginx and the API back up and check the site answers.',
       story:
-        'Someone deployed config at midnight and went to bed. Now neither the site nor the API works. The previous on-call left a good nginx copy at /etc/nginx/nginx.conf.bak.',
+        'Someone deployed config at midnight and went to bed. Now neither the site nor the API works. The previous on-call shift left a good nginx copy at /etc/nginx/nginx.conf.bak.',
       tasks: [
         'Find which services are down and why (systemctl, journalctl).',
         'Fix nginx: restore its good configuration and test it with nginx -t.',

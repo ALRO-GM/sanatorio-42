@@ -27,7 +27,7 @@ export const BEGINNER: Unit[] = [
       title: 'Tu primer contenedor',
       goal: 'Ejecuta un contenedor de la imagen hello-world.',
       theory: {
-        what: 'Una imagen es una plantilla de solo lectura (un sistema de ficheros y qué ejecutar); un contenedor es esa imagen en marcha, con su capa propia. docker run descarga la imagen si no la tienes, crea el contenedor y lo arranca.',
+        what: 'Una imagen es una plantilla de solo lectura (un sistema de ficheros y qué ejecutar); un contenedor se crea a partir de ella para ejecutarla, con su propia capa de escritura. docker run descarga la imagen si no la tienes, crea el contenedor y lo arranca.',
         how: [
           'docker run hello-world      # descarga, crea, ejecuta y termina',
           'docker ps                   # contenedores en marcha',
@@ -46,7 +46,7 @@ export const BEGINNER: Unit[] = [
       title: 'Your first container',
       goal: 'Run a container from the hello-world image.',
       theory: {
-        what: 'An image is a read-only template (a filesystem and what to run); a container is that image running, with its own layer. docker run pulls the image if you do not have it, creates the container and starts it.',
+        what: 'An image is a read-only template (a filesystem and what to run); a container is created from it to run it, with its own writable layer. docker run pulls the image if you do not have it, creates the container and starts it.',
         how: [
           'docker run hello-world      # pull, create, run and exit',
           'docker ps                   # running containers',
@@ -153,7 +153,7 @@ export const BEGINNER: Unit[] = [
           'rm borra la capa propia del contenedor: lo que se escribió dentro y no está en un volumen se pierde. docker rm de uno que corre falla: hay que pararlo antes o usar -f.',
       },
       example:
-        'Paras cache, lo ves Exited en docker ps -a, lo vuelves a arrancar y borras legacy con -f.',
+        'Miras los contenedores, paras legacy, lo ves Exited en docker ps -a y lo vuelves a arrancar.',
       objectives: { 'gone:legacy': 'legacy ya no existe' },
     },
     en: {
@@ -173,7 +173,7 @@ export const BEGINNER: Unit[] = [
           'rm removes the container layer: whatever was written inside and is not in a volume is gone. docker rm on a running container fails: stop it first or use -f.',
       },
       example:
-        'You stop cache, see it Exited in docker ps -a, start it again and remove legacy with -f.',
+        'You list the containers, stop legacy, see it Exited in docker ps -a and start it again.',
       objectives: { 'gone:legacy': 'legacy no longer exists' },
     },
     example: ['docker ps -a', 'docker stop legacy', 'docker ps -a', 'docker start legacy'],
@@ -689,7 +689,7 @@ export const BEGINNER: Unit[] = [
       title: 'Contenerizar la API',
       goal: 'Construye api:1.0 desde ~/api (Node 22 alpine, npm ci sin dependencias de desarrollo, node server.js) y déjala corriendo como api en el 3000.',
       theory: {
-        what: 'WORKDIR fija la carpeta de trabajo de la imagen, RUN ejecuta una orden al construir (instalar dependencias), EXPOSE documenta el puerto y CMD dice qué arrancar al crear un contenedor.',
+        what: 'WORKDIR fija la carpeta de trabajo de la imagen, RUN ejecuta una orden al construir (instalar dependencias), EXPOSE documenta el puerto y CMD dice qué ejecutar al arrancar un contenedor.',
         how: [
           'FROM node:22-alpine',
           'WORKDIR /app',
@@ -710,7 +710,7 @@ export const BEGINNER: Unit[] = [
       title: 'Containerising the API',
       goal: 'Build api:1.0 from ~/api (Node 22 alpine, npm ci without dev dependencies, node server.js) and leave it running as api on 3000.',
       theory: {
-        what: 'WORKDIR sets the working folder of the image, RUN runs a command at build time (install dependencies), EXPOSE documents the port and CMD says what to start when a container is created.',
+        what: 'WORKDIR sets the working folder of the image, RUN runs a command at build time (install dependencies), EXPOSE documents the port and CMD says what to run when a container starts.',
         how: [
           'FROM node:22-alpine',
           'WORKDIR /app',

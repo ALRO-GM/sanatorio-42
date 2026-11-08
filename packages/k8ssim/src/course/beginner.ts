@@ -105,7 +105,7 @@ export const BEGINNER: Unit[] = [
       title: 'Tu primer Pod',
       goal: 'Arranca un Pod llamado web con nginx:1.27 y borra el Pod prueba, que ya no se usa.',
       theory: {
-        what: 'El Pod es la unidad mínima de Kubernetes: uno o varios contenedores que comparten red y disco y van siempre juntos al mismo nodo. kubectl run crea uno suelto.',
+        what: 'El Pod es la unidad mínima de Kubernetes: uno o varios contenedores que comparten red (la misma IP) y volúmenes y van siempre juntos al mismo nodo. kubectl run crea uno suelto.',
         how: [
           'kubectl run web --image=nginx:1.27   # crea el Pod',
           'kubectl get pods -o wide             # su estado, IP y nodo',
@@ -119,13 +119,13 @@ export const BEGINNER: Unit[] = [
         problems:
           'En Docker era docker run; aquí la imagen tiene que estar en un registro al que llegue el clúster, no en tu portátil.',
       },
-      example: 'Arrancas un Pod de prueba, lo miras con get, describe y logs y lo borras.',
+      example: 'Arrancas un Pod de prueba, lo miras con get y logs y lo borras.',
     },
     en: {
       title: 'Your first Pod',
       goal: 'Start a Pod called web with nginx:1.27 and delete the Pod prueba, which is no longer used.',
       theory: {
-        what: 'The Pod is the smallest unit in Kubernetes: one or more containers that share network and disk and always land together on the same node. kubectl run creates a standalone one.',
+        what: 'The Pod is the smallest unit in Kubernetes: one or more containers that share the network (the same IP) and volumes and always land together on the same node. kubectl run creates a standalone one.',
         how: [
           'kubectl run web --image=nginx:1.27   # create the Pod',
           'kubectl get pods -o wide             # its status, IP and node',
@@ -139,7 +139,7 @@ export const BEGINNER: Unit[] = [
         problems:
           'In Docker it was docker run; here the image must be in a registry the cluster can reach, not on your laptop.',
       },
-      example: 'You start a test Pod, look at it with get, describe and logs, and delete it.',
+      example: 'You start a test Pod, look at it with get and logs, and delete it.',
     },
     example: [
       'kubectl run demo --image=nginx:1.27-alpine',
@@ -170,9 +170,10 @@ export const BEGINNER: Unit[] = [
         ],
         when: 'Siempre que algo tenga que durar: lo que está en un YAML en git se puede revisar, repetir y deshacer.',
         problems:
-          'La sangría importa (espacios, nunca tabuladores) y un campo mal escrito da un error de validación: léelo, dice la línea.',
+          'La sangría importa (espacios, nunca tabuladores). Lee el error: si el YAML está mal formado, dice la línea (yaml: line 8); si falta un campo o no vale, dice cuál (spec.containers[0].image).',
       },
-      example: 'Generas un borrador con --dry-run, miras los campos con explain y lo aplicas.',
+      example:
+        'Generas un borrador con --dry-run, miras los campos con explain y aplicas un manifiesto escrito a mano.',
       objectives: {
         'get:default pod/web {.metadata.labels.equipo}': 'El Pod web lleva equipo=tienda',
       },
@@ -191,9 +192,10 @@ export const BEGINNER: Unit[] = [
         ],
         when: 'Whenever something must last: what is in a YAML file in git can be reviewed, repeated and undone.',
         problems:
-          'Indentation matters (spaces, never tabs) and a misspelt field gives a validation error: read it, it tells you the line.',
+          'Indentation matters (spaces, never tabs). Read the error: if the YAML is malformed it gives the line (yaml: line 8); if a field is missing or invalid it names it (spec.containers[0].image).',
       },
-      example: 'You generate a draft with --dry-run, look at the fields with explain and apply it.',
+      example:
+        'You generate a draft with --dry-run, look at the fields with explain and apply a manifest written by hand.',
       objectives: {
         'get:default pod/web {.metadata.labels.equipo}': 'Pod web is labelled equipo=tienda',
       },
@@ -579,7 +581,7 @@ export const BEGINNER: Unit[] = [
       title: 'Llegar desde tu máquina',
       goal: 'Haz que curl localhost:8080 en tu máquina conteste el nginx de web y crea además un Service web-np de tipo NodePort.',
       theory: {
-        what: 'Un ClusterIP solo se ve desde dentro. Para probar desde tu máquina, kubectl port-forward abre un túnel a un Pod (o a un Service). NodePort abre el mismo puerto (30000–32767) en todos los nodos; LoadBalancer pide una IP pública al proveedor.',
+        what: 'Un ClusterIP solo se ve desde dentro. Para probar desde tu máquina, kubectl port-forward abre un túnel a un Pod (con svc/ o deploy/, a uno de sus Pods). NodePort abre el mismo puerto (30000–32767) en todos los nodos; LoadBalancer pide una IP pública al proveedor.',
         how: [
           'kubectl port-forward svc/web 8080:80     # tu 8080 → el 80 del Service',
           'curl localhost:8080',
@@ -590,7 +592,7 @@ export const BEGINNER: Unit[] = [
         whenNot:
           'port-forward no es para dar servicio: vive mientras la orden sigue abierta (aquí se queda en segundo plano).',
       },
-      example: 'Abres un port-forward al Pod y al Service y los pruebas con curl.',
+      example: 'Abres un port-forward al Deployment (a uno de sus Pods) y lo pruebas con curl.',
       objectives: {
         'http:localhost:8080/': 'localhost:8080 contesta nginx',
         'get:tienda svc/web-np {.spec.type}': 'web-np es NodePort',
@@ -600,7 +602,7 @@ export const BEGINNER: Unit[] = [
       title: 'Reaching it from your machine',
       goal: "Make curl localhost:8080 on your machine answer with web's nginx and also create a NodePort Service called web-np.",
       theory: {
-        what: 'A ClusterIP is only visible from inside. To try it from your machine, kubectl port-forward opens a tunnel to a Pod (or a Service). NodePort opens the same port (30000–32767) on every node; LoadBalancer asks the provider for a public IP.',
+        what: 'A ClusterIP is only visible from inside. To try it from your machine, kubectl port-forward opens a tunnel to a Pod (with svc/ or deploy/, to one of its Pods). NodePort opens the same port (30000–32767) on every node; LoadBalancer asks the provider for a public IP.',
         how: [
           'kubectl port-forward svc/web 8080:80     # your 8080 → the Service 80',
           'curl localhost:8080',
@@ -611,7 +613,7 @@ export const BEGINNER: Unit[] = [
         whenNot:
           'port-forward is not for serving traffic: it lives while the command stays open (here it stays in the background).',
       },
-      example: 'You open a port-forward to the Pod and to the Service and try them with curl.',
+      example: 'You open a port-forward to the Deployment (one of its Pods) and try it with curl.',
       objectives: {
         'http:localhost:8080/': 'localhost:8080 answers with nginx',
         'get:tienda svc/web-np {.spec.type}': 'web-np is a NodePort',
@@ -762,6 +764,7 @@ export const BEGINNER: Unit[] = [
         what: 'Un Secret es como un ConfigMap para contraseñas y tokens: se lee igual (env, envFrom, volumen) pero se trata aparte (permisos, no se enseña en describe). Ojo: en base64 no está cifrado, solo codificado. Es el .env de Compose.',
         how: [
           'kubectl create secret generic db --from-literal=POSTGRES_PASSWORD=secreto',
+          'kubectl create secret generic db --from-env-file=.env   # o un .env entero (CLAVE=valor)',
           "kubectl get secret db -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d",
           'kubectl set env deployment/db --from=secret/db       # o secretKeyRef en el YAML',
         ],
@@ -769,7 +772,8 @@ export const BEGINNER: Unit[] = [
         problems:
           'Nunca subas un Secret en claro a git: base64 se deshace en un segundo. Se crean a mano, desde la CI o con herramientas como Sealed Secrets o External Secrets.',
       },
-      example: 'Creas un Secret, lo ves en base64 y lo lees con base64 -d.',
+      example:
+        'Creas un Secret, lo ves en base64, lo lees con base64 -d y ves que db sigue sin arrancar.',
       objectives: {
         'ready:tienda deploy/db': 'db en marcha',
         'get:tienda secret/db {.data.POSTGRES_PASSWORD}': 'El Secret db guarda la contraseña',
@@ -782,6 +786,7 @@ export const BEGINNER: Unit[] = [
         what: "A Secret is like a ConfigMap for passwords and tokens: it is read the same way (env, envFrom, volume) but handled separately (permissions, hidden in describe). Careful: base64 is not encryption, just encoding. It is Compose's .env.",
         how: [
           'kubectl create secret generic db --from-literal=POSTGRES_PASSWORD=secreto',
+          'kubectl create secret generic db --from-env-file=.env   # or a whole .env (KEY=value)',
           "kubectl get secret db -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d",
           'kubectl set env deployment/db --from=secret/db       # or secretKeyRef in the YAML',
         ],
@@ -789,7 +794,8 @@ export const BEGINNER: Unit[] = [
         problems:
           'Never push a plain Secret to git: base64 is undone in a second. They are created by hand, from CI or with tools like Sealed Secrets or External Secrets.',
       },
-      example: 'You create a Secret, see it in base64 and read it with base64 -d.',
+      example:
+        'You create a Secret, see it in base64, read it with base64 -d and see that db still does not start.',
       objectives: {
         'ready:tienda deploy/db': 'db running',
         'get:tienda secret/db {.data.POSTGRES_PASSWORD}': 'Secret db holds the password',
@@ -826,7 +832,7 @@ export const BEGINNER: Unit[] = [
       title: 'Imágenes privadas y etiquetas',
       goal: 'La API (ghcr.io/peer4u/api:1.0.0) se queda en ImagePullBackOff. Crea el Secret de registro ghcr con tu token y haz que la API lo use.',
       theory: {
-        what: 'Para descargar de un registro privado el clúster necesita credenciales: un Secret de tipo docker-registry y, en el Pod, imagePullSecrets (o en la ServiceAccount, y así lo usan todos). Las imágenes van siempre con etiqueta fija: la versión y, mejor aún, el commit, como en el curso de Docker.',
+        what: 'Para descargar de un registro privado el clúster necesita credenciales: un Secret de tipo docker-registry y, en el Pod, imagePullSecrets (o en la ServiceAccount, y así lo usan todos sus Pods). Las imágenes van siempre con etiqueta fija: la versión y, mejor aún, el commit, como en el curso de Docker.',
         how: [
           'kubectl create secret docker-registry ghcr --docker-server=ghcr.io \\',
           '  --docker-username=peer --docker-password=$(cat ~/.ghcr-token)',
@@ -844,7 +850,7 @@ export const BEGINNER: Unit[] = [
       title: 'Private images and tags',
       goal: 'The API (ghcr.io/peer4u/api:1.0.0) is stuck in ImagePullBackOff. Create registry Secret ghcr with your token and make the API use it.',
       theory: {
-        what: 'To pull from a private registry the cluster needs credentials: a docker-registry Secret and, in the Pod, imagePullSecrets (or on the ServiceAccount, so everybody uses it). Images always carry a fixed tag: the version and, even better, the commit, as in the Docker course.',
+        what: 'To pull from a private registry the cluster needs credentials: a docker-registry Secret and, in the Pod, imagePullSecrets (or on the ServiceAccount, so all its Pods use it). Images always carry a fixed tag: the version and, even better, the commit, as in the Docker course.',
         how: [
           'kubectl create secret docker-registry ghcr --docker-server=ghcr.io \\',
           '  --docker-username=peer --docker-password=$(cat ~/.ghcr-token)',

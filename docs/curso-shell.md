@@ -1,7 +1,7 @@
 # Curso de shell de Linux
 
 Un curso para manejarse en la shell de un servidor Linux, de lo más básico a
-lo que se hace en una guardia de verdad. Sigue la
+lo que se hace en un turno de on-call de verdad. Sigue la
 [plantilla de cursos](plantilla-cursos.md): cada conocimiento tiene **teoría,
 ejemplo y prueba**, cada bloque acaba en un **jefe contrarreloj** y cada nivel
 en un **jefe final** que da su certificado (principiante, intermedio,

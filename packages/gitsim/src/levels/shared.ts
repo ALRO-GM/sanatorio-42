@@ -12,8 +12,12 @@ export const WORLD_2: Level[] = [
     title: 'Clonar y subir',
     goal: 'Clona origin, haz un commit en main y súbelo.',
     theory: {
-      what: 'Un remoto (origin) es otra copia del repositorio, normalmente en GitHub o en el GitLab de 42. clone la copia entera; push sube tus commits.',
-      how: ['git clone', 'git commit -m "mi parte"', 'git push'],
+      what: 'Un remoto (origin) es otra copia del repositorio, normalmente en GitHub o en el GitLab de 42. clone lo copia entero; push sube tus commits.',
+      how: [
+        'git clone git@github.com:equipo/peer4u.git   # aquí basta con git clone',
+        'git commit -m "mi parte"',
+        'git push',
+      ],
       when: 'clone una vez al empezar; push cuando tu trabajo está listo para que lo vean los demás.',
       whenNot: 'push de algo que no compila a una rama que usa más gente.',
       looks: 'Aparece origin/main: dónde estaba main en origin la última vez que hablaste con él.',
@@ -146,7 +150,7 @@ export const WORLD_3: Level[] = [
       how: [
         'git commit --amend -m "Arregla el parser"',
         'git add olvidado.c',
-        'git commit --amend',
+        'git commit --amend --no-edit   # mismo mensaje',
       ],
       when: 'Justo después de un commit con un error tonto, antes de subirlo.',
       whenNot: 'Si ya lo has subido: los demás tienen el viejo y tendrás que forzar el push.',
@@ -407,7 +411,7 @@ export const WORLD_5: Level[] = [
     world: 5,
     kind: 'step',
     title: 'Versiones: tag',
-    goal: 'Marca main como v1.0 y la anterior como v0.9.',
+    goal: 'Marca main como v1.0 y el commit anterior como v0.9.',
     theory: {
       what: 'Un tag es un nombre fijo para un commit: una versión. A diferencia de una rama, no se mueve.',
       how: ['git tag v1.0', 'git tag v0.9 HEAD~1', 'git push --tags'],
@@ -461,7 +465,7 @@ export const WORLD_5: Level[] = [
     world: 5,
     kind: 'review',
     title: 'Gitflow: hotfix',
-    goal: 'Hay un fallo en v1.0: saca hotfix de main, arréglalo, únelo con --no-ff en main (v1.0.1) y en develop.',
+    goal: 'Hay un fallo en v1.0: saca hotfix de main, arréglalo, únelo en main con --no-ff, márcalo como v1.0.1 y únelo también en develop.',
     theory: {
       what: 'Un hotfix sale de main (lo publicado), no de develop (que tiene cosas a medias). Se une en los dos sitios para que el arreglo no se pierda.',
       how: [
@@ -505,7 +509,7 @@ export const WORLD_5: Level[] = [
       what: 'Trunk-based: todo el mundo une en main varias veces al día, con ramas de horas. Pide tests automáticos que lo protejan.',
       how: [
         'git switch -c mini',
-        'git commit',
+        'git commit -m "pequeño cambio"',
         'git switch main',
         'git pull',
         'git switch mini',

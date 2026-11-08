@@ -8,7 +8,11 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
     goal: 'Clone origin, make a commit on main and push it.',
     theory: {
       what: "A remote (origin) is another copy of the repository, usually on GitHub or on 42's GitLab. clone copies the whole thing; push uploads your commits.",
-      how: ['git clone', 'git commit -m "my part"', 'git push'],
+      how: [
+        'git clone git@github.com:equipo/peer4u.git   # here plain git clone is enough',
+        'git commit -m "my part"',
+        'git push',
+      ],
       when: 'clone once, when you start; push when your work is ready for others to see.',
       whenNot: 'Pushing something that does not compile to a branch other people use.',
       looks: 'origin/main appears: where main was on origin the last time you talked to it.',
@@ -80,7 +84,11 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
     goal: 'The last commit has a wrong message: redo it with the message «Arregla el parser».',
     theory: {
       what: 'commit --amend changes the last commit (message or files). It actually makes a new one and leaves the old one without a branch.',
-      how: ['git commit --amend -m "Fix the parser"', 'git add olvidado.c', 'git commit --amend'],
+      how: [
+        'git commit --amend -m "Arregla el parser"',
+        'git add olvidado.c',
+        'git commit --amend --no-edit   # same message',
+      ],
       when: 'Right after a commit with a silly mistake, before you push it.',
       whenNot:
         'If you already pushed it: the others have the old one and you will have to force the push.',
@@ -200,7 +208,7 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
   },
   'w5-tag': {
     title: 'Versions: tag',
-    goal: 'Mark main as v1.0 and the previous one as v0.9.',
+    goal: 'Mark main as v1.0 and the commit before it as v0.9.',
     theory: {
       what: 'A tag is a fixed name for a commit: a version. Unlike a branch, it does not move.',
       how: ['git tag v1.0', 'git tag v0.9 HEAD~1', 'git push --tags'],
@@ -230,7 +238,7 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
   },
   'w5-hotfix': {
     title: 'Gitflow: hotfix',
-    goal: 'There is a bug in v1.0: create hotfix from main, fix it, merge it with --no-ff into main (v1.0.1) and into develop.',
+    goal: 'There is a bug in v1.0: create hotfix from main, fix it, merge it into main with --no-ff, tag it v1.0.1 and merge it into develop too.',
     theory: {
       what: 'A hotfix starts from main (what is published), not from develop (which has half-done things). It is merged in both places so the fix is not lost.',
       how: [
@@ -254,7 +262,7 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
       what: 'Trunk-based: everyone merges into main several times a day, with branches that live for hours. It needs automated tests to protect it.',
       how: [
         'git switch -c mini',
-        'git commit',
+        'git commit -m "small change"',
         'git switch main',
         'git pull',
         'git switch mini',

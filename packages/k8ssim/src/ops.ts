@@ -1386,6 +1386,22 @@ const EXPLAIN: Record<string, [string, string, string[]]> = {
       'type\t<string>\n    enum: Recreate, RollingUpdate',
     ],
   ],
+  'statefulset.spec': [
+    'StatefulSet',
+    'Spec defines the desired identities of pods in this set.',
+    [
+      'minReadySeconds\t<integer>',
+      'persistentVolumeClaimRetentionPolicy\t<StatefulSetPersistentVolumeClaimRetentionPolicy>',
+      'podManagementPolicy\t<string>',
+      'replicas\t<integer>',
+      'revisionHistoryLimit\t<integer>',
+      'selector\t<LabelSelector> -required-',
+      'serviceName\t<string>',
+      'template\t<PodTemplateSpec> -required-',
+      'updateStrategy\t<StatefulSetUpdateStrategy>',
+      'volumeClaimTemplates\t<[]PersistentVolumeClaim>',
+    ],
+  ],
   service: [
     'Service',
     'Service is a named abstraction of software service (for example, mysql) consisting of local port (for example 3306) that the proxy listens on, and the selector that determines which pods will answer requests sent through the proxy.',
@@ -1457,8 +1473,12 @@ function explain(ctx: Ctx, raw: readonly string[]): number {
   if (info === undefined)
     throw new Fail(`error: the server doesn't have a resource type "${head}"`, 1)
   if (doc === undefined) {
+    // Se sugiere solo algo que tenga ayuda: del mismo tipo si hay, y si no, la del Pod.
+    const kind = info.kind.toLowerCase()
+    const known = Object.keys(EXPLAIN).find((each) => each.split('.')[0] === kind && each !== key)
+
     ctx.io.out(
-      `GROUP:      ${info.apiVersion.includes('/') ? (info.apiVersion.split('/')[0] ?? '') : ''}\nKIND:       ${info.kind}\nVERSION:    ${info.apiVersion.split('/').at(-1) ?? ''}\n\nFIELD: ${tail.at(-1) ?? info.kind}\n\nDESCRIPTION:\n    (peer4u-sandbox: aquí solo hay ayuda de los campos que más se usan; prueba kubectl explain ${head}.spec)\n`,
+      `GROUP:      ${info.apiVersion.includes('/') ? (info.apiVersion.split('/')[0] ?? '') : ''}\nKIND:       ${info.kind}\nVERSION:    ${info.apiVersion.split('/').at(-1) ?? ''}\n\nFIELD: ${tail.at(-1) ?? info.kind}\n\nDESCRIPTION:\n    (peer4u-sandbox: aquí solo hay ayuda de los campos que más se usan; prueba kubectl explain ${known ?? 'pod.spec'})\n`,
     )
 
     return 0
