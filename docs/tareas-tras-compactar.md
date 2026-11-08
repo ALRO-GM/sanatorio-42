@@ -3,6 +3,44 @@
 En producción hasta 7a69796. Si la CI falla: `gh run view --job <id> --log-failed`
 (gh en `~/.local/bin`).
 
+
+## Cola del 2026-11-08 (push y despliegue autorizados)
+
+En producción hasta e911260 (secreto de 42 con relevo, git fuera del clúster,
+instalar como app, cargas con progreso, eje 1–26 del abandono).
+
+1. **Curso de Docker**: lo construye un agente en un worktree (migración 87).
+   Al acabar: revisar, `git merge --no-ff`, `npm install` (paquete nuevo
+   `packages/dockersim`), `npm run check`, push y despliegue. Investigación en
+   `docs/referencia/curso-docker-investigacion.md`.
+2. **Curso de Kubernetes**: después del de Docker, misma forma (migración 88).
+   Investigación hecha en `docs/referencia/curso-kubernetes-investigacion.md`.
+   Su examen 1 despliega lo del examen A de Docker.
+3. **Orden de cursos sin bloqueo** (Alberto): sugerir shell → git → Docker →
+   Kubernetes y cuál terminar antes, con enlace; nunca bloquear
+   (`shared/course`, regla en `docs/plantilla-cursos.md`).
+4. **Repaso exhaustivo de los cursos** (todos: git, shell, Docker, Kubernetes)
+   al terminarlos: que las explicaciones sean correctas, tengan sentido y
+   estén bien escritas (castellano e inglés).
+5. **Gamificación de los cursos**: en la pestaña Clasificaciones de campus y
+   logros para los banners del perfil (`features/profile/Achievements.tsx`,
+   `title.ts`, `TitlePicker.tsx`).
+6. Regla nueva: todo lo que tarde enseña progreso (`shared/ui/Refreshing.tsx`).
+7. **Agente de preguntas y explicaciones** (después de lo anterior):
+   - Investigar (papers, foros, aplicaciones) cómo se escriben preguntas de
+     opción múltiple con distractores coherentes: estructuras y reglas
+     (p. ej. las de Haladyna, que los distractores salgan de errores
+     frecuentes reales, sin pistas gramaticales ni «todas las anteriores»).
+   - Crear (o mejorar si existe) un agente en `.claude/agents/` que escriba
+     preguntas por proyecto, curso o genéricas: bien redactadas, con la buena y
+     las incorrectas coherentes con la pregunta, y **variantes** de cada
+     pregunta (afirmativa, negativa, otras palabras) y de cada respuesta, para
+     que no se memoricen frases.
+   - Investigar qué modelo pedagógico funciona mejor para explicar conceptos
+     y hacer una **plantilla de explicación** (explicación concreta + ejemplos
+     que demuestran lo explicado) que siga ese agente; con ella, el agente
+     completa el repaso de los cursos (punto 4).
+
 ## Gran tanda pedida por Alberto el 2026-11-01 (push y despliegue autorizados)
 
 Cinco agentes en worktrees (`.claude/worktrees/`), cada uno con commit local:
