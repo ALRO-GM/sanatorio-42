@@ -11,6 +11,8 @@ import { createShellCourseRepository, createShellCourseService } from './shellco
 import type { ShellCourseService } from './shellcourse.service.js'
 
 export { activeSecondsSchema, createCourseTimes } from './course-times.js'
+export { createShellCourseRepository, createShellCourseService } from './shellcourse.service.js'
+export type { TerminalCourse } from './shellcourse.service.js'
 export type { CourseTimes } from './course-times.js'
 
 export type ShellCourseModule = AppModule & { service: ShellCourseService }

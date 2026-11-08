@@ -33,6 +33,7 @@ const TREE: Record<PoolKey, Group> = {
   gitcourse: 'aprender',
   'gitcourse.groups': 'aprender',
   shellcourse: 'aprender',
+  dockercourse: 'aprender',
   estadisticas: 'campus',
   calendario: 'yo',
   clusters: 'campus',

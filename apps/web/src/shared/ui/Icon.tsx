@@ -236,6 +236,15 @@ const PATHS = {
       <path d="M7 9l3 3-3 3M12.5 15H17" />
     </>
   ),
+  /** Curso de Docker: contenedores apilados, como en un barco. */
+  contenedor: (
+    <>
+      <rect x="3" y="13" width="8" height="6" rx="1" />
+      <rect x="13" y="13" width="8" height="6" rx="1" />
+      <rect x="8" y="6" width="8" height="6" rx="1" />
+      <path d="M6 15v2M8 15v2M16 15v2M18 15v2M11 8v2M13 8v2" />
+    </>
+  ),
 
   // --- Avisos de un evento ---------------------------------------------------
   visto: (

@@ -41,8 +41,8 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
-| **Tamaño**      | 35 módulos de API con 258 rutas, 85 migraciones, 6 paquetes compartidos; 4 categorías con 18 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
-| **Calidad**     | 7 162 tests en 260 ficheros (6 217 de la API y 945 de la web, con 73 ficheros de pantallas; medido el 2026-11-07), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
+| **Tamaño**      | 36 módulos de API con 260 rutas, 87 migraciones, 7 paquetes compartidos; 4 categorías con 19 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
+| **Calidad**     | 7 248 tests en 266 ficheros (6 288 de la API y 960 de la web, con 74 ficheros de pantallas; medido el 2026-11-08), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
 | **Coste**       | 0 € al mes. La web y la máquina se cortan solas antes de pasar de la capa gratuita                                                                   |
@@ -95,7 +95,7 @@ modo está en [docs/interfaz.md](docs/interfaz.md).
 | ------------ | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | **Yo**       | Perfil (la portada) · Agenda · Calendario                                | Nivel, XP y títulos; health check (pace y black hole); metas por proyecto; todo lo tuyo y lo de 42 en un calendario |
 | **Ayuda**    | Peer to peer · Proyectos · Sprints · Pizarras · On-call                  | Quién te puede ayudar y dónde se sienta; dudas, guía y álbum de correcciones por proyecto; quedar en grupo; explicar algo; ofrecerse |
-| **Aprender** | Curso de git · Curso de shell · Not-games · Pomodoro                     | Cursos con terminal simulada; preguntas y ajedrez con más gente; concentrarse (y llevar una startup en una oficina viva) |
+| **Aprender** | Curso de git · Curso de shell · Curso de Docker · Not-games · Pomodoro   | Cursos con terminal simulada; preguntas y ajedrez con más gente; concentrarse (y llevar una startup en una oficina viva) |
 | **Campus**   | Clústeres · Amigos · Avance · Red · Exámenes · Clasificaciones            | Plano del campus; con quién te sientas; tu avance frente a la media; red de correcciones; examen en vivo     |
 
 Alrededor: el buscador de personas, el interruptor de disponibilidad, un buzón
@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-08 | Curso de Docker        | Curso nuevo en Aprender: 3 niveles, 9 bloques, 37 unidades, 9 jefes y 3 jefes finales con certificado, en una terminal con Docker simulado (Dockerfiles, compose, registro); sugiere hacer antes el de shell sin bloquear ([docs/curso-docker.md](docs/curso-docker.md)) |
 | 2026-11-07 | Abandono | En las piscinas terminadas el abandono ya no se estima: quien vino hasta dos días antes del examen final la terminó; el resto la dejó tras el último día que vino a un puesto, examen o corrección ([docs/abandono.md](docs/abandono.md)) |
 | 2026-11-07 | Avance | La gráfica de la piscina va por semanas, hasta el viernes del examen final, con cada viernes de examen marcado; y en la vista sin límites, «Quién cuenta»: todos, quien sigue o quien abandonó ([docs/piscineros.md](docs/piscineros.md)) |
 | 2026-11-07 | Red | En la vista de piscinero sin límites, la Red abre por la de toda la piscina en curso o la última, desde su primer día ([docs/piscineros.md](docs/piscineros.md)) |
@@ -253,6 +254,7 @@ packages/
   contracts/           tipos de cada respuesta de la API (solo tipos)
   course/              plantilla común de los cursos
   gitsim/  shellsim/   git y shell simulados (web y API)
+  dockersim/           Docker simulado sobre la shell (curso de Docker)
   clicker/ startup/    motores de Code Clicker y de la startup del Pomodoro
 infra/                 Dockerfile, compose, Caddyfile, Oracle y guiones
                        (despliegue, copias, restauración, guardia de límites)
@@ -338,6 +340,7 @@ Cada uno por dentro, con diagramas: [docs/componentes.md](docs/componentes.md).
 | `client-errors` | Fallos de la web en el navegador de cada cual, para enterarse |
 | `collection` | Álbum de correcciones: rareza de cada proyecto y clasificaciones de completitud |
 | `countdowns` | Cuentas atrás: las del panel (taquillas) y lo que cada cual fija |
+| `dockercourse` | Curso de Docker con Docker simulado, jefes y certificados (el servicio de `shellcourse` con otro motor) |
 | `doubts` | Tablón de dudas por proyecto, guía que mantienen los seniors y el grafo del plan |
 | `exams` | Exámenes: intentos y notas, examen en vivo, días por círculo y black hole, por plan y kickoff |
 | `facility` | Avisos al staff de problemas del edificio o de los ordenadores |

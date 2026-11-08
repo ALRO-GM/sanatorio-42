@@ -69,6 +69,8 @@ import { createGitCourseModule } from '../modules/gitcourse/index.js'
 import type { GitCourseModule } from '../modules/gitcourse/index.js'
 import { createShellCourseModule } from '../modules/shellcourse/index.js'
 import type { ShellCourseModule } from '../modules/shellcourse/index.js'
+import { createDockerCourseModule } from '../modules/dockercourse/index.js'
+import type { DockerCourseModule } from '../modules/dockercourse/index.js'
 import type { FacilityModule } from '../modules/facility/index.js'
 import { createStatsModule } from '../modules/stats/index.js'
 import { createCollectionModule } from '../modules/collection/index.js'
@@ -159,6 +161,7 @@ export type Services = {
   focus: FocusModule['service']
   gitCourse: GitCourseModule['service']
   shellCourse: ShellCourseModule['service']
+  dockerCourse: DockerCourseModule['service']
   pool: PoolModule['service']
   poolMembers: ReplicaModule['poolMembers']
   /** Quién ve a quién: estudiantes y piscineros separados. */
@@ -545,6 +548,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
 
   const shellCourse = createShellCourseModule({ db, ...clock })
+  const dockerCourse = createDockerCourseModule({ db, ...clock })
 
   // `admin` va el primero: sus ganchos de consumo solo ven las rutas que se
   // registran después.
@@ -586,6 +590,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     }),
     gitCourse,
     shellCourse,
+    dockerCourse,
     pool,
     // El álbum de correcciones del tablón (`docs/correcciones-coleccion.md`).
     createCollectionModule({
@@ -649,6 +654,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       focus: focus.service,
       gitCourse: gitCourse.service,
       shellCourse: shellCourse.service,
+      dockerCourse: dockerCourse.service,
       pool: pool.service,
       poolMembers: replica.poolMembers,
       audience,

@@ -9,6 +9,16 @@ export { LIMITS } from './limits.js'
 export type { World } from './model.js'
 export { isIncomplete, run } from './run.js'
 export type { RunResult } from './interp.js'
+
+// Lo que necesita otro motor que se apoya en esta shell (`extend.ts`; el de Docker).
+export type { Extension, HttpReply } from './extend.js'
+export type { CommandFn, Ctx } from './commands/types.js'
+export { getopts } from './commands/types.js'
+export type { FsNode, Machine, User } from './model.js'
+export { cloneWorld, ShellError } from './model.js'
+export { freshSession } from './interp.js'
+export { Fail, lookup, makeDir, writeText } from './fs.js'
+export { commandsIn } from './parse.js'
 export {
   BLOCKS,
   blockOf,

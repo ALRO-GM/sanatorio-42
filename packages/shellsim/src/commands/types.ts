@@ -5,6 +5,7 @@
  * mensaje de error de verdad («ls: cannot access 'x': No such file…»).
  */
 
+import type { Extension } from '../extend.js'
 import type { Budget } from '../limits.js'
 import type { Machine, Session, User, World } from '../model.js'
 
@@ -45,6 +46,8 @@ export type Io = {
 export type ShellApi = {
   world: World
   budget: Budget
+  /** Los programas y puertos de otro motor (`extend.ts`), si los hay. */
+  ext?: Extension | undefined
   machine: () => Machine
   /** Quien ejecuta ahora (con `sudo`, root). */
   user: () => User

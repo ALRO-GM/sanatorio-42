@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-252 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+260 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -259,3 +259,11 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.studio.title.4` | Demostración animada de Personalizar: título del paso 4 | shared/tour/Tour | Prueba un estilo | Try a style | Prova un estil | Probatu estilo bat | Essaie un style |
 | `tour.studio.5` | Demostración animada de Personalizar: frase del paso 5 | shared/tour/Tour | Todo se guarda solo: Listo solo cierra la ventana. | Everything saves itself: Done just closes the window. | Tot es desa sol: Fet només tanca la finestra. | Dena bakarrik gordetzen da: Eginda sakatuta leihoa ixten da, besterik ez. | Tout s'enregistre tout seul : Terminé ferme juste la fenêtre. |
 | `tour.studio.title.5` | Demostración animada de Personalizar: título del paso 5 | shared/tour/Tour | Se guarda solo | Saves itself | Es desa sol | Bakarrik gordetzen da | Tout s'enregistre |
+| `tour.dockerCourse.1` | Demostración animada del curso de Docker: frase del paso 1 | shared/tour/Tour | Elige la siguiente unidad; la sugerencia de orden no bloquea. | Pick the next unit; the order suggestion does not block you. | Tria la unitat següent; el suggeriment d'ordre no bloqueja. | Aukeratu hurrengo unitatea; ordenaren iradokizunak ez du blokeatzen. | Choisis l'unité suivante ; la suggestion d'ordre ne bloque rien. |
+| `tour.dockerCourse.title.1` | Demostración animada del curso de Docker: título del paso 1 | shared/tour/Tour | Las unidades | The units | Les unitats | Unitateak | Les unités |
+| `tour.dockerCourse.2` | Demostración animada del curso de Docker: frase del paso 2 | shared/tour/Tour | Lees la teoría y ves un ejemplo que se ejecuta de verdad. | Read the theory and watch an example that really runs. | Llegeixes la teoria i veus un exemple que s'executa de veritat. | Teoria irakurri eta benetan exekutatzen den adibide bat ikusten duzu. | Lis la théorie et regarde un exemple qui s'exécute vraiment. |
+| `tour.dockerCourse.title.2` | Demostración animada del curso de Docker: título del paso 2 | shared/tour/Tour | Teoría y ejemplo | Theory and example | Teoria i exemple | Teoria eta adibidea | Théorie et exemple |
+| `tour.dockerCourse.3` | Demostración animada del curso de Docker: frase del paso 3 | shared/tour/Tour | Escribe en la terminal: los objetivos se marcan solos. | Type in the terminal: the goals tick themselves. | Escriu al terminal: els objectius es marquen sols. | Idatzi terminalean: helburuak bakarrik markatzen dira. | Écris dans le terminal : les objectifs se cochent tout seuls. |
+| `tour.dockerCourse.title.3` | Demostración animada del curso de Docker: título del paso 3 | shared/tour/Tour | La terminal | The terminal | El terminal | Terminala | Le terminal |
+| `tour.dockerCourse.4` | Demostración animada del curso de Docker: frase del paso 4 | shared/tour/Tour | Cada bloque acaba en un jefe contrarreloj. | Each block ends with a timed boss. | Cada bloc acaba amb un cap contrarellotge. | Bloke bakoitza erlojupeko buruzagi batekin amaitzen da. | Chaque bloc se termine par un boss contre la montre. |
+| `tour.dockerCourse.title.4` | Demostración animada del curso de Docker: título del paso 4 | shared/tour/Tour | Jefe contrarreloj | Timed boss | Cap contrarellotge | Erlojupeko buruzagia | Boss contre la montre |

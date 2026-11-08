@@ -33,6 +33,7 @@
     "@sanatorio/clicker": "*",
     "@sanatorio/course": "*",
     "@sanatorio/gitsim": "*",
+    "@sanatorio/dockersim": "*",
     "@sanatorio/shellsim": "*",
     "@sanatorio/startup": "*",
     "chess.js": "1.4.0",

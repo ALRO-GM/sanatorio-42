@@ -15,11 +15,13 @@ import type {
   CourseCertificate,
   CourseRun,
   CourseStars,
+  CourseTier,
   ShellAttemptResult,
   ShellBossStart,
   ShellCourse,
 } from '@sanatorio/contracts'
 import { checkAttempt, estimateOf, FINALS, LIMITS, TIERS, UNITS } from '@sanatorio/shellsim'
+import type { Stars } from '@sanatorio/course'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
@@ -32,11 +34,42 @@ import { parse } from '../../core/validation.js'
 import { activeSecondsSchema } from './course-times.js'
 import type { CourseTimes } from './course-times.js'
 
+/**
+ * Un curso que se juega en una terminal simulada y se corrige volviendo a
+ * ejecutar las órdenes: el de shell y el de Docker (`modules/dockercourse`)
+ * comparten este servicio; cada uno trae su motor y sus tablas.
+ */
+export type TerminalCourse<U extends { id: string; limit?: number }> = {
+  /** Cómo se llama en `course_times`. */
+  name: 'shell' | 'docker'
+  units: readonly U[]
+  finals: Record<CourseTier, string>
+  tiers: readonly CourseTier[]
+  limits: { entry: number; attemptEntries: number }
+  checkAttempt: (
+    unit: U,
+    entries: readonly string[],
+    seconds?: number,
+  ) => { done: boolean; stars: Stars | 0; commands: number; misses: string[] }
+  estimateOf: (unit: U) => number
+}
+
+const SHELL: TerminalCourse<(typeof UNITS)[number]> = {
+  name: 'shell',
+  units: UNITS,
+  finals: FINALS,
+  tiers: TIERS,
+  limits: LIMITS,
+  checkAttempt,
+  estimateOf,
+}
+
 // Los mismos topes que la terminal: la API vuelve a ejecutar cada orden.
-const attemptSchema = z.object({
-  entries: z.array(z.string().max(LIMITS.entry)).max(LIMITS.attemptEntries),
-  activeSeconds: activeSecondsSchema,
-})
+const attemptSchemaOf = (limits: { entry: number; attemptEntries: number }) =>
+  z.object({
+    entries: z.array(z.string().max(limits.entry)).max(limits.attemptEntries),
+    activeSeconds: activeSecondsSchema,
+  })
 
 /**
  * Intentos por persona: la web manda uno al llegar al objetivo, así que 30
@@ -50,7 +83,13 @@ const STARTS_PER_WINDOW = 20
 /** Margen del contrarreloj por lo que tarda la red en llevar el intento. */
 const GRACE_S = 5
 
-export function createShellCourseRepository(db: Db) {
+/** Las tablas de cada curso (las de shell, de la migración 74; las de Docker, de la 87). */
+type Tables = { progress: 'shell_progress' | 'docker_progress'; runs: 'shell_runs' | 'docker_runs' }
+
+export function createShellCourseRepository(
+  db: Db,
+  tables: Tables = { progress: 'shell_progress', runs: 'shell_runs' },
+) {
   return {
     async progress(login: string): Promise<{
       stars: Record<string, CourseStars>
@@ -58,7 +97,7 @@ export function createShellCourseRepository(db: Db) {
       at: Record<string, string>
     }> {
       const result = await db.execute({
-        sql: 'SELECT unit, stars, commands, seconds, done_at FROM shell_progress WHERE login = ?',
+        sql: `SELECT unit, stars, commands, seconds, done_at FROM ${tables.progress} WHERE login = ?`,
         args: [login],
       })
       const stars: Record<string, CourseStars> = {}
@@ -89,7 +128,7 @@ export function createShellCourseRepository(db: Db) {
       at: string,
     ): Promise<void> {
       await db.execute({
-        sql: `INSERT INTO shell_progress (login, unit, stars, commands, seconds, done_at) VALUES (?, ?, ?, ?, ?, ?)
+        sql: `INSERT INTO ${tables.progress} (login, unit, stars, commands, seconds, done_at) VALUES (?, ?, ?, ?, ?, ?)
               ON CONFLICT (login, unit) DO UPDATE SET
                 stars = MAX(stars, excluded.stars),
                 commands = MIN(commands, excluded.commands),
@@ -102,7 +141,7 @@ export function createShellCourseRepository(db: Db) {
 
     async runs(login: string): Promise<Record<string, string>> {
       const result = await db.execute({
-        sql: 'SELECT unit, started_at FROM shell_runs WHERE login = ?',
+        sql: `SELECT unit, started_at FROM ${tables.runs} WHERE login = ?`,
         args: [login],
       })
 
@@ -113,7 +152,7 @@ export function createShellCourseRepository(db: Db) {
 
     async startRun(login: string, unit: string, at: string): Promise<void> {
       await db.execute({
-        sql: `INSERT INTO shell_runs (login, unit, started_at) VALUES (?, ?, ?)
+        sql: `INSERT INTO ${tables.runs} (login, unit, started_at) VALUES (?, ?, ?)
               ON CONFLICT (login, unit) DO UPDATE SET started_at = excluded.started_at`,
         args: [login, unit, at],
       })
@@ -121,7 +160,7 @@ export function createShellCourseRepository(db: Db) {
 
     async endRun(login: string, unit: string): Promise<void> {
       await db.execute({
-        sql: 'DELETE FROM shell_runs WHERE login = ? AND unit = ?',
+        sql: `DELETE FROM ${tables.runs} WHERE login = ? AND unit = ?`,
         args: [login, unit],
       })
     },
@@ -130,12 +169,21 @@ export function createShellCourseRepository(db: Db) {
 
 type ShellCourseRepository = ReturnType<typeof createShellCourseRepository>
 
-export function createShellCourseService(deps: {
+export function createShellCourseService<
+  U extends { id: string; limit?: number } = (typeof UNITS)[number],
+>(deps: {
   progress: ShellCourseRepository
   /** Dónde se apunta el tiempo activo de cada punto superado. */
   times?: CourseTimes
   now?: () => number
+  /** El curso (de fábrica, el de shell). */
+  course?: TerminalCourse<U>
 }) {
+  const engine = (deps.course ?? SHELL) as unknown as TerminalCourse<U>
+  const UNITS = engine.units
+  const TIERS = engine.tiers
+  const FINALS = engine.finals
+  const attemptSchema = attemptSchemaOf(engine.limits)
   const now = deps.now ?? Date.now
   const attempts = createRateLimit({ max: ATTEMPTS_PER_WINDOW, windowMs: ATTEMPT_WINDOW_MS, now })
   const starts = createRateLimit({ max: STARTS_PER_WINDOW, windowMs: ATTEMPT_WINDOW_MS, now })
@@ -230,7 +278,7 @@ export function createShellCourseService(deps: {
         if (seconds > unit.limit && seconds <= unit.limit + GRACE_S) seconds = unit.limit
       }
 
-      const result = checkAttempt(unit, entries, seconds ?? undefined)
+      const result = engine.checkAttempt(unit, entries, seconds ?? undefined)
 
       if (result.done && result.stars > 0) {
         const first = (await deps.progress.progress(actor.login)).stars[unit.id] === undefined
@@ -247,10 +295,10 @@ export function createShellCourseService(deps: {
         if (activeSeconds !== undefined) {
           await deps.times?.record({
             login: actor.login,
-            course: 'shell',
+            course: engine.name,
             unit: unit.id,
             activeSeconds,
-            estimateSeconds: estimateOf(unit),
+            estimateSeconds: engine.estimateOf(unit),
             stars: result.stars,
             first,
             at: iso(now()),

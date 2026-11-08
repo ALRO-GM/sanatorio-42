@@ -149,6 +149,12 @@ export type World = {
   clock: number
   /** Semilla de `$RANDOM`, para que sea siempre la misma secuencia. */
   seed: number
+  /**
+   * El estado de otro motor que usa esta shell (`extend.ts`), por nombre: el
+   * de Docker guarda aquí imágenes y contenedores. Es JSON, como lo demás:
+   * se copia, se mide y cuenta en los topes con el mundo.
+   */
+  ext?: Record<string, unknown>
 }
 
 /** El mundo de partida, en el que empieza el reloj (25 oct 2026, 09:00 UTC). */

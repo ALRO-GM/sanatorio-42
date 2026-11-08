@@ -35,6 +35,7 @@ export const SECTIONS = [
   // menú de la cuenta), que es para todos: concentrarse no es «de datos».
   { id: 'cursogit', icon: 'chispa', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'cursoshell', icon: 'terminal', inNav: true, category: 'aprender', from: 'normal' },
+  { id: 'cursodocker', icon: 'contenedor', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'notgames', icon: 'pregunta', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'pomodoro', icon: 'reloj', inNav: true, category: 'aprender', from: 'simple' },
   // Campus: cómo va el campus y cómo vas tú frente a él.
@@ -128,6 +129,7 @@ const POOL_KEY: Record<Section, PoolKey | null> = {
   pizarras: 'pizarras',
   cursogit: 'gitcourse',
   cursoshell: 'shellcourse',
+  cursodocker: 'dockercourse',
   notgames: 'notgames',
   pomodoro: 'focus',
   estadisticas: 'estadisticas',

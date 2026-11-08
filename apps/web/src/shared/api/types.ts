@@ -35,6 +35,10 @@ import type {
   ShellAttemptResult,
   ShellBossStart,
   ShellCourse,
+  DockerAttemptInput,
+  DockerAttemptResult,
+  DockerBossStart,
+  DockerCourse,
   GitAttemptResult,
   GitCourse,
   CoursePlace,
@@ -417,6 +421,9 @@ export type Api = {
   getShellCourse: () => Promise<ShellCourse>
   submitShellAttempt: (unit: string, input: ShellAttemptInput) => Promise<ShellAttemptResult>
   startShellBoss: (unit: string) => Promise<ShellBossStart>
+  getDockerCourse: () => Promise<DockerCourse>
+  submitDockerAttempt: (unit: string, input: DockerAttemptInput) => Promise<DockerAttemptResult>
+  startDockerBoss: (unit: string) => Promise<DockerBossStart>
   startFocus: (settings: FocusSettings) => Promise<Focus>
   stopFocus: (reasons?: FocusReason[]) => Promise<Focus>
   /** Querías acabar el Pomodoro y sigues: se apunta con los motivos marcados. */
