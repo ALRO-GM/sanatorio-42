@@ -324,6 +324,7 @@ Pedido por Alberto el 2026-11-06 ([abandono.md](abandono.md)). Solo quien admini
 | Interruptor «Disponible» | S | Todos `[guardia]` | `features/peers/AvailabilityToggle.tsx` |
 | Interrogante: se arrastra sobre un sitio y abre su demostración | S | Todos | `features/suggest/HelpBubble.tsx` |
 | Bicho de sugerencias: se suelta sobre algo y abre un panel con el sitio, el problema y tu propuesta | S | Todos `[tickets]` | `SuggestBubble.tsx`, `SuggestPanel.tsx` |
+| Instalar como aplicación (icono de bandeja con flecha): solo si el navegador lo permite y aún no está instalada; en Safari de iPhone y iPad explica cómo hacerlo desde Compartir. Iconos PNG, manifest con `id` y `scope` y etiquetas de iOS para instalarla en cualquier dispositivo | S | Todos | `app/InstallButton.tsx`, `shared/install.ts`, `public/manifest.webmanifest` |
 | Buzón con el número de sin leer | S | Todos `[mailbox]` | `features/notices/Mailbox.tsx` |
 | Categorías y, debajo, secciones de la abierta (en el móvil, barra fija abajo) | S | Todos | `app/Nav.tsx` |
 

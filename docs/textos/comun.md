@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-445 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+447 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -452,3 +452,5 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `focus.open` | Menú de la cuenta: lleva a la pestaña del Pomodoro | app/Header | Pomodoro (modo concentración) | Pomodoro (focus mode) | Pomodoro (mode concentració) | Pomodoroa (kontzentrazio modua) | Pomodoro (mode concentration) |
 | `app.loadingSlow` | Mientras carga algo que tarda más de un par de segundos | shared/ui/Async | Sigue en marcha: juntando los datos… | Still working: gathering the data… | Encara en marxa: reunint les dades… | Martxan jarraitzen du: datuak biltzen… | Toujours en cours : collecte des données… |
 | `app.loadingAlmost` | Mientras carga algo que tarda bastante | shared/ui/Async | Casi está: poniéndolo en orden… | Almost there: putting it in order… | Gairebé hi és: posant-ho en ordre… | Ia prest: ordenatzen… | Presque fini : mise en ordre… |
+| `app.install` | Cabecera: icono para instalar la web como aplicación en el ordenador o el móvil; solo sale si el navegador lo permite. Es su nombre accesible y su globo. | app/InstallButton | Instalar Peer4U como aplicación | Install Peer4U as an app | Instal·lar Peer4U com a aplicació | Instalatu Peer4U aplikazio gisa | Installer Peer4U comme application |
+| `app.install.apple` | Cabecera: en Safari de iPhone y iPad no se puede instalar desde la página; al pulsar el icono de instalar se explica cómo hacerlo a mano. «Compartir» y «Añadir a pantalla de inicio» son los nombres del menú de Safari en cada idioma. | app/InstallButton | Pulsa Compartir (el cuadrado con la flecha hacia arriba) y luego «Añadir a pantalla de inicio». | Tap Share (the square with the up arrow), then “Add to Home Screen”. | Toca Comparteix (el quadrat amb la fletxa cap amunt) i després «Afegeix a la pantalla d'inici». | Sakatu Partekatu (gora begira dagoen geziarekin karratua) eta gero «Gehitu hasierako pantailan». | Touche Partager (le carré avec la flèche vers le haut), puis « Sur l'écran d'accueil ». |

@@ -13,7 +13,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [calendario](calendario.md) | 105 | 0 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 82 | 0 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 0 |
-| [comun](comun.md) | 445 | 0 | 0 | 0 | 0 |
+| [comun](comun.md) | 447 | 0 | 0 | 0 | 0 |
 | [curso-shell](curso-shell.md) | 66 | 0 | 0 | 0 | 0 |
 | [demos](demos.md) | 252 | 0 | 0 | 0 | 0 |
 | [estadisticas](estadisticas.md) | 195 | 0 | 0 | 0 | 0 |

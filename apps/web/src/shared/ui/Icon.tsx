@@ -320,6 +320,8 @@ const PATHS = {
       <circle cx="15" cy="18" r="1" />
     </>
   ),
+  /** Instalar la web como aplicación: una flecha que baja a la bandeja. */
+  instalar: <path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14" />,
   /** El black hole: un pozo. */
   pozo: (
     <>

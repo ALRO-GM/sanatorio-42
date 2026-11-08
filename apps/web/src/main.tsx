@@ -1,3 +1,4 @@
+import { listenForInstall } from './shared/install'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 
@@ -25,6 +26,9 @@ watchErrors()
 
 // Sin nadie mirando, las animaciones se paran (y no calientan el equipo).
 watchStill()
+
+// El aviso de «se puede instalar» llega pronto: se escucha antes de pintar.
+listenForInstall()
 
 // Lo que se va usando de la web se queda en el PC (`public/sw.js`): la próxima
 // vez se abre sin bajarlo. Solo en la web compilada, no con `npm run dev`.
