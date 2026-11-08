@@ -186,19 +186,20 @@ export const ADVANCED: Unit[] = [
       title: 'Volúmenes persistentes',
       goal: 'Monta en db un PVC pgdata (ReadWriteOnce, 1Gi) en /var/lib/postgresql/data, crea la tabla pedidos y comprueba que sobrevive a borrar el Pod.',
       theory: {
-        what: 'Lo que un contenedor escribe en su disco se pierde cuando se recrea el Pod. Un PersistentVolumeClaim pide almacenamiento que vive aparte (el StorageClass lo aprovisiona: en k3s, local-path) y se monta en el Pod. Es el volumen con nombre del curso de Docker.',
+        what: 'Un PersistentVolumeClaim pide disco aparte del Pod: lo escrito ahí sobrevive al recrearlo.',
         how: [
-          'kubectl get storageclass                 # local-path (default)',
-          'kubectl apply -f pvc.yaml                # accessModes y resources.requests.storage',
-          '# en el Pod: volumes (persistentVolumeClaim) + volumeMounts en el contenedor',
-          'kubectl get pv,pvc                       # Bound cuando un Pod lo usa',
+          'kubectl get storageclass   # local-path (default)',
+          'kubectl apply -f pvc.yaml  # ReadWriteOnce, 1Gi',
+          'kubectl get pvc            # Bound cuando un Pod lo usa',
         ],
-        when: 'Para cualquier dato que tenga que sobrevivir: bases de datos, ficheros subidos, colas.',
+        when: 'Para datos que deben durar.',
+        whenNot:
+          'ReadWriteOnce: un solo nodo a la vez. Para bases de datos, StatefulSet (siguiente unidad).',
         problems:
-          'ReadWriteOnce se monta en un nodo a la vez: en una base de datos usa la estrategia Recreate o, mejor, un StatefulSet (siguiente unidad).',
+          'Una base de datos sin volumen: tras borrar su Pod, \\dt dice «Did not find any relations.» Monta un PVC en /var/lib/postgresql/data.',
       },
       example:
-        'Creas una tabla en la base de datos sin volumen, borras el Pod y ves que ya no está.',
+        'Antes de verlo: creas la tabla prueba en db, sin volumen, y borras su Pod. ¿Qué dirá \\dt?',
       objectives: {
         'exec:tienda deploy/db psql -U postgres -c \\dt': 'La tabla pedidos sigue ahí',
         'get:tienda pvc/pgdata {.status.phase}': 'pgdata enlazado (Bound)',
@@ -208,19 +209,19 @@ export const ADVANCED: Unit[] = [
       title: 'Persistent volumes',
       goal: 'Mount a PVC pgdata (ReadWriteOnce, 1Gi) on /var/lib/postgresql/data in db, create the table pedidos and check it survives deleting the Pod.',
       theory: {
-        what: 'Whatever a container writes to its disk is lost when the Pod is recreated. A PersistentVolumeClaim asks for storage that lives apart (the StorageClass provisions it: local-path on k3s) and is mounted into the Pod. It is the named volume from the Docker course.',
+        what: 'A PersistentVolumeClaim requests storage apart from the Pod: what is written there survives re-creation.',
         how: [
-          'kubectl get storageclass                 # local-path (default)',
-          'kubectl apply -f pvc.yaml                # accessModes and resources.requests.storage',
-          '# in the Pod: volumes (persistentVolumeClaim) + volumeMounts in the container',
-          'kubectl get pv,pvc                       # Bound once a Pod uses it',
+          'kubectl get storageclass   # local-path (default)',
+          'kubectl apply -f pvc.yaml  # ReadWriteOnce, 1Gi',
+          'kubectl get pvc            # Bound once a Pod uses it',
         ],
-        when: 'For any data that must survive: databases, uploaded files, queues.',
+        when: 'For data that must last.',
+        whenNot: 'ReadWriteOnce: one node at a time. For databases, StatefulSet (next unit).',
         problems:
-          'ReadWriteOnce mounts on one node at a time: for a database use the Recreate strategy or, better, a StatefulSet (next unit).',
+          'A database without a volume: after deleting its Pod, \\dt says "Did not find any relations." Mount a PVC on /var/lib/postgresql/data.',
       },
       example:
-        'You create a table in the database without a volume, delete the Pod and see it is gone.',
+        'Before you look: you create table prueba in db, without a volume, and delete its Pod. What will \\dt say?',
       objectives: {
         'exec:tienda deploy/db psql -U postgres -c \\dt': 'Table pedidos is still there',
         'get:tienda pvc/pgdata {.status.phase}': 'pgdata bound',
@@ -254,17 +255,20 @@ export const ADVANCED: Unit[] = [
       title: 'StatefulSet para la base de datos',
       goal: 'Levanta Postgres como StatefulSet db (1 réplica, con un Service headless db y un volumeClaimTemplate data de 1Gi).',
       theory: {
-        what: 'Un StatefulSet es como un Deployment para lo que tiene estado: cada Pod tiene nombre fijo (db-0, db-1…), arranca en orden y su propio PVC (de volumeClaimTemplates), que vuelve a ser suyo si se recrea. Con un Service headless (clusterIP: None), cada uno tiene DNS propio: db-0.db.',
+        what: 'Un StatefulSet da a cada Pod nombre fijo (db-0, db-1) y su propio PVC, que conserva al recrearse.',
         how: [
-          'kubectl apply -f db-statefulset.yaml     # serviceName: db y volumeClaimTemplates',
-          'kubectl get sts,pods,pvc                 # db-0 y data-db-0',
-          'kubectl delete pod db-0                  # vuelve db-0 con el mismo PVC',
+          'kubectl apply -f db.yaml   # serviceName y volumeClaimTemplates',
+          'kubectl get pods,pvc       # db-0 y data-db-0',
+          'kubectl delete pod db-0    # vuelve db-0, con su PVC',
         ],
-        when: 'Bases de datos, colas y todo lo que necesita identidad y disco propios.',
+        when: 'Bases de datos y colas.',
         whenNot:
-          'En producción, la base de datos casi siempre es un servicio gestionado (RDS, Cloud SQL): operar Postgres en Kubernetes es un trabajo en sí.',
+          'En producción, la base de datos suele ser un servicio gestionado (RDS, Cloud SQL).',
+        problems:
+          'Usar un Deployment: el Pod sale como «db-hc9k4fl4sl-74rkt» y cambia de nombre al recrearse.',
       },
-      example: 'Miras qué StorageClass hay y qué campos tiene un StatefulSet.',
+      example:
+        'Antes de verlo: borras cache-0 de un StatefulSet. ¿Con qué nombre vuelve, y qué PVC usa?',
       objectives: {
         'ready:tienda sts/db': 'db-0 en marcha',
         'get:tienda pvc/data-db-0 {.status.phase}': 'data-db-0 enlazado',
@@ -275,24 +279,32 @@ export const ADVANCED: Unit[] = [
       title: 'A StatefulSet for the database',
       goal: 'Run Postgres as StatefulSet db (1 replica, with a headless Service db and a 1Gi volumeClaimTemplate called data).',
       theory: {
-        what: 'A StatefulSet is like a Deployment for stateful things: each Pod has a fixed name (db-0, db-1…), starts in order and gets its own PVC (from volumeClaimTemplates), which is its again if recreated. With a headless Service (clusterIP: None) each gets its own DNS name: db-0.db.',
+        what: 'A StatefulSet gives each Pod a fixed name (db-0, db-1) and its own PVC, kept when recreated.',
         how: [
-          'kubectl apply -f db-statefulset.yaml     # serviceName: db and volumeClaimTemplates',
-          'kubectl get sts,pods,pvc                 # db-0 and data-db-0',
-          'kubectl delete pod db-0                  # db-0 comes back with the same PVC',
+          'kubectl apply -f db.yaml   # serviceName and volumeClaimTemplates',
+          'kubectl get pods,pvc       # db-0 and data-db-0',
+          'kubectl delete pod db-0    # db-0 returns, with its PVC',
         ],
-        when: 'Databases, queues and anything that needs its own identity and disk.',
-        whenNot:
-          'In production the database is nearly always a managed service (RDS, Cloud SQL): running Postgres on Kubernetes is a job in itself.',
+        when: 'Databases and queues.',
+        whenNot: 'In production the database is usually a managed service (RDS, Cloud SQL).',
+        problems:
+          'Using a Deployment: the Pod shows up as "db-hc9k4fl4sl-74rkt" and changes name when recreated.',
       },
-      example: 'You check which StorageClass exists and which fields a StatefulSet has.',
+      example:
+        'Before you look: you delete cache-0 from a StatefulSet. Under what name does it return, and with which PVC?',
       objectives: {
         'ready:tienda sts/db': 'db-0 running',
         'get:tienda pvc/data-db-0 {.status.phase}': 'data-db-0 bound',
         'get:tienda svc/db {.spec.clusterIP}': 'Service db is headless',
       },
     },
-    example: ['kubectl get storageclass', 'kubectl explain statefulset.spec'],
+    example: [
+      "cat <<'EOF' | kubectl apply -f -\napiVersion: apps/v1\nkind: StatefulSet\nmetadata: {name: cache}\nspec:\n  serviceName: cache\n  replicas: 2\n  selector:\n    matchLabels: {app: cache}\n  template:\n    metadata:\n      labels: {app: cache}\n    spec:\n      containers:\n      - name: redis\n        image: redis:7\n        volumeMounts: [{name: data, mountPath: /data}]\n  volumeClaimTemplates:\n  - metadata: {name: data}\n    spec:\n      accessModes: [ReadWriteOnce]\n      resources: {requests: {storage: 1Gi}}\nEOF",
+      'kubectl get pods',
+      'kubectl get pvc',
+      'kubectl delete pod cache-0',
+      'kubectl get pods',
+    ],
     solution: [applyIt(STATEFUL_DB)],
     check: {
       ready: ['tienda sts/db'],
@@ -309,19 +321,20 @@ export const ADVANCED: Unit[] = [
       title: 'Jobs y CronJobs',
       goal: 'Lanza las migraciones como el Job migra (la API con npm run migrate y el Secret db) hasta que acabe, y deja un CronJob copia que haga pg_dump a las 03:00.',
       theory: {
-        what: 'Un Job ejecuta Pods hasta que acaban bien (con reintentos: backoffLimit); un CronJob crea Jobs según un horario cron. Las migraciones van en un Job antes de desplegar; las copias, en un CronJob.',
+        what: 'Un Job ejecuta un Pod hasta que acaba bien, con reintentos; un CronJob crea Jobs según un horario cron.',
         how: [
-          'kubectl apply -f migra.yaml                         # restartPolicy: Never',
-          'kubectl wait --for=condition=complete job/migra',
-          'kubectl logs job/migra',
-          'kubectl create cronjob copia --image=postgres:16 --schedule="0 3 * * *" -- pg_dump …',
-          'kubectl create job copia-ya --from=cronjob/copia    # probarlo sin esperar',
+          'kubectl create job hola --image=busybox:1.36 -- echo hola',
+          'kubectl wait --for=condition=complete job/hola',
+          'kubectl logs job/hola',
+          'kubectl create cronjob copia --image=postgres:16 --schedule="0 3 * * *" -- pg_dump',
         ],
-        when: 'Para tareas que acaban: migraciones, informes, copias, limpiezas.',
+        when: 'Para tareas que acaban: migraciones, copias.',
+        whenNot: 'kubectl create job ya --from=cronjob/copia lo prueba sin esperar.',
         problems:
-          'Un Job no se vuelve a ejecutar si lo aplicas igual: para repetirlo, bórralo y créalo, o usa otro nombre.',
+          'Relanzar un Job con el mismo nombre: responde «jobs.batch "hola" already exists» y no se ejecuta. Bórralo antes.',
       },
-      example: 'Lanzas un Job sencillo, esperas a que acabe y lees sus registros.',
+      example:
+        'Antes de verlo: hola ya acabó y lo creas otra vez con el mismo nombre. ¿Se ejecutará de nuevo?',
       objectives: {
         'ready:tienda job/migra': 'migra terminado',
         'get:tienda cj/copia {.spec.schedule}': 'copia a las 03:00',
@@ -331,19 +344,20 @@ export const ADVANCED: Unit[] = [
       title: 'Jobs and CronJobs',
       goal: 'Run the migrations as Job migra (the API with npm run migrate and Secret db) until it completes, and leave a CronJob copia that runs pg_dump at 03:00.',
       theory: {
-        what: 'A Job runs Pods until they finish successfully (with retries: backoffLimit); a CronJob creates Jobs on a cron schedule. Migrations go in a Job before releasing; backups, in a CronJob.',
+        what: 'A Job runs a Pod until it finishes well, with retries; a CronJob creates Jobs on a cron schedule.',
         how: [
-          'kubectl apply -f migra.yaml                         # restartPolicy: Never',
-          'kubectl wait --for=condition=complete job/migra',
-          'kubectl logs job/migra',
-          'kubectl create cronjob copia --image=postgres:16 --schedule="0 3 * * *" -- pg_dump …',
-          'kubectl create job copia-ya --from=cronjob/copia    # try it without waiting',
+          'kubectl create job hola --image=busybox:1.36 -- echo hola',
+          'kubectl wait --for=condition=complete job/hola',
+          'kubectl logs job/hola',
+          'kubectl create cronjob copia --image=postgres:16 --schedule="0 3 * * *" -- pg_dump',
         ],
-        when: 'For tasks that finish: migrations, reports, backups, clean-ups.',
+        when: 'For tasks that finish: migrations, backups.',
+        whenNot: 'kubectl create job ya --from=cronjob/copia tries it without waiting.',
         problems:
-          'A Job does not run again if you apply it unchanged: to repeat it, delete and recreate it, or use another name.',
+          'Relaunching a Job with the same name: it answers "jobs.batch "hola" already exists" and does not run. Delete it first.',
       },
-      example: 'You run a simple Job, wait for it and read its logs.',
+      example:
+        'Before you look: hola already finished and you create it again with the same name. Will it run again?',
       objectives: {
         'ready:tienda job/migra': 'migra finished',
         'get:tienda cj/copia {.spec.schedule}': 'copia at 03:00',
@@ -353,6 +367,7 @@ export const ADVANCED: Unit[] = [
       'kubectl create job hola --image=busybox:1.36 -- echo hola desde un Job',
       'kubectl wait --for=condition=complete job/hola',
       'kubectl logs job/hola',
+      'kubectl create job hola --image=busybox:1.36 -- echo otra vez',
       'kubectl get jobs',
     ],
     solution: [
@@ -372,21 +387,20 @@ export const ADVANCED: Unit[] = [
       title: 'Contenedores init y sidecar',
       goal: 'Añade a la API (en ~/tienda/api.yaml) un contenedor init espera-db (busybox:1.36) que espere a que db:5432 conteste, y aplícalo.',
       theory: {
-        what: 'Los initContainers se ejecutan en orden antes que los de la app y tienen que acabar bien: esperar a otro servicio, migrar, preparar ficheros. Un sidecar es un contenedor más que acompaña a la app todo el rato (leer sus registros, un proxy); desde Kubernetes 1.29 se declara como un initContainer con restartPolicy: Always.',
+        what: 'Los initContainers se ejecutan antes que la app y tienen que acabar bien; un sidecar acompaña a la app todo el rato.',
         how: [
           'initContainers:',
           '- name: espera-db',
           '  image: busybox:1.36',
           '  command: ["sh", "-c", "until nc -z db 5432; do sleep 2; done"]',
-          'kubectl get pods                  # Init:0/1 y luego Running',
-          'kubectl logs <api-…> -c espera-db',
         ],
-        when: 'Cuando la app falla si arranca antes que lo que necesita, o para preparar algo antes.',
+        when: 'Cuando la app falla si arranca antes que otra.',
+        whenNot: 'Mientras el init no acaba, el Pod sale en Init:0/1.',
         problems:
-          'Un init que no acaba deja el Pod en Init:0/1 para siempre: mira sus registros con -c.',
+          'Confiar en que db ya está: la API arranca igual y sus logs dicen «db: connect ECONNREFUSED db:5432».',
       },
       example:
-        'Paras la base de datos, reinicias la API y ves que arranca igual y no llega a ella (ECONNREFUSED); luego vuelves a levantarla.',
+        'Antes de verlo: paras db y reinicias la API, que no tiene init. ¿Arrancará, y qué dirán sus logs?',
       objectives: {
         'get:tienda deploy/api {.spec.template.spec.initContainers[0].name} {.spec.template.spec.initContainers[0].image}':
           'espera-db con busybox:1.36',
@@ -397,21 +411,20 @@ export const ADVANCED: Unit[] = [
       title: 'Init and sidecar containers',
       goal: 'Add to the API (in ~/tienda/api.yaml) an init container espera-db (busybox:1.36) that waits until db:5432 answers, and apply it.',
       theory: {
-        what: 'initContainers run in order before the app ones and must finish successfully: wait for another service, migrate, prepare files. A sidecar is one more container that runs alongside the app all the time (reading its logs, a proxy); since Kubernetes 1.29 it is declared as an initContainer with restartPolicy: Always.',
+        what: 'initContainers run before the app and must finish well; a sidecar stays with the app all the time.',
         how: [
           'initContainers:',
           '- name: espera-db',
           '  image: busybox:1.36',
           '  command: ["sh", "-c", "until nc -z db 5432; do sleep 2; done"]',
-          'kubectl get pods                  # Init:0/1 and then Running',
-          'kubectl logs <api-…> -c espera-db',
         ],
-        when: 'When the app fails if it starts before what it needs, or to prepare something beforehand.',
+        when: 'When the app fails if it starts before another.',
+        whenNot: 'Until the init finishes, the Pod shows Init:0/1.',
         problems:
-          'An init that never finishes leaves the Pod at Init:0/1 forever: read its logs with -c.',
+          'Trusting db is already up: the API starts anyway and its logs say "db: connect ECONNREFUSED db:5432".',
       },
       example:
-        'You stop the database, restart the API and see it starts anyway and cannot reach it (ECONNREFUSED); then you bring the database back.',
+        'Before you look: you stop db and restart the API, which has no init. Will it start, and what will its logs say?',
       objectives: {
         'get:tienda deploy/api {.spec.template.spec.initContainers[0].name} {.spec.template.spec.initContainers[0].image}':
           'espera-db with busybox:1.36',
@@ -510,20 +523,19 @@ export const ADVANCED: Unit[] = [
       title: 'Ingress (y Gateway API)',
       goal: 'Publica la tienda en tienda.local con un Ingress tienda (clase traefik): / al front y /api a la API.',
       theory: {
-        what: 'Un Ingress es la puerta HTTP del clúster: según el host y la ruta manda cada petición a un Service. Lo atiende un controlador (en k3s, Traefik). Ingress NGINX está retirado desde marzo de 2026 y lo nuevo es Gateway API (Gateway + HTTPRoute), pero Ingress sigue siendo lo que hay en casi todos los clústeres.',
+        what: 'Un Ingress es la puerta HTTP del clúster: según el host y la ruta, manda cada petición a un Service.',
         how: [
           'kubectl create ingress tienda --class=traefik \\',
           '  --rule="tienda.local/*=front:80" --rule="tienda.local/api*=api:3000"',
-          'kubectl get ingress                     # ADDRESS: las IP de los nodos',
           'curl -H "Host: tienda.local" http://10.0.0.11/api/health',
-          '# Gateway API: kind: HTTPRoute, parentRefs: [{name: web}],',
-          '#   rules: [{matches: [{path: {value: /api}}], backendRefs: [{name: api, port: 3000}]}]',
         ],
-        when: 'Para exponer varias apps web por un solo punto de entrada, con nombres y TLS.',
+        when: 'Para publicar varias webs por una sola entrada.',
+        whenNot: 'La regla de /api casa /api/health pero no /apiv2, que cae en la de /.',
         problems:
-          'pathType Prefix casa por trozos de ruta (/api casa /api/health, no /apiv2); Exact solo la ruta exacta. Sin ingressClassName, lo coge la clase por defecto (si la hay).',
+          'Probar con un host que ninguna regla nombra: Traefik responde «404 page not found». Manda la cabecera Host del Ingress.',
       },
-      example: 'Miras la clase de Ingress del clúster y pruebas un host que aún no existe.',
+      example:
+        'Antes de verlo: con el Ingress creado, ¿a qué Service irá /apiv2: a la API o al front?',
       objectives: {
         'http:tienda.local/': 'tienda.local enseña el front',
         'http:tienda.local/api/health': 'tienda.local/api llega a la API',
@@ -533,26 +545,30 @@ export const ADVANCED: Unit[] = [
       title: 'Ingress (and Gateway API)',
       goal: 'Publish the shop on tienda.local with an Ingress called tienda (class traefik): / to the front and /api to the API.',
       theory: {
-        what: 'An Ingress is the HTTP door of the cluster: by host and path it sends each request to a Service. A controller serves it (Traefik on k3s). Ingress NGINX has been retired since March 2026 and the new thing is Gateway API (Gateway + HTTPRoute), but Ingress is still what nearly every cluster runs.',
+        what: 'An Ingress is the HTTP door of the cluster: by host and path, it sends each request to a Service.',
         how: [
           'kubectl create ingress tienda --class=traefik \\',
           '  --rule="tienda.local/*=front:80" --rule="tienda.local/api*=api:3000"',
-          'kubectl get ingress                     # ADDRESS: the node IPs',
           'curl -H "Host: tienda.local" http://10.0.0.11/api/health',
-          '# Gateway API: kind: HTTPRoute, parentRefs: [{name: web}],',
-          '#   rules: [{matches: [{path: {value: /api}}], backendRefs: [{name: api, port: 3000}]}]',
         ],
-        when: 'To expose several web apps through a single entry point, with names and TLS.',
+        when: 'To publish several websites through one entry point.',
+        whenNot: 'The /api rule matches /api/health but not /apiv2, which falls to the / rule.',
         problems:
-          'pathType Prefix matches by path segments (/api matches /api/health, not /apiv2); Exact only the exact path. Without ingressClassName the default class (if any) takes it.',
+          'Testing with a host no rule names: Traefik answers "404 page not found". Send the Ingress Host header.',
       },
-      example: 'You look at the cluster Ingress class and try a host that does not exist yet.',
+      example:
+        'Before you look: with the Ingress created, which Service will /apiv2 go to: the API or the front?',
       objectives: {
         'http:tienda.local/': 'tienda.local shows the front',
         'http:tienda.local/api/health': 'tienda.local/api reaches the API',
       },
     },
-    example: ['kubectl get ingressclass', 'curl -s -H "Host: tienda.local" http://10.0.0.11/'],
+    example: [
+      'curl -s -H "Host: tienda.local" http://10.0.0.11/',
+      'kubectl create ingress tienda --class=traefik --rule="tienda.local/*=front:80" --rule="tienda.local/api*=api:3000"',
+      'curl -s -H "Host: tienda.local" http://10.0.0.11/api/health',
+      'curl -s -H "Host: tienda.local" http://10.0.0.11/apiv2',
+    ],
     solution: [
       'kubectl create ingress tienda --class=traefik --rule="tienda.local/*=front:80" --rule="tienda.local/api*=api:3000"',
     ],
@@ -568,18 +584,18 @@ export const ADVANCED: Unit[] = [
       title: 'Escalado automático',
       goal: 'Crea un HPA para la API (CPU al 70 %, de 2 a 6 réplicas), comprueba con un Pod carga que sube y, al acabar, quita la carga.',
       theory: {
-        what: 'Un HorizontalPodAutoscaler cambia las réplicas de un Deployment según una métrica (la más común, el uso de CPU respecto a lo pedido en requests). Sube rápido y baja con calma (espera unos 5 minutos sin carga).',
+        what: 'Un HorizontalPodAutoscaler cambia las réplicas de un Deployment según el uso de CPU, medido frente a sus requests. Sube rápido y baja con calma.',
         how: [
           'kubectl autoscale deployment api --cpu-percent=70 --min=2 --max=6',
-          "kubectl run carga --image=busybox:1.36 -- sh -c 'while true; do wget -qO- api:3000; done'",
-          'kubectl get hpa                 # TARGETS cpu: 250%/70%, REPLICAS sube',
-          'kubectl delete pod carga',
+          'kubectl get hpa   # TARGETS y REPLICAS',
         ],
-        when: 'Para apps con tráfico que sube y baja (horas punta, campañas).',
+        when: 'Para apps con picos de tráfico: horas punta, campañas.',
+        whenNot: 'Si el YAML fija replicas, cada apply pelea con el HPA: quítalas del fichero.',
         problems:
-          'Sin requests de CPU el HPA no puede calcular nada (<unknown>/70%). Y si el YAML del repositorio fija replicas, cada apply pelea con el HPA: quítalas del YAML.',
+          'Un Deployment sin requests de CPU: get hpa enseña «cpu: <unknown>/70%» y no escala. Ponle requests.',
       },
-      example: 'Miras con top lo que usan los Pods y los nodos.',
+      example:
+        'Antes de verlo: api pide CPU en requests y front no. ¿Qué TARGETS saldrá en cada uno?',
       objectives: {
         'get:tienda hpa/api {.spec.minReplicas} {.spec.maxReplicas} {.spec.metrics[0].resource.target.averageUtilization}':
           'HPA de 2 a 6 réplicas al 70 %',
@@ -590,25 +606,30 @@ export const ADVANCED: Unit[] = [
       title: 'Autoscaling',
       goal: 'Create an HPA for the API (CPU at 70 %, 2 to 6 replicas), check with a Pod called carga that it scales up and, when done, remove the load.',
       theory: {
-        what: 'A HorizontalPodAutoscaler changes a Deployment replica count from a metric (most often CPU usage relative to the requests). It goes up fast and down calmly (it waits about 5 minutes without load).',
+        what: 'A HorizontalPodAutoscaler changes the replicas of a Deployment by CPU use, measured against its requests. It scales up fast and down calmly.',
         how: [
           'kubectl autoscale deployment api --cpu-percent=70 --min=2 --max=6',
-          "kubectl run carga --image=busybox:1.36 -- sh -c 'while true; do wget -qO- api:3000; done'",
-          'kubectl get hpa                 # TARGETS cpu: 250%/70%, REPLICAS goes up',
-          'kubectl delete pod carga',
+          'kubectl get hpa   # TARGETS and REPLICAS',
         ],
-        when: 'For apps whose traffic goes up and down (rush hours, campaigns).',
+        when: 'For apps with traffic peaks: rush hours, campaigns.',
+        whenNot:
+          'If the YAML pins replicas, every apply fights the HPA: remove them from the file.',
         problems:
-          'Without CPU requests the HPA cannot compute anything (<unknown>/70%). And if the repository YAML pins replicas, every apply fights the HPA: drop them from the YAML.',
+          'A Deployment without CPU requests: get hpa shows "cpu: <unknown>/70%" and never scales. Give it requests.',
       },
-      example: 'You look at what the Pods and the nodes use with top.',
+      example: 'Before you look: api requests CPU and front does not. What TARGETS will each show?',
       objectives: {
         'get:tienda hpa/api {.spec.minReplicas} {.spec.maxReplicas} {.spec.metrics[0].resource.target.averageUtilization}':
           'HPA from 2 to 6 replicas at 70 %',
         'gone:tienda pod/carga': 'No carga Pod',
       },
     },
-    example: ['kubectl top pods', 'kubectl top nodes'],
+    example: [
+      'kubectl top pods',
+      'kubectl autoscale deployment api --cpu-percent=70 --min=2 --max=6',
+      'kubectl autoscale deployment front --cpu-percent=70 --min=2 --max=6',
+      'kubectl get hpa',
+    ],
     solution: [
       'kubectl autoscale deployment api --cpu-percent=70 --min=2 --max=6',
       "kubectl run carga --image=busybox:1.36 -- sh -c 'while true; do wget -qO- api:3000; done'",
@@ -633,19 +654,19 @@ export const ADVANCED: Unit[] = [
       title: 'NetworkPolicies',
       goal: 'En tienda, deniega todo el tráfico de entrada y permite solo lo necesario: al front, cualquiera; a la API, el front (3000); a la base de datos, la API (5432).',
       theory: {
-        what: 'Por defecto todos los Pods hablan con todos. Una NetworkPolicy elige unos Pods (podSelector) y dice de quién aceptan tráfico (ingress) o a quién pueden hablar (egress). En cuanto una política elige un Pod, a ese Pod solo le llega lo permitido.',
+        what: 'Una NetworkPolicy elige Pods (podSelector) y dice de quién aceptan tráfico: a esos Pods solo les llega lo permitido.',
         how: [
-          'podSelector: {}               # todos los Pods del namespace',
-          'policyTypes: [Ingress]        # sin reglas: no entra nada',
-          'ingress:',
+          'podSelector: {}          # todos los del namespace',
+          'policyTypes: [Ingress]   # sin reglas: no entra nada',
           '- from: [{podSelector: {matchLabels: {app: api}}}]',
-          '  ports: [{port: 5432}]',
         ],
-        when: 'Para que, si alguien entra en un Pod, no pueda llegar a todo (la base de datos solo para la API).',
+        when: 'Para que la base de datos solo la vea la API.',
+        whenNot: 'Sin políticas, todos hablan con todos: el front llega a db.',
         problems:
-          'Hace falta un plugin de red que las aplique (en k3s viene). Si niegas todo y te olvidas de algo, la web deja de ir: prueba cada paso.',
+          'Negarlo todo y olvidar un permiso: /api/health responde «502 Bad Gateway». Abre cada paso y pruébalo.',
       },
-      example: 'Compruebas que hoy el front llega a la base de datos (y no debería).',
+      example:
+        'Antes de verlo: aplicas una política que lo niega todo. ¿Qué responderá curl localhost:8080/api/health?',
       objectives: {
         'http:localhost:8080/api/health': 'La tienda sigue funcionando',
         'exec:tienda deploy/front nc -z -w 2 db 5432': 'El front ya no llega a la base de datos',
@@ -656,19 +677,19 @@ export const ADVANCED: Unit[] = [
       title: 'NetworkPolicies',
       goal: 'In tienda, deny all incoming traffic and allow only what is needed: anyone to the front; the front to the API (3000); the API to the database (5432).',
       theory: {
-        what: 'By default every Pod talks to every Pod. A NetworkPolicy picks some Pods (podSelector) and says who they accept traffic from (ingress) or who they can talk to (egress). As soon as a policy selects a Pod, that Pod only gets what is allowed.',
+        what: 'A NetworkPolicy picks Pods (podSelector) and says who they accept traffic from: only what is allowed reaches them.',
         how: [
-          'podSelector: {}               # every Pod in the namespace',
-          'policyTypes: [Ingress]        # no rules: nothing comes in',
-          'ingress:',
+          'podSelector: {}          # every Pod in the namespace',
+          'policyTypes: [Ingress]   # no rules: nothing gets in',
           '- from: [{podSelector: {matchLabels: {app: api}}}]',
-          '  ports: [{port: 5432}]',
         ],
-        when: 'So that if someone gets into a Pod they cannot reach everything (the database only for the API).',
+        when: 'So only the API sees the database.',
+        whenNot: 'With no policy, everyone talks to everyone: the front reaches db.',
         problems:
-          'You need a network plugin that enforces them (k3s ships one). If you deny everything and forget something, the site stops working: test each step.',
+          'Denying everything and forgetting one rule: /api/health answers "502 Bad Gateway". Open each step and test it.',
       },
-      example: 'You check that today the front reaches the database (and it should not).',
+      example:
+        'Before you look: you apply a policy that denies everything. What will curl localhost:8080/api/health answer?',
       objectives: {
         'http:localhost:8080/api/health': 'The shop still works',
         'exec:tienda deploy/front nc -z -w 2 db 5432': 'The front no longer reaches the database',
@@ -677,7 +698,9 @@ export const ADVANCED: Unit[] = [
     },
     example: [
       'kubectl exec deploy/front -- nc -z -w 2 db 5432 && echo abierto',
-      'kubectl get networkpolicies',
+      "cat <<'EOF' | kubectl apply -f -\napiVersion: networking.k8s.io/v1\nkind: NetworkPolicy\nmetadata: {name: default-deny}\nspec:\n  podSelector: {}\n  policyTypes: [Ingress]\nEOF",
+      'kubectl exec deploy/front -- nc -z -w 2 db 5432 && echo abierto',
+      'curl -s localhost:8080/api/health',
     ],
     solution: [applyIt(POLICIES)],
     check: {
@@ -769,20 +792,20 @@ export const ADVANCED: Unit[] = [
       title: 'Kustomize: un repo, varios entornos',
       goal: 'Crea ~/tienda/overlays/produccion encima de base/: namespace produccion, 4 réplicas de la API y la imagen 1.2.0. Aplícalo con kubectl apply -k.',
       theory: {
-        what: 'Kustomize junta manifiestos y los ajusta por entorno sin plantillas: una base común y un overlay por entorno que cambia namespace, réplicas, etiquetas de imagen o lo que haga falta (patches). Viene dentro de kubectl (-k); kustomize edit, que cambia el kustomization.yaml, es del binario kustomize.',
+        what: 'Kustomize ajusta manifiestos por entorno: una base común y un overlay que cambia namespace, réplicas o imagen. Va en kubectl (-k).',
         how: [
-          'base/kustomization.yaml:            resources: [api.yaml, front.yaml]',
-          'overlays/produccion/kustomization.yaml: resources: [../../base], namespace,',
-          '  replicas: [{name: api, count: 4}], images: [{name: ghcr.io/peer4u/api, newTag: 1.2.0}]',
-          'kustomize edit set image ghcr.io/peer4u/api:1.2.0   # lo que hace la CI',
-          'kubectl kustomize overlays/produccion   # ver lo que sale',
+          'resources: [../../base]   # en overlays/produccion',
+          'kubectl kustomize overlays/produccion   # lo que sale',
           'kubectl apply -k overlays/produccion',
         ],
-        when: 'Cuando el mismo despliegue va a varios entornos (staging, producción) con pocas diferencias.',
+        when: 'Cuando el mismo despliegue va a varios entornos.',
+        whenNot:
+          'apply -f sobre la carpeta lee kustomization.yaml como un objeto y falla: con overlays, -k.',
         problems:
-          'GitOps: en muchos equipos nadie hace apply a mano. La CI construye la imagen, cambia la etiqueta en el overlay y hace commit; Argo CD o Flux ven el repositorio y aplican solos. Es lo que pide la parte 3 de Inception-of-Things.',
+          'Contar mal los ../: responde «error: the path "/home/peer/tienda/overlays/base" does not exist». Desde overlays/produccion, la base está en ../../base.',
       },
-      example: 'Ves lo que sale de la base con kubectl kustomize.',
+      example:
+        'Antes de verlo: el overlay está en overlays/produccion y pone resources: [../base]. ¿Encontrará la base?',
       objectives: {
         'ready:produccion deploy/api': 'La API en produccion: 4 réplicas de la 1.2.0',
         'probe:diff': 'El overlay coincide con el clúster (diff vacío)',
@@ -792,20 +815,20 @@ export const ADVANCED: Unit[] = [
       title: 'Kustomize: one repo, several environments',
       goal: 'Create ~/tienda/overlays/produccion on top of base/: namespace produccion, 4 API replicas and image 1.2.0. Apply it with kubectl apply -k.',
       theory: {
-        what: 'Kustomize gathers manifests and adjusts them per environment without templates: a shared base and an overlay per environment that changes namespace, replicas, image tags or whatever is needed (patches). It ships inside kubectl (-k); kustomize edit, which changes kustomization.yaml, belongs to the standalone kustomize binary.',
+        what: 'Kustomize adjusts manifests per environment: a common base and an overlay that changes namespace, replicas or image. It ships in kubectl (-k).',
         how: [
-          'base/kustomization.yaml:            resources: [api.yaml, front.yaml]',
-          'overlays/produccion/kustomization.yaml: resources: [../../base], namespace,',
-          '  replicas: [{name: api, count: 4}], images: [{name: ghcr.io/peer4u/api, newTag: 1.2.0}]',
-          'kustomize edit set image ghcr.io/peer4u/api:1.2.0   # what CI does',
-          'kubectl kustomize overlays/produccion   # see the output',
+          'resources: [../../base]   # in overlays/produccion',
+          'kubectl kustomize overlays/produccion   # what comes out',
           'kubectl apply -k overlays/produccion',
         ],
-        when: 'When the same deployment goes to several environments (staging, production) with small differences.',
+        when: 'When the same deployment goes to several environments.',
+        whenNot:
+          'apply -f on the folder reads kustomization.yaml as an object and fails: with overlays, -k.',
         problems:
-          'GitOps: in many teams nobody applies by hand. CI builds the image, changes the tag in the overlay and commits; Argo CD or Flux watch the repository and apply on their own. It is what part 3 of Inception-of-Things asks for.',
+          'Miscounting the ../: it answers "error: the path "/home/peer/tienda/overlays/base" does not exist". From overlays/produccion, the base is ../../base.',
       },
-      example: 'You see what comes out of the base with kubectl kustomize.',
+      example:
+        'Before you look: the overlay lives in overlays/produccion and says resources: [../base]. Will it find the base?',
       objectives: {
         'ready:produccion deploy/api': 'The API in produccion: 4 replicas of 1.2.0',
         'probe:diff': 'The overlay matches the cluster (empty diff)',
@@ -813,7 +836,11 @@ export const ADVANCED: Unit[] = [
     },
     example: [
       'cat ~/tienda/base/kustomization.yaml',
-      'kubectl kustomize ~/tienda/base | head -n 12',
+      'mkdir -p ~/tienda/overlays/produccion',
+      "printf 'resources: [../base]\\nnamespace: produccion\\n' > ~/tienda/overlays/produccion/kustomization.yaml",
+      'kubectl kustomize ~/tienda/overlays/produccion',
+      "printf 'resources: [../../base]\\nnamespace: produccion\\n' > ~/tienda/overlays/produccion/kustomization.yaml",
+      'kubectl kustomize ~/tienda/overlays/produccion | grep namespace',
     ],
     solution: [
       'mkdir -p ~/tienda/overlays/produccion',
@@ -838,19 +865,20 @@ export const ADVANCED: Unit[] = [
       title: 'Helm: usar charts',
       goal: 'Instala Redis como la release cache (bitnami/redis, architecture=standalone), súbela con ~/valores.yaml y vuelve después a la revisión 1.',
       theory: {
-        what: 'Helm instala paquetes (charts) de otros: plantillas con valores por defecto que cambias con --set o con un fichero de values. Cada instalación es una release con revisiones que se pueden ver y deshacer.',
+        what: 'Helm instala charts, paquetes de otros con valores que cambias con --set o -f. Cada instalación es una release con revisiones.',
         how: [
-          'helm repo add bitnami https://charts.bitnami.com/bitnami',
           'helm install cache bitnami/redis --set architecture=standalone',
-          'helm list ; helm get values cache',
           'helm upgrade cache bitnami/redis -f valores.yaml',
-          'helm history cache ; helm rollback cache 1',
+          'helm get values cache   # lo que pusiste tú',
+          'helm rollback cache 1',
         ],
-        when: 'Para lo de otros (Redis, Postgres, un Ingress, monitorización): el chart ya sabe cómo montarlo. Para lo tuyo, Kustomize o un chart propio.',
+        when: 'Para software de otros, como Redis.',
+        whenNot: 'rollback crea otra revisión: «Rollback to 1».',
         problems:
-          'upgrade sin --reuse-values vuelve a los valores por defecto en lo que no digas: pasa siempre tu fichero de values.',
+          'upgrade sin -f ni --reuse-values olvida lo anterior: tras --set auth.password, get values ya no enseña «architecture: standalone».',
       },
-      example: 'Buscas el chart de Redis y miras sus valores por defecto.',
+      example:
+        'Antes de verlo: instalas con architecture=standalone y subes solo con --set auth.password. ¿Qué dirá get values?',
       objectives: {
         'probe:release': 'cache en la revisión 3, con los valores de la 1',
         'ready:tienda sts/cache-redis-master': 'Redis en marcha',
@@ -860,19 +888,20 @@ export const ADVANCED: Unit[] = [
       title: 'Helm: using charts',
       goal: 'Install Redis as release cache (bitnami/redis, architecture=standalone), upgrade it with ~/valores.yaml and then roll back to revision 1.',
       theory: {
-        what: "Helm installs other people's packages (charts): templates with default values you change with --set or a values file. Each install is a release with revisions you can list and undo.",
+        what: 'Helm installs charts, other people’s packages with values you change with --set or -f. Each install is a release with revisions.',
         how: [
-          'helm repo add bitnami https://charts.bitnami.com/bitnami',
           'helm install cache bitnami/redis --set architecture=standalone',
-          'helm list ; helm get values cache',
           'helm upgrade cache bitnami/redis -f valores.yaml',
-          'helm history cache ; helm rollback cache 1',
+          'helm get values cache   # what you set',
+          'helm rollback cache 1',
         ],
-        when: "For other people's software (Redis, Postgres, an Ingress, monitoring): the chart already knows how to set it up. For your own, Kustomize or your own chart.",
+        when: 'For other people’s software, like Redis.',
+        whenNot: 'rollback adds a revision: "Rollback to 1".',
         problems:
-          'upgrade without --reuse-values goes back to the defaults for whatever you do not say: always pass your values file.',
+          'upgrade without -f or --reuse-values forgets what came before: after --set auth.password, get values no longer shows "architecture: standalone".',
       },
-      example: 'You search for the Redis chart and look at its default values.',
+      example:
+        'Before you look: you install with architecture=standalone and upgrade only with --set auth.password. What will get values say?',
       objectives: {
         'probe:release': 'cache on revision 3, with revision 1 values',
         'ready:tienda sts/cache-redis-master': 'Redis running',
@@ -880,8 +909,10 @@ export const ADVANCED: Unit[] = [
     },
     example: [
       'helm repo add bitnami https://charts.bitnami.com/bitnami',
-      'helm search repo redis',
-      'helm show values bitnami/redis',
+      'helm install cache bitnami/redis --set architecture=standalone > /dev/null',
+      'helm get values cache',
+      'helm upgrade cache bitnami/redis --set auth.password=s3creto > /dev/null',
+      'helm get values cache',
     ],
     solution: [
       'helm repo add bitnami https://charts.bitnami.com/bitnami',
@@ -907,19 +938,20 @@ export const ADVANCED: Unit[] = [
       title: 'Seguridad básica del Pod',
       goal: 'Que la API corra con su propia ServiceAccount api (sin token montado) y con securityContext: runAsNonRoot, sin escalar privilegios y con el disco de solo lectura.',
       theory: {
-        what: 'securityContext dice cómo corre el contenedor: no como root (runAsNonRoot, como el USER del curso de Docker), sin poder ganar privilegios y con el sistema de ficheros de solo lectura. Una ServiceAccount propia, sin token si la app no habla con la API de Kubernetes, limita lo que puede hacer quien entre en el Pod.',
+        what: 'securityContext dice cómo corre el contenedor: sin root, sin ganar privilegios, con disco de solo lectura.',
         how: [
           'securityContext: {runAsNonRoot: true, allowPrivilegeEscalation: false, readOnlyRootFilesystem: true}',
           'kubectl create serviceaccount api',
-          'kubectl patch serviceaccount api -p \'{"automountServiceAccountToken":false}\'',
-          'kubectl exec deploy/api -- id                # uid=1000, no 0',
-          'kubectl auth can-i list secrets --as=system:serviceaccount:tienda:api   # no',
+          'kubectl exec deploy/api -- id   # uid=1000, no 0',
         ],
-        when: 'En todo lo que va a producción: es lo primero que mira una auditoría de seguridad.',
+        when: 'En todo lo que va a producción.',
+        whenNot:
+          'Una ServiceAccount propia sin token montado: quien entre en el Pod no habla con el clúster.',
         problems:
-          'runAsNonRoot con una imagen que corre como root no arranca (CreateContainerConfigError): hace falta USER en el Dockerfile o runAsUser.',
+          'runAsNonRoot con una imagen que corre como root: «CreateContainerConfigError», y describe dice «container has runAsNonRoot and image will run as root».',
       },
-      example: 'Miras con qué usuario corre la API y qué puede hacer su ServiceAccount.',
+      example:
+        'Antes de verlo: db corre como root y le pones runAsNonRoot. ¿Arrancará su Pod nuevo?',
       objectives: {
         'exec:tienda deploy/api id': 'La API no corre como root',
         'get:tienda deploy/api {.spec.template.spec.serviceAccountName} {.spec.template.spec.containers[0].securityContext.runAsNonRoot} {.spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation} {.spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem}':
@@ -931,19 +963,19 @@ export const ADVANCED: Unit[] = [
       title: 'Basic Pod security',
       goal: 'Make the API run with its own ServiceAccount api (no token mounted) and with a securityContext: runAsNonRoot, no privilege escalation and a read-only filesystem.',
       theory: {
-        what: 'securityContext says how the container runs: not as root (runAsNonRoot, like USER in the Docker course), unable to gain privileges and with a read-only filesystem. Its own ServiceAccount, with no token if the app does not talk to the Kubernetes API, limits what someone who gets into the Pod can do.',
+        what: 'securityContext says how the container runs: not as root, no privilege gain, read-only disk.',
         how: [
           'securityContext: {runAsNonRoot: true, allowPrivilegeEscalation: false, readOnlyRootFilesystem: true}',
           'kubectl create serviceaccount api',
-          'kubectl patch serviceaccount api -p \'{"automountServiceAccountToken":false}\'',
-          'kubectl exec deploy/api -- id                # uid=1000, not 0',
-          'kubectl auth can-i list secrets --as=system:serviceaccount:tienda:api   # no',
+          'kubectl exec deploy/api -- id   # uid=1000, not 0',
         ],
-        when: 'In everything that goes to production: it is the first thing a security audit looks at.',
+        when: 'In everything that goes to production.',
+        whenNot:
+          'Its own ServiceAccount with no mounted token: whoever gets into the Pod cannot talk to the cluster.',
         problems:
-          'runAsNonRoot with an image that runs as root does not start (CreateContainerConfigError): it needs USER in the Dockerfile or runAsUser.',
+          'runAsNonRoot with an image that runs as root: "CreateContainerConfigError", and describe says "container has runAsNonRoot and image will run as root".',
       },
-      example: 'You check which user the API runs as and what its ServiceAccount can do.',
+      example: 'Before you look: db runs as root and you set runAsNonRoot. Will its new Pod start?',
       objectives: {
         'exec:tienda deploy/api id': 'The API does not run as root',
         'get:tienda deploy/api {.spec.template.spec.serviceAccountName} {.spec.template.spec.containers[0].securityContext.runAsNonRoot} {.spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation} {.spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem}':
@@ -953,8 +985,10 @@ export const ADVANCED: Unit[] = [
     },
     example: [
       'kubectl exec deploy/api -- id',
-      'kubectl exec deploy/front -- id',
-      'kubectl auth can-i list secrets --as=system:serviceaccount:tienda:default',
+      'kubectl exec deploy/db -- id',
+      'kubectl patch deployment db -p \'{"spec":{"template":{"spec":{"containers":[{"name":"postgres","securityContext":{"runAsNonRoot":true}}]}}}}\'',
+      'kubectl get pods -l app=db',
+      "kubectl describe pod -l app=db | grep 'Error:'",
     ],
     solution: [
       'kubectl create serviceaccount api',

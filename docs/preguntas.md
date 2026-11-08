@@ -76,6 +76,15 @@ que repetían otros generales (`algo-stack`, `algo-sort-complexity`). Nuevos:
 | Piscina: C 04 a C 07 | — | 49 |
 | Piscina: C 08 a C 13 | — | 54 |
 
+Revisión del 2026-11-08, con [plantilla-preguntas.md](plantilla-preguntas.md):
+las preguntas de los cursos pasan de 23 conceptos y 31 formas a 26 y 60. Los
+18 de los 23 de git (`git.ts`) que no la tenían ganan una forma de aplicar
+(predicción, diagnóstico o escenario, con malas propias comprobadas en el
+motor de git), y entran 3 de los otros cursos en `courses.ts`
+(`shell-cd-rutas`, `docker-ports`, `k8s-pod-status`) con su Repaso
+(`review-courses.ts`). Total: 481. Las tablas de abajo siguen siendo las del
+2026-11-01.
+
 Abajo, por tema y por proyecto (el primer slug de `needs.projects`; en la
 piscina y en los CPP, el módulo donde se ve). Para rehacerlas, agrupa `BANK`
 por `topic` y por ese slug.

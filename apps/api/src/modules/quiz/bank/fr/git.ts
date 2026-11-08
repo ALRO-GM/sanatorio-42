@@ -24,6 +24,22 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
           "Ce qui n'est pas encore dans l'index",
         ],
       },
+      {
+        ask: [
+          'Tu modifies `a.txt` et `b.txt`, tu fais `git add a.txt` puis un commit. Que dit ensuite `git status` ?',
+          'Avec `a.txt` et `b.txt` modifiés, après `git add a.txt` et un commit, `git status` dit…',
+        ],
+        right: [
+          'Que `b.txt` a encore des modifications non indexées',
+          'Que les modifications de `b.txt` sont restées dehors',
+        ],
+        wrong: [
+          'Que `b.txt` est aussi entré dans le commit',
+          'Que `a.txt` a encore des modifications non indexées',
+          'Que `b.txt` est indexé pour le commit',
+          "Qu'il ne reste rien à enregistrer sur `main`",
+        ],
+      },
     ],
     wrong: [
       'Une copie du dépôt gardée sur le serveur',
@@ -40,6 +56,19 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
         right: [
           "Ta branche, ce qui est indexé et ce qui ne l'est pas",
           "L'état de tes fichiers et de ta branche",
+        ],
+      },
+      {
+        ask: [
+          'Tu modifies `main.c` et tu fais `git add main.c`, sans commit. Comment `git status` montre-t-il `main.c` ?',
+          'Après `git add main.c` et avant le commit, `git status` montre `main.c` comme…',
+        ],
+        right: ['Indexé pour le prochain commit', 'Prêt à entrer dans le prochain commit'],
+        wrong: [
+          'Modifié, mais pas indexé',
+          'Déjà enregistré dans un nouveau commit',
+          'Non suivi : git ne le connaît pas encore',
+          'Déjà poussé sur la branche distante',
         ],
       },
     ],
@@ -64,6 +93,19 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
           'Tous les fichiers du projet',
           "L'historique entier de la branche actuelle",
           "L'index et les changements non indexés",
+        ],
+      },
+      {
+        ask: [
+          'Tu es sur `main` et tu crées la branche `login` sans faire de commit. Vers quel commit pointe `login` ?',
+          'Tout juste créée depuis `main`, sans nouveau commit, la branche `login` pointe…',
+        ],
+        right: ['Vers le même commit que main', 'Vers le commit où se trouve main'],
+        wrong: [
+          'Vers le premier commit du dépôt',
+          'Vers un nouveau commit, copie de celui de main',
+          'Vers aucun tant que tu ne fais pas de commit',
+          "Vers le commit d'avant celui de main",
         ],
       },
     ],
@@ -93,6 +135,19 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
           'Que le dépôt est vide, sans aucun commit',
         ],
       },
+      {
+        ask: [
+          'Avec HEAD détachée, tu fais un commit et tu reviens sur `main`. Que devient ce commit ?',
+          'Tu fais un commit avec HEAD détachée puis `git switch main`. Ce commit…',
+        ],
+        right: ['Ne reste sur aucune branche', 'Reste en dehors de toutes les branches'],
+        wrong: [
+          "S'ajoute à main quand tu reviens",
+          'Passe sur une nouvelle branche nommée HEAD',
+          'Est supprimé dès que tu le fais',
+          'Est poussé tout seul sur origin',
+        ],
+      },
     ],
     wrong: [
       'Le premier commit du dépôt',
@@ -112,6 +167,22 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
         right: ['git switch -c login', 'git checkout -b login'],
         wrong: ['git branch login', 'git switch login', 'git merge login', 'git commit -b login'],
       },
+      {
+        ask: [
+          'Tu es sur `main`, tu tapes `git branch login` et tu fais un commit. Quelle branche avance ?',
+          'Après `git branch login` et un commit, sur `main`, la branche qui avance est…',
+        ],
+        right: [
+          'main, car git branch ne te fait pas changer de branche',
+          "main : créer login ne t'y emmène pas",
+        ],
+        wrong: [
+          "login, car c'est la branche qui vient d'être créée",
+          'Les deux, car elles pointaient vers le même commit',
+          'Aucune, car HEAD se retrouve détachée',
+          'login, et main reste sur le précédent',
+        ],
+      },
     ],
     wrong: ['git push login', 'git add login', 'git init login'],
     why: 'git branch se contente de la créer ; switch -c (ou checkout -b) la crée et te place dessus.',
@@ -124,6 +195,14 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
           'Avance juste la branche, sans nouveau commit',
           "Déplace juste le pointeur, car il n'y a rien à combiner",
         ],
+      },
+      {
+        ask: [
+          "`feature` a 2 commits et `main` n'a pas avancé. Combien de commits de merge crée `git merge feature` sur `main` ?",
+          "Combien de commits de merge crée `git merge feature` si `main` n'a pas bougé depuis le départ de `feature` ?",
+        ],
+        right: ['0'],
+        wrong: ['1', '2', '3'],
       },
     ],
     wrong: [
@@ -142,6 +221,14 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
           'Si les deux branches ont avancé, git merge crée…',
         ],
         right: ['Un seul commit, à deux parents', 'Un commit qui réunit les deux historiques'],
+      },
+      {
+        ask: [
+          '`main` et `feature` ont chacune un nouveau commit. Après `git merge feature`, combien de parents a le nouveau commit ?',
+          'Si les deux branches ont avancé, combien de parents a le commit créé par `git merge` ?',
+        ],
+        right: ['2'],
+        wrong: ['1', '0', '3'],
       },
     ],
     wrong: [
@@ -218,6 +305,22 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
           "Ta copie de l'état de main sur le dépôt distant",
         ],
       },
+      {
+        ask: [
+          "Ton `origin/main` est sur `c3`. Quelqu'un pousse `c4` et tu ne fais rien. Où est ton `origin/main` ?",
+          'Une autre personne pousse `c4` sur origin ; tu ne tapes rien. Ton `origin/main`, qui était sur `c3`, est maintenant…',
+        ],
+        right: [
+          "Sur `c3`, jusqu'à ton `git fetch`",
+          "Toujours sur `c3` : personne d'autre ne le bouge",
+        ],
+        wrong: [
+          'Sur `c4`, car il se met à jour tout seul',
+          'Sur `c4`, mais sans ses fichiers',
+          "Supprimé jusqu'au prochain `git pull`",
+          'Sur `c3`, et ton `main` passe à `c4`',
+        ],
+      },
     ],
     wrong: [
       'La branche main du dépôt distant, en temps réel',
@@ -241,6 +344,22 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
           'git commit --amend puis git push à nouveau',
         ],
       },
+      {
+        ask: [
+          "Ton `main` et celui d'origin ont avancé chacun de leur côté. Que se passe-t-il avec `git push` ?",
+          "Si origin a un commit que tu n'as pas et toi un qu'origin n'a pas, `git push`…",
+        ],
+        right: [
+          "Est refusé : il faut d'abord récupérer le leur",
+          "Échoue tant que tu n'as pas fusionné origin",
+        ],
+        wrong: [
+          "Pousse le tien et efface ce qu'il y avait sur origin",
+          'Fusionne les deux historiques sur le distant',
+          "Pousse le tien sur une nouvelle branche d'origin",
+          'Pousse le tien et laisse le leur pour plus tard',
+        ],
+      },
     ],
     wrong: ['git commit --amend', 'git reset --hard', 'git branch -D main', 'git init'],
     why: "Le dépôt distant ne te laisse pas écraser le travail des autres : d'abord tu récupères le leur (pull, ou pull --rebase), tu fusionnes, puis tu pousses.",
@@ -250,6 +369,19 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
       {
         ask: ['Que fait `git clone url` ?', 'À quoi sert git clone ?'],
         right: ['Il copie le dépôt avec son historique et configure origin'],
+      },
+      {
+        ask: [
+          'Tu clones un dépôt qui a 20 commits. Que montre `git log --oneline` juste après le clone ?',
+          "Juste après le `git clone` d'un dépôt de 20 commits, `git log --oneline` montre…",
+        ],
+        right: ["Les 20 commits, avec tout l'historique", "Tout l'historique : les 20 commits"],
+        wrong: [
+          'Seulement le dernier commit, sans historique',
+          "Rien : l'historique reste sur le dépôt distant",
+          'Seulement les commits que tu feras désormais',
+          'Un seul nouveau commit nommé clone',
+        ],
       },
     ],
     wrong: [
@@ -281,6 +413,22 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
           "Les branches que tu n'as pas encore poussées",
         ],
       },
+      {
+        ask: [
+          'Sur `feature` tu as 2 commits et `main` a avancé. Après `git rebase main`, que deviennent les identifiants de tes commits ?',
+          'Après `git rebase main` sur `feature`, les identifiants de tes 2 commits…',
+        ],
+        right: [
+          'Changent : ce sont de nouvelles copies sur main',
+          'Sont autres : git crée des copies sur main',
+        ],
+        wrong: [
+          'Restent les mêmes : seule la branche bouge',
+          'Disparaissent, réunis en un seul commit',
+          'Passent sur main avec les mêmes identifiants',
+          'Restent les mêmes et main est fusionnée dans feature',
+        ],
+      },
     ],
     wrong: [
       'Il fusionne main dans feature avec un commit de merge',
@@ -299,6 +447,19 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
           "Il récupère un commit précis d'une autre branche",
         ],
       },
+      {
+        ask: [
+          "Sur `main` tu fais `git cherry-pick` d'un commit de la branche `fix`. Que devient `fix` ?",
+          'Après avoir copié sur `main` un commit de `fix` avec `git cherry-pick`, la branche `fix`…',
+        ],
+        right: ['Rien ne change : elle garde ce commit', 'Reste pareille, avec son commit dedans'],
+        wrong: [
+          'Perd le commit, qui passe sur main',
+          'Est fusionnée en entier dans main',
+          "Avance jusqu'au bout de main",
+          'Est supprimée car il est déjà sur main',
+        ],
+      },
     ],
     wrong: [
       'Il récupère toute la branche de ce commit',
@@ -315,6 +476,19 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
         right: [
           'Il refait le dernier commit, avec un autre message ou d’autres fichiers',
           'Il remplace le dernier commit par une version corrigée',
+        ],
+      },
+      {
+        ask: [
+          'Tu viens de faire un commit, pas encore poussé, et tu as oublié `libft.h`. Que fais-tu ?',
+          'Pour mettre `libft.h` dans le commit que tu viens de faire (pas poussé), tu tapes…',
+        ],
+        right: ['`git add libft.h` puis `git commit --amend`'],
+        wrong: [
+          '`git commit --amend` puis `git add libft.h`',
+          '`git revert HEAD` puis `git add libft.h`',
+          '`git add libft.h` puis `git push --force`',
+          '`git reset --hard HEAD~1` et un autre `git commit`',
         ],
       },
     ],
@@ -343,6 +517,14 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
           "Le premier commit de l'historique de main",
           "L'enfant du commit vers lequel pointe main",
         ],
+      },
+      {
+        ask: [
+          'Ta branche a 4 commits en ligne, de c0 à c3, et HEAD est sur c3. Quel commit est `HEAD~2` ?',
+          'Avec 4 commits en ligne, de c0 à c3, et HEAD sur c3, `HEAD~2` est…',
+        ],
+        right: ['c1'],
+        wrong: ['c2', 'c0', 'c5'],
       },
     ],
     wrong: [
@@ -417,6 +599,19 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
           'Il garde tes changements en cours pour que tu changes de branche',
         ],
       },
+      {
+        ask: [
+          'Tu as `main.c` modifié sans commit et tu fais `git stash`. Que dit ensuite `git status` ?',
+          'Juste après `git stash`, avec `main.c` modifié, `git status` dit…',
+        ],
+        right: ["Qu'il n'y a rien à enregistrer", 'Que le dossier de travail est propre'],
+        wrong: [
+          'Que main.c est encore modifié, non indexé',
+          'Que main.c est indexé pour le commit',
+          "Qu'il y a un nouveau commit sur main",
+          'Que main.c a été supprimé du dépôt',
+        ],
+      },
     ],
     wrong: [
       'Il fait un commit temporaire sur la branche main',
@@ -431,6 +626,22 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
       {
         ask: ['En quoi consiste le GitHub flow ?', 'Avec le GitHub flow…'],
         right: ['Des branches courtes depuis main, fusionnées par pull request'],
+      },
+      {
+        ask: [
+          'Avec GitHub flow, tu termines un correctif sur ta branche `fix-login`. Et maintenant ?',
+          "Avec GitHub flow, quand le travail de la branche `fix-login` est fini, l'étape suivante est…",
+        ],
+        right: [
+          'Ouvrir une pull request pour la fusionner dans main',
+          'Demander une revue avec une pull request vers main',
+        ],
+        wrong: [
+          'La fusionner dans develop et attendre la release',
+          'Pousser ses commits directement sur main',
+          "La laisser ouverte jusqu'à la prochaine version",
+          "Créer une branche release à partir d'elle",
+        ],
       },
     ],
     wrong: [
@@ -483,6 +694,19 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
         right: ['git push --tags', 'git push origin v1.0'],
         wrong: ['git push, qui pousse toujours les tags', 'git tag --push', 'git commit --tags'],
       },
+      {
+        ask: [
+          'Tu poses `git tag v1.0` sur `c3` et tu fais deux commits de plus. Où est `v1.0` ?',
+          'Après `git tag v1.0` sur `c3` et deux commits de plus, `v1.0` désigne…',
+        ],
+        right: ["`c3`, là où tu l'as posé", 'Toujours `c3` : un tag ne bouge pas'],
+        wrong: [
+          '`c5`, le dernier commit',
+          '`c4`, un commit plus loin',
+          'Aucun : le commit le supprime',
+          '`c3` et `c5`, les deux à la fois',
+        ],
+      },
     ],
     wrong: [
       'Avance à chaque commit que tu fais',
@@ -497,6 +721,22 @@ export const GIT_FR: Readonly<Record<string, ConceptText>> = {
       {
         ask: ["Qu'est-ce que le trunk-based development ?", 'En trunk-based development…'],
         right: ['Tous fusionnent dans main plusieurs fois par jour, avec des branches courtes'],
+      },
+      {
+        ask: [
+          'Ton équipe fait du trunk-based et une fonctionnalité prendra deux semaines. Comment fais-tu ?',
+          'En trunk-based, une fonctionnalité de deux semaines se fait…',
+        ],
+        right: [
+          'Par petits morceaux sur main, désactivée par un flag',
+          'Fusionnée chaque jour dans main, cachée derrière un flag',
+        ],
+        wrong: [
+          'Sur sa propre branche, fusionnée à la fin',
+          "Sur develop, jusqu'à la prochaine release",
+          'Dans un fork à part que personne ne voit',
+          "Sans aucun commit tant qu'elle n'est pas finie",
+        ],
       },
     ],
     wrong: [

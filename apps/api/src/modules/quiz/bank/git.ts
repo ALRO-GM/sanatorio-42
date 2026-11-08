@@ -31,6 +31,23 @@ export const GIT: readonly Concept[] = [
           'Lo que no está en el índice todavía',
         ],
       },
+      {
+        // Predicción (motor: tras el commit, «Cambios sin preparar: b.txt»)
+        ask: [
+          'Cambias `a.txt` y `b.txt`, haces `git add a.txt` y un commit. ¿Qué dice después `git status`?',
+          'Con `a.txt` y `b.txt` cambiados, tras `git add a.txt` y un commit, `git status` dice…',
+        ],
+        right: [
+          'Que `b.txt` sigue con cambios sin preparar',
+          'Que los cambios de `b.txt` siguen fuera',
+        ],
+        wrong: [
+          'Que `b.txt` también entró en el commit',
+          'Que `a.txt` sigue con cambios sin preparar',
+          'Que `b.txt` está preparado para el commit',
+          'Que no queda nada que guardar en `main`',
+        ],
+      },
     ],
     wrong: [
       'Una copia del repositorio en el servidor',
@@ -52,6 +69,20 @@ export const GIT: readonly Concept[] = [
         right: [
           'Tu rama, lo preparado y lo cambiado sin preparar',
           'El estado de tus ficheros y de tu rama',
+        ],
+      },
+      {
+        // Predicción (motor: «Preparado para el commit: main.c»)
+        ask: [
+          'Cambias `main.c` y haces `git add main.c`, sin commit. ¿Cómo sale `main.c` en `git status`?',
+          'Tras `git add main.c` y antes del commit, `git status` enseña `main.c` como…',
+        ],
+        right: ['Preparado para el próximo commit', 'Listo para entrar en el próximo commit'],
+        wrong: [
+          'Cambiado, pero sin preparar',
+          'Guardado ya en un commit nuevo',
+          'Sin seguir: git aún no lo conoce',
+          'Subido ya a la rama del remoto',
         ],
       },
     ],
@@ -83,6 +114,20 @@ export const GIT: readonly Concept[] = [
           'Todos los ficheros del proyecto',
           'La historia entera de la rama actual',
           'El índice y los cambios sin preparar',
+        ],
+      },
+      {
+        // Predicción (motor: «Rama login creada en c0», el commit de main)
+        ask: [
+          'Estás en `main` y creas la rama `login` sin hacer commits. ¿A qué commit apunta `login`?',
+          'Recién creada desde `main`, sin commits nuevos, la rama `login` apunta…',
+        ],
+        right: ['Al mismo commit que main', 'Al commit en el que está main'],
+        wrong: [
+          'Al primer commit del repositorio',
+          'A un commit nuevo, copia del de main',
+          'A ninguno hasta que hagas un commit',
+          'Al commit anterior al de main',
         ],
       },
     ],
@@ -117,6 +162,20 @@ export const GIT: readonly Concept[] = [
           'Que el repositorio está vacío, sin commits',
         ],
       },
+      {
+        // Predicción (motor: el commit hecho con HEAD separado no sale en ninguna rama al volver a main)
+        ask: [
+          'Con HEAD separado haces un commit y vuelves a `main`. ¿Qué pasa con ese commit?',
+          'Haces un commit con HEAD separado y luego `git switch main`. Ese commit…',
+        ],
+        right: ['No queda en ninguna rama', 'Se queda fuera de todas las ramas'],
+        wrong: [
+          'Se añade a main al volver',
+          'Pasa a una rama nueva llamada HEAD',
+          'Se borra en cuanto lo haces',
+          'Se sube solo al remoto origin',
+        ],
+      },
     ],
     wrong: [
       'El primer commit del repositorio',
@@ -141,6 +200,23 @@ export const GIT: readonly Concept[] = [
         right: ['git switch -c login', 'git checkout -b login'],
         wrong: ['git branch login', 'git switch login', 'git merge login', 'git commit -b login'],
       },
+      {
+        // Predicción (motor: tras git branch login y un commit, avanza main y login sigue en c0)
+        ask: [
+          'Estás en `main`, escribes `git branch login` y haces un commit. ¿Qué rama avanza?',
+          'Tras `git branch login` y un commit, estando en `main`, la rama que avanza es…',
+        ],
+        right: [
+          'main, porque git branch no te cambia de rama',
+          'main: crear login no te lleva a ella',
+        ],
+        wrong: [
+          'login, porque es la rama recién creada',
+          'Las dos, porque apuntaban al mismo commit',
+          'Ninguna, porque HEAD se queda separado',
+          'login, y main se queda en el anterior',
+        ],
+      },
     ],
     wrong: ['git push login', 'git add login', 'git init login'],
     why: 'git branch solo la crea; switch -c (o checkout -b) la crea y te cambia a ella.',
@@ -161,6 +237,15 @@ export const GIT: readonly Concept[] = [
           'Solo mueve la rama adelante, sin commit nuevo',
           'Solo avanza el puntero, porque no hay nada que mezclar',
         ],
+      },
+      {
+        // Predicción (motor: «Avance rápido (fast-forward) hasta c2», sin commit nuevo)
+        ask: [
+          '`feature` lleva 2 commits y `main` no ha avanzado. ¿Cuántos commits de merge crea `git merge feature` en `main`?',
+          '¿Cuántos commits de merge crea `git merge feature` si `main` no se ha movido desde que salió `feature`?',
+        ],
+        right: ['0'],
+        wrong: ['1', '2', '3'],
       },
     ],
     wrong: [
@@ -184,6 +269,15 @@ export const GIT: readonly Concept[] = [
           'Si las dos ramas han avanzado, git merge crea…',
         ],
         right: ['Un commit con dos padres', 'Un commit que une las dos historias'],
+      },
+      {
+        // Predicción: las dos ramas han avanzado (motor: «Merge hecho: c7»)
+        ask: [
+          '`main` y `feature` tienen un commit nuevo cada una. Tras `git merge feature`, ¿cuántos padres tiene el commit nuevo?',
+          'Si las dos ramas han avanzado, ¿cuántos padres tiene el commit que crea `git merge`?',
+        ],
+        right: ['2'],
+        wrong: ['1', '0', '3'],
       },
     ],
     wrong: [
@@ -277,6 +371,20 @@ export const GIT: readonly Concept[] = [
           'Tu copia de cómo estaba main en el remoto',
         ],
       },
+      {
+        // Predicción: origin/main solo cambia con fetch, pull o push
+        ask: [
+          'Tu `origin/main` está en `c3`. Alguien sube `c4` y tú no haces nada. ¿Dónde está tu `origin/main`?',
+          'Otra persona sube `c4` a origin; tú no tecleas nada. Tu `origin/main`, que estaba en `c3`, ahora está…',
+        ],
+        right: ['En `c3`, hasta que hagas `git fetch`', 'Aún en `c3`: no lo mueve nadie más'],
+        wrong: [
+          'En `c4`, porque se actualiza solo',
+          'En `c4`, pero sin sus ficheros',
+          'Borrada hasta el próximo `git pull`',
+          'En `c3`, y tu `main` pasa a `c4`',
+        ],
+      },
     ],
     wrong: [
       'La rama main del remoto, en tiempo real',
@@ -305,6 +413,23 @@ export const GIT: readonly Concept[] = [
           'git commit --amend y otra vez git push',
         ],
       },
+      {
+        // Predicción (motor: «rechazado: origin/main tiene commits que tú no tienes»)
+        ask: [
+          'Tu `main` y el de origin han avanzado cada uno por su lado. ¿Qué pasa con `git push`?',
+          'Si origin tiene un commit que tú no tienes y tú uno que origin no tiene, `git push`…',
+        ],
+        right: [
+          'Lo rechaza: antes tienes que traer lo suyo',
+          'Falla hasta que unas lo que hay en origin',
+        ],
+        wrong: [
+          'Sube lo tuyo y borra lo que había en origin',
+          'Une las dos historias en el remoto',
+          'Sube lo tuyo en una rama nueva de origin',
+          'Sube lo tuyo y deja lo suyo para después',
+        ],
+      },
     ],
     wrong: ['git commit --amend', 'git reset --hard', 'git branch -D main', 'git init'],
     why: 'El remoto no deja que pises trabajo ajeno: primero traes lo suyo (pull, o pull --rebase), unes y luego subes.',
@@ -319,6 +444,20 @@ export const GIT: readonly Concept[] = [
       {
         ask: ['¿Qué hace `git clone url`?', '¿Para qué sirve git clone?'],
         right: ['Copia el repositorio con su historia y deja origin configurado'],
+      },
+      {
+        // Predicción: clone trae toda la historia
+        ask: [
+          'Clonas un repositorio que tiene 20 commits. ¿Qué enseña `git log --oneline` nada más clonar?',
+          'Nada más hacer `git clone` de un repositorio con 20 commits, `git log --oneline` enseña…',
+        ],
+        right: ['Los 20 commits, con toda la historia', 'Toda la historia: los 20 commits'],
+        wrong: [
+          'Solo el último commit, sin historia',
+          'Nada: la historia sigue en el remoto',
+          'Solo los commits que hagas desde ahora',
+          'Un único commit nuevo llamado clone',
+        ],
       },
     ],
     wrong: [
@@ -354,6 +493,23 @@ export const GIT: readonly Concept[] = [
           'Ramas que aún no has subido al remoto',
         ],
       },
+      {
+        // Predicción (motor: «Rebase hecho: c5 copiados encima de main», y sale c5')
+        ask: [
+          'En `feature` tienes 2 commits y `main` ha avanzado. Tras `git rebase main`, ¿qué pasa con los ids de tus commits?',
+          'Tras `git rebase main` en `feature`, los ids de tus 2 commits…',
+        ],
+        right: [
+          'Cambian: son copias nuevas encima de main',
+          'Son otros: git crea copias sobre main',
+        ],
+        wrong: [
+          'Siguen iguales: solo se mueve la rama',
+          'Desaparecen, juntos en un solo commit',
+          'Pasan a main con los mismos ids',
+          'Siguen iguales y main se une a feature',
+        ],
+      },
     ],
     wrong: [
       'Une main en feature con un commit de merge',
@@ -373,6 +529,20 @@ export const GIT: readonly Concept[] = [
       {
         ask: ['¿Qué hace `git cherry-pick a1b2c3`?', '¿Para qué sirve cherry-pick?'],
         right: ['Copia ese commit encima de donde estás', 'Trae un commit concreto de otra rama'],
+      },
+      {
+        // Predicción: la rama de origen no cambia
+        ask: [
+          'En `main` haces `git cherry-pick` de un commit de la rama `fix`. ¿Qué le pasa a `fix`?',
+          'Tras copiar en `main` un commit de `fix` con `git cherry-pick`, la rama `fix`…',
+        ],
+        right: ['Nada: sigue con ese commit donde estaba', 'Se queda igual, con su commit dentro'],
+        wrong: [
+          'Pierde el commit, que pasa a main',
+          'Se une entera a main con un merge',
+          'Avanza hasta la punta de main',
+          'Se borra porque ya está en main',
+        ],
       },
     ],
     wrong: [
@@ -395,6 +565,20 @@ export const GIT: readonly Concept[] = [
         right: [
           'Rehace el último commit, con otro mensaje o ficheros',
           'Cambia el último commit por otro corregido',
+        ],
+      },
+      {
+        // Escenario: falta un fichero en el último commit, aún sin subir
+        ask: [
+          'Acabas de hacer un commit, sin subirlo, y te has dejado `libft.h` fuera. ¿Qué haces?',
+          'Para meter `libft.h` en el commit que acabas de hacer (sin subir), escribes…',
+        ],
+        right: ['`git add libft.h` y luego `git commit --amend`'],
+        wrong: [
+          '`git commit --amend` y luego `git add libft.h`',
+          '`git revert HEAD` y luego `git add libft.h`',
+          '`git add libft.h` y luego `git push --force`',
+          '`git reset --hard HEAD~1` y otro `git commit`',
         ],
       },
     ],
@@ -425,6 +609,15 @@ export const GIT: readonly Concept[] = [
           'El primer commit de la historia de main',
           'El hijo del commit al que apunta main',
         ],
+      },
+      {
+        // Predicción (motor: git checkout HEAD~2 desde c3 → «HEAD separado en c1»)
+        ask: [
+          'Tu rama tiene 4 commits en línea, de c0 a c3, y HEAD está en c3. ¿Qué commit es `HEAD~2`?',
+          'Con 4 commits en línea, de c0 a c3, y HEAD en c3, `HEAD~2` es…',
+        ],
+        right: ['c1'],
+        wrong: ['c2', 'c0', 'c5'],
       },
     ],
     wrong: [
@@ -512,6 +705,20 @@ export const GIT: readonly Concept[] = [
           'Guarda tus cambios a medias para cambiar de rama',
         ],
       },
+      {
+        // Predicción (motor: «Nada que guardar: el trabajo está limpio»)
+        ask: [
+          'Tienes `main.c` cambiado sin commit y haces `git stash`. ¿Qué dice después `git status`?',
+          'Justo después de `git stash`, con `main.c` cambiado, `git status` dice…',
+        ],
+        right: ['Que no hay nada que guardar', 'Que el trabajo está limpio'],
+        wrong: [
+          'Que main.c sigue cambiado sin preparar',
+          'Que main.c está preparado para el commit',
+          'Que hay un commit nuevo en main',
+          'Que main.c se ha borrado del repositorio',
+        ],
+      },
     ],
     wrong: [
       'Hace un commit temporal en la rama main',
@@ -533,6 +740,23 @@ export const GIT: readonly Concept[] = [
       {
         ask: ['¿En qué consiste GitHub flow?', 'Con GitHub flow…'],
         right: ['Ramas cortas desde main que se unen por pull request'],
+      },
+      {
+        // Escenario
+        ask: [
+          'Con GitHub flow, terminas un arreglo en tu rama `fix-login`. ¿Qué toca ahora?',
+          'En GitHub flow, cuando acabas el trabajo de la rama `fix-login`, lo siguiente es…',
+        ],
+        right: [
+          'Abrir un pull request para unirla a main',
+          'Pedir revisión con un pull request a main',
+        ],
+        wrong: [
+          'Unirla en develop y esperar a la release',
+          'Subir sus commits directamente a main',
+          'Dejarla abierta hasta la próxima versión',
+          'Crear una rama release desde ella',
+        ],
       },
     ],
     wrong: [
@@ -595,6 +819,20 @@ export const GIT: readonly Concept[] = [
         right: ['git push --tags', 'git push origin v1.0'],
         wrong: ['git push, que sube siempre los tags', 'git tag --push', 'git commit --tags'],
       },
+      {
+        // Predicción (motor: tras dos commits, el tag sigue en c3)
+        ask: [
+          'Pones `git tag v1.0` en `c3` y haces dos commits más. ¿Dónde está `v1.0`?',
+          'Tras `git tag v1.0` en `c3` y dos commits más, `v1.0` señala…',
+        ],
+        right: ['`c3`, donde lo pusiste', 'Aún `c3`: un tag no se mueve'],
+        wrong: [
+          '`c5`, el último commit',
+          '`c4`, un commit por delante',
+          'Ninguno: se borra con el commit',
+          '`c3` y `c5`, los dos a la vez',
+        ],
+      },
     ],
     wrong: [
       'Avanza con cada commit que haces',
@@ -614,6 +852,23 @@ export const GIT: readonly Concept[] = [
       {
         ask: ['¿Qué es trunk-based development?', 'En trunk-based…'],
         right: ['Todos unen en main varias veces al día, con ramas de horas'],
+      },
+      {
+        // Escenario: el trabajo largo va a main en trozos, apagado
+        ask: [
+          'Tu equipo hace trunk-based y una funcionalidad llevará dos semanas. ¿Cómo la llevas?',
+          'En trunk-based, una funcionalidad de dos semanas se hace…',
+        ],
+        right: [
+          'En trozos pequeños a main, apagada con un interruptor',
+          'Unida a main a diario, oculta tras un flag',
+        ],
+        wrong: [
+          'En una rama propia que unes al acabar',
+          'En develop, hasta la próxima release',
+          'En un fork aparte que nadie más ve',
+          'Sin commits hasta que esté terminada',
+        ],
       },
     ],
     wrong: [

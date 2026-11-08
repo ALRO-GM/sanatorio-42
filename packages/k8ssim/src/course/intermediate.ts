@@ -116,18 +116,20 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Rolling update',
       goal: 'Sube la API a ghcr.io/peer4u/api:1.0.1, anota el motivo («sube a 1.0.1») y deja el rollout terminado.',
       theory: {
-        what: 'Cambiar la imagen de un Deployment crea un ReplicaSet nuevo y sustituye los Pods poco a poco: arranca uno nuevo, espera a que esté listo, quita uno viejo. Siempre hay Pods sirviendo. Cada cambio es una revisión que se puede ver y deshacer.',
+        what: 'Cambiar la imagen de un Deployment sustituye los Pods poco a poco: arranca uno nuevo, espera a que esté listo y quita uno viejo.',
         how: [
           'kubectl set image deployment/api api=ghcr.io/peer4u/api:1.0.1',
           'kubectl annotate deployment/api kubernetes.io/change-cause="sube a 1.0.1"',
-          'kubectl rollout status deployment/api     # espera a que acabe',
-          'kubectl rollout history deployment/api    # las revisiones con su motivo',
+          'kubectl rollout status deployment/api    # espera a que acabe',
+          'kubectl rollout history deployment/api   # revisiones y su motivo',
         ],
-        when: 'En cada despliegue de una versión nueva. En un equipo lo hace la CI o GitOps cambiando la etiqueta en el YAML (bloque 9).',
+        when: 'En cada despliegue de una versión nueva.',
+        whenNot: 'Sin anotar, CHANGE-CAUSE dice «<none>»: nadie sabrá qué trajo cada revisión.',
         problems:
-          'La anotación change-cause se queda en el Deployment y se copia a la revisión siguiente si no la cambias: ponla en cada despliegue (con --overwrite si ya tiene uno).',
+          'Anotar otra vez sin --overwrite: «already has a value (sube a 1.0.1), and --overwrite is false», y la revisión nueva hereda el motivo viejo.',
       },
-      example: 'Subes la API a 1.0.1 y miras el rollout y las revisiones.',
+      example:
+        'Antes de verlo: subes a 1.0.1 sin anotar nada. ¿Qué dirá CHANGE-CAUSE en rollout history?',
       objectives: {
         'ready:tienda deploy/api': 'La API en 1.0.1, con sus 3 réplicas',
         'get:tienda deploy/api {.metadata.annotations.kubernetes\\.io/change-cause}':
@@ -138,18 +140,21 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Rolling update',
       goal: 'Move the API to ghcr.io/peer4u/api:1.0.1, record the reason («sube a 1.0.1») and leave the rollout finished.',
       theory: {
-        what: 'Changing a Deployment image creates a new ReplicaSet and replaces the Pods gradually: start a new one, wait until it is ready, remove an old one. There are always Pods serving. Every change is a revision you can see and undo.',
+        what: 'Changing a Deployment image replaces the Pods bit by bit: it starts a new one, waits until it is ready and removes an old one.',
         how: [
           'kubectl set image deployment/api api=ghcr.io/peer4u/api:1.0.1',
           'kubectl annotate deployment/api kubernetes.io/change-cause="sube a 1.0.1"',
-          'kubectl rollout status deployment/api     # wait until it finishes',
-          'kubectl rollout history deployment/api    # revisions with their reason',
+          'kubectl rollout status deployment/api    # waits until done',
+          'kubectl rollout history deployment/api   # revisions and why',
         ],
-        when: 'On every release. In a team, CI or GitOps does it by changing the tag in the YAML (block 9).',
+        when: 'On every release of a new version.',
+        whenNot:
+          'Without an annotation, CHANGE-CAUSE says "<none>": nobody will know what each revision brought.',
         problems:
-          'The change-cause annotation stays on the Deployment and is copied to the next revision unless you change it: set it on every release (with --overwrite if it already has one).',
+          'Annotating again without --overwrite: "already has a value (sube a 1.0.1), and --overwrite is false", and the new revision inherits the old reason.',
       },
-      example: 'You move the API to 1.0.1 and look at the rollout and the revisions.',
+      example:
+        'Before you look: you move to 1.0.1 without annotating. What will CHANGE-CAUSE say in rollout history?',
       objectives: {
         'ready:tienda deploy/api': 'The API on 1.0.1, with its 3 replicas',
         'get:tienda deploy/api {.metadata.annotations.kubernetes\\.io/change-cause}':
@@ -181,36 +186,38 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Deshacer un despliegue',
       goal: 'Alguien ha subido la API a 1.1.0 y los Pods nuevos no arrancan. Vuelve a la versión buena (1.0.0) y deja el rollout terminado.',
       theory: {
-        what: 'Si los Pods nuevos no llegan a estar listos, el rolling update se para a medias: los viejos siguen sirviendo. kubectl rollout undo vuelve a la plantilla de la revisión anterior (o a la que digas) con otro rolling update.',
+        what: 'Si los Pods nuevos no llegan a estar listos, el rolling update se queda a medias y los viejos siguen sirviendo. rollout undo vuelve a la revisión anterior.',
         how: [
-          'kubectl rollout status deployment/api --timeout=60s   # no acaba',
-          'kubectl get pods                                       # los nuevos, en CrashLoopBackOff',
+          'kubectl rollout status deployment/api --timeout=30s   # no acaba',
           'kubectl rollout undo deployment/api                    # a la anterior',
-          'kubectl rollout undo deployment/api --to-revision=1    # o a una concreta',
         ],
-        when: 'Cuando una versión rompe algo en producción: primero vuelves atrás y luego investigas con calma.',
+        when: 'Cuando una versión rompe producción: vuelves atrás y luego investigas.',
+        whenNot:
+          'undo cambia el clúster, no el YAML: si el fichero dice 1.1.0, el siguiente apply lo rompe otra vez.',
         problems:
-          'undo cambia el clúster, no el repositorio: si el YAML dice 1.1.0, el siguiente apply lo vuelve a romper. Arréglalo también en el YAML.',
+          'Esperar a que se arregle solo: status acaba en «error: timed out waiting for the condition» y el Pod nuevo sigue en «CrashLoopBackOff». Haz undo.',
       },
-      example: 'Ves el rollout atascado, los Pods nuevos fallando y las revisiones.',
+      example:
+        'Antes de verlo: la 1.1.0 no arranca. ¿Cuántos Pods de la 1.0.0 seguirán en Running mientras tanto?',
       objectives: { 'ready:tienda deploy/api': 'La API en 1.0.0, con el rollout terminado' },
     },
     en: {
       title: 'Undo a rollout',
       goal: 'Someone moved the API to 1.1.0 and the new Pods do not start. Go back to the good version (1.0.0) and leave the rollout finished.',
       theory: {
-        what: 'If the new Pods never become ready, the rolling update stops half-way: the old ones keep serving. kubectl rollout undo goes back to the previous revision template (or the one you name) with another rolling update.',
+        what: 'If the new Pods never get ready, the rolling update stalls halfway and the old ones keep serving. rollout undo goes back to the previous revision.',
         how: [
-          'kubectl rollout status deployment/api --timeout=60s   # never finishes',
-          'kubectl get pods                                       # new ones in CrashLoopBackOff',
-          'kubectl rollout undo deployment/api                    # back to the previous one',
-          'kubectl rollout undo deployment/api --to-revision=1    # or a given one',
+          'kubectl rollout status deployment/api --timeout=30s   # does not finish',
+          'kubectl rollout undo deployment/api                    # to the previous one',
         ],
-        when: 'When a version breaks something in production: first roll back, then investigate calmly.',
+        when: 'When a version breaks production: roll back, then investigate.',
+        whenNot:
+          'undo changes the cluster, not the YAML: if the file says 1.1.0, the next apply breaks it again.',
         problems:
-          'undo changes the cluster, not the repository: if the YAML says 1.1.0, the next apply breaks it again. Fix the YAML too.',
+          'Waiting for it to fix itself: status ends with "error: timed out waiting for the condition" and the new Pod stays in "CrashLoopBackOff". Run undo.',
       },
-      example: 'You see the stuck rollout, the new Pods failing and the revisions.',
+      example:
+        'Before you look: 1.1.0 does not start. How many 1.0.0 Pods will still be Running meanwhile?',
       objectives: { 'ready:tienda deploy/api': 'The API on 1.0.0, with the rollout finished' },
     },
     example: [
@@ -231,17 +238,20 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Estrategias de despliegue',
       goal: 'Que la API no pierda nunca capacidad al actualizarse (maxSurge 1, maxUnavailable 0) y añade un canary api-canary con 1 réplica de la 1.0.2 detrás del mismo Service.',
       theory: {
-        what: 'El rolling update se regula con maxSurge (cuántos Pods de más puede haber) y maxUnavailable (cuántos pueden faltar). Recreate para todos los Pods viejos y luego arranca los nuevos (para lo que no aguanta dos versiones a la vez). Un canary es un segundo Deployment con pocas réplicas y las mismas etiquetas que mira el Service: le llega una parte del tráfico.',
+        what: 'maxSurge dice cuántos Pods de más puede haber al actualizar y maxUnavailable cuántos pueden faltar. Un canary es otro Deployment pequeño que el Service también elige.',
         how: [
           'kubectl patch deployment api -p \'{"spec":{"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":0}}}}\'',
-          'kubectl apply -f api-canary.yaml       # labels app: api, track: canary',
-          'kubectl describe svc api               # Endpoints: los 3 + el canary',
+          'kubectl apply -f api-canary.yaml   # app: api, track: canary',
+          'kubectl describe svc api           # Endpoints: 3 + el canary',
         ],
-        when: 'maxUnavailable 0 cuando no sobra capacidad; un canary para probar una versión con tráfico real antes de darle todo.',
+        when: 'maxUnavailable 0 si no sobra capacidad; un canary, para probar con poco tráfico real.',
+        whenNot:
+          'Recreate para los Pods viejos antes de arrancar los nuevos: hay corte, sin versiones mezcladas.',
         problems:
-          'Si el canary no lleva la etiqueta que mira el Service, no le llega nada; si lleva exactamente las mismas que el Deployment principal, se pelean por los Pods.',
+          'Crear el canary con create deployment api-canary: sus Pods llevan «app=api-canary» y Endpoints sigue con 3 IP. Ponle app: api.',
       },
-      example: 'Miras la estrategia actual de la API y los endpoints de su Service.',
+      example:
+        'Antes de verlo: el Service api tiene 3 IP en Endpoints y aplicas un canary con app: api. ¿Cuántas tendrá después?',
       objectives: {
         'get:tienda deploy/api {.spec.strategy.rollingUpdate.maxSurge} {.spec.strategy.rollingUpdate.maxUnavailable}':
           'maxSurge 1 y maxUnavailable 0',
@@ -253,17 +263,20 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Deployment strategies',
       goal: 'Make sure the API never loses capacity while updating (maxSurge 1, maxUnavailable 0) and add a canary api-canary with 1 replica of 1.0.2 behind the same Service.',
       theory: {
-        what: 'A rolling update is tuned with maxSurge (how many extra Pods may exist) and maxUnavailable (how many may be missing). Recreate stops all the old Pods and then starts the new ones (for apps that cannot run two versions at once). A canary is a second Deployment with few replicas and the labels the Service selects: it gets a slice of the traffic.',
+        what: 'maxSurge says how many extra Pods may exist during an update and maxUnavailable how many may be missing. A canary is another small Deployment the Service also selects.',
         how: [
           'kubectl patch deployment api -p \'{"spec":{"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":0}}}}\'',
-          'kubectl apply -f api-canary.yaml       # labels app: api, track: canary',
-          'kubectl describe svc api               # Endpoints: the 3 + the canary',
+          'kubectl apply -f api-canary.yaml   # app: api, track: canary',
+          'kubectl describe svc api           # Endpoints: 3 + the canary',
         ],
-        when: 'maxUnavailable 0 when there is no spare capacity; a canary to try a version with real traffic before giving it everything.',
+        when: 'maxUnavailable 0 without spare capacity; a canary, to try with a little real traffic.',
+        whenNot:
+          'Recreate stops the old Pods before starting the new ones: downtime, but no mixed versions.',
         problems:
-          'If the canary lacks the label the Service selects, it gets nothing; if it has exactly the same labels as the main Deployment, they fight over Pods.',
+          'Creating the canary with create deployment api-canary: its Pods get "app=api-canary" and Endpoints keeps 3 IPs. Give it app: api.',
       },
-      example: 'You look at the API current strategy and at its Service endpoints.',
+      example:
+        'Before you look: Service api has 3 IPs in Endpoints and you apply a canary with app: api. How many will it have afterwards?',
       objectives: {
         'get:tienda deploy/api {.spec.strategy.rollingUpdate.maxSurge} {.spec.strategy.rollingUpdate.maxUnavailable}':
           'maxSurge 1 and maxUnavailable 0',
@@ -271,7 +284,13 @@ export const INTERMEDIATE: Unit[] = [
         'probe:endpoints': 'Service api spreads over 4 Pods',
       },
     },
-    example: ["kubectl get deploy api -o jsonpath='{.spec.strategy}'", 'kubectl describe svc api'],
+    example: [
+      "kubectl get deploy api -o jsonpath='{.spec.strategy}'",
+      'kubectl describe svc api | grep Endpoints',
+      "cat <<'EOF' | kubectl apply -f -\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: api-canary\nspec:\n  replicas: 1\n  selector:\n    matchLabels: {app: api, track: canary}\n  template:\n    metadata:\n      labels: {app: api, track: canary}\n    spec:\n      imagePullSecrets: [{name: ghcr}]\n      containers:\n      - name: api\n        image: ghcr.io/peer4u/api:1.0.2\n        envFrom: [{secretRef: {name: db}}]\nEOF",
+      'kubectl get pods -l app=api -L track',
+      'kubectl describe svc api | grep Endpoints',
+    ],
     solution: [
       'kubectl patch deployment api -p \'{"spec":{"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":0}}}}\'',
       CANARY,
@@ -294,17 +313,19 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Declarativo de verdad',
       goal: 'Alguien escaló la API a mano y el clúster ya no es lo que dice ~/tienda/api.yaml. Vuelve a lo del repositorio y compruébalo con kubectl diff.',
       theory: {
-        what: 'kubectl diff enseña qué cambiaría un apply: la diferencia entre el clúster y tus ficheros. scale, set, patch o edit cambian el clúster pero no el repositorio: eso es la deriva (drift). La fuente de la verdad es el YAML en git.',
+        what: 'kubectl diff enseña qué cambiaría un apply. Un cambio a mano que no está en el YAML es deriva (drift).',
         how: [
-          'kubectl diff -f api.yaml       # sale 1 si hay diferencias, 0 si no',
-          'kubectl apply -f api.yaml      # el clúster vuelve a lo del fichero',
-          'kubectl diff -f api.yaml       # ya no enseña nada',
+          'kubectl diff -f api.yaml    # sale 1 si hay diferencias',
+          'kubectl apply -f api.yaml   # el clúster vuelve al fichero',
+          'kubectl diff -f api.yaml    # sin salida, y sale 0',
         ],
-        when: 'Antes de cada apply (sobre todo en producción) y para encontrar cambios hechos a mano.',
+        when: 'Antes de cada apply en producción.',
+        whenNot: 'scale, set y patch cambian el clúster; la verdad es el YAML en git.',
         problems:
-          'Un cambio a mano que arregla una urgencia se pierde en el siguiente despliegue si no se lleva al YAML.',
+          'Arreglar una urgencia con scale y no llevarlo al YAML: diff enseña «-  replicas: 5» y el siguiente apply lo deshace.',
       },
-      example: 'Miras la deriva de la API con diff.',
+      example:
+        'Antes de verlo: alguien escaló la API a 5 y api.yaml dice 3. ¿Qué líneas marcará diff con - y +?',
       objectives: {
         'get:tienda deploy/api {.spec.replicas}': 'La API con las réplicas del YAML',
         'probe:diff': 'kubectl diff ya no encuentra diferencias',
@@ -314,23 +335,30 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Truly declarative',
       goal: 'Someone scaled the API by hand and the cluster no longer matches ~/tienda/api.yaml. Go back to what the repository says and check it with kubectl diff.',
       theory: {
-        what: 'kubectl diff shows what an apply would change: the difference between the cluster and your files. scale, set, patch or edit change the cluster but not the repository: that is drift. The source of truth is the YAML in git.',
+        what: 'kubectl diff shows what an apply would change. A manual change missing from the YAML is drift.',
         how: [
-          'kubectl diff -f api.yaml       # exits 1 if there are differences, 0 otherwise',
-          'kubectl apply -f api.yaml      # the cluster goes back to the file',
-          'kubectl diff -f api.yaml       # shows nothing now',
+          'kubectl diff -f api.yaml    # exits 1 if there are differences',
+          'kubectl apply -f api.yaml   # the cluster goes back to the file',
+          'kubectl diff -f api.yaml    # no output, exits 0',
         ],
-        when: 'Before every apply (above all in production) and to find manual changes.',
+        when: 'Before every apply in production.',
+        whenNot: 'scale, set and patch change the cluster; the truth is the YAML in git.',
         problems:
-          'A manual fix for an emergency is lost on the next release unless it goes into the YAML.',
+          'Fixing an emergency with scale and not taking it to the YAML: diff shows "-  replicas: 5" and the next apply undoes it.',
       },
-      example: 'You look at the API drift with diff.',
+      example:
+        'Before you look: someone scaled the API to 5 and api.yaml says 3. Which lines will diff mark with - and +?',
       objectives: {
         'get:tienda deploy/api {.spec.replicas}': 'The API with the YAML replicas',
         'probe:diff': 'kubectl diff finds no differences',
       },
     },
-    example: ['kubectl diff -f ~/tienda/api.yaml'],
+    example: [
+      'kubectl get deploy api',
+      'kubectl diff -f ~/tienda/api.yaml',
+      'kubectl apply -f ~/tienda/api.yaml',
+      'kubectl diff -f ~/tienda/api.yaml; echo $?',
+    ],
     solution: ['kubectl apply -f ~/tienda/api.yaml', 'kubectl diff -f ~/tienda/api.yaml'],
     check: {
       get: ['tienda deploy/api {.spec.replicas}'],
@@ -405,19 +433,21 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Readiness: no mandes tráfico antes de tiempo',
       goal: 'La 1.2.0 tarda 20 s en escuchar y el Service le manda peticiones antes. Añade en ~/tienda/api.yaml una readinessProbe HTTP a /health en el 3000 y aplícalo.',
       theory: {
-        what: 'La readinessProbe dice cuándo un Pod puede recibir tráfico: hasta que pasa, no está en los endpoints del Service. Sin ella, el Pod cuenta como listo en cuanto arranca el contenedor, aunque la app aún no escuche. Kubernetes no mira el HEALTHCHECK de la imagen de Docker: hay que escribirlo otra vez.',
+        what: 'La readinessProbe dice cuándo un Pod puede recibir tráfico: hasta que pasa, no entra en los endpoints del Service. Kubernetes no lee el HEALTHCHECK de la imagen.',
         how: [
           'readinessProbe:',
           '  httpGet: {path: /health, port: 3000}',
           '  periodSeconds: 5',
-          'kubectl get pods -w                 # 0/1 y luego 1/1',
-          'kubectl describe svc api            # solo los listos en Endpoints',
+          'kubectl get pods   # 0/1 hasta que pasa, luego 1/1',
         ],
-        when: 'En toda app que tarde en arrancar o dependa de otra cosa (base de datos, caché).',
+        when: 'En toda app que tarde en arrancar o dependa de otra (base de datos, caché).',
+        whenNot:
+          'Una sonda que nunca pasa (puerto o ruta mal) deja el Pod en 0/1 y el rollout sin acabar.',
         problems:
-          'Si la sonda nunca pasa (puerto o ruta mal), el Pod se queda en 0/1 para siempre y el rollout no acaba.',
+          "Creer que «1/1 Running» es que contesta: sin sonda, el Service le manda tráfico y curl dice «Couldn't connect to server».",
       },
-      example: 'Ves los Pods de la 1.2.0 «listos» mientras la API todavía no contesta.',
+      example:
+        'Antes de verlo: la 1.2.0 tarda 20 s en escuchar y no tiene sonda. ¿Qué READY saldrá, y contestará curl?',
       objectives: {
         'get:tienda deploy/api {.spec.template.spec.containers[0].readinessProbe.httpGet.path} {.spec.template.spec.containers[0].readinessProbe.httpGet.port}':
           'readinessProbe a /health en el 3000',
@@ -428,19 +458,21 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Readiness: no traffic before it is time',
       goal: 'Version 1.2.0 takes 20 s to listen and the Service sends it requests before that. Add an HTTP readinessProbe to /health on 3000 in ~/tienda/api.yaml and apply it.',
       theory: {
-        what: 'The readinessProbe says when a Pod may receive traffic: until it passes, the Pod is not among the Service endpoints. Without it, the Pod counts as ready as soon as the container starts, even if the app is not listening yet. Kubernetes ignores the Docker image HEALTHCHECK: you write it again.',
+        what: 'The readinessProbe says when a Pod may get traffic: until it passes, the Pod is not in the Service endpoints. Kubernetes ignores the image HEALTHCHECK.',
         how: [
           'readinessProbe:',
           '  httpGet: {path: /health, port: 3000}',
           '  periodSeconds: 5',
-          'kubectl get pods -w                 # 0/1 and then 1/1',
-          'kubectl describe svc api            # only the ready ones under Endpoints',
+          'kubectl get pods   # 0/1 until it passes, then 1/1',
         ],
-        when: 'In every app that is slow to start or depends on something else (database, cache).',
+        when: 'In any app that is slow to start or depends on another (database, cache).',
+        whenNot:
+          'A probe that never passes (wrong port or path) leaves the Pod at 0/1 and the rollout unfinished.',
         problems:
-          'If the probe never passes (wrong port or path), the Pod stays 0/1 forever and the rollout never finishes.',
+          'Thinking "1/1 Running" means it answers: without a probe the Service sends it traffic and curl says "Couldn\'t connect to server".',
       },
-      example: 'You see the 1.2.0 Pods «ready» while the API does not answer yet.',
+      example:
+        'Before you look: 1.2.0 takes 20 s to listen and has no probe. What READY will show, and will curl answer?',
       objectives: {
         'get:tienda deploy/api {.spec.template.spec.containers[0].readinessProbe.httpGet.path} {.spec.template.spec.containers[0].readinessProbe.httpGet.port}':
           'readinessProbe to /health on 3000',
@@ -474,21 +506,21 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Liveness y startup',
       goal: 'La livenessProbe mata la API antes de que acabe de arrancar y entra en bucle. Arréglalo sin quitarla (una startupProbe es lo indicado) y aplica ~/tienda/api.yaml.',
       theory: {
-        what: 'La livenessProbe reinicia un contenedor que se ha colgado. Mal puesta (poco margen en una app lenta) lo mata una y otra vez: RESTARTS sube y acaba en CrashLoopBackOff. La startupProbe da tiempo al arranque: hasta que pasa, no se mira la liveness.',
+        what: 'La livenessProbe reinicia un contenedor colgado. La startupProbe da tiempo al arranque: mientras no pasa, la liveness no se mira.',
         how: [
           'startupProbe:',
           '  httpGet: {path: /health, port: 3000}',
-          '  failureThreshold: 30     # 30 × 2 s de margen para arrancar',
+          '  failureThreshold: 30   # 30 × 2 s para arrancar',
           '  periodSeconds: 2',
-          'kubectl describe pod <api-…>   # «Liveness probe failed», «will be restarted»',
         ],
-        when: 'Liveness para lo que se puede colgar sin morirse; startup para lo que tarda en arrancar.',
+        when: 'Liveness para lo que se cuelga sin morirse; startup para lo que tarda en arrancar.',
         whenNot:
-          'No hagas que la liveness dependa de otros servicios: si se cae la base de datos, reiniciar la API no arregla nada.',
+          'Readiness mal: no llega tráfico. Liveness mal: reinicios en bucle. Y la liveness no depende de la base de datos.',
         problems:
-          'Readiness mal: no llega tráfico. Liveness mal: reinicios en bucle. Saber distinguirlos es media guardia.',
+          'Una liveness con poco margen en una app lenta: describe dice «failed liveness probe, will be restarted» y acaba en «CrashLoopBackOff». Añade una startupProbe.',
       },
-      example: 'Ves los reinicios y los eventos de la liveness que falla.',
+      example:
+        'Antes de verlo: la liveness empieza a los 3 s y la API tarda 20 en escuchar. ¿Qué STATUS tendrán sus Pods?',
       objectives: {
         'ready:tienda deploy/api': 'La API estable, sin reinicios en bucle',
         'get:tienda deploy/api {.spec.template.spec.containers[0].livenessProbe.httpGet.path}':
@@ -499,21 +531,21 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Liveness and startup',
       goal: 'The livenessProbe kills the API before it finishes starting and it loops. Fix it without removing it (a startupProbe is the right tool) and apply ~/tienda/api.yaml.',
       theory: {
-        what: 'The livenessProbe restarts a container that hung. Badly set (too little margin on a slow app) it kills it again and again: RESTARTS climbs and it ends in CrashLoopBackOff. The startupProbe gives start-up time: until it passes, liveness is not checked.',
+        what: 'The livenessProbe restarts a hung container. The startupProbe gives start-up time: until it passes, liveness is not checked.',
         how: [
           'startupProbe:',
           '  httpGet: {path: /health, port: 3000}',
-          '  failureThreshold: 30     # 30 × 2 s of margin to start',
+          '  failureThreshold: 30   # 30 × 2 s to start',
           '  periodSeconds: 2',
-          'kubectl describe pod <api-…>   # «Liveness probe failed», «will be restarted»',
         ],
         when: 'Liveness for what can hang without dying; startup for what is slow to start.',
         whenNot:
-          'Do not make liveness depend on other services: if the database goes down, restarting the API fixes nothing.',
+          'Bad readiness: no traffic. Bad liveness: restart loop. And liveness must not depend on the database.',
         problems:
-          'Bad readiness: no traffic. Bad liveness: restart loops. Telling them apart is half of on-call.',
+          'A tight liveness on a slow app: describe says "failed liveness probe, will be restarted" and it ends in "CrashLoopBackOff". Add a startupProbe.',
       },
-      example: 'You see the restarts and the events of the failing liveness.',
+      example:
+        'Before you look: liveness starts at 3 s and the API takes 20 to listen. What STATUS will its Pods have?',
       objectives: {
         'ready:tienda deploy/api': 'The API stable, no restart loops',
         'get:tienda deploy/api {.spec.template.spec.containers[0].livenessProbe.httpGet.path}':
@@ -521,7 +553,7 @@ export const INTERMEDIATE: Unit[] = [
       },
     },
     example: [
-      'kubectl get pods -l app=api -w',
+      'kubectl get pods -l app=api -w | tail -n 4',
       "kubectl describe pod -l app=api | grep -E 'Unhealthy|Killing' | head -n 2",
     ],
     solution: [
@@ -546,17 +578,20 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Requests, limits y OOMKilled',
       goal: 'informes muere por memoria (OOMKilled). Dale requests de 100m de CPU y 256Mi de memoria y un límite de 384Mi.',
       theory: {
-        what: 'requests es lo que se reserva para el Pod (el planificador lo usa para elegir nodo); limits es el techo. Pasarse de CPU solo frena; pasarse de memoria mata el contenedor: OOMKilled, código 137 (128 + SIGKILL), como en el curso de Docker.',
+        what: 'requests es lo que se reserva para el Pod; limits, el techo. Pasarse de CPU frena; pasarse de memoria mata el contenedor.',
         how: [
-          'kubectl describe pod <informes-…>   # Last State: Terminated, Reason: OOMKilled, Exit Code: 137',
+          'kubectl describe pod <informes-…>   # Last State y Reason',
           'kubectl set resources deployment informes --requests=cpu=100m,memory=256Mi --limits=memory=384Mi',
           'kubectl top pods                    # lo que usa de verdad',
         ],
-        when: 'Siempre en producción: sin requests el planificador no sabe dónde cabe nada y sin límites un Pod se come el nodo.',
+        when: 'Siempre en producción: sin límites, un Pod se come el nodo.',
+        whenNot:
+          'Un OOMKilled también acaba en CrashLoopBackOff; lo que lo distingue es el 137 de describe.',
         problems:
-          'Un Pod que muere por OOMKilled también acaba en CrashLoopBackOff, pero describe dice OOMKilled y 137: no es un fallo de la app, es memoria. Sube el límite o arregla la fuga.',
+          'Buscar un fallo de la app cuando es memoria: describe dice «Reason: OOMKilled» y «Exit Code: 137». Sube el límite o arregla la fuga.',
       },
-      example: 'Ves informes reiniciándose, el OOMKilled en describe y su memoria en el límite.',
+      example:
+        'Antes de verlo: informes tiene un límite de 128Mi. ¿Qué Reason y qué Exit Code dará describe?',
       objectives: {
         'ready:tienda deploy/informes': 'informes en marcha sin OOMKilled',
         'get:tienda deploy/informes {.spec.template.spec.containers[0].resources.requests.memory} {.spec.template.spec.containers[0].resources.limits.memory}':
@@ -567,17 +602,20 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Requests, limits and OOMKilled',
       goal: 'informes dies of memory (OOMKilled). Give it requests of 100m CPU and 256Mi memory and a 384Mi limit.',
       theory: {
-        what: 'requests is what is reserved for the Pod (the scheduler uses it to pick a node); limits is the ceiling. Going over CPU only throttles; going over memory kills the container: OOMKilled, exit code 137 (128 + SIGKILL), as in the Docker course.',
+        what: 'requests is what gets reserved for the Pod; limits, the ceiling. Going over CPU slows it down; going over memory kills the container.',
         how: [
-          'kubectl describe pod <informes-…>   # Last State: Terminated, Reason: OOMKilled, Exit Code: 137',
+          'kubectl describe pod <informes-…>   # Last State and Reason',
           'kubectl set resources deployment informes --requests=cpu=100m,memory=256Mi --limits=memory=384Mi',
           'kubectl top pods                    # what it really uses',
         ],
-        when: 'Always in production: without requests the scheduler cannot tell where things fit and without limits one Pod can eat the node.',
+        when: 'Always in production: without limits, a Pod eats the node.',
+        whenNot:
+          'An OOMKilled also ends in CrashLoopBackOff; what tells them apart is the 137 in describe.',
         problems:
-          'A Pod killed by OOMKilled also ends up in CrashLoopBackOff, but describe says OOMKilled and 137: it is not an app bug, it is memory. Raise the limit or fix the leak.',
+          'Hunting an app bug when it is memory: describe says "Reason: OOMKilled" and "Exit Code: 137". Raise the limit or fix the leak.',
       },
-      example: 'You see informes restarting, OOMKilled in describe and its memory at the limit.',
+      example:
+        'Before you look: informes has a 128Mi limit. What Reason and Exit Code will describe give?',
       objectives: {
         'ready:tienda deploy/informes': 'informes running without OOMKilled',
         'get:tienda deploy/informes {.spec.template.spec.containers[0].resources.requests.memory} {.spec.template.spec.containers[0].resources.limits.memory}':
@@ -676,38 +714,38 @@ export const INTERMEDIATE: Unit[] = [
       title: 'CrashLoopBackOff',
       goal: 'La API está en CrashLoopBackOff. Encuentra la causa con el método (get → describe → logs --previous) y arréglala.',
       theory: {
-        what: 'CrashLoopBackOff: el contenedor arranca, sale con error y Kubernetes espera cada vez más antes de reintentarlo (10 s, 20 s, 40 s… hasta 5 min). La causa está casi siempre en lo que escribió antes de morir.',
+        what: 'CrashLoopBackOff: el contenedor arranca, sale con error y Kubernetes espera cada vez más antes de reintentar. La causa suele estar en lo que escribió antes de morir.',
         how: [
-          'kubectl get pods                         # STATUS y RESTARTS',
-          'kubectl describe pod <api-…>             # Last State, Exit Code y eventos',
-          'kubectl logs <api-…> --previous          # lo que escribió la vez anterior',
-          'kubectl get secret db -o yaml            # ¿está la clave que pide?',
-          'kubectl rollout restart deployment/api   # Pods nuevos con lo arreglado',
+          'kubectl get pods                       # STATUS y RESTARTS',
+          'kubectl describe pod <api-…>           # Exit Code y eventos',
+          'kubectl logs <api-…> --previous        # la vez anterior',
         ],
-        when: 'Cada vez que un Pod no se queda en Running: el orden es siempre el mismo.',
+        when: 'Cuando un Pod no se queda en Running: get, describe y logs.',
+        whenNot: 'Si describe dice OOMKilled y 137, no es la app sino la memoria (bloque 5).',
         problems:
-          'Sin --previous ves el arranque de ahora, que quizá aún no ha fallado. Una clave con otro nombre en un Secret (o una variable que falta) es el clásico.',
+          'Reiniciar sin leer: los Pods nuevos vuelven a «CrashLoopBackOff». logs decía «Error: DATABASE_URL is not set» y el Secret guarda DATABASE_ULR.',
       },
-      example: 'Sigues el método sobre la API que falla.',
+      example:
+        'Antes de verlo: la API pide DATABASE_URL y el Secret db trae otra clave. ¿Qué dirán sus logs?',
       objectives: { 'ready:tienda deploy/api': 'La API en marcha' },
     },
     en: {
       title: 'CrashLoopBackOff',
       goal: 'The API is in CrashLoopBackOff. Find the cause with the method (get → describe → logs --previous) and fix it.',
       theory: {
-        what: 'CrashLoopBackOff: the container starts, exits with an error and Kubernetes waits longer each time before retrying (10 s, 20 s, 40 s… up to 5 min). The cause is nearly always in what it wrote before dying.',
+        what: 'CrashLoopBackOff: the container starts, exits with an error and Kubernetes waits longer each time before retrying. The cause is usually in what it wrote before dying.',
         how: [
-          'kubectl get pods                         # STATUS and RESTARTS',
-          'kubectl describe pod <api-…>             # Last State, Exit Code and events',
-          'kubectl logs <api-…> --previous          # what it wrote last time',
-          'kubectl get secret db -o yaml            # is the key it asks for there?',
-          'kubectl rollout restart deployment/api   # new Pods with the fix',
+          'kubectl get pods                       # STATUS and RESTARTS',
+          'kubectl describe pod <api-…>           # Exit Code and events',
+          'kubectl logs <api-…> --previous        # the previous run',
         ],
-        when: 'Every time a Pod does not stay Running: the order is always the same.',
+        when: 'When a Pod does not stay Running: get, describe and logs.',
+        whenNot: 'If describe says OOMKilled and 137, it is not the app but memory (block 5).',
         problems:
-          'Without --previous you see the current start, which may not have failed yet. A key with another name in a Secret (or a missing variable) is the classic.',
+          'Restarting without reading: the new Pods go back to "CrashLoopBackOff". logs said "Error: DATABASE_URL is not set" and the Secret holds DATABASE_ULR.',
       },
-      example: 'You follow the method on the failing API.',
+      example:
+        'Before you look: the API wants DATABASE_URL and Secret db brings another key. What will its logs say?',
       objectives: { 'ready:tienda deploy/api': 'The API running' },
     },
     example: [
@@ -735,34 +773,40 @@ export const INTERMEDIATE: Unit[] = [
       title: 'ImagePullBackOff y ErrImagePull',
       goal: 'El front no arranca: ImagePullBackOff. Lee el porqué en los eventos y arréglalo.',
       theory: {
-        what: 'ErrImagePull e ImagePullBackOff: el nodo no puede descargar la imagen. Los eventos dicen por qué: «not found» (la etiqueta o el nombre no existen) o «401 Unauthorized» (registro privado sin imagePullSecrets o con el token mal).',
+        what: 'ErrImagePull e ImagePullBackOff: el nodo no puede bajar la imagen. Los eventos dicen por qué: no existe (NotFound) o falta permiso (401 Unauthorized).',
         how: [
-          'kubectl describe pod <front-…>     # Events: Failed to pull image …',
+          'kubectl describe pod <front-…>   # Events: Failed to pull image',
           'kubectl get events --sort-by=.lastTimestamp',
           'kubectl set image deployment/front front=ghcr.io/peer4u/front:1.0.0',
         ],
-        when: 'Justo después de un despliegue, cuando los Pods nuevos no llegan ni a arrancar.',
+        when: 'Justo después de un despliegue, cuando los Pods nuevos ni arrancan.',
+        whenNot:
+          '«401 Unauthorized» es otra cosa: la imagen existe pero falta imagePullSecrets o el token está mal.',
         problems:
-          'Una etiqueta que existe en tu portátil (docker images) no tiene por qué estar en el registro: comprueba que la publicaste (docker push).',
+          'Una etiqueta que no se publicó (1.0 en vez de 1.0.0): el evento dice «code = NotFound». Corrige la etiqueta; no hace falta tocar el Secret.',
       },
-      example: 'Miras los eventos del front.',
+      example:
+        'Antes de verlo: el front pide ghcr.io/peer4u/front:1.0, que nunca se publicó. ¿Qué code dará el evento?',
       objectives: { 'ready:tienda deploy/front': 'El front descargado y en marcha' },
     },
     en: {
       title: 'ImagePullBackOff and ErrImagePull',
       goal: 'The front does not start: ImagePullBackOff. Read why in the events and fix it.',
       theory: {
-        what: 'ErrImagePull and ImagePullBackOff: the node cannot pull the image. The events say why: «not found» (the tag or name does not exist) or «401 Unauthorized» (private registry without imagePullSecrets or with a bad token).',
+        what: 'ErrImagePull and ImagePullBackOff: the node cannot pull the image. Events say why: it does not exist (NotFound) or permission is missing (401 Unauthorized).',
         how: [
-          'kubectl describe pod <front-…>     # Events: Failed to pull image …',
+          'kubectl describe pod <front-…>   # Events: Failed to pull image',
           'kubectl get events --sort-by=.lastTimestamp',
           'kubectl set image deployment/front front=ghcr.io/peer4u/front:1.0.0',
         ],
         when: 'Right after a release, when the new Pods do not even start.',
+        whenNot:
+          '"401 Unauthorized" is something else: the image exists but imagePullSecrets is missing or the token is wrong.',
         problems:
-          'A tag that exists on your laptop (docker images) is not necessarily in the registry: check you pushed it (docker push).',
+          'A tag that was never pushed (1.0 instead of 1.0.0): the event says "code = NotFound". Fix the tag; the Secret needs no change.',
       },
-      example: 'You look at the front events.',
+      example:
+        'Before you look: front asks for ghcr.io/peer4u/front:1.0, never pushed. What code will the event give?',
       objectives: { 'ready:tienda deploy/front': 'The front pulled and running' },
     },
     example: ['kubectl get pods', 'kubectl get events --sort-by=.lastTimestamp | tail -n 4'],
@@ -791,39 +835,45 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Pods en Pending',
       goal: 'La base de datos se queda en Pending. Averigua por qué y haz que quepa (pide 512Mi de memoria).',
       theory: {
-        what: 'Pending: el planificador no encuentra un nodo donde quepa el Pod. Los motivos de siempre: pide más CPU o memoria de la que queda libre, un PVC que no existe o no se enlaza, o nodos que no aceptan Pods.',
+        what: 'Pending: el planificador no encuentra un nodo donde quepa el Pod. Lo de siempre: pide más CPU o memoria de la que queda libre.',
         how: [
-          'kubectl describe pod <db-…>        # 0/3 nodes are available: 3 Insufficient memory',
-          'kubectl describe nodes | grep -A6 Allocated   # lo pedido en cada nodo',
+          'kubectl get pods -o wide            # NODE <none>',
+          'kubectl describe pod <db-…>         # FailedScheduling',
           'kubectl set resources deployment db --requests=memory=512Mi',
         ],
-        when: 'Cuando un Pod nuevo no llega ni a tener nodo (columna NODE vacía en -o wide).',
+        when: 'Cuando un Pod nuevo no llega a tener nodo.',
+        whenNot:
+          'Pending no ha arrancado nunca; CrashLoopBackOff sí arranca y se cae. Uno se mira en describe, el otro en logs.',
         problems:
-          'requests es una reserva, no un uso: pedir de más deja nodos vacíos que no aceptan nada. Pide lo que de verdad usa (kubectl top) con algo de margen.',
+          'Pedir 8Gi «por si acaso»: el evento dice «0/3 nodes are available: 3 Insufficient memory». Pide lo que usa, con margen.',
       },
-      example: 'Miras el evento de la base de datos y lo que hay pedido en los nodos.',
+      example:
+        'Antes de verlo: db pide 8Gi de memoria y los nodos son pequeños. ¿Qué NODE saldrá en get pods -o wide?',
       objectives: { 'ready:tienda deploy/db': 'La base de datos planificada y en marcha' },
     },
     en: {
       title: 'Pods stuck in Pending',
       goal: 'The database stays Pending. Find out why and make it fit (ask for 512Mi of memory).',
       theory: {
-        what: 'Pending: the scheduler cannot find a node where the Pod fits. The usual reasons: it asks for more CPU or memory than is free, a PVC that does not exist or does not bind, or nodes that do not take Pods.',
+        what: 'Pending: the scheduler cannot find a node where the Pod fits. The usual cause: it asks for more CPU or memory than is free.',
         how: [
-          'kubectl describe pod <db-…>        # 0/3 nodes are available: 3 Insufficient memory',
-          'kubectl describe nodes | grep -A6 Allocated   # what each node has reserved',
+          'kubectl get pods -o wide            # NODE <none>',
+          'kubectl describe pod <db-…>         # FailedScheduling',
           'kubectl set resources deployment db --requests=memory=512Mi',
         ],
-        when: 'When a new Pod does not even get a node (empty NODE column in -o wide).',
+        when: 'When a new Pod does not even get a node.',
+        whenNot:
+          'Pending never started; CrashLoopBackOff starts and falls over. One is read in describe, the other in logs.',
         problems:
-          'requests is a reservation, not usage: asking too much leaves empty nodes that accept nothing. Ask for what it really uses (kubectl top) plus some margin.',
+          'Asking for 8Gi "just in case": the event says "0/3 nodes are available: 3 Insufficient memory". Ask for what it uses, with margin.',
       },
-      example: 'You look at the database event and at what is reserved on the nodes.',
+      example:
+        'Before you look: db asks for 8Gi of memory and the nodes are small. What NODE will get pods -o wide show?',
       objectives: { 'ready:tienda deploy/db': 'The database scheduled and running' },
     },
     example: [
       'kubectl get pods -o wide',
-      'kubectl describe pod -l app=db | tail -n 2',
+      'kubectl describe pod -l app=db | grep FailedScheduling',
       'kubectl describe node nodo-2 | grep -A5 Allocated',
     ],
     solution: [
@@ -843,44 +893,46 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Entrar a mirar',
       goal: 'Trae a tu máquina el /app/config.json de un Pod de la API, como ~/config.json.',
       theory: {
-        what: 'kubectl exec ejecuta una orden dentro de un contenedor que corre (como docker exec); kubectl cp copia ficheros entre tu máquina y un Pod. Si la imagen no trae shell (distroless), kubectl debug añade un contenedor efímero con herramientas junto al de la app.',
+        what: 'kubectl exec ejecuta una orden dentro de un contenedor que corre, como docker exec. Con > detrás, la salida se guarda en tu máquina.',
         how: [
-          'kubectl exec deploy/api -- env                        # sus variables',
-          'kubectl exec deploy/api -- wget -qO- localhost:3000/health',
-          "kubectl exec -it deploy/api -- sh -c 'ls /app'",
-          'kubectl cp tienda/<api-…>:/app/config.json ./config.json',
-          'kubectl debug <api-…> --image=busybox:1.36 --target=api -- sh -c env',
+          'kubectl exec deploy/api -- printenv DATABASE_URL',
+          "kubectl exec deploy/api -- sh -c 'ls /app'",
+          'kubectl exec deploy/api -- cat /app/config.json > config.json',
         ],
-        when: 'Para ver lo que ve la app desde dentro: sus variables, sus ficheros, si llega a otro servicio.',
-        whenNot:
-          'Para arreglar: lo que cambies dentro se pierde cuando se recrea el Pod. El arreglo va a la imagen o al YAML.',
+        when: 'Para ver lo que ve la app desde dentro: variables y ficheros.',
+        whenNot: 'Aquí no hay sesión interactiva (-it): escribe la orden detrás de --.',
+        problems:
+          'Arreglar dentro con exec: tras un rollout restart, ls /app enseña «config.json package.json server.js», sin nota.txt. Lo que dura va a la imagen o al YAML.',
       },
-      example: 'Miras las variables de la API, su salud desde dentro y sus ficheros.',
+      example:
+        'Antes de verlo: escribes nota.txt dentro de la API y reinicias el Deployment. ¿Seguirá en /app?',
       objectives: { 'file:~/config.json': 'El config.json de la API en ~/config.json' },
     },
     en: {
       title: 'Looking inside',
       goal: 'Bring the /app/config.json of an API Pod to your machine, as ~/config.json.',
       theory: {
-        what: 'kubectl exec runs a command inside a running container (like docker exec); kubectl cp copies files between your machine and a Pod. If the image has no shell (distroless), kubectl debug adds an ephemeral container with tools next to the app one.',
+        what: 'kubectl exec runs a command inside a running container, like docker exec. With > after it, the output is saved on your machine.',
         how: [
-          'kubectl exec deploy/api -- env                        # its variables',
-          'kubectl exec deploy/api -- wget -qO- localhost:3000/health',
-          "kubectl exec -it deploy/api -- sh -c 'ls /app'",
-          'kubectl cp tienda/<api-…>:/app/config.json ./config.json',
-          'kubectl debug <api-…> --image=busybox:1.36 --target=api -- sh -c env',
+          'kubectl exec deploy/api -- printenv DATABASE_URL',
+          "kubectl exec deploy/api -- sh -c 'ls /app'",
+          'kubectl exec deploy/api -- cat /app/config.json > config.json',
         ],
-        when: 'To see what the app sees from inside: its variables, its files, whether it reaches another service.',
-        whenNot:
-          'To fix things: whatever you change inside is lost when the Pod is recreated. The fix goes into the image or the YAML.',
+        when: 'To see what the app sees from inside: variables and files.',
+        whenNot: 'There is no interactive session (-it) here: write the command after --.',
+        problems:
+          'Fixing things inside with exec: after a rollout restart, ls /app shows "config.json package.json server.js", no nota.txt. What must last goes into the image or the YAML.',
       },
-      example: 'You look at the API variables, its health from inside and its files.',
+      example:
+        'Before you look: you write nota.txt inside the API and restart the Deployment. Will it still be in /app?',
       objectives: { 'file:~/config.json': 'The API config.json in ~/config.json' },
     },
     example: [
       'kubectl exec deploy/api -- printenv DATABASE_URL',
-      'kubectl exec deploy/api -- wget -qO- localhost:3000/health',
-      "kubectl exec deploy/api -- sh -c 'ls /app'",
+      "kubectl exec deploy/api -- sh -c 'echo x > /app/nota.txt; ls /app'",
+      'kubectl rollout restart deployment/api',
+      'kubectl rollout status deployment/api',
+      'kubectl exec deploy/api -- ls /app',
     ],
     solution: ['kubectl exec deploy/api -- cat /app/config.json > ~/config.json'],
     check: { files: ['~/config.json'] },
@@ -895,36 +947,40 @@ export const INTERMEDIATE: Unit[] = [
       title: 'El Service no llega',
       goal: 'Desde dentro del clúster, api:3000 no contesta. Arregla el Service api para que /health conteste.',
       theory: {
-        what: 'Cuando un Service no llega, casi siempre es una de tres: el selector no casa con las etiquetas de los Pods (no hay endpoints), el targetPort no es el puerto en el que escucha el contenedor, o lo buscas desde otro namespace (entonces es api.tienda).',
+        what: 'Si un Service no llega, casi siempre es una de tres: el selector no casa (sin endpoints), el targetPort no es el del contenedor, o llamas desde otro namespace.',
         how: [
-          'kubectl get endpointslices              # <unset>: el selector no casa',
-          'kubectl get pods --show-labels          # qué etiquetas tienen',
-          'kubectl describe svc api                # Selector, TargetPort y Endpoints',
-          'kubectl patch service api -p \'{"spec":{"selector":{"app":"api"}}}\'',
+          'kubectl get endpointslices       # <unset>: el selector no casa',
+          'kubectl get pods --show-labels   # qué etiquetas tienen',
+          'kubectl describe svc api         # Selector y TargetPort',
         ],
-        when: 'Cada vez que una app dice «connection refused», «timeout» o «could not resolve host» hablando con otra.',
+        when: 'Cuando una app no llega a otra.',
+        whenNot:
+          "«Couldn't connect to server» sí encuentra el nombre: falla el selector o el puerto, no el DNS.",
         problems:
-          'Desde otro namespace el nombre corto no existe: usa api.tienda o api.tienda.svc.cluster.local.',
+          'Desde otro namespace el nombre corto no existe: curl dice «Could not resolve host: api». Usa api.tienda.',
       },
-      example: 'Miras los endpoints, las etiquetas y el Service, y lo pruebas desde un Pod.',
+      example:
+        'Antes de verlo: el Service elige app=api-v2 y los Pods llevan app=api. ¿Qué ENDPOINTS tendrá?',
       objectives: { 'reach:tienda api:3000/health': 'api:3000/health contesta desde dentro' },
     },
     en: {
       title: 'The Service does not connect',
       goal: 'From inside the cluster, api:3000 does not answer. Fix Service api so /health answers.',
       theory: {
-        what: 'When a Service does not connect it is nearly always one of three: the selector does not match the Pod labels (no endpoints), the targetPort is not the port the container listens on, or you look for it from another namespace (then it is api.tienda).',
+        what: 'When a Service does not reach, it is nearly always one of three: the selector does not match (no endpoints), targetPort is not the container port, or you call from another namespace.',
         how: [
-          'kubectl get endpointslices              # <unset>: the selector does not match',
-          'kubectl get pods --show-labels          # which labels they have',
-          'kubectl describe svc api                # Selector, TargetPort and Endpoints',
-          'kubectl patch service api -p \'{"spec":{"selector":{"app":"api"}}}\'',
+          'kubectl get endpointslices       # <unset>: selector does not match',
+          'kubectl get pods --show-labels   # which labels they have',
+          'kubectl describe svc api         # Selector and TargetPort',
         ],
-        when: 'Whenever an app says «connection refused», «timeout» or «could not resolve host» talking to another.',
+        when: 'When an app cannot reach another.',
+        whenNot:
+          '"Couldn\'t connect to server" does find the name: the selector or the port fails, not DNS.',
         problems:
-          'From another namespace the short name does not exist: use api.tienda or api.tienda.svc.cluster.local.',
+          'From another namespace the short name does not exist: curl says "Could not resolve host: api". Use api.tienda.',
       },
-      example: 'You look at the endpoints, the labels and the Service, and try it from a Pod.',
+      example:
+        'Before you look: the Service selects app=api-v2 and the Pods carry app=api. What ENDPOINTS will it have?',
       objectives: { 'reach:tienda api:3000/health': 'api:3000/health answers from inside' },
     },
     example: [
@@ -932,6 +988,8 @@ export const INTERMEDIATE: Unit[] = [
       'kubectl get pods --show-labels',
       'kubectl describe svc api',
       'kubectl run tmp --rm -i --image=curlimages/curl:8.10 --restart=Never -- curl -s api:3000/health',
+      'kubectl create namespace otro',
+      'kubectl run tmp -n otro --rm -i --image=curlimages/curl:8.10 --restart=Never -- curl -s api:3000/health',
     ],
     solution: [
       'kubectl patch service api -p \'{"spec":{"selector":{"app":"api"},"ports":[{"port":3000,"targetPort":3000}]}}\'',

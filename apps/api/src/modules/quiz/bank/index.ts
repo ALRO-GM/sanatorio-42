@@ -9,6 +9,7 @@
 
 import { ALGORITHMS } from './algorithms.js'
 import { C_BASICS } from './c-basics.js'
+import { COURSES } from './courses.js'
 import { CPP } from './cpp.js'
 import { GIT } from './git.js'
 import { GENERAL } from './general.js'
@@ -17,6 +18,7 @@ import { NETWORK_BANK } from './network.js'
 import { PYTHON } from './python.js'
 import { REVIEW_A } from './review-a.js'
 import { REVIEW_B } from './review-b.js'
+import { REVIEW_COURSES } from './review-courses.js'
 import { REVIEW_GIT } from './review-git.js'
 import { PISCINE_SHELL } from './piscine-shell.js'
 import { PISCINE_C00_C03 } from './piscine-c00-c03.js'
@@ -45,6 +47,7 @@ export const BANK: readonly Concept[] = [
   ...CPP,
   ...PYTHON,
   ...GIT,
+  ...COURSES,
   ...PISCINE_SHELL,
   ...PISCINE_C00_C03,
   ...PISCINE_C04_C07,
@@ -56,6 +59,7 @@ export const REVIEW: Readonly<Record<string, ReviewEntry>> = {
   ...REVIEW_A,
   ...REVIEW_B,
   ...REVIEW_GIT,
+  ...REVIEW_COURSES,
   ...REVIEW_PISCINE_SHELL,
   ...REVIEW_PISCINE_C00_C03,
   ...REVIEW_PISCINE_C04_C07,

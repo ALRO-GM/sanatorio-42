@@ -52,45 +52,49 @@ export const BEGINNER: Unit[] = [
       title: 'Hola, clúster',
       goal: 'Guarda en ~/nodos.txt la lista de nodos del clúster tal como la da kubectl get nodes -o name.',
       theory: {
-        what: 'Un clúster de Kubernetes son unas máquinas (nodos) que ejecutan tus contenedores y un plano de control que decide dónde va cada cosa y vigila que se cumpla. kubectl habla con ese plano de control; a qué clúster y con qué usuario lo dice el contexto de tu kubeconfig.',
+        what: 'kubectl habla con el plano de control de un clúster, que decide en qué nodo (máquina) corre cada contenedor. El contexto dice a qué clúster hablas.',
         how: [
-          'kubectl config get-contexts      # a qué clústeres puedes hablar (el * es el actual)',
+          'kubectl config get-contexts      # el * marca el actual',
+          'kubectl config current-context   # solo su nombre',
           'kubectl cluster-info             # dónde está el plano de control',
-          'kubectl get nodes -o wide        # los nodos, con su IP y versión',
-          'kubectl api-resources | head     # los tipos de objeto que conoce',
+          'kubectl get nodes                # las máquinas y si están Ready',
         ],
-        when: 'Lo primero al llegar a un clúster o a un equipo: saber dónde estás antes de tocar nada.',
+        when: 'Lo primero al llegar a un equipo: saber a qué clúster hablas antes de tocar nada.',
+        whenNot:
+          'kubectl config use-context produccion cambia de clúster para todas las órdenes siguientes, no solo para una.',
         problems:
-          'El error más caro es el contexto equivocado: un kubectl delete en producción creyendo que era staging. Mira siempre el contexto (aquí hay staging y produccion).',
+          'Creer que estás en staging y estar en producción: un delete ahí sale caro. Antes de borrar, mira que current-context diga «staging».',
       },
       example:
-        'Miras los contextos, dónde está el plano de control, los nodos y unos cuantos tipos de objeto.',
+        'Antes de verlo: hay dos contextos, staging y produccion. ¿Cuál lleva el * de actual?',
       objectives: { 'file:~/nodos.txt': 'Los nodos, en ~/nodos.txt' },
     },
     en: {
       title: 'Hello, cluster',
       goal: 'Save the list of cluster nodes in ~/nodos.txt, exactly as kubectl get nodes -o name prints it.',
       theory: {
-        what: 'A Kubernetes cluster is a set of machines (nodes) that run your containers plus a control plane that decides where everything goes and keeps it that way. kubectl talks to that control plane; which cluster and which user is set by the context in your kubeconfig.',
+        what: 'kubectl talks to the control plane of a cluster, which decides on which node (machine) each container runs. The context says which cluster you talk to.',
         how: [
-          'kubectl config get-contexts      # clusters you can talk to (* is the current one)',
+          'kubectl config get-contexts      # the * marks the current one',
+          'kubectl config current-context   # just its name',
           'kubectl cluster-info             # where the control plane is',
-          'kubectl get nodes -o wide        # the nodes, with IP and version',
-          'kubectl api-resources | head     # the object types it knows',
+          'kubectl get nodes                # the machines and whether Ready',
         ],
-        when: 'First thing when you join a cluster or a team: know where you are before touching anything.',
+        when: 'First thing when you join a team: know which cluster you talk to before touching anything.',
+        whenNot:
+          'kubectl config use-context produccion switches cluster for every following command, not just one.',
         problems:
-          'The most expensive mistake is the wrong context: a kubectl delete in production thinking it was staging. Always check the context (here there are staging and produccion).',
+          'Thinking you are on staging while on production: a delete there costs dearly. Before deleting, check that current-context says "staging".',
       },
       example:
-        'You look at the contexts, where the control plane is, the nodes and a few object types.',
+        'Before you look: there are two contexts, staging and produccion. Which one has the current *?',
       objectives: { 'file:~/nodos.txt': 'The nodes, in ~/nodos.txt' },
     },
     example: [
       'kubectl config get-contexts',
+      'kubectl config current-context',
       'kubectl cluster-info',
-      'kubectl get nodes -o wide',
-      'kubectl api-resources | head -n 6',
+      'kubectl get nodes',
     ],
     solution: ['kubectl get nodes -o name > ~/nodos.txt'],
     check: { files: ['~/nodos.txt'] },
@@ -105,46 +109,46 @@ export const BEGINNER: Unit[] = [
       title: 'Tu primer Pod',
       goal: 'Arranca un Pod llamado web con nginx:1.27 y borra el Pod prueba, que ya no se usa.',
       theory: {
-        what: 'El Pod es la unidad mínima de Kubernetes: uno o varios contenedores que comparten red (la misma IP) y volúmenes y van siempre juntos al mismo nodo. kubectl run crea uno suelto.',
+        what: 'Un Pod es uno o varios contenedores que van juntos al mismo nodo y comparten IP. kubectl run crea uno suelto.',
         how: [
           'kubectl run web --image=nginx:1.27   # crea el Pod',
-          'kubectl get pods -o wide             # su estado, IP y nodo',
-          'kubectl describe pod web             # todo lo que sabe de él, con eventos',
-          'kubectl logs web                     # lo que escribe el contenedor',
-          'kubectl delete pod web               # y nadie lo vuelve a crear',
+          'kubectl get pods -o wide             # estado, IP y nodo',
+          'kubectl logs web                     # lo que escribe',
+          'kubectl delete pod web               # y no vuelve',
         ],
-        when: 'Para probar algo rápido (una imagen, una conexión) y entender qué hay debajo de todo lo demás.',
+        when: 'Para probar rápido una imagen o una conexión dentro del clúster.',
         whenNot:
-          'Para una app de verdad: un Pod suelto que se borra o cuyo nodo se cae no vuelve. Para eso está el Deployment (bloque 2).',
+          'Un Pod suelto que borras no vuelve. Para una app que se cuide sola está el Deployment (bloque 2).',
         problems:
-          'En Docker era docker run; aquí la imagen tiene que estar en un registro al que llegue el clúster, no en tu portátil.',
+          'Usar una imagen que solo está en tu portátil: el clúster no la encuentra y get pods enseña «ErrImagePull» y luego «ImagePullBackOff». Súbela antes a un registro.',
       },
-      example: 'Arrancas un Pod de prueba, lo miras con get y logs y lo borras.',
+      example:
+        'Antes de verlo: arrancas demo con nginx y local con api:1.0, que no está en ningún registro. ¿Qué STATUS tendrá cada uno?',
     },
     en: {
       title: 'Your first Pod',
       goal: 'Start a Pod called web with nginx:1.27 and delete the Pod prueba, which is no longer used.',
       theory: {
-        what: 'The Pod is the smallest unit in Kubernetes: one or more containers that share the network (the same IP) and volumes and always land together on the same node. kubectl run creates a standalone one.',
+        what: 'A Pod is one or more containers that go together to the same node and share an IP. kubectl run creates a standalone one.',
         how: [
           'kubectl run web --image=nginx:1.27   # create the Pod',
-          'kubectl get pods -o wide             # its status, IP and node',
-          'kubectl describe pod web             # everything it knows, with events',
-          'kubectl logs web                     # what the container writes',
-          'kubectl delete pod web               # and nobody creates it again',
+          'kubectl get pods -o wide             # status, IP and node',
+          'kubectl logs web                     # what it writes',
+          'kubectl delete pod web               # and it does not come back',
         ],
-        when: 'To try something quickly (an image, a connection) and to understand what sits under everything else.',
+        when: 'To quickly try an image or a connection inside the cluster.',
         whenNot:
-          'For a real app: a standalone Pod that gets deleted, or whose node dies, does not come back. That is what Deployments are for (block 2).',
+          'A standalone Pod you delete does not come back. For an app that looks after itself there is the Deployment (block 2).',
         problems:
-          'In Docker it was docker run; here the image must be in a registry the cluster can reach, not on your laptop.',
+          'Using an image that only exists on your laptop: the cluster cannot find it and get pods shows "ErrImagePull" and then "ImagePullBackOff". Push it to a registry first.',
       },
-      example: 'You start a test Pod, look at it with get and logs, and delete it.',
+      example:
+        'Before you look: you start demo with nginx and local with api:1.0, which is in no registry. What STATUS will each have?',
     },
     example: [
       'kubectl run demo --image=nginx:1.27-alpine',
-      'kubectl get pods -o wide',
-      'kubectl logs demo',
+      'kubectl run local --image=api:1.0',
+      'kubectl get pods',
       'kubectl delete pod demo',
       'kubectl get pods',
     ],
@@ -160,20 +164,21 @@ export const BEGINNER: Unit[] = [
       title: 'Manifiestos YAML',
       goal: 'Crea el Pod web (nginx:1.27) desde un manifiesto ~/pod.yaml, con la etiqueta equipo=tienda, aplicándolo con kubectl apply.',
       theory: {
-        what: 'Un manifiesto describe el estado que quieres (no los pasos): apiVersion, kind, metadata (nombre, etiquetas) y spec. kubectl apply -f se lo da al clúster y él se encarga de que se cumpla. Es lo que se guarda en el repositorio.',
+        what: 'Un manifiesto YAML describe lo que quieres (apiVersion, kind, metadata y spec), no los pasos. kubectl apply -f lo crea o lo cambia hasta que coincida.',
         how: [
-          'kubectl run web --image=nginx:1.27 --dry-run=client -o yaml > pod.yaml   # un borrador',
-          'kubectl explain pod.spec.containers     # qué campos hay',
-          "cat > pod.yaml <<'EOF'                  # o escribirlo a mano",
-          'kubectl apply -f pod.yaml               # crear o actualizar',
-          'kubectl get pod web -o yaml             # cómo ha quedado (con lo que pone el servidor)',
+          'kubectl run web --image=nginx:1.27 --dry-run=client -o yaml > pod.yaml   # borrador',
+          'kubectl explain pod.spec.containers   # qué campos hay',
+          'kubectl apply -f pod.yaml             # crear o actualizar',
+          'kubectl get pod web -o yaml           # cómo ha quedado',
         ],
-        when: 'Siempre que algo tenga que durar: lo que está en un YAML en git se puede revisar, repetir y deshacer.',
+        when: 'Para todo lo que tiene que durar: el YAML vive en git, se revisa y se repite igual.',
+        whenNot:
+          'kubectl run crea al momento pero no deja nada escrito; con apply -f manda el fichero, y se puede volver a aplicar.',
         problems:
-          'La sangría importa (espacios, nunca tabuladores). Lee el error: si el YAML está mal formado, dice la línea (yaml: line 8); si falta un campo o no vale, dice cuál (spec.containers[0].image).',
+          'Sangrar con un tabulador: apply responde «yaml: line 8: found character that cannot start any token». Usa espacios. Si falta un campo, lo nombra: «spec.containers[0].image: Required value».',
       },
       example:
-        'Generas un borrador con --dry-run, miras los campos con explain y aplicas un manifiesto escrito a mano.',
+        'Antes de verlo: el primer demo.yaml sangra image con un tabulador. ¿Qué dirá apply?',
       objectives: {
         'get:default pod/web {.metadata.labels.equipo}': 'El Pod web lleva equipo=tienda',
       },
@@ -182,28 +187,30 @@ export const BEGINNER: Unit[] = [
       title: 'YAML manifests',
       goal: 'Create the Pod web (nginx:1.27) from a manifest ~/pod.yaml, labelled equipo=tienda, applying it with kubectl apply.',
       theory: {
-        what: 'A manifest describes the state you want (not the steps): apiVersion, kind, metadata (name, labels) and spec. kubectl apply -f hands it to the cluster, which makes it happen. It is what lives in the repository.',
+        what: 'A YAML manifest describes what you want (apiVersion, kind, metadata and spec), not the steps. kubectl apply -f creates or changes it until it matches.',
         how: [
-          'kubectl run web --image=nginx:1.27 --dry-run=client -o yaml > pod.yaml   # a draft',
-          'kubectl explain pod.spec.containers     # which fields exist',
-          "cat > pod.yaml <<'EOF'                  # or write it by hand",
-          'kubectl apply -f pod.yaml               # create or update',
-          'kubectl get pod web -o yaml             # how it ended up (with what the server adds)',
+          'kubectl run web --image=nginx:1.27 --dry-run=client -o yaml > pod.yaml   # draft',
+          'kubectl explain pod.spec.containers   # which fields exist',
+          'kubectl apply -f pod.yaml             # create or update',
+          'kubectl get pod web -o yaml           # how it ended up',
         ],
-        when: 'Whenever something must last: what is in a YAML file in git can be reviewed, repeated and undone.',
+        when: 'For anything that must last: the YAML lives in git, gets reviewed and repeats the same way.',
+        whenNot:
+          'kubectl run creates on the spot but leaves nothing written; with apply -f the file rules, and you can apply it again.',
         problems:
-          'Indentation matters (spaces, never tabs). Read the error: if the YAML is malformed it gives the line (yaml: line 8); if a field is missing or invalid it names it (spec.containers[0].image).',
+          'Indenting with a tab: apply answers "yaml: line 8: found character that cannot start any token". Use spaces. If a field is missing it names it: "spec.containers[0].image: Required value".',
       },
       example:
-        'You generate a draft with --dry-run, look at the fields with explain and apply a manifest written by hand.',
+        'Before you look: the first demo.yaml indents image with a tab. What will apply say?',
       objectives: {
         'get:default pod/web {.metadata.labels.equipo}': 'Pod web is labelled equipo=tienda',
       },
     },
     example: [
       'kubectl run demo --image=nginx:1.27 --dry-run=client -o yaml',
-      'kubectl explain pod.spec.containers',
-      "cat > demo.yaml <<'EOF'\napiVersion: v1\nkind: Pod\nmetadata:\n  name: demo\n  labels: {app: demo}\nspec:\n  containers:\n  - name: nginx\n    image: nginx:1.27-alpine\nEOF",
+      "cat > demo.yaml <<'EOF'\napiVersion: v1\nkind: Pod\nmetadata:\n  name: demo\nspec:\n  containers:\n  - name: nginx\n\timage: nginx:1.27-alpine\nEOF",
+      'kubectl apply -f demo.yaml',
+      "cat > demo.yaml <<'EOF'\napiVersion: v1\nkind: Pod\nmetadata:\n  name: demo\nspec:\n  containers:\n  - name: nginx\n    image: nginx:1.27-alpine\nEOF",
       'kubectl apply -f demo.yaml',
     ],
     solution: [
@@ -222,43 +229,47 @@ export const BEGINNER: Unit[] = [
       title: 'Namespaces y contexto',
       goal: 'Crea el namespace tienda, arranca en él un Pod web con nginx:1.27 y deja kubectl apuntando a tienda.',
       theory: {
-        what: 'Un namespace separa objetos de un mismo clúster (por equipo o por entorno): los nombres solo tienen que ser únicos dentro de él. Cada orden va al namespace del contexto, salvo que pongas -n.',
+        what: 'Un namespace separa objetos dentro del mismo clúster: puede haber un web en tienda y otro en pagos. Cada orden va al namespace del contexto, salvo con -n.',
         how: [
-          'kubectl get ns                               # los que hay',
           'kubectl create namespace tienda',
           'kubectl run web --image=nginx:1.27 -n tienda',
-          'kubectl get pods -A                          # en todos los namespaces',
-          'kubectl config set-context --current --namespace=tienda   # el de por defecto',
+          'kubectl get pods -A                 # en todos los namespaces',
+          'kubectl config set-context --current --namespace=tienda   # el de siempre',
         ],
-        when: 'Para que cada equipo o app tenga lo suyo y no os piséis nombres, cuotas ni permisos.',
+        when: 'Cuando varios equipos o apps comparten clúster y no queréis pisaros los nombres.',
+        whenNot:
+          '-n vale para una orden; set-context --current --namespace cambia el de todas las siguientes.',
         problems:
-          '«No resources found» casi siempre es que miras en el namespace que no toca: prueba con -A.',
+          'Crear en un namespace y mirar en otro: get pods dice «No resources found in default namespace.» Añade -n tienda o mira todo con -A.',
       },
-      example: 'Creas un namespace de pruebas, arrancas algo en él con -n y lo ves con -A.',
+      example:
+        'Antes de verlo: creas demo con -n pruebas y luego escribes kubectl get pods, sin -n. ¿Qué sale?',
     },
     en: {
       title: 'Namespaces and context',
       goal: 'Create the namespace tienda, start a Pod web with nginx:1.27 in it and leave kubectl pointing at tienda.',
       theory: {
-        what: 'A namespace separates objects in the same cluster (per team or environment): names only have to be unique inside it. Every command goes to the context namespace unless you pass -n.',
+        what: 'A namespace separates objects inside the same cluster: there can be a web in tienda and another in pagos. Every command goes to the context namespace unless you pass -n.',
         how: [
-          'kubectl get ns                               # the existing ones',
           'kubectl create namespace tienda',
           'kubectl run web --image=nginx:1.27 -n tienda',
-          'kubectl get pods -A                          # in every namespace',
-          'kubectl config set-context --current --namespace=tienda   # the default one',
+          'kubectl get pods -A                 # in every namespace',
+          'kubectl config set-context --current --namespace=tienda   # the default',
         ],
-        when: 'So each team or app has its own space and you do not step on names, quotas or permissions.',
+        when: 'When several teams or apps share a cluster and must not step on each other’s names.',
+        whenNot:
+          '-n works for one command; set-context --current --namespace changes it for all the following ones.',
         problems:
-          '«No resources found» nearly always means you are looking in the wrong namespace: try -A.',
+          'Creating in one namespace and looking in another: get pods says "No resources found in default namespace." Add -n tienda or look everywhere with -A.',
       },
-      example: 'You create a test namespace, start something in it with -n and see it with -A.',
+      example:
+        'Before you look: you create demo with -n pruebas and then type kubectl get pods, without -n. What comes out?',
     },
     example: [
-      'kubectl get ns',
       'kubectl create namespace pruebas',
       'kubectl run demo --image=nginx:1.27-alpine -n pruebas',
       'kubectl get pods',
+      'kubectl get pods -n pruebas',
       'kubectl get pods -A',
     ],
     solution: [
@@ -344,34 +355,42 @@ export const BEGINNER: Unit[] = [
       title: 'Deployments: que se cuide solo',
       goal: 'Despliega web (nginx:1.27) con 2 réplicas en tienda, con un Deployment.',
       theory: {
-        what: 'Un Deployment dice «quiero N copias de este Pod» y un controlador lo cumple siempre: crea un ReplicaSet, que crea los Pods, y si uno muere o lo borras, pone otro. Es la reconciliación: el estado real va solo hacia el deseado.',
+        what: 'Un Deployment mantiene N copias de un Pod: si una muere o la borras, crea otra. El estado real va solo hacia el que pides.',
         how: [
           'kubectl create deployment web --image=nginx:1.27 --replicas=2',
-          'kubectl get deploy,rs,pods        # quién crea qué',
-          'kubectl delete pod <uno>          # y vuelve a haber 2',
+          'kubectl get deploy,pods         # quién crea qué',
+          'kubectl delete pod <uno>        # y vuelve a haber 2',
+          'kubectl delete deployment web   # se lleva sus Pods',
         ],
-        when: 'Para cualquier app sin estado (webs, APIs): es lo que se usa en el día a día, no los Pods sueltos.',
+        when: 'Para cualquier API o web del día a día; los Pods sueltos quedan para pruebas.',
+        whenNot:
+          'Por eso el nombre de un Pod no sirve para llegar a él: cambia en cada recreación. Para eso está el Service (bloque 2).',
         problems:
-          'Los Pods de un Deployment cambian de nombre y de IP cada vez que se recrean: nunca apuntes a uno a mano (para eso están los Services).',
+          'Borrar un Pod para parar la app: get pods enseña otro nuevo, con otro nombre y «AGE 5s». Para pararla, borra el Deployment.',
       },
-      example: 'Creas un Deployment de prueba, borras uno de sus Pods y ves cómo vuelve.',
+      example:
+        'Antes de verlo: demo tiene 2 Pods y borras uno. ¿Cuántos enseñará get pods después, y con qué nombres?',
       objectives: { 'ready:tienda deploy/web': 'web con sus 2 réplicas listas' },
     },
     en: {
       title: 'Deployments: let it look after itself',
       goal: 'Deploy web (nginx:1.27) with 2 replicas in tienda, using a Deployment.',
       theory: {
-        what: 'A Deployment says «I want N copies of this Pod» and a controller keeps it true: it creates a ReplicaSet, which creates the Pods, and if one dies or you delete it, it starts another. That is reconciliation: the real state moves on its own towards the desired one.',
+        what: 'A Deployment keeps N copies of a Pod: if one dies or you delete it, it creates another. The real state moves on its own towards the one you ask for.',
         how: [
           'kubectl create deployment web --image=nginx:1.27 --replicas=2',
-          'kubectl get deploy,rs,pods        # who creates what',
-          'kubectl delete pod <one>          # and there are 2 again',
+          'kubectl get deploy,pods         # who creates what',
+          'kubectl delete pod <one>        # and there are 2 again',
+          'kubectl delete deployment web   # takes its Pods along',
         ],
-        when: 'For any stateless app (websites, APIs): it is what you use every day, not standalone Pods.',
+        when: 'For any everyday API or website; standalone Pods are for tests.',
+        whenNot:
+          'That is why a Pod name is no way to reach it: it changes on every re-creation. That is what Services are for (block 2).',
         problems:
-          'Deployment Pods change name and IP every time they are recreated: never point at one by hand (that is what Services are for).',
+          'Deleting a Pod to stop the app: get pods shows a new one, with another name and "AGE 5s". To stop it, delete the Deployment.',
       },
-      example: 'You create a test Deployment, delete one of its Pods and watch it come back.',
+      example:
+        'Before you look: demo has 2 Pods and you delete one. How many will get pods show afterwards, and with what names?',
       objectives: { 'ready:tienda deploy/web': 'web with its 2 replicas ready' },
     },
     example: [
@@ -393,19 +412,20 @@ export const BEGINNER: Unit[] = [
       title: 'Escalar',
       goal: 'Deja web con 3 réplicas en el clúster y también en ~/tienda/web.yaml (el fichero del repositorio).',
       theory: {
-        what: 'Escalar es cambiar el número de réplicas. Se puede hacer al momento (kubectl scale) o cambiando el YAML y aplicándolo. Kubernetes reparte los Pods entre los nodos.',
+        what: 'Escalar es cambiar el número de réplicas: al momento con kubectl scale, o cambiando replicas en el YAML y aplicándolo.',
         how: [
           'kubectl scale deployment web --replicas=4   # al momento',
-          'kubectl get pods -o wide                     # repartidos por nodos',
           "sed -i 's/replicas: 2/replicas: 3/' web.yaml",
-          'kubectl apply -f web.yaml                    # lo del repositorio manda',
+          'kubectl apply -f web.yaml                    # manda el fichero',
+          'kubectl get deploy web                       # READY 3/3',
         ],
-        when: 'Cuando llega más tráfico (o menos) y no hay un autoescalado (bloque 8).',
+        when: 'Cuando llega más tráfico (o menos) y no hay autoescalado (bloque 8).',
+        whenNot: 'scale sirve para un apuro; lo que tiene que durar va al YAML del repositorio.',
         problems:
-          'Si escalas solo a mano, el siguiente apply del YAML del repositorio lo deja como estaba: el cambio tiene que ir al fichero.',
+          'Escalar solo a mano: el siguiente apply del YAML lo deshace y READY vuelve de «4/4» a «2/2». Cambia también el fichero.',
       },
       example:
-        'Escalas web a 4 con scale, ves los Pods repartidos y vuelves a lo del fichero con apply.',
+        'Antes de verlo: escalas web a 4 y luego aplicas web.yaml, que dice replicas: 2. ¿Qué READY saldrá al final?',
       objectives: {
         'get:tienda deploy/web {.spec.replicas}': 'web con 3 réplicas',
         'probe:repo': 'web.yaml dice replicas: 3 y coincide con el clúster',
@@ -415,19 +435,20 @@ export const BEGINNER: Unit[] = [
       title: 'Scaling',
       goal: 'Leave web with 3 replicas in the cluster and also in ~/tienda/web.yaml (the repository file).',
       theory: {
-        what: 'Scaling means changing the number of replicas. You can do it on the spot (kubectl scale) or by changing the YAML and applying it. Kubernetes spreads the Pods across the nodes.',
+        what: 'Scaling means changing the number of replicas: on the spot with kubectl scale, or by changing replicas in the YAML and applying it.',
         how: [
           'kubectl scale deployment web --replicas=4   # on the spot',
-          'kubectl get pods -o wide                     # spread across nodes',
           "sed -i 's/replicas: 2/replicas: 3/' web.yaml",
-          'kubectl apply -f web.yaml                    # the repository wins',
+          'kubectl apply -f web.yaml                    # the file rules',
+          'kubectl get deploy web                       # READY 3/3',
         ],
         when: 'When more (or less) traffic arrives and there is no autoscaler (block 8).',
+        whenNot: 'scale is for an emergency; whatever must last goes into the repository YAML.',
         problems:
-          'If you only scale by hand, the next apply of the repository YAML puts it back: the change has to go into the file.',
+          'Scaling only by hand: the next apply of the YAML undoes it and READY goes back from "4/4" to "2/2". Change the file too.',
       },
       example:
-        'You scale web to 4 with scale, see the Pods spread out and go back to the file with apply.',
+        'Before you look: you scale web to 4 and then apply web.yaml, which says replicas: 2. What READY comes out at the end?',
       objectives: {
         'get:tienda deploy/web {.spec.replicas}': 'web with 3 replicas',
         'probe:repo': 'web.yaml says replicas: 3 and matches the cluster',
@@ -435,7 +456,7 @@ export const BEGINNER: Unit[] = [
     },
     example: [
       'kubectl scale deployment web --replicas=4',
-      'kubectl get pods -o wide',
+      'kubectl get deploy web',
       'kubectl apply -f ~/tienda/web.yaml',
       'kubectl get deploy web',
     ],
@@ -463,19 +484,22 @@ export const BEGINNER: Unit[] = [
       title: 'Labels y selectores',
       goal: 'Saca un Pod de web del Deployment para investigarlo: quítale la etiqueta app y ponle investigar=si. web tiene que seguir con 2 Pods.',
       theory: {
-        what: 'Las etiquetas (labels) son pares clave=valor en los objetos, y los selectores eligen por ellas. Todo se une así: el ReplicaSet cuenta los Pods que casan con su selector y el Service manda tráfico a los que casan con el suyo.',
+        what: 'Una etiqueta (label) es un par clave=valor en un objeto; un selector elige objetos por sus etiquetas. Así sabe un Deployment qué Pods son suyos.',
         how: [
           'kubectl get pods --show-labels',
           'kubectl get pods -l app=web             # filtrar',
           'kubectl label pod <uno> investigar=si   # poner',
-          'kubectl label pod <uno> app-            # quitar (el - del final)',
-          'kubectl get pods -L app                 # una columna con su valor',
+          'kubectl label pod <uno> app-            # quitar (el - final)',
+          'kubectl get pods -L app                 # una columna APP',
         ],
-        when: 'Para filtrar (por app, versión o equipo) y para apartar un Pod que falla sin borrarlo: deja de recibir tráfico y el ReplicaSet crea otro.',
+        when: 'Para filtrar por app o por equipo, y para apartar un Pod que falla sin borrarlo.',
+        whenNot:
+          'Quitarle app a un Pod no lo borra: el Deployment deja de contarlo y crea otro, y el apartado sigue vivo para investigarlo.',
         problems:
-          'Cambiar las etiquetas de la plantilla de un Deployment no vale: el selector no se puede cambiar una vez creado.',
+          'Un selector con otra letra no casa: kubectl get pods -l app=Web dice «No resources found in tienda namespace.» Las etiquetas distinguen mayúsculas.',
       },
-      example: 'Miras las etiquetas, filtras con -l y ves la columna de app con -L.',
+      example:
+        'Antes de verlo: web tiene 2 Pods y a uno le quitas la etiqueta app. ¿Cuántos Pods saldrán después?',
       objectives: {
         'probe:apartado': 'Un Pod con investigar=si, fuera de web',
         'ready:tienda deploy/web': 'web sigue con 2 Pods listos',
@@ -485,19 +509,22 @@ export const BEGINNER: Unit[] = [
       title: 'Labels and selectors',
       goal: 'Take one web Pod out of the Deployment to investigate it: remove its app label and add investigar=si. web must still have 2 Pods.',
       theory: {
-        what: 'Labels are key=value pairs on objects, and selectors pick by them. That is how everything is tied together: the ReplicaSet counts the Pods matching its selector and the Service sends traffic to the ones matching its own.',
+        what: 'A label is a key=value pair on an object; a selector picks objects by their labels. That is how a Deployment knows which Pods are its own.',
         how: [
           'kubectl get pods --show-labels',
           'kubectl get pods -l app=web             # filter',
           'kubectl label pod <one> investigar=si   # add',
-          'kubectl label pod <one> app-            # remove (the trailing -)',
-          'kubectl get pods -L app                 # a column with its value',
+          'kubectl label pod <one> app-            # remove (trailing -)',
+          'kubectl get pods -L app                 # an APP column',
         ],
-        when: 'To filter (by app, version or team) and to set a failing Pod aside without deleting it: it stops getting traffic and the ReplicaSet starts another.',
+        when: 'To filter by app or team, and to set a failing Pod aside without deleting it.',
+        whenNot:
+          'Removing app from a Pod does not delete it: the Deployment stops counting it and creates another, and the set-aside one stays alive to investigate.',
         problems:
-          'Changing the labels in a Deployment template does not work: the selector cannot change once created.',
+          'A selector with a different letter matches nothing: kubectl get pods -l app=Web says "No resources found in tienda namespace." Labels are case-sensitive.',
       },
-      example: 'You look at the labels, filter with -l and see the app column with -L.',
+      example:
+        'Before you look: web has 2 Pods and you remove the app label from one. How many Pods will show afterwards?',
       objectives: {
         'probe:apartado': 'One Pod with investigar=si, out of web',
         'ready:tienda deploy/web': 'web still has 2 ready Pods',
@@ -505,7 +532,8 @@ export const BEGINNER: Unit[] = [
     },
     example: [
       'kubectl get pods --show-labels',
-      'kubectl get pods -l app=web',
+      'kubectl get pods -l app=Web',
+      'kubectl label $(kubectl get pods -l app=web -o name | head -n 1) app-',
       'kubectl get pods -L app',
     ],
     solution: [
@@ -531,42 +559,48 @@ export const BEGINNER: Unit[] = [
       title: 'Services y DNS',
       goal: 'Crea un Service web en el puerto 80 para que, desde cualquier Pod de tienda, curl web conteste nginx.',
       theory: {
-        what: 'Un Service da un nombre y una IP fijos a unos Pods que cambian: reparte el tráfico entre los que casan con su selector y están listos (sus endpoints). Dentro del clúster se llega por DNS: web, web.tienda o web.tienda.svc.cluster.local. Es lo que en Compose era el nombre del servicio.',
+        what: 'Un Service da un nombre y una IP fijos a los Pods que casan con su selector y reparte el tráfico entre ellos. Dentro del clúster se llega por su nombre.',
         how: [
-          'kubectl expose deployment web --port=80              # ClusterIP, el de por defecto',
-          'kubectl get svc,endpointslices                       # la IP y los Pods detrás',
+          'kubectl expose deployment web --port=80   # ClusterIP',
+          'kubectl get svc,endpointslices            # la IP y los Pods detrás',
           'kubectl run tmp --rm -i --image=curlimages/curl:8.10 --restart=Never -- curl -s web',
         ],
-        when: 'Siempre que algo tenga que llegar a tus Pods: otra app del clúster, un Ingress o tú con port-forward.',
+        when: 'Siempre que algo tenga que llegar a tus Pods: otra app, un Ingress o tú.',
+        whenNot:
+          'port es el puerto del Service y targetPort el del contenedor; si no pones targetPort, vale lo mismo que port.',
         problems:
-          'port es el puerto del Service; targetPort, el del contenedor (si no lo pones, el mismo). Un Service sin endpoints casi siempre es un selector que no casa.',
+          "Poner --port=8080 sin --target-port cuando nginx escucha en el 80: curl responde «Couldn't connect to server». Añade --target-port=80.",
       },
       example:
-        'Expones web en el 8080 apuntando al 80, miras sus endpoints y lo pruebas desde un Pod de curl.',
+        'Antes de verlo: demo escucha en el 8080 sin --target-port y nginx, en el 80. ¿Contestará curl demo:8080?',
       objectives: { 'reach:tienda web/': 'Desde tienda, curl web contesta nginx' },
     },
     en: {
       title: 'Services and DNS',
       goal: 'Create a Service web on port 80 so that, from any Pod in tienda, curl web answers with nginx.',
       theory: {
-        what: 'A Service gives a stable name and IP to Pods that come and go: it spreads traffic across the ones that match its selector and are ready (its endpoints). Inside the cluster you reach it through DNS: web, web.tienda or web.tienda.svc.cluster.local. It is what the service name was in Compose.',
+        what: 'A Service gives a fixed name and IP to the Pods matching its selector and spreads traffic across them. Inside the cluster you reach it by name.',
         how: [
-          'kubectl expose deployment web --port=80              # ClusterIP, the default',
-          'kubectl get svc,endpointslices                       # the IP and the Pods behind it',
+          'kubectl expose deployment web --port=80   # ClusterIP',
+          'kubectl get svc,endpointslices            # the IP and the Pods behind',
           'kubectl run tmp --rm -i --image=curlimages/curl:8.10 --restart=Never -- curl -s web',
         ],
-        when: 'Whenever something has to reach your Pods: another app in the cluster, an Ingress or you with port-forward.',
+        when: 'Whenever something must reach your Pods: another app, an Ingress or you.',
+        whenNot:
+          'port is the Service port and targetPort the container one; without targetPort it takes the same value as port.',
         problems:
-          'port is the Service port; targetPort, the container one (same by default). A Service without endpoints is nearly always a selector that does not match.',
+          'Setting --port=8080 without --target-port while nginx listens on 80: curl answers "Couldn\'t connect to server". Add --target-port=80.',
       },
       example:
-        'You expose web on 8080 pointing to 80, look at its endpoints and try it from a curl Pod.',
+        'Before you look: demo listens on 8080 without --target-port and nginx on 80. Will curl demo:8080 answer?',
       objectives: { 'reach:tienda web/': 'From tienda, curl web answers with nginx' },
     },
     example: [
-      'kubectl expose deployment web --name=demo --port=8080 --target-port=80',
-      'kubectl get svc,endpointslices',
+      'kubectl expose deployment web --name=demo --port=8080',
       'kubectl run tmp --rm -i --image=curlimages/curl:8.10 --restart=Never -- curl -s demo:8080',
+      'kubectl expose deployment web --name=bien --port=8080 --target-port=80',
+      'kubectl get svc,endpointslices',
+      'kubectl run tmp --rm -i --image=curlimages/curl:8.10 --restart=Never -- curl -s bien:8080',
     ],
     solution: ['kubectl expose deployment web --port=80'],
     check: { reach: ['tienda web/'], exists: ['tienda svc/web'] },
@@ -581,18 +615,21 @@ export const BEGINNER: Unit[] = [
       title: 'Llegar desde tu máquina',
       goal: 'Haz que curl localhost:8080 en tu máquina conteste el nginx de web y crea además un Service web-np de tipo NodePort.',
       theory: {
-        what: 'Un ClusterIP solo se ve desde dentro. Para probar desde tu máquina, kubectl port-forward abre un túnel a un Pod (con svc/ o deploy/, a uno de sus Pods). NodePort abre el mismo puerto (30000–32767) en todos los nodos; LoadBalancer pide una IP pública al proveedor.',
+        what: 'kubectl port-forward abre un túnel desde un puerto de tu máquina hasta un Pod (con svc/ o deploy/, uno de los suyos). Un ClusterIP solo se ve desde dentro.',
         how: [
-          'kubectl port-forward svc/web 8080:80     # tu 8080 → el 80 del Service',
+          'kubectl port-forward svc/web 8080:80   # tu 8080 → el 80',
           'curl localhost:8080',
           'kubectl expose deployment web --name=web-np --type=NodePort --port=80',
-          'kubectl get svc web-np                   # PORT(S) 80:3xxxx/TCP',
+          'kubectl get svc web-np                 # PORT(S) 80:30080/TCP',
         ],
-        when: 'port-forward para depurar o probar algo tuyo; NodePort en un clúster de pruebas; para producción, un Ingress (bloque 8).',
+        when: 'Para probar desde tu máquina algo que solo se ve dentro del clúster.',
         whenNot:
-          'port-forward no es para dar servicio: vive mientras la orden sigue abierta (aquí se queda en segundo plano).',
+          'port-forward es para ti y vive mientras la orden sigue abierta; NodePort abre el puerto en todos los nodos, y en producción va un Ingress (bloque 8).',
+        problems:
+          'Probar en tu máquina sin túnel: curl localhost:9090 dice «Failed to connect to localhost port 9090». Abre antes el port-forward.',
       },
-      example: 'Abres un port-forward al Deployment (a uno de sus Pods) y lo pruebas con curl.',
+      example:
+        'Antes de verlo: web solo tiene un ClusterIP. ¿Qué responde curl localhost:9090 antes y después del port-forward?',
       objectives: {
         'http:localhost:8080/': 'localhost:8080 contesta nginx',
         'get:tienda svc/web-np {.spec.type}': 'web-np es NodePort',
@@ -602,24 +639,28 @@ export const BEGINNER: Unit[] = [
       title: 'Reaching it from your machine',
       goal: "Make curl localhost:8080 on your machine answer with web's nginx and also create a NodePort Service called web-np.",
       theory: {
-        what: 'A ClusterIP is only visible from inside. To try it from your machine, kubectl port-forward opens a tunnel to a Pod (with svc/ or deploy/, to one of its Pods). NodePort opens the same port (30000–32767) on every node; LoadBalancer asks the provider for a public IP.',
+        what: 'kubectl port-forward opens a tunnel from a port on your machine to a Pod (with svc/ or deploy/, one of theirs). A ClusterIP is only visible from inside.',
         how: [
-          'kubectl port-forward svc/web 8080:80     # your 8080 → the Service 80',
+          'kubectl port-forward svc/web 8080:80   # your 8080 → the 80',
           'curl localhost:8080',
           'kubectl expose deployment web --name=web-np --type=NodePort --port=80',
-          'kubectl get svc web-np                   # PORT(S) 80:3xxxx/TCP',
+          'kubectl get svc web-np                 # PORT(S) 80:30080/TCP',
         ],
-        when: 'port-forward to debug or try your own thing; NodePort in a test cluster; for production, an Ingress (block 8).',
+        when: 'To try from your machine something only visible inside the cluster.',
         whenNot:
-          'port-forward is not for serving traffic: it lives while the command stays open (here it stays in the background).',
+          'port-forward is for you and lives while the command stays open; NodePort opens the port on every node, and production uses an Ingress (block 8).',
+        problems:
+          'Trying on your machine without a tunnel: curl localhost:9090 says "Failed to connect to localhost port 9090". Open the port-forward first.',
       },
-      example: 'You open a port-forward to the Deployment (one of its Pods) and try it with curl.',
+      example:
+        'Before you look: web only has a ClusterIP. What does curl localhost:9090 answer before and after the port-forward?',
       objectives: {
         'http:localhost:8080/': 'localhost:8080 answers with nginx',
         'get:tienda svc/web-np {.spec.type}': 'web-np is a NodePort',
       },
     },
     example: [
+      'curl localhost:9090',
       'kubectl port-forward deploy/web 9090:80',
       'curl -s localhost:9090',
       'kubectl get svc',
@@ -693,18 +734,21 @@ export const BEGINNER: Unit[] = [
       title: 'ConfigMaps',
       goal: 'Crea el ConfigMap api-config con LOG_LEVEL=info y PORT=3000 y haz que la API lo lea como variables de entorno.',
       theory: {
-        what: 'Un ConfigMap guarda configuración fuera de la imagen (pares clave-valor o ficheros enteros) para que la misma imagen valga en todos los entornos. Un Pod lo lee como variables (env, envFrom) o montado como ficheros. Es el environment: de Compose.',
+        what: 'Un ConfigMap guarda configuración fuera de la imagen, en pares clave-valor o ficheros enteros. Un Pod lo lee como variables o como ficheros montados.',
         how: [
           'kubectl create configmap api-config --from-literal=LOG_LEVEL=info --from-literal=PORT=3000',
-          'kubectl create configmap nginx-conf --from-file=default.conf    # un fichero entero',
-          'kubectl set env deployment/api --from=configmap/api-config      # o envFrom en el YAML',
-          'kubectl exec deploy/api -- env | grep LOG_LEVEL',
+          'kubectl get configmap api-config -o yaml   # data, con los valores',
+          'kubectl set env deployment/api --from=configmap/api-config',
+          'kubectl exec deploy/api -- printenv LOG_LEVEL   # info',
         ],
-        when: 'Para lo que cambia entre entornos y no es secreto: niveles de log, URLs de otros servicios, opciones.',
+        when: 'Para lo que cambia entre entornos y no es secreto: el nivel de log, la URL de otro servicio.',
+        whenNot:
+          'Para contraseñas, no: un ConfigMap se lee en claro con get -o yaml. Van en un Secret (siguiente unidad).',
         problems:
-          'Cambiar un ConfigMap no reinicia los Pods: las variables se leen al arrancar (kubectl rollout restart deployment/api).',
+          'Escribir mal el nombre al dárselo a la app: set env responde «Error from server (NotFound): configmaps "demos" not found». Míralo con kubectl get configmap.',
       },
-      example: 'Creas un ConfigMap con dos valores, lo miras en YAML y en describe.',
+      example:
+        'Antes de verlo: el ConfigMap se llama demo y escribes --from=configmap/demos. ¿Qué responde set env?',
       objectives: {
         'exec:tienda deploy/api printenv LOG_LEVEL': 'La API ve LOG_LEVEL=info',
         'exists:tienda cm/api-config': 'El ConfigMap api-config',
@@ -714,18 +758,21 @@ export const BEGINNER: Unit[] = [
       title: 'ConfigMaps',
       goal: 'Create ConfigMap api-config with LOG_LEVEL=info and PORT=3000 and make the API read it as environment variables.',
       theory: {
-        what: "A ConfigMap keeps configuration outside the image (key-value pairs or whole files) so the same image works in every environment. A Pod reads it as variables (env, envFrom) or mounted as files. It is Compose's environment:.",
+        what: 'A ConfigMap keeps configuration outside the image, as key-value pairs or whole files. A Pod reads it as variables or as mounted files.',
         how: [
           'kubectl create configmap api-config --from-literal=LOG_LEVEL=info --from-literal=PORT=3000',
-          'kubectl create configmap nginx-conf --from-file=default.conf    # a whole file',
-          'kubectl set env deployment/api --from=configmap/api-config      # or envFrom in the YAML',
-          'kubectl exec deploy/api -- env | grep LOG_LEVEL',
+          'kubectl get configmap api-config -o yaml   # data, with the values',
+          'kubectl set env deployment/api --from=configmap/api-config',
+          'kubectl exec deploy/api -- printenv LOG_LEVEL   # info',
         ],
-        when: 'For whatever changes between environments and is not secret: log levels, URLs of other services, options.',
+        when: 'For whatever changes between environments and is not secret: log level, another service’s URL.',
+        whenNot:
+          'Not for passwords: a ConfigMap reads in plain text with get -o yaml. They go in a Secret (next unit).',
         problems:
-          'Changing a ConfigMap does not restart the Pods: variables are read at start-up (kubectl rollout restart deployment/api).',
+          'Misspelling the name when giving it to the app: set env answers "Error from server (NotFound): configmaps "demos" not found". Check it with kubectl get configmap.',
       },
-      example: 'You create a ConfigMap with two values and look at it in YAML and in describe.',
+      example:
+        'Before you look: the ConfigMap is called demo and you type --from=configmap/demos. What does set env answer?',
       objectives: {
         'exec:tienda deploy/api printenv LOG_LEVEL': 'The API sees LOG_LEVEL=info',
         'exists:tienda cm/api-config': 'ConfigMap api-config',
@@ -734,7 +781,9 @@ export const BEGINNER: Unit[] = [
     example: [
       'kubectl create configmap demo --from-literal=COLOR=verde --from-literal=MODO=prueba',
       'kubectl get configmap demo -o yaml',
-      'kubectl describe configmap demo',
+      'kubectl set env deployment/api --from=configmap/demos',
+      'kubectl set env deployment/api --from=configmap/demo',
+      'kubectl exec deploy/api -- printenv COLOR',
     ],
     solution: [
       'kubectl create configmap api-config --from-literal=LOG_LEVEL=info --from-literal=PORT=3000',
@@ -761,19 +810,21 @@ export const BEGINNER: Unit[] = [
       title: 'Secrets',
       goal: 'La base de datos no arranca: le falta la contraseña. Crea el Secret db con POSTGRES_PASSWORD=secreto y dáselo a db.',
       theory: {
-        what: 'Un Secret es como un ConfigMap para contraseñas y tokens: se lee igual (env, envFrom, volumen) pero se trata aparte (permisos, no se enseña en describe). Ojo: en base64 no está cifrado, solo codificado. Es el .env de Compose.',
+        what: 'Un Secret guarda contraseñas y tokens; un Pod lo lee igual que un ConfigMap, pero describe no enseña los valores. Va en base64: codificado, no cifrado.',
         how: [
           'kubectl create secret generic db --from-literal=POSTGRES_PASSWORD=secreto',
-          'kubectl create secret generic db --from-env-file=.env   # o un .env entero (CLAVE=valor)',
+          'kubectl get secret db -o yaml        # el valor, en base64',
           "kubectl get secret db -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d",
-          'kubectl set env deployment/db --from=secret/db       # o secretKeyRef en el YAML',
+          'kubectl set env deployment/db --from=secret/db',
         ],
-        when: 'Para todo lo que no puede verse en el repositorio ni en un registro: contraseñas, tokens, certificados.',
+        when: 'Para lo que no puede verse en el repositorio: contraseñas, tokens, certificados.',
+        whenNot:
+          'describe secret solo enseña el tamaño («TOKEN:  6 bytes»): sirve para mirar sin destapar el valor.',
         problems:
-          'Nunca subas un Secret en claro a git: base64 se deshace en un segundo. Se crean a mano, desde la CI o con herramientas como Sealed Secrets o External Secrets.',
+          'Creer que base64 protege y subir el YAML a git: «YWJjMTIz» se lee «abc123» con base64 -d. Los Secrets se crean a mano o desde la CI, no en el repositorio.',
       },
       example:
-        'Creas un Secret, lo ves en base64, lo lees con base64 -d y ves que db sigue sin arrancar.',
+        'Antes de verlo: guardas TOKEN=abc123. ¿Qué enseña get -o yaml, y qué devuelve base64 -d?',
       objectives: {
         'ready:tienda deploy/db': 'db en marcha',
         'get:tienda secret/db {.data.POSTGRES_PASSWORD}': 'El Secret db guarda la contraseña',
@@ -783,19 +834,21 @@ export const BEGINNER: Unit[] = [
       title: 'Secrets',
       goal: 'The database does not start: it is missing its password. Create Secret db with POSTGRES_PASSWORD=secreto and give it to db.',
       theory: {
-        what: "A Secret is like a ConfigMap for passwords and tokens: it is read the same way (env, envFrom, volume) but handled separately (permissions, hidden in describe). Careful: base64 is not encryption, just encoding. It is Compose's .env.",
+        what: 'A Secret holds passwords and tokens; a Pod reads it like a ConfigMap, but describe hides the values. It is base64: encoded, not encrypted.',
         how: [
           'kubectl create secret generic db --from-literal=POSTGRES_PASSWORD=secreto',
-          'kubectl create secret generic db --from-env-file=.env   # or a whole .env (KEY=value)',
+          'kubectl get secret db -o yaml        # the value, in base64',
           "kubectl get secret db -o jsonpath='{.data.POSTGRES_PASSWORD}' | base64 -d",
-          'kubectl set env deployment/db --from=secret/db       # or secretKeyRef in the YAML',
+          'kubectl set env deployment/db --from=secret/db',
         ],
-        when: 'For anything that must not show up in the repository or in a log: passwords, tokens, certificates.',
+        when: 'For whatever must not show up in the repository: passwords, tokens, certificates.',
+        whenNot:
+          'describe secret only shows the size ("TOKEN:  6 bytes"): useful to look without revealing the value.',
         problems:
-          'Never push a plain Secret to git: base64 is undone in a second. They are created by hand, from CI or with tools like Sealed Secrets or External Secrets.',
+          'Believing base64 protects it and pushing the YAML to git: "YWJjMTIz" reads "abc123" with base64 -d. Secrets are created by hand or from CI, not in the repository.',
       },
       example:
-        'You create a Secret, see it in base64, read it with base64 -d and see that db still does not start.',
+        'Before you look: you store TOKEN=abc123. What does get -o yaml show, and what does base64 -d return?',
       objectives: {
         'ready:tienda deploy/db': 'db running',
         'get:tienda secret/db {.data.POSTGRES_PASSWORD}': 'Secret db holds the password',
@@ -805,7 +858,7 @@ export const BEGINNER: Unit[] = [
       'kubectl create secret generic demo --from-literal=TOKEN=abc123',
       'kubectl get secret demo -o yaml',
       "kubectl get secret demo -o jsonpath='{.data.TOKEN}' | base64 -d",
-      'kubectl get pods',
+      'kubectl describe secret demo',
     ],
     solution: [
       'kubectl create secret generic db --from-literal=POSTGRES_PASSWORD=secreto',
@@ -832,39 +885,50 @@ export const BEGINNER: Unit[] = [
       title: 'Imágenes privadas y etiquetas',
       goal: 'La API (ghcr.io/peer4u/api:1.0.0) se queda en ImagePullBackOff. Crea el Secret de registro ghcr con tu token y haz que la API lo use.',
       theory: {
-        what: 'Para descargar de un registro privado el clúster necesita credenciales: un Secret de tipo docker-registry y, en el Pod, imagePullSecrets (o en la ServiceAccount, y así lo usan todos sus Pods). Las imágenes van siempre con etiqueta fija: la versión y, mejor aún, el commit, como en el curso de Docker.',
+        what: 'Para bajar de un registro privado, el clúster necesita un Secret de tipo docker-registry y que el Pod lo nombre en imagePullSecrets.',
         how: [
           'kubectl create secret docker-registry ghcr --docker-server=ghcr.io \\',
           '  --docker-username=peer --docker-password=$(cat ~/.ghcr-token)',
           'kubectl patch deployment api -p \'{"spec":{"template":{"spec":{"imagePullSecrets":[{"name":"ghcr"}]}}}}\'',
-          'kubectl describe pod <api-…>          # Events: 401 Unauthorized si falta',
+          'kubectl describe pod <api-…>   # Events: 401 Unauthorized si falta',
         ],
-        when: 'Con cualquier imagen del equipo: casi nunca son públicas.',
+        when: 'Con casi cualquier imagen del equipo: pocas son públicas.',
+        whenNot:
+          'Etiqueta fija (1.0.0), no latest: latest no dice qué versión corre ni deja volver a la anterior.',
         problems:
-          'latest no dice qué versión corre ni deja volver atrás: con etiquetas fijas, imagePullPolicy IfNotPresent basta.',
+          'Crear el Secret y no nombrarlo en el Pod: sigue en «ImagePullBackOff» y Events dice «401 Unauthorized». Añade imagePullSecrets con patch.',
       },
-      example: 'Miras por qué no arranca la API: el evento dice 401 Unauthorized.',
+      example:
+        'Antes de verlo: creas el Secret ghcr pero no tocas la API. ¿Saldrá de ImagePullBackOff?',
       objectives: { 'ready:tienda deploy/api': 'La API descargada y en marcha' },
     },
     en: {
       title: 'Private images and tags',
       goal: 'The API (ghcr.io/peer4u/api:1.0.0) is stuck in ImagePullBackOff. Create registry Secret ghcr with your token and make the API use it.',
       theory: {
-        what: 'To pull from a private registry the cluster needs credentials: a docker-registry Secret and, in the Pod, imagePullSecrets (or on the ServiceAccount, so all its Pods use it). Images always carry a fixed tag: the version and, even better, the commit, as in the Docker course.',
+        what: 'To pull from a private registry, the cluster needs a docker-registry Secret and the Pod has to name it in imagePullSecrets.',
         how: [
           'kubectl create secret docker-registry ghcr --docker-server=ghcr.io \\',
           '  --docker-username=peer --docker-password=$(cat ~/.ghcr-token)',
           'kubectl patch deployment api -p \'{"spec":{"template":{"spec":{"imagePullSecrets":[{"name":"ghcr"}]}}}}\'',
-          'kubectl describe pod <api-…>          # Events: 401 Unauthorized when missing',
+          'kubectl describe pod <api-…>   # Events: 401 Unauthorized if missing',
         ],
-        when: 'With any team image: they are almost never public.',
+        when: 'With almost any team image: few are public.',
+        whenNot:
+          'A fixed tag (1.0.0), not latest: latest does not say which version runs nor lets you go back to the previous one.',
         problems:
-          'latest does not say which version runs nor lets you roll back: with fixed tags, imagePullPolicy IfNotPresent is enough.',
+          'Creating the Secret but not naming it in the Pod: it stays in "ImagePullBackOff" and Events says "401 Unauthorized". Add imagePullSecrets with patch.',
       },
-      example: 'You check why the API does not start: the event says 401 Unauthorized.',
+      example:
+        'Before you look: you create Secret ghcr but leave the API alone. Will it leave ImagePullBackOff?',
       objectives: { 'ready:tienda deploy/api': 'The API pulled and running' },
     },
-    example: ['kubectl get pods', 'kubectl describe pod -l app=api | grep -A2 Failed'],
+    example: [
+      'kubectl get pods',
+      'kubectl create secret docker-registry ghcr --docker-server=ghcr.io --docker-username=peer --docker-password=$(cat ~/.ghcr-token)',
+      'kubectl get pods',
+      "kubectl describe pod -l app=api | grep -m1 -o '401 Unauthorized'",
+    ],
     solution: [
       GHCR_SECRET,
       'kubectl patch deployment api -p \'{"spec":{"template":{"spec":{"imagePullSecrets":[{"name":"ghcr"}]}}}}\'',

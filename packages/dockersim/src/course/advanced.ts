@@ -155,44 +155,49 @@ export const ADVANCED: Unit[] = [
       title: 'Imágenes pequeñas',
       goal: 'api:fat pesa más de 1 GB. Construye api:slim desde ~/api que pese menos de 300 MB y siga contestando en /health.',
       theory: {
-        what: 'Lo que más pesa es la imagen base y las dependencias. node:22 trae compiladores y herramientas (más de 1 GB); node:22-slim y node:22-alpine, solo lo justo. Y en producción no hacen falta las dependencias de desarrollo (--omit=dev).',
+        what: 'Lo que más pesa es la base: node:22 trae compiladores; node:22-alpine, lo justo.',
         how: [
-          'docker images api                   # cuánto pesa cada versión',
-          'docker image history api:fat        # qué capa pesa',
-          'FROM node:22-alpine                 # base pequeña',
-          'RUN npm ci --omit=dev               # sin eslint, vite…',
-          'RUN apk add --no-cache curl         # sin dejar la caché de apk',
+          'docker image history api:fat   # qué capa pesa',
+          'FROM node:22-alpine',
+          'RUN npm ci --omit=dev          # sin eslint ni vite',
         ],
-        when: 'Siempre en lo que se despliega: se descarga antes, arranca antes en cada nodo, ocupa menos en el registro y trae menos paquetes con vulnerabilidades.',
-        whenNot:
-          'Para una imagen de herramientas de desarrollo (con compiladores, depuradores) pesar más es lo normal.',
+        when: 'En lo que despliegas: baja y arranca antes, con menos vulnerabilidades.',
+        whenNot: 'Una imagen de herramientas de desarrollo puede pesar más.',
         problems:
-          'Borrar en otro RUN no adelgaza: la capa de antes sigue en la imagen. Limpia en el mismo RUN que ensucia. Alpine usa musl en vez de glibc: algún módulo nativo puede necesitar compilarse distinto.',
+          'Borrar en otro RUN: RUN rm -rf node_modules sale con «0B» en docker image history y la imagen sigue en 1.37GB. Limpia en el mismo RUN.',
       },
-      example: 'Comparas lo que pesan las bases de Node y miras qué capas tiene api:fat.',
+      example:
+        'Antes de verlo: tras npm ci, añades RUN rm -rf node_modules. ¿Cuánto bajará la imagen?',
       objectives: { 'probe:works': 'api:slim arranca y contesta en /health' },
     },
     en: {
       title: 'Small images',
       goal: 'api:fat weighs over 1 GB. Build api:slim from ~/api weighing under 300 MB and still answering on /health.',
       theory: {
-        what: 'What weighs most is the base image and the dependencies. node:22 ships compilers and tools (over 1 GB); node:22-slim and node:22-alpine, just enough. And production does not need dev dependencies (--omit=dev).',
+        what: 'The heaviest part is the base: node:22 ships compilers; node:22-alpine, just enough.',
         how: [
-          'docker images api                   # size of each version',
-          'docker image history api:fat        # which layer is heavy',
-          'FROM node:22-alpine                 # small base',
-          'RUN npm ci --omit=dev               # no eslint, vite…',
-          'RUN apk add --no-cache curl         # without keeping the apk cache',
+          'docker image history api:fat   # which layer weighs',
+          'FROM node:22-alpine',
+          'RUN npm ci --omit=dev          # no eslint or vite',
         ],
-        when: 'Always for what you deploy: it downloads faster, starts faster on every node, takes less registry space and ships fewer vulnerable packages.',
-        whenNot: 'For a dev tooling image (compilers, debuggers) being bigger is normal.',
+        when: 'In what you deploy: it pulls and starts faster, with fewer vulnerabilities.',
+        whenNot: 'An image of development tools may weigh more.',
         problems:
-          'Deleting in another RUN does not shrink anything: the earlier layer is still in the image. Clean up in the same RUN that makes the mess. Alpine uses musl instead of glibc: some native module may need a different build.',
+          'Deleting in another RUN: RUN rm -rf node_modules shows "0B" in docker image history and the image stays at 1.37GB. Clean up in the same RUN.',
       },
-      example: 'You compare the size of the Node bases and look at the layers of api:fat.',
+      example:
+        'Before you look: after npm ci, you add RUN rm -rf node_modules. How much smaller will the image get?',
       objectives: { 'probe:works': 'api:slim starts and answers on /health' },
     },
-    example: ['docker pull node:22-alpine', 'docker images', 'docker image history api:fat'],
+    example: [
+      'docker images api',
+      'docker pull node:22-alpine',
+      'docker images node',
+      'cat > Dockerfile <<\'EOF\'\nFROM node:22\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nRUN rm -rf node_modules\nCOPY . .\nCMD ["node", "server.js"]\nEOF',
+      'docker build -t api:x .',
+      'docker images api',
+      'docker image history api:x',
+    ],
     solution: [write('Dockerfile', API_BASE), 'docker build -t api:slim .'],
     check: {
       size: ['api:slim 300'],
@@ -214,19 +219,19 @@ export const ADVANCED: Unit[] = [
       title: 'No correr como root',
       goal: 'Construye api:2.0 desde ~/api para que el proceso no corra como root (y siga contestando).',
       theory: {
-        what: 'Si nadie dice otra cosa, el proceso del contenedor es root. Con USER corre con otro usuario: si alguien entra por un fallo de la app, no es root ni dentro ni ante el núcleo.',
+        what: 'Por defecto el contenedor corre como root. Con USER corre como otro usuario, y un fallo de la app no da root.',
         how: [
-          'RUN addgroup -S app && adduser -S app -G app   # en alpine (useradd en debian)',
-          'COPY --chown=app:app . .                        # que los ficheros sean suyos',
+          'RUN addgroup -S app && adduser -S app -G app',
           'USER app',
-          'docker run --rm api:2.0 id                      # uid distinto de 0',
-          'docker run --rm -u 0 api:2.0 id                 # para depurar, root a mano',
+          'docker run --rm api:2.0 id   # uid=1001(app)',
         ],
-        when: 'En toda imagen que vaya a producción. Kubernetes puede exigirlo (runAsNonRoot) y muchas empresas lo comprueban en CI.',
+        when: 'En toda imagen de producción: Kubernetes puede exigirlo (runAsNonRoot).',
+        whenNot: 'Para depurar, docker run -u 0 da root esa vez.',
         problems:
-          'Sin root no se escribe donde no es tuyo: si la app guarda ficheros, dale su carpeta con --chown. Y escucha en un puerto alto (3000, 8080): Docker deja usar el 80 sin root, pero otros entornos, como Kubernetes, no siempre. Las imágenes oficiales de Node ya traen el usuario node.',
+          'USER sin crear el usuario: docker run responde «unable to find user app: no matching entries in passwd file».',
       },
-      example: 'Miras con qué usuario corren las imágenes oficiales.',
+      example:
+        'Antes de verlo: ni node:22-alpine ni nginx:1.27-alpine dicen USER. ¿Con qué usuario corren?',
       objectives: {
         'probe:root': 'El proceso no corre como root',
         'probe:works': 'La API sigue contestando',
@@ -236,25 +241,31 @@ export const ADVANCED: Unit[] = [
       title: 'Not running as root',
       goal: 'Build api:2.0 from ~/api so that the process does not run as root (and still answers).',
       theory: {
-        what: 'Unless told otherwise, the container process is root. With USER it runs as another user: if someone gets in through an app bug, they are not root inside nor in front of the kernel.',
+        what: 'By default the container runs as root. With USER it runs as another user, so an app bug gives no root.',
         how: [
-          'RUN addgroup -S app && adduser -S app -G app   # on alpine (useradd on debian)',
-          'COPY --chown=app:app . .                        # files owned by it',
+          'RUN addgroup -S app && adduser -S app -G app',
           'USER app',
-          'docker run --rm api:2.0 id                      # uid other than 0',
-          'docker run --rm -u 0 api:2.0 id                 # root on purpose, to debug',
+          'docker run --rm api:2.0 id   # uid=1001(app)',
         ],
-        when: 'In every image that goes to production. Kubernetes can require it (runAsNonRoot) and many companies check it in CI.',
+        when: 'In every production image: Kubernetes may require it (runAsNonRoot).',
+        whenNot: 'To debug, docker run -u 0 gives root that once.',
         problems:
-          'Without root you cannot write where you do not own: if the app saves files, give it its folder with --chown. And listen on a high port (3000, 8080): Docker lets you use 80 without root, but other environments, like Kubernetes, do not always. The official Node images already include the node user.',
+          'USER without creating the user: docker run answers "unable to find user app: no matching entries in passwd file".',
       },
-      example: 'You check which user the official images run as.',
+      example:
+        'Before you look: neither node:22-alpine nor nginx:1.27-alpine sets USER. Which user do they run as?',
       objectives: {
         'probe:root': 'The process does not run as root',
         'probe:works': 'The API still answers',
       },
     },
-    example: ['docker run --rm node:22-alpine id', 'docker run --rm nginx:1.27-alpine whoami'],
+    example: [
+      'docker run --rm node:22-alpine id',
+      'docker run --rm nginx:1.27-alpine whoami',
+      'cat > Dockerfile <<\'EOF\'\nFROM node:22-alpine\nWORKDIR /app\nCOPY . .\nUSER app\nCMD ["node", "server.js"]\nEOF',
+      'docker build -t api:x .',
+      'docker run --rm api:x id',
+    ],
     solution: [
       write(
         'Dockerfile',
@@ -283,44 +294,44 @@ export const ADVANCED: Unit[] = [
       title: 'HEALTHCHECK en la imagen',
       goal: 'Construye api:2.1 con un HEALTHCHECK que pregunte a /health y déjala corriendo como api en el 3000, healthy.',
       theory: {
-        what: 'Que el proceso viva no quiere decir que la app conteste. HEALTHCHECK le da a Docker una orden que mira de verdad (pedir /health); el contenedor pasa a healthy o unhealthy y compose puede esperar a que lo esté.',
+        what: 'Que el proceso viva no quiere decir que conteste. HEALTHCHECK da a Docker una orden que lo comprueba: healthy o unhealthy.',
         how: [
           'HEALTHCHECK --interval=10s --timeout=3s \\',
           '  CMD wget -qO- http://localhost:3000/health || exit 1',
-          'docker ps                                   # Up 1 minute (healthy)',
-          "docker inspect -f '{{.State.Health.Status}}' api",
-          'docker run --health-cmd "…" …               # también al arrancar',
+          'docker ps   # Up … (healthy)',
         ],
-        when: 'En toda imagen de un servicio: es lo que usan compose (depends_on con service_healthy) y los orquestadores para no mandar tráfico a quien no está listo.',
+        when: 'En todo servicio: nadie manda tráfico a quien no está sano.',
+        whenNot: 'Kubernetes ignora el HEALTHCHECK: allí va como probe del manifiesto.',
         problems:
-          'La orden corre dentro del contenedor: tiene que existir allí (wget viene en alpine; curl, no siempre). Kubernetes ignora el HEALTHCHECK de la imagen: allí se escribe como probe en el manifiesto.',
+          'Una orden que la imagen no trae: node:22-alpine no tiene curl, y con curl -f queda «(unhealthy)». Usa wget.',
       },
-      example: 'Arrancas un nginx con --health-cmd y ves cómo docker ps enseña su salud.',
+      example:
+        'Antes de verlo: la prueba de un contenedor de node:22-alpine usa curl -f. ¿Saldrá healthy?',
       objectives: {},
     },
     en: {
       title: 'HEALTHCHECK in the image',
       goal: 'Build api:2.1 with a HEALTHCHECK that asks /health and leave it running as api on 3000, healthy.',
       theory: {
-        what: 'A living process does not mean the app answers. HEALTHCHECK gives Docker a command that really checks (ask /health); the container becomes healthy or unhealthy and compose can wait for it.',
+        what: 'A living process does not mean an answering app. HEALTHCHECK gives Docker a command that checks it: healthy or unhealthy.',
         how: [
           'HEALTHCHECK --interval=10s --timeout=3s \\',
           '  CMD wget -qO- http://localhost:3000/health || exit 1',
-          'docker ps                                   # Up 1 minute (healthy)',
-          "docker inspect -f '{{.State.Health.Status}}' api",
-          'docker run --health-cmd "…" …               # also when starting',
+          'docker ps   # Up … (healthy)',
         ],
-        when: 'In every service image: compose (depends_on with service_healthy) and orchestrators use it to avoid sending traffic to what is not ready.',
+        when: 'In every service: no traffic goes to what is not healthy.',
+        whenNot: 'Kubernetes ignores HEALTHCHECK: there it is a probe in the manifest.',
         problems:
-          'The command runs inside the container: it must exist there (wget ships with alpine; curl, not always). Kubernetes ignores the image HEALTHCHECK: there it is written as a probe in the manifest.',
+          'A command the image lacks: node:22-alpine has no curl, and with curl -f it stays "(unhealthy)". Use wget.',
       },
-      example: 'You start an nginx with --health-cmd and see docker ps show its health.',
+      example:
+        'Before you look: the test of a node:22-alpine container uses curl -f. Will it be healthy?',
       objectives: {},
     },
     example: [
       "docker run -d --name demo --health-cmd 'wget -qO- http://localhost/ || exit 1' nginx:1.27-alpine",
+      "docker run -d --name demo2 --health-cmd 'curl -f http://localhost/ || exit 1' node:22-alpine sleep infinity",
       'docker ps',
-      "docker inspect -f '{{.State.Health.Status}}' demo",
     ],
     solution: [
       write(
@@ -351,20 +362,19 @@ export const ADVANCED: Unit[] = [
       title: 'Secretos fuera de la imagen',
       goal: 'api:leaky lleva el token de npm a la vista. Construye api:2.2 desde ~/api con el token como secreto de construcción: que no salga en su historial ni haya un .npmrc en /app.',
       theory: {
-        what: 'Todo lo que pasa por ARG, ENV o COPY queda en la imagen y cualquiera que la descargue lo lee (docker history, docker inspect, o abriendo la capa). Un secreto de BuildKit se monta solo mientras dura ese RUN y no se guarda en ninguna capa.',
+        what: 'ARG, ENV y COPY dejan su contenido en la imagen; un secreto de BuildKit solo existe durante su RUN.',
         how: [
-          'docker history --no-trunc api:leaky        # el token, a la vista',
-          'RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci --omit=dev',
+          'RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci',
           'docker build --secret id=npmrc,src=.npmrc -t api:2.2 .',
-          'echo .npmrc >> .dockerignore              # y que COPY . . no lo meta',
+          'echo .npmrc >> .dockerignore',
         ],
-        when: 'Para lo que hace falta al construir: tokens de registros privados de npm o pip, claves para clonar un repositorio.',
-        whenNot:
-          'Los secretos de cuando la app corre (la contraseña de la base de datos) no van en la imagen: se pasan al arrancar (variables, secrets de compose, Secrets de Kubernetes).',
+        when: 'Para lo que hace falta al construir: tokens de npm o pip.',
+        whenNot: 'Los secretos de la app en marcha se pasan al arrancar, no en la imagen.',
         problems:
-          'Un token que ya se publicó en una imagen está filtrado: además de arreglar el Dockerfile, hay que revocarlo y crear otro.',
+          'Pasar el token con --build-arg: docker history --no-trunc enseña «NPM_TOKEN=npm_peer4uSecreto42». Revócalo y usa --secret.',
       },
-      example: 'Buscas el token en el historial de api:leaky y dentro de su carpeta /app.',
+      example:
+        'Antes de verlo: api:leaky recibió el token con --build-arg. ¿Saldrá en docker history?',
       objectives: {
         'probe:history': 'El token no sale en el historial de api:2.2',
         'probe:npmrc': 'No hay ningún .npmrc dentro de /app',
@@ -374,20 +384,19 @@ export const ADVANCED: Unit[] = [
       title: 'Secrets out of the image',
       goal: 'api:leaky exposes the npm token. Build api:2.2 from ~/api with the token as a build secret: it must not show in its history and there must be no .npmrc in /app.',
       theory: {
-        what: 'Everything passed through ARG, ENV or COPY stays in the image and anyone who pulls it can read it (docker history, docker inspect, or opening the layer). A BuildKit secret is mounted only while that RUN lasts and is not saved in any layer.',
+        what: 'ARG, ENV and COPY leave their content in the image; a BuildKit secret only exists during its RUN.',
         how: [
-          'docker history --no-trunc api:leaky        # the token, in plain sight',
-          'RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci --omit=dev',
+          'RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm ci',
           'docker build --secret id=npmrc,src=.npmrc -t api:2.2 .',
-          'echo .npmrc >> .dockerignore              # and keep COPY . . from adding it',
+          'echo .npmrc >> .dockerignore',
         ],
-        when: 'For what is needed at build time: tokens for private npm or pip registries, keys to clone a repository.',
-        whenNot:
-          'Run-time secrets (the database password) do not go in the image: pass them at start (variables, compose secrets, Kubernetes Secrets).',
+        when: 'For what is needed at build time: npm or pip tokens.',
+        whenNot: 'Secrets of the running app are passed at start, not in the image.',
         problems:
-          'A token already published in an image is leaked: besides fixing the Dockerfile, revoke it and create a new one.',
+          'Passing the token with --build-arg: docker history --no-trunc shows "NPM_TOKEN=npm_peer4uSecreto42". Revoke it and use --secret.',
       },
-      example: 'You look for the token in the history of api:leaky and inside its /app folder.',
+      example:
+        'Before you look: api:leaky got the token with --build-arg. Will it show in docker history?',
       objectives: {
         'probe:history': 'The token does not show in the history of api:2.2',
         'probe:npmrc': 'There is no .npmrc inside /app',
@@ -494,46 +503,43 @@ export const ADVANCED: Unit[] = [
       title: 'Reinicios y límites',
       goal: 'Deja api:2.0 corriendo como api en el 3000, que vuelva sola si se cae (salvo que la pares tú), con 256 MB de memoria y media CPU como mucho.',
       theory: {
-        what: '--restart dice qué hace Docker cuando el proceso muere; --memory y --cpus ponen techo a lo que gasta, para que un fallo no se coma la máquina entera.',
+        what: '--restart dice qué hace Docker cuando el proceso muere; --memory y --cpus ponen techo a lo que gasta.',
         how: [
           'docker run -d --restart unless-stopped --memory 256m --cpus 0.5 …',
-          'docker stats --no-stream           # consumo frente al límite',
-          "docker inspect -f '{{.HostConfig.Memory}} {{.HostConfig.NanoCpus}}' api",
-          "docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' api",
+          'docker stats --no-stream   # consumo frente al límite',
         ],
-        when: 'En cualquier servidor que no sea Kubernetes (una máquina con compose o docker run): sin --restart, tras un reinicio de la máquina o un fallo, el servicio no vuelve.',
-        whenNot:
-          'always vuelve a arrancar también lo que paraste a mano al reiniciar Docker; unless-stopped respeta tu stop. Para tareas que acaban, on-failure.',
+        when: 'En un servidor sin Kubernetes: sin --restart, tras un fallo, el servicio no vuelve.',
+        whenNot: 'always arranca también lo que paraste tú; unless-stopped respeta tu stop.',
         problems:
-          'Si el proceso pasa del límite de memoria, el núcleo lo mata: sale con 137 y OOMKilled a true (siguiente unidad). Un límite demasiado justo es un reinicio detrás de otro.',
+          'Olvidar la unidad: --memory 256 son bytes, y Docker responde «Minimum memory limit allowed is 6MB». Escribe 256m.',
       },
-      example: 'Arrancas un nginx con un límite de memoria y miras su consumo y su configuración.',
+      example:
+        'Antes de verlo: arrancas un nginx con --memory 256, sin unidad. ¿Qué límite tendrá?',
       objectives: {},
     },
     en: {
       title: 'Restarts and limits',
       goal: 'Leave api:2.0 running as api on 3000, coming back on its own if it crashes (unless you stop it), with at most 256 MB of memory and half a CPU.',
       theory: {
-        what: '--restart says what Docker does when the process dies; --memory and --cpus cap what it uses, so a bug cannot eat the whole machine.',
+        what: '--restart says what Docker does when the process dies; --memory and --cpus cap what it uses.',
         how: [
           'docker run -d --restart unless-stopped --memory 256m --cpus 0.5 …',
-          'docker stats --no-stream           # usage against the limit',
-          "docker inspect -f '{{.HostConfig.Memory}} {{.HostConfig.NanoCpus}}' api",
-          "docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' api",
+          'docker stats --no-stream   # usage against the limit',
         ],
-        when: 'On any server that is not Kubernetes (a machine with compose or docker run): without --restart, after a reboot or a crash the service does not come back.',
-        whenNot:
-          'always also restarts what you stopped by hand when Docker restarts; unless-stopped respects your stop. For jobs that finish, on-failure.',
+        when: 'On a server without Kubernetes: without --restart, after a crash, the service does not come back.',
+        whenNot: 'always also restarts what you stopped; unless-stopped respects your stop.',
         problems:
-          'If the process goes over the memory limit, the kernel kills it: it exits with 137 and OOMKilled true (next unit). A limit that is too tight means restart after restart.',
+          'Forgetting the unit: --memory 256 means bytes, and Docker answers "Minimum memory limit allowed is 6MB". Write 256m.',
       },
-      example: 'You start an nginx with a memory limit and look at its usage and configuration.',
+      example:
+        'Before you look: you start nginx with --memory 256, with no unit. What limit will it get?',
       objectives: {},
     },
     example: [
       'docker run -d --name demo --memory 64m nginx:1.27-alpine',
       'docker stats --no-stream',
       "docker inspect -f '{{.HostConfig.Memory}} {{.HostConfig.RestartPolicy.Name}}' demo",
+      'docker run -d --name poco --memory 256 nginx:1.27-alpine',
     ],
     solution: [
       'docker run -d --name api -p 3000:3000 --restart unless-stopped --memory 256m --cpus 0.5 api:2.0',
@@ -567,45 +573,46 @@ export const ADVANCED: Unit[] = [
       title: 'Depurar lo que se cae',
       goal: 'api y worker (los dos de api:2.0) salen nada más arrancar. Averigua por qué y déjalos corriendo con el mismo nombre: api en el 3000.',
       theory: {
-        what: 'El método: docker ps -a para ver el código de salida, docker logs para leer qué dijo y docker inspect para lo que no dice (OOMKilled, límites, variables). 1 suele ser un error de la app; 137 es que lo mataron (SIGKILL), casi siempre por memoria; 143, que lo pararon (SIGTERM).',
+        what: 'ps -a da el código de salida; logs, lo que dijo; inspect, lo que calla. 137 es que lo mataron, casi siempre por memoria.',
         how: [
-          'docker ps -a                                   # Exited (1), Exited (137)',
+          'docker ps -a     # Exited (137)',
           'docker logs api',
-          "docker inspect -f '{{.State.ExitCode}} {{.State.OOMKilled}}' worker",
-          "docker inspect -f '{{.HostConfig.Memory}}' worker",
-          'docker run --rm -it --entrypoint sh api:2.0    # entrar en la imagen sin su CMD',
+          "docker inspect -f '{{.State.OOMKilled}}' worker",
         ],
-        when: 'Cada vez que algo no arranca o se reinicia sin parar: primero mirar, luego cambiar una sola cosa y volver a mirar.',
+        when: 'Cuando algo no arranca: mirar, cambiar una cosa y volver a mirar.',
+        whenNot: 'Con 137, docker logs no lo explica: mira OOMKilled.',
         problems:
-          'Con 137 los registros no dicen nada (al proceso lo matan de golpe): por eso hay que mirar OOMKilled. Para cambiar una variable o un límite hay que crear el contenedor otra vez.',
+          'Arrancarlo sin cambiar nada: tras docker start worker, sigue «Exited (137)». Crea el contenedor otra vez con el límite nuevo.',
       },
-      example: 'Un contenedor de alpine que sale con 3: lo ves en docker ps -a y en su inspect.',
+      example:
+        'Antes de verlo: worker salió con 137 y lo arrancas con docker start. ¿Seguirá corriendo?',
       objectives: {},
     },
     en: {
       title: 'Debugging what crashes',
       goal: 'api and worker (both from api:2.0) exit right after starting. Find out why and leave them running with the same names: api on 3000.',
       theory: {
-        what: 'The method: docker ps -a to see the exit code, docker logs to read what it said and docker inspect for what it does not say (OOMKilled, limits, variables). 1 is usually an app error; 137 means it was killed (SIGKILL), almost always for memory; 143, that it was stopped (SIGTERM).',
+        what: 'ps -a gives the exit code; logs, what it said; inspect, what it hides. 137 means it was killed, almost always for memory.',
         how: [
-          'docker ps -a                                   # Exited (1), Exited (137)',
+          'docker ps -a     # Exited (137)',
           'docker logs api',
-          "docker inspect -f '{{.State.ExitCode}} {{.State.OOMKilled}}' worker",
-          "docker inspect -f '{{.HostConfig.Memory}}' worker",
-          'docker run --rm -it --entrypoint sh api:2.0    # get into the image without its CMD',
+          "docker inspect -f '{{.State.OOMKilled}}' worker",
         ],
-        when: 'Every time something does not start or keeps restarting: look first, then change one thing and look again.',
+        when: 'When something does not start: look, change one thing and look again.',
+        whenNot: 'With 137, docker logs does not explain it: check OOMKilled.',
         problems:
-          'With 137 the logs say nothing (the process is killed outright): that is why you check OOMKilled. To change a variable or a limit you must create the container again.',
+          'Starting it unchanged: after docker start worker, it is still "Exited (137)". Create the container again with the new limit.',
       },
       example:
-        'An alpine container that exits with 3: you see it in docker ps -a and in its inspect.',
+        'Before you look: worker exited with 137 and you start it with docker start. Will it keep running?',
       objectives: {},
     },
     example: [
       "docker run --name falla alpine:3.20 sh -c 'exit 3'",
       'docker ps -a',
       "docker inspect -f '{{.State.ExitCode}} {{.State.OOMKilled}}' falla",
+      'docker start worker',
+      'docker ps -a',
     ],
     solution: [
       'docker logs api',
@@ -634,40 +641,41 @@ export const ADVANCED: Unit[] = [
       title: 'Escanear vulnerabilidades',
       goal: 'api:old tiene vulnerabilidades críticas. Construye api:2.3 desde ~/api sin ninguna crítica.',
       theory: {
-        what: 'Un escáner (docker scout, trivy, grype) compara los paquetes de la imagen con las bases de vulnerabilidades conocidas (CVE). Casi todas vienen de la imagen base: subir de versión o cambiar a una más pequeña quita la mayoría.',
+        what: 'docker scout cves cruza los paquetes de la imagen con las vulnerabilidades conocidas (CVE). Casi todas vienen de la base.',
         how: [
-          'docker scout cves api:old',
-          'docker scout cves --only-severity critical,high api:old',
-          'docker scout cves --exit-code --only-severity critical api:2.3   # 2 si hay alguna: corta el CI',
-          'trivy image api:old                                              # la otra herramienta habitual',
+          'docker scout cves api:old   # 4C 37H 112M 0L',
+          'docker scout cves --exit-code --only-severity critical api:2.3',
         ],
-        when: 'En CI, en cada build: que la tubería falle si aparece una crítica. Y de vez en cuando sobre lo que ya está desplegado, porque salen CVE nuevas cada día.',
+        when: 'En CI, en cada build: salen CVE nuevas cada día.',
+        whenNot: 'Cero críticas hoy no es para siempre: reconstruye a menudo.',
         problems:
-          'Cero críticas hoy no es para siempre. Una etiqueta como node:22-alpine recibe parches: reconstruye a menudo para recogerlos. Fijarla por digest (@sha256:…) da builds repetibles, pero entonces el digest hay que moverlo a mano.',
+          'Escanear en CI sin --exit-code: dice «Detected 153 vulnerabilities», pero sale con 0 y la tubería sigue. Con --exit-code, sale con 2.',
       },
-      example: 'Escaneas api:old y una base alpine para comparar.',
+      example:
+        'Antes de verlo: api:old parte de node:18. ¿Cuántas críticas tendrá, y cuántas node:22-alpine?',
       objectives: { 'probe:critical': 'api:2.3 no tiene vulnerabilidades críticas' },
     },
     en: {
       title: 'Scanning for vulnerabilities',
       goal: 'api:old has critical vulnerabilities. Build api:2.3 from ~/api with none.',
       theory: {
-        what: 'A scanner (docker scout, trivy, grype) compares the image packages with known vulnerability databases (CVE). Most come from the base image: upgrading it or moving to a smaller one removes most of them.',
+        what: 'docker scout cves checks the image packages against known vulnerabilities (CVE). Most come from the base.',
         how: [
-          'docker scout cves api:old',
-          'docker scout cves --only-severity critical,high api:old',
-          'docker scout cves --exit-code --only-severity critical api:2.3   # 2 if any: breaks CI',
-          'trivy image api:old                                              # the other usual tool',
+          'docker scout cves api:old   # 4C 37H 112M 0L',
+          'docker scout cves --exit-code --only-severity critical api:2.3',
         ],
-        when: 'In CI, on every build: make the pipeline fail when a critical one shows up. And now and then on what is already deployed, because new CVEs appear every day.',
+        when: 'In CI, on every build: new CVEs appear every day.',
+        whenNot: 'Zero criticals today is not forever: rebuild often.',
         problems:
-          'Zero critical today is not forever. A tag like node:22-alpine receives patches: rebuild often to pick them up. Pinning by digest (@sha256:…) gives repeatable builds, but then you move the digest by hand.',
+          'Scanning in CI without --exit-code: it says "Detected 153 vulnerabilities" but exits with 0 and the pipeline goes on. With --exit-code, it exits with 2.',
       },
-      example: 'You scan api:old and an alpine base to compare.',
+      example:
+        'Before you look: api:old starts from node:18. How many criticals will it have, and node:22-alpine?',
       objectives: { 'probe:critical': 'api:2.3 has no critical vulnerabilities' },
     },
     example: [
       'docker scout cves api:old',
+      'echo $?',
       'docker pull node:22-alpine',
       'docker scout cves node:22-alpine',
     ],
@@ -750,47 +758,46 @@ export const ADVANCED: Unit[] = [
       title: 'Etiquetas de versión y de commit',
       goal: 'Publica api:dev en ghcr.io/peer4u/api con dos etiquetas: 1.5.0 y el commit corto de ~/api.',
       theory: {
-        what: 'En CI cada imagen se etiqueta con la versión (1.5.0, para las personas) y con el commit (4f2a9c1, para saber exactamente qué código lleva). Las dos apuntan a la misma imagen; la del commit no se mueve nunca.',
+        what: 'En CI cada imagen lleva la versión (1.5.0), para las personas, y el commit (4f2a9c1), que dice qué código lleva.',
         how: [
-          'git rev-parse --short HEAD',
           'docker tag api:dev ghcr.io/peer4u/api:1.5.0',
           'docker tag api:dev ghcr.io/peer4u/api:$(git rev-parse --short HEAD)',
-          'echo "$TOKEN" | docker login ghcr.io -u USUARIO --password-stdin',
           'docker push ghcr.io/peer4u/api:1.5.0',
-          'docker push --all-tags ghcr.io/peer4u/api',
         ],
-        when: 'En la tubería que corre en cada fusión a main: así se puede desplegar o volver a cualquier versión exacta.',
-        whenNot:
-          'Nada de desplegar latest ni una etiqueta que se reescribe (main, prod): no sabrías qué corre.',
+        when: 'En cada fusión a main: así despliegas o vuelves a una versión exacta.',
+        whenNot: 'Nada de desplegar latest: no sabrías qué corre.',
         problems:
-          'Con --password el token queda en el historial de la shell: mejor --password-stdin. Y una etiqueta de versión ya publicada no se vuelve a usar para otra imagen.',
+          'Subir una etiqueta sin crearla antes con docker tag: el push responde «An image does not exist locally with the tag».',
       },
-      example: 'Miras el commit de ~/api y las etiquetas que ya tiene api:dev.',
+      example:
+        'Antes de verlo: subes ghcr.io/peer4u/api:4f2a9c1 sin haberla etiquetado. ¿Qué responde docker push?',
       objectives: {},
     },
     en: {
       title: 'Version and commit tags',
       goal: 'Publish api:dev to ghcr.io/peer4u/api with two tags: 1.5.0 and the short commit of ~/api.',
       theory: {
-        what: 'In CI every image is tagged with the version (1.5.0, for people) and with the commit (4f2a9c1, to know exactly which code it holds). Both point to the same image; the commit one never moves.',
+        what: 'In CI each image gets the version (1.5.0), for people, and the commit (4f2a9c1), which says what code it carries.',
         how: [
-          'git rev-parse --short HEAD',
           'docker tag api:dev ghcr.io/peer4u/api:1.5.0',
           'docker tag api:dev ghcr.io/peer4u/api:$(git rev-parse --short HEAD)',
-          'echo "$TOKEN" | docker login ghcr.io -u USER --password-stdin',
           'docker push ghcr.io/peer4u/api:1.5.0',
-          'docker push --all-tags ghcr.io/peer4u/api',
         ],
-        when: 'In the pipeline that runs on every merge to main: you can deploy or roll back to any exact version.',
-        whenNot:
-          'Never deploy latest or a tag that gets rewritten (main, prod): you would not know what runs.',
+        when: 'On every merge to main: so you can deploy or roll back to an exact version.',
+        whenNot: 'Never deploy latest: you would not know what runs.',
         problems:
-          'With --password the token stays in the shell history: prefer --password-stdin. And a version tag already published is never reused for another image.',
+          'Pushing a tag you never created with docker tag: the push answers "An image does not exist locally with the tag".',
       },
-      example: 'You check the commit of ~/api and the tags api:dev already has.',
+      example:
+        'Before you look: you push ghcr.io/peer4u/api:4f2a9c1 without tagging it. What does docker push answer?',
       objectives: {},
     },
-    example: ['git rev-parse --short HEAD', 'git log --oneline -1', 'docker images api'],
+    example: [
+      'git rev-parse --short HEAD',
+      'docker images api',
+      LOGIN,
+      'docker push ghcr.io/peer4u/api:4f2a9c1',
+    ],
     solution: [
       'docker tag api:dev ghcr.io/peer4u/api:1.5.0',
       'docker tag api:dev ghcr.io/peer4u/api:$(git rev-parse --short HEAD)',
@@ -814,40 +821,44 @@ export const ADVANCED: Unit[] = [
       title: 'Varias plataformas con buildx',
       goal: 'Publica ghcr.io/peer4u/api:1.5.0 desde ~/api para linux/amd64 y linux/arm64 a la vez.',
       theory: {
-        what: 'Los portátiles con Apple Silicon y muchos servidores en la nube son arm64; los de siempre, amd64. docker buildx build --platform construye para varias y publica una sola etiqueta con una variante por plataforma (un manifest list).',
+        what: 'Los Mac con Apple Silicon son arm64; muchos servidores, amd64. buildx --platform construye para varias bajo una sola etiqueta.',
         how: [
-          'docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/peer4u/api:1.5.0 --push .',
-          'docker buildx imagetools inspect ghcr.io/peer4u/api:1.5.0   # las plataformas publicadas',
-          'docker buildx ls',
+          'docker buildx build --platform linux/amd64,linux/arm64 \\',
+          '  -t ghcr.io/peer4u/api:1.5.0 --push .',
+          'docker buildx imagetools inspect ghcr.io/peer4u/api:1.5.0',
         ],
-        when: 'Cuando la imagen la usan máquinas distintas: el equipo con Mac y la producción en amd64, o nodos arm baratos en la nube.',
+        when: 'Cuando la usan máquinas distintas: el equipo con Mac y producción en amd64.',
+        whenNot: 'Para una sola plataforma basta docker build.',
         problems:
-          'Con el almacén de imágenes clásico, varias plataformas no caben en la lista local: hay que publicarlas a la vez (--push). Construir para la otra arquitectura va emulado y tarda más; en CI se cachea.',
+          'Pedir dos plataformas sin --push: «ERROR: docker exporter does not currently support exporting manifest lists». Se publican a la vez, con --push.',
       },
-      example: 'Ves qué constructores hay y qué pasa si pides dos plataformas sin publicar.',
+      example: 'Antes de verlo: pides amd64 y arm64 sin --push. ¿Dónde se guardará la imagen?',
       objectives: { 'probe:platforms': 'La etiqueta publicada tiene amd64 y arm64' },
     },
     en: {
       title: 'Multi-platform with buildx',
       goal: 'Publish ghcr.io/peer4u/api:1.5.0 from ~/api for linux/amd64 and linux/arm64 at once.',
       theory: {
-        what: 'Apple Silicon laptops and many cloud servers are arm64; the classic ones, amd64. docker buildx build --platform builds for several and publishes a single tag with one variant per platform (a manifest list).',
+        what: 'Apple Silicon Macs are arm64; many servers, amd64. buildx --platform builds for several under a single tag.',
         how: [
-          'docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/peer4u/api:1.5.0 --push .',
-          'docker buildx imagetools inspect ghcr.io/peer4u/api:1.5.0   # published platforms',
-          'docker buildx ls',
+          'docker buildx build --platform linux/amd64,linux/arm64 \\',
+          '  -t ghcr.io/peer4u/api:1.5.0 --push .',
+          'docker buildx imagetools inspect ghcr.io/peer4u/api:1.5.0',
         ],
-        when: 'When different machines use the image: the team on Macs and production on amd64, or cheap arm nodes in the cloud.',
+        when: 'When different machines use it: the team on Macs and production on amd64.',
+        whenNot: 'For a single platform docker build is enough.',
         problems:
-          'With the classic image store, several platforms do not fit in the local image list: they must be pushed at once (--push). Building for the other architecture is emulated and slower; CI caches it.',
+          'Asking for two platforms without --push: "ERROR: docker exporter does not currently support exporting manifest lists". They are published at once, with --push.',
       },
       example:
-        'You check the builders and what happens if you ask for two platforms without pushing.',
+        'Before you look: you ask for amd64 and arm64 without --push. Where will the image be kept?',
       objectives: { 'probe:platforms': 'The published tag has amd64 and arm64' },
     },
     example: [
       'docker buildx ls',
       'docker buildx build --platform linux/amd64,linux/arm64 -t prueba .',
+      'docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/peer4u/prueba:0.1 --push .',
+      'docker buildx imagetools inspect ghcr.io/peer4u/prueba:0.1',
     ],
     solution: [
       'docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/peer4u/api:1.5.0 --push .',
@@ -881,46 +892,44 @@ export const ADVANCED: Unit[] = [
       title: 'Compose de producción',
       goal: 'En ~/deploy, escribe compose.prod.yaml (api y db con restart: unless-stopped, api en el 8080) y levanta producción con compose.yaml y él, sin el override de desarrollo.',
       theory: {
-        what: 'compose.yaml tiene lo común; compose.override.yaml se añade solo y trae lo de desarrollo (build, bind mounts, puertos de depurar). Para producción se dicen los ficheros con -f: el común y uno de producción con lo suyo (reinicios, el puerto público).',
+        what: 'compose.override.yaml se suma solo y trae lo de desarrollo. Con -f eliges tú: el común y uno de producción.',
         how: [
-          'docker compose config                                    # común + override',
-          'docker compose -f compose.yaml -f compose.prod.yaml config',
           'docker compose -f compose.yaml -f compose.prod.yaml up -d',
-          'restart: unless-stopped                                  # en cada servicio',
+          'restart: unless-stopped   # en cada servicio',
         ],
-        when: 'Cuando la misma aplicación se levanta en tu máquina y en un servidor: un fichero común y lo que cambia aparte, sin copiar todo dos veces.',
-        whenNot:
-          'En producción nada de build ni bind mounts: se usa la imagen publicada, la misma que pasó CI.',
+        when: 'Cuando la misma app corre en tu máquina y en un servidor.',
+        whenNot: 'En producción, ni build ni bind mounts.',
         problems:
-          'Con -f el override ya no entra solo: si lo quieres, hay que nombrarlo. Las listas (ports, volumes) se juntan entre ficheros: lo que pone el común no se quita con no escribirlo en el otro.',
+          'Solo -f compose.prod.yaml: le falta lo común y responde «service "api" has neither an image nor a build context specified». Nombra los dos.',
       },
-      example: 'Ves qué servicios hay y cómo queda la configuración de desarrollo.',
+      example:
+        'Antes de verlo: prueba.yaml solo dice restart. ¿Qué pasa si lo usas con -f sin compose.yaml?',
       objectives: {},
     },
     en: {
       title: 'Production compose',
       goal: 'In ~/deploy, write compose.prod.yaml (api and db with restart: unless-stopped, api on 8080) and bring up production with compose.yaml and it, without the dev override.',
       theory: {
-        what: 'compose.yaml holds what is shared; compose.override.yaml is added automatically and carries dev things (build, bind mounts, debug ports). For production you name the files with -f: the shared one and a production one with its own (restarts, the public port).',
+        what: 'compose.override.yaml is added on its own and brings the development bits. With -f you pick: the common file and a production one.',
         how: [
-          'docker compose config                                    # shared + override',
-          'docker compose -f compose.yaml -f compose.prod.yaml config',
           'docker compose -f compose.yaml -f compose.prod.yaml up -d',
-          'restart: unless-stopped                                  # in every service',
+          'restart: unless-stopped   # in every service',
         ],
-        when: 'When the same app runs on your machine and on a server: one shared file and the differences apart, without copying everything twice.',
-        whenNot:
-          'In production no build and no bind mounts: you use the published image, the same one that passed CI.',
+        when: 'When the same app runs on your machine and on a server.',
+        whenNot: 'In production, no build and no bind mounts.',
         problems:
-          'With -f the override is no longer added on its own: name it if you want it. Lists (ports, volumes) are merged across files: leaving something out of the second file does not remove it from the shared one.',
+          'Only -f compose.prod.yaml: it lacks the common part and answers "service "api" has neither an image nor a build context specified". Name both.',
       },
-      example: 'You check the services and how the development configuration looks.',
+      example:
+        'Before you look: prueba.yaml only says restart. What happens if you use it with -f without compose.yaml?',
       objectives: {},
     },
     example: [
       'docker compose config --services',
       'cat compose.override.yaml',
-      'docker compose config',
+      "cat > prueba.yaml <<'EOF'\nservices:\n  api:\n    restart: unless-stopped\nEOF",
+      'docker compose -f prueba.yaml config',
+      'docker compose -f compose.yaml -f prueba.yaml config',
     ],
     solution: [
       write('compose.prod.yaml', DEPLOY_PROD),

@@ -7,150 +7,182 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
     title: 'Your first commit',
     goal: 'Make two commits on main.',
     theory: {
-      what: 'A commit is a snapshot of your files at one moment, with a message. Each commit points to the one before it: that is how history is built.',
-      how: ['git commit -m "Add the Makefile"', 'git log --oneline'],
+      what: 'A commit saves a snapshot of your files with a message. Each commit points to the one before: that is how history is built.',
+      how: [
+        'git commit -m "Añade el Makefile"   # a new circle on main',
+        'git log --oneline                   # the history, newest on top',
+      ],
       when: 'Every time you finish a small change that makes sense on its own: a function, a fix, a test.',
       whenNot:
-        "With half-done code that does not compile, if you are going to share it: you break everyone else's work.",
-      looks: 'A new circle on top of the previous one, and the branch (main) moves forward to it.',
+        'One giant commit of “various changes” is unreadable later: better several small ones, one per change.',
+      looks: 'A new circle on top of the previous one, and main moves forward to it.',
       problems:
-        'Giant commits called «various changes»: later nobody (not even you) knows what each one did.',
+        'Leaving the message empty: git commit -m "" answers “el mensaje está vacío: git commit -m "qué has hecho"” (empty message). Say what the change does.',
     },
   },
   'w0-add': {
     title: 'The index: git add',
     goal: 'Create hola.c with the text «int main(void)» and save it in a commit.',
     theory: {
-      what: 'Between your files and the commit sits the index (staging area): git add chooses which changes go into the next commit.',
+      what: 'Between your files and the commit sits the index. git add chooses which changes go into the next commit; what you do not add stays out.',
       how: [
         'echo "int main(void)" > hola.c',
-        'git status',
-        'git add hola.c',
-        'git commit -m "Add hola.c"',
+        'git status                    # hola.c, not staged',
+        'git add hola.c                # into the index',
+        'git commit -m "Añade hola.c"',
       ],
-      when: 'Always before a commit. With add you can make several clean commits from the changes of one work session.',
-      whenNot: 'git add . without looking: you end up committing binaries, .o files or keys.',
-      looks: 'The index does not show in the tree: it is what will go inside the next circle.',
+      when: 'After a while touching several things, to make clean commits: one per change.',
+      whenNot:
+        'git add . adds everything at once, including what you did not want (binaries, .o files, keys). Check git status first.',
+      looks: 'The index is not drawn: it is what will go inside the next circle.',
       problems:
-        'Forgetting the add: your changes do not go into the commit (git status tells you).',
+        'Forgetting the add: the commit goes out without hola.c and git status still says “Cambios sin preparar: hola.c” (not staged). Run git add hola.c and commit again.',
     },
   },
   'w0-status': {
     title: 'Look before you save',
     goal: 'Two files have changed: save only libft.h in a commit (not main.c).',
     theory: {
-      what: 'git status tells you which branch you are on, what is staged and what is not. git log shows the history.',
-      how: ['git status', 'git add libft.h', 'git commit -m "Prototypes"', 'git log --oneline'],
+      what: 'git status tells you which branch you are on, what is staged for the commit and what is not.',
+      how: [
+        'git status                  # libft.h and main.c, not staged',
+        'git add libft.h',
+        'git status                  # only libft.h, staged',
+        'git commit -m "Prototipos"',
+      ],
       when: 'Before every add and every commit: it is free and avoids surprises.',
-      looks:
-        'Only libft.h goes into the commit; main.c is still modified in your working directory.',
+      whenNot:
+        'git status does not show history: the commits already made are in git log --oneline.',
+      looks: 'Only libft.h goes into the commit; main.c is still modified in your directory.',
+      problems:
+        'git add . without looking: git status says “Preparado para el commit: libft.h, main.c” (staged) and the commit would take both. Add by name: git add libft.h.',
     },
   },
   'w0-world': {
     title: 'Root: the history',
     goal: 'Three commits: the first creates notas.txt with «a», the second adds a line «b» to it and the third adds todo.txt with «c».',
     theory: {
-      what: 'World review: each commit saves a snapshot of what you staged with add, and the branch moves forward with each one.',
+      what: 'Review: add stages, commit saves and the branch moves forward. git commit -am stages and saves in one go what git already tracks.',
       how: [
         'echo a > notas.txt',
-        'git add notas.txt',
-        'git commit -m "notes"',
+        'git add notas.txt            # new: it needs add',
+        'git commit -m "notas"',
         'echo b >> notas.txt',
-        'git commit -am "more notes"   # -a: stages what git already tracks',
+        'git commit -am "más notas"   # already tracked: -a works',
       ],
-      when: 'From here on, everything else is built on commits.',
+      when: 'For changes to files already in the history, without typing add every time.',
+      whenNot:
+        'To save just one of several changes, -a is no good: it stages everything. Use git add with its name.',
       looks: 'Three circles in a row on main.',
+      problems:
+        'Using -a with a new file: it does not add it. The commit goes out without it and git status says “Cambios sin preparar: notas.txt”. Run git add first.',
     },
   },
   'w1-branch': {
     title: 'Create a branch',
     goal: 'Create the branch feature, switch to it and make a commit there.',
     theory: {
-      what: 'A branch is just a name that points to a commit. Creating one is free: use it to work on something without touching main.',
+      what: 'A branch is a name that points to a commit. Creating one copies nothing: it lets you work without touching main.',
       how: [
-        'git branch feature',
-        'git switch feature',
-        'git switch -c otra   # create and switch at the same time',
+        'git branch feature          # creates it; you stay on main',
+        'git switch feature          # you move onto it',
+        'git switch -c otra          # create and switch at once',
       ],
-      when: 'For every new thing: a feature, a fix, an experiment.',
-      whenNot: 'Branches that live for months without being merged: the merge later is hell.',
-      looks: 'A new label on the same circle; when you commit on it, it separates from main.',
+      when: 'For each new thing: a feature, a fix, an experiment.',
+      whenNot:
+        'A branch that lives for months without merging drifts away from main: merging it later costs much more.',
+      looks: 'A new label on the same circle; once you commit on it, it splits off from main.',
       problems:
-        'Committing without checking which branch you are on (git status tells you, and so does the prompt).',
+        'Committing after git branch without switching: the commit lands on main, and git status says so: “En la rama main” (on branch main). Use git switch first.',
     },
   },
   'w1-head': {
     title: 'HEAD: where you are',
     goal: 'Go back to main and make a commit: main and feature diverge.',
     theory: {
-      what: 'HEAD is where you are: usually it points to a branch, and the branch to a commit. When you commit, the branch that HEAD points to moves forward.',
-      how: ['git switch main', 'git log --oneline --all'],
-      when: 'You switch branches to work on something else without mixing things.',
-      looks: 'Two paths leaving the same commit: the history forks.',
+      what: 'HEAD marks where you are: it points to a branch, and the branch to a commit. When you commit, the HEAD branch moves forward.',
+      how: [
+        'git switch main             # HEAD moves to main',
+        'git commit -m "arreglo"     # main moves, not feature',
+        'git log --oneline --all     # both branches',
+      ],
+      when: 'To switch branch and work on something else without mixing.',
+      whenNot:
+        'git log --oneline only shows the history of where you are; with --all you also see the other branches.',
+      looks: 'Two paths leaving the same commit: history forks.',
       problems:
-        'Switching branches with uncommitted changes: git carries them over to the other branch or, if they clash with it, does not let you (in this course, it never does). Commit first (or stash, in world 4).',
+        'Switching branch with uncommitted changes: the course answers “tienes cambios sin guardar: haz commit o stash antes de cambiar de rama” (unsaved changes). Commit first.',
     },
   },
   'w1-ff': {
     title: 'Merge: fast-forward',
     goal: 'Merge feature into main without creating a new commit (fast-forward).',
     theory: {
-      what: 'If main has not moved since you branched off, merging feature just moves main forward: this is a fast-forward.',
-      how: ['git switch main', 'git merge feature'],
-      when: 'When nobody has touched main while you were working.',
+      what: 'If main has not moved since you branched feature off, merging only moves main forward: a fast-forward, with no new commit.',
+      how: ['git switch main', 'git merge feature           # “Avance rápido (fast-forward)”'],
+      when: 'When nobody touched main while you worked on your branch.',
       whenNot:
-        'If you want to keep a record that a branch existed: git merge --no-ff creates the merge commit anyway.',
-      looks: 'The main label jumps to where feature is. No new circle appears.',
+        'To keep a trace of the branch, git merge --no-ff makes a merge commit even when it could fast-forward.',
+      looks: 'The main label jumps to feature. No new circle appears.',
+      problems:
+        'Merging the wrong way, from feature: git merge main says “Ya está todo unido” (already merged) and main does not move. Switch to main and merge feature.',
     },
   },
   'w1-merge': {
     title: 'Merge: three-way merge',
     goal: 'main and feature have both moved forward: merge them into main with a merge commit.',
     theory: {
-      what: 'If both branches have new commits, git combines the changes of both (from their common ancestor) in a merge commit with two parents.',
-      how: ['git switch main', 'git merge feature'],
-      when: 'To bring the finished work of a branch into main.',
+      what: 'If both branches have new commits, git combines their changes since the common ancestor in a merge commit with two parents.',
+      how: [
+        'git switch main',
+        'git merge feature           # “Merge hecho: c4”',
+        'git log --oneline           # “Merge feature” on top',
+      ],
+      when: 'To bring a branch’s finished work into main.',
       whenNot:
-        'If both branches changed the same thing in different ways there will be a conflict: it is not bad, but you have to resolve it calmly.',
+        'If both branches change the same line, there is a conflict: you will see it in world 4.',
       looks: 'A new circle with two arrows: one to each branch.',
-      problems: 'Merging main into your branch every five minutes makes the history messy.',
+      problems:
+        'Merging from the wrong branch: on feature, git merge main leaves “(HEAD -> feature) Merge main” in the log and main untouched. Switch to main first.',
     },
   },
   'w1-delete': {
     title: 'Review: branch, merge and clean up',
     goal: 'Create fix from main, make a commit, merge it into main and delete fix.',
     theory: {
-      what: 'A branch that is already merged is not needed: delete it (the work stays in main). git branch -d does not let you delete one that is not merged.',
+      what: 'A merged branch is no longer needed: delete it and its work stays in main. git branch -d will not delete an unmerged branch.',
       how: [
         'git switch -c fix',
-        'git commit -m "fix"',
+        'git commit -m "arreglo"',
         'git switch main',
         'git merge fix',
-        'git branch -d fix',
+        'git branch -d fix           # “Rama fix borrada”',
       ],
-      when: 'When you finish each branch: that way the branch list shows what is still alive.',
-      whenNot:
-        'git branch -D (capital) deletes even if it is not merged: the work is lost (or almost).',
+      when: 'When you finish each branch: that way the branch list shows what is alive.',
+      whenNot: 'git branch -D deletes even if unmerged: its commits are left with no branch.',
       looks: 'The fix label disappears; the circles are still there, inside main.',
+      problems:
+        'Deleting before merging: git branch -d fix answers “fix tiene commits sin unir: usa -D para borrarla igualmente” (unmerged commits). Merge first.',
     },
   },
   'w1-world': {
     title: 'Branches: two at a time',
     goal: 'Two branches, a and b, leave main with one commit each; merge both into main (first a, then b).',
     theory: {
-      what: 'World review: several branches in parallel, each with its own work, and main merging them one by one.',
+      what: 'Review: several branches in parallel, each with its own work, and main merging them one by one.',
       how: [
         'git switch -c a',
         'git commit -m "a1"',
-        'git switch main',
-        'git switch -c b',
-        'git commit -m "b1"',
-        'git switch main',
-        'git merge a',
-        'git merge b',
+        'git switch main             # go back before creating b',
+        'git merge a                 # fast-forward',
+        'git merge b                 # merge with two parents',
       ],
-      when: 'The normal thing in a team: everyone on their own branch, and main collecting the work.',
-      looks: 'main fast-forwards with a and then makes a merge with b.',
+      when: 'The usual in a team: everyone on their branch, and main collecting.',
+      whenNot:
+        'Order matters: the first branch you merge fast-forwards; the second one needs a merge.',
+      looks: 'main fast-forwards to a and then merges b.',
+      problems:
+        'Creating b without going back to main: git switch -c b says “Rama b creada en c2”, a’s commit, so b takes a1 along. Go back to main first.',
     },
   },
 }

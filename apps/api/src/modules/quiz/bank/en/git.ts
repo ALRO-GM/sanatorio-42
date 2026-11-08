@@ -21,6 +21,22 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
           'What is not in the index yet',
         ],
       },
+      {
+        ask: [
+          'You change `a.txt` and `b.txt`, run `git add a.txt` and commit. What does `git status` say next?',
+          'With `a.txt` and `b.txt` changed, after `git add a.txt` and a commit, `git status` says…',
+        ],
+        right: [
+          'That `b.txt` still has unstaged changes',
+          'That the changes to `b.txt` were left out',
+        ],
+        wrong: [
+          'That `b.txt` went into the commit as well',
+          'That `a.txt` still has unstaged changes',
+          'That `b.txt` is staged for the commit',
+          'That there is nothing left to save on `main`',
+        ],
+      },
     ],
     wrong: [
       'A copy of the repository kept on the server',
@@ -37,6 +53,19 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
         right: [
           'Your branch, what is staged and what is not',
           'The state of your files and of your branch',
+        ],
+      },
+      {
+        ask: [
+          'You change `main.c` and run `git add main.c`, no commit. How does `git status` show `main.c`?',
+          'After `git add main.c` and before committing, `git status` shows `main.c` as…',
+        ],
+        right: ['Staged for the next commit', 'Ready to go into the next commit'],
+        wrong: [
+          'Changed, but not staged',
+          'Already saved in a new commit',
+          'Untracked: git does not know it yet',
+          'Already pushed to the remote branch',
         ],
       },
     ],
@@ -61,6 +90,19 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
           'All the files of the project',
           'The whole history of the current branch',
           'The index and the unstaged changes',
+        ],
+      },
+      {
+        ask: [
+          'You are on `main` and create branch `login` without committing. Which commit does `login` point to?',
+          'Just created from `main`, with no new commits, branch `login` points…',
+        ],
+        right: ['To the same commit as main', 'To the commit main is on'],
+        wrong: [
+          'To the first commit of the repository',
+          "To a new commit, a copy of main's",
+          'To none until you make a commit',
+          "To the commit before main's",
         ],
       },
     ],
@@ -90,6 +132,19 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
           'That the repository is empty, with no commits',
         ],
       },
+      {
+        ask: [
+          'With a detached HEAD you commit and go back to `main`. What happens to that commit?',
+          'You commit with a detached HEAD and then run `git switch main`. That commit…',
+        ],
+        right: ['Is left on no branch at all', 'Stays outside every branch'],
+        wrong: [
+          'Is added to main when you return',
+          'Moves to a new branch called HEAD',
+          'Is deleted as soon as you make it',
+          'Is pushed to origin by itself',
+        ],
+      },
     ],
     wrong: [
       'The first commit of the repository',
@@ -109,6 +164,22 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
         right: ['git switch -c login', 'git checkout -b login'],
         wrong: ['git branch login', 'git switch login', 'git merge login', 'git commit -b login'],
       },
+      {
+        ask: [
+          'You are on `main`, type `git branch login` and make a commit. Which branch moves?',
+          'After `git branch login` and a commit, while on `main`, the branch that moves is…',
+        ],
+        right: [
+          'main, because git branch does not switch you',
+          'main: creating login does not take you there',
+        ],
+        wrong: [
+          'login, because it is the new branch',
+          'Both, because they pointed to the same commit',
+          'Neither, because HEAD becomes detached',
+          'login, and main stays on the previous one',
+        ],
+      },
     ],
     wrong: ['git push login', 'git add login', 'git init login'],
     why: 'git branch only creates it; switch -c (or checkout -b) creates it and switches you to it.',
@@ -121,6 +192,14 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
           'Just moves the branch forward, with no new commit',
           'Just moves the pointer: there is nothing to combine',
         ],
+      },
+      {
+        ask: [
+          '`feature` has 2 commits and `main` has not moved. How many merge commits does `git merge feature` on `main` create?',
+          'How many merge commits does `git merge feature` create if `main` has not moved since `feature` left it?',
+        ],
+        right: ['0'],
+        wrong: ['1', '2', '3'],
       },
     ],
     wrong: [
@@ -139,6 +218,14 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
           'If both branches have moved on, git merge creates…',
         ],
         right: ['A single commit with two parents', 'A commit that joins the two histories'],
+      },
+      {
+        ask: [
+          '`main` and `feature` each have a new commit. After `git merge feature`, how many parents does the new commit have?',
+          'If both branches have moved, how many parents does the commit made by `git merge` have?',
+        ],
+        right: ['2'],
+        wrong: ['1', '0', '3'],
       },
     ],
     wrong: [
@@ -215,6 +302,19 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
           'Your copy of how main was on the remote',
         ],
       },
+      {
+        ask: [
+          'Your `origin/main` is at `c3`. Someone pushes `c4` and you do nothing. Where is your `origin/main`?',
+          'Someone else pushes `c4` to origin; you type nothing. Your `origin/main`, which was at `c3`, is now…',
+        ],
+        right: ['At `c3`, until you run `git fetch`', 'Still at `c3`: nobody else moves it'],
+        wrong: [
+          'At `c4`, because it updates by itself',
+          'At `c4`, but without its files',
+          'Deleted until the next `git pull`',
+          'At `c3`, and your `main` moves to `c4`',
+        ],
+      },
     ],
     wrong: [
       'The main branch of the remote, in real time',
@@ -238,6 +338,22 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
           'git commit --amend and git push again',
         ],
       },
+      {
+        ask: [
+          "Your `main` and origin's have each moved on separately. What happens with `git push`?",
+          'If origin has a commit you lack and you have one origin lacks, `git push`…',
+        ],
+        right: [
+          'Is rejected: first you must bring theirs in',
+          'Fails until you merge what is on origin',
+        ],
+        wrong: [
+          'Pushes yours and deletes what was on origin',
+          'Merges the two histories on the remote',
+          'Pushes yours to a new branch on origin',
+          'Pushes yours and leaves theirs for later',
+        ],
+      },
     ],
     wrong: ['git commit --amend', 'git reset --hard', 'git branch -D main', 'git init'],
     why: 'The remote does not let you overwrite other people’s work: first you bring theirs (pull, or pull --rebase), merge and then push.',
@@ -247,6 +363,19 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: ['What does `git clone url` do?', 'What is git clone for?'],
         right: ['Copies the repository with its history and sets up origin'],
+      },
+      {
+        ask: [
+          'You clone a repository with 20 commits. What does `git log --oneline` show right after cloning?',
+          'Right after `git clone` of a repository with 20 commits, `git log --oneline` shows…',
+        ],
+        right: ['All 20 commits, the whole history', 'The whole history: all 20 commits'],
+        wrong: [
+          'Only the last commit, no history',
+          'Nothing: the history stays on the remote',
+          'Only the commits you make from now on',
+          'A single new commit called clone',
+        ],
       },
     ],
     wrong: [
@@ -278,6 +407,22 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
           'Branches you have not pushed yet',
         ],
       },
+      {
+        ask: [
+          'On `feature` you have 2 commits and `main` has moved on. After `git rebase main`, what happens to your commit ids?',
+          'After `git rebase main` on `feature`, the ids of your 2 commits…',
+        ],
+        right: [
+          'Change: they are new copies on top of main',
+          'Are different: git makes copies on main',
+        ],
+        wrong: [
+          'Stay the same: only the branch moves',
+          'Disappear, squashed into a single commit',
+          'Move to main with the same ids',
+          'Stay the same and main is merged into feature',
+        ],
+      },
     ],
     wrong: [
       'Merges main into feature with a merge commit',
@@ -296,6 +441,22 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
           'Brings one specific commit from another branch',
         ],
       },
+      {
+        ask: [
+          'On `main` you `git cherry-pick` a commit from branch `fix`. What happens to `fix`?',
+          'After copying a commit from `fix` onto `main` with `git cherry-pick`, branch `fix`…',
+        ],
+        right: [
+          'Nothing: it keeps that commit where it was',
+          'Stays the same, with its commit in it',
+        ],
+        wrong: [
+          'Loses the commit, which moves to main',
+          'Is merged whole into main',
+          'Moves forward to the tip of main',
+          'Is deleted because it is already in main',
+        ],
+      },
     ],
     wrong: [
       'Brings the whole branch of that commit',
@@ -312,6 +473,19 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
         right: [
           'Redoes the last commit, with another message or files',
           'Replaces the last commit with a corrected one',
+        ],
+      },
+      {
+        ask: [
+          'You have just committed, not pushed, and left `libft.h` out. What do you do?',
+          'To put `libft.h` into the commit you just made (not pushed), you type…',
+        ],
+        right: ['`git add libft.h` then `git commit --amend`'],
+        wrong: [
+          '`git commit --amend` then `git add libft.h`',
+          '`git revert HEAD` then `git add libft.h`',
+          '`git add libft.h` then `git push --force`',
+          '`git reset --hard HEAD~1` and another `git commit`',
         ],
       },
     ],
@@ -337,6 +511,14 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
           'The first commit in the history of main',
           'The child of the commit main points to',
         ],
+      },
+      {
+        ask: [
+          'Your branch has 4 commits in a line, c0 to c3, and HEAD is on c3. Which commit is `HEAD~2`?',
+          'With 4 commits in a line, c0 to c3, and HEAD on c3, `HEAD~2` is…',
+        ],
+        right: ['c1'],
+        wrong: ['c2', 'c0', 'c5'],
       },
     ],
     wrong: [
@@ -407,6 +589,19 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
           'Keeps your half-done changes so you can switch branch',
         ],
       },
+      {
+        ask: [
+          'You have `main.c` changed with no commit and run `git stash`. What does `git status` say next?',
+          'Right after `git stash`, with `main.c` changed, `git status` says…',
+        ],
+        right: ['That there is nothing to commit', 'That the working tree is clean'],
+        wrong: [
+          'That main.c is still changed, unstaged',
+          'That main.c is staged for the commit',
+          'That there is a new commit on main',
+          'That main.c was deleted from the repository',
+        ],
+      },
     ],
     wrong: [
       'Makes a temporary commit on the main branch',
@@ -421,6 +616,22 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: ['What does GitHub flow consist of?', 'With GitHub flow…'],
         right: ['Short branches off main, merged through a pull request'],
+      },
+      {
+        ask: [
+          'With GitHub flow, you finish a fix on your branch `fix-login`. What comes next?',
+          'In GitHub flow, when the work on branch `fix-login` is done, the next step is…',
+        ],
+        right: [
+          'Opening a pull request to merge it into main',
+          'Asking for review with a pull request to main',
+        ],
+        wrong: [
+          'Merging it into develop and waiting for the release',
+          'Pushing its commits straight to main',
+          'Leaving it open until the next version',
+          'Creating a release branch from it',
+        ],
       },
     ],
     wrong: [
@@ -473,6 +684,19 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
         right: ['git push --tags', 'git push origin v1.0'],
         wrong: ['git push, which always pushes the tags', 'git tag --push', 'git commit --tags'],
       },
+      {
+        ask: [
+          'You run `git tag v1.0` on `c3` and make two more commits. Where is `v1.0`?',
+          'After `git tag v1.0` on `c3` and two more commits, `v1.0` points to…',
+        ],
+        right: ['`c3`, where you put it', 'Still `c3`: a tag does not move'],
+        wrong: [
+          '`c5`, the latest commit',
+          '`c4`, one commit ahead',
+          'None: committing deletes it',
+          '`c3` and `c5`, both at once',
+        ],
+      },
     ],
     wrong: [
       'Moves forward with each commit you make',
@@ -487,6 +711,22 @@ export const GIT_EN: Readonly<Record<string, ConceptText>> = {
       {
         ask: ['What is trunk-based development?', 'In trunk-based development…'],
         right: ['Everyone merges into main several times a day, on hour-long branches'],
+      },
+      {
+        ask: [
+          'Your team does trunk-based development and a feature will take two weeks. How do you handle it?',
+          'In trunk-based development, a two-week feature is built…',
+        ],
+        right: [
+          'In small pieces on main, switched off by a flag',
+          'Merged into main daily, hidden behind a flag',
+        ],
+        wrong: [
+          'On its own branch, merged at the end',
+          'On develop, until the next release',
+          'In a separate fork nobody else sees',
+          'With no commits until it is finished',
+        ],
       },
     ],
     wrong: [

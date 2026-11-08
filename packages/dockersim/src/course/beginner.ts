@@ -27,38 +27,42 @@ export const BEGINNER: Unit[] = [
       title: 'Tu primer contenedor',
       goal: 'Ejecuta un contenedor de la imagen hello-world.',
       theory: {
-        what: 'Una imagen es una plantilla de solo lectura (un sistema de ficheros y qué ejecutar); un contenedor se crea a partir de ella para ejecutarla, con su propia capa de escritura. docker run descarga la imagen si no la tienes, crea el contenedor y lo arranca.',
+        what: 'docker run crea un contenedor a partir de una imagen (la plantilla, de solo lectura) y lo arranca. Si no tienes la imagen, antes la descarga.',
         how: [
-          'docker run hello-world      # descarga, crea, ejecuta y termina',
-          'docker ps                   # contenedores en marcha',
-          'docker ps -a                # también los que ya acabaron',
-          'docker images               # imágenes descargadas',
+          'docker run hello-world   # descarga, ejecuta y acaba',
+          'docker ps                # solo los que corren',
+          'docker ps -a             # también los acabados',
+          'docker images            # las imágenes descargadas',
         ],
-        when: 'Siempre que quieras ejecutar algo empaquetado (una base de datos, una herramienta, la app del equipo) sin instalarlo en tu máquina.',
+        when: 'Para usar una base de datos, una herramienta o la app del equipo sin instalarla en tu máquina.',
+        whenNot:
+          'Repetir docker run no reutiliza el contenedor: crea otro, con otro nombre al azar, y docker ps -a enseña los dos.',
         problems:
-          'Un contenedor que acaba no desaparece: se queda parado (Exited) hasta que lo borras. Por eso docker ps -a enseña más cosas que docker ps.',
+          'Creer que el contenedor desaparece al acabar. docker ps sale vacío, pero docker ps -a lo enseña como «Exited (0)»: sigue ahí, parado, hasta que lo borras.',
       },
       example:
-        'Ejecutas hello-world, ves el contenedor parado con docker ps -a y la imagen con docker images.',
+        'Antes de verlo: hello-world escribe su saludo y acaba. ¿Saldrá en docker ps, en docker ps -a o en ninguno?',
       objectives: { 'probe:ran': 'Un contenedor de hello-world ha terminado bien' },
     },
     en: {
       title: 'Your first container',
       goal: 'Run a container from the hello-world image.',
       theory: {
-        what: 'An image is a read-only template (a filesystem and what to run); a container is created from it to run it, with its own writable layer. docker run pulls the image if you do not have it, creates the container and starts it.',
+        what: 'docker run creates a container from an image (the read-only template) and starts it. If you do not have the image, it pulls it first.',
         how: [
-          'docker run hello-world      # pull, create, run and exit',
-          'docker ps                   # running containers',
-          'docker ps -a                # also the ones that finished',
-          'docker images               # pulled images',
+          'docker run hello-world   # pull, run and exit',
+          'docker ps                # only running ones',
+          'docker ps -a             # finished ones too',
+          'docker images            # pulled images',
         ],
-        when: 'Whenever you want to run something packaged (a database, a tool, the team app) without installing it on your machine.',
+        when: 'To use a database, a tool or the team app without installing it on your machine.',
+        whenNot:
+          'Running docker run again does not reuse the container: it creates another, with another random name, and docker ps -a shows both.',
         problems:
-          'A container that finishes does not disappear: it stays stopped (Exited) until you remove it. That is why docker ps -a shows more than docker ps.',
+          'Thinking the container disappears when it ends. docker ps is empty, but docker ps -a shows it as "Exited (0)": it stays there, stopped, until you remove it.',
       },
       example:
-        'You run hello-world, see the stopped container with docker ps -a and the image with docker images.',
+        'Before you look: hello-world prints its greeting and exits. Will it show in docker ps, in docker ps -a or in neither?',
       objectives: { 'probe:ran': 'A hello-world container finished successfully' },
     },
     example: ['docker run hello-world', 'docker ps', 'docker ps -a', 'docker images'],
@@ -80,43 +84,45 @@ export const BEGINNER: Unit[] = [
       title: 'En segundo plano y con puerto',
       goal: 'Deja nginx:1.27 corriendo en segundo plano con el nombre web y el puerto 8080 de tu máquina llevando a su puerto 80.',
       theory: {
-        what: '-d deja el contenedor en segundo plano y te devuelve la terminal; --name le pone un nombre para no usar el id; -p PUERTO_TUYO:PUERTO_DEL_CONTENEDOR publica un puerto para llegar desde fuera.',
+        what: '-d deja el contenedor en segundo plano, --name le pone nombre y -p 8080:80 lleva el puerto 8080 de tu máquina al 80 del contenedor.',
         how: [
           'docker run -d --name web -p 8080:80 nginx:1.27',
-          'docker ps                   # PORTS: 0.0.0.0:8080->80/tcp',
-          'curl localhost:8080         # contesta nginx',
+          'docker ps            # PORTS: 0.0.0.0:8080->80/tcp',
+          'curl localhost:8080  # contesta nginx',
         ],
-        when: 'Para servidores (webs, APIs, bases de datos): procesos que se quedan escuchando.',
+        when: 'Para servidores (webs, APIs, bases de datos), que se quedan escuchando mientras sigues usando la terminal.',
         whenNot:
-          'Para una orden que acaba (una migración, un script) no hace falta -d: quieres ver su salida.',
+          'Una orden que acaba (una migración, un guion) no necesita -d: quieres ver su salida. Y fija la versión: latest cambia sin avisar.',
         problems:
-          'Sin -p el contenedor escucha, pero solo dentro de Docker: desde tu máquina no llegas. Y fija siempre la versión (nginx:1.27): latest cambia sin avisar.',
+          'Olvidar -p: el contenedor escucha, pero solo dentro de Docker. docker ps enseña «80/tcp» sin flecha y curl dice «Failed to connect to localhost port 9090». Créalo otra vez con -p.',
       },
       example:
-        'Arrancas un nginx de prueba en el 9090, lo ves en docker ps y le pides la portada con curl.',
+        'Antes de verlo: arrancas nginx sin -p y le pides la portada con curl en el 9090. ¿Contestará?',
       objectives: {},
     },
     en: {
       title: 'Detached and with a port',
       goal: 'Leave nginx:1.27 running in the background named web, with port 8080 on your machine going to its port 80.',
       theory: {
-        what: '-d runs the container in the background and gives you the terminal back; --name names it so you do not need the id; -p YOUR_PORT:CONTAINER_PORT publishes a port so you can reach it from outside.',
+        what: '-d leaves the container in the background, --name gives it a name and -p 8080:80 sends port 8080 on your machine to port 80 in the container.',
         how: [
           'docker run -d --name web -p 8080:80 nginx:1.27',
-          'docker ps                   # PORTS: 0.0.0.0:8080->80/tcp',
-          'curl localhost:8080         # nginx answers',
+          'docker ps            # PORTS: 0.0.0.0:8080->80/tcp',
+          'curl localhost:8080  # nginx answers',
         ],
-        when: 'For servers (websites, APIs, databases): processes that keep listening.',
+        when: 'For servers (websites, APIs, databases), which keep listening while you go on using the terminal.',
         whenNot:
-          'For a command that finishes (a migration, a script) you do not need -d: you want its output.',
+          'A command that ends (a migration, a script) does not need -d: you want its output. And pin the version: latest changes without warning.',
         problems:
-          'Without -p the container listens, but only inside Docker: you cannot reach it from your machine. And always pin the version (nginx:1.27): latest changes without warning.',
+          'Forgetting -p: the container listens, but only inside Docker. docker ps shows "80/tcp" with no arrow and curl says "Failed to connect to localhost port 9090". Create it again with -p.',
       },
       example:
-        'You start a test nginx on 9090, see it in docker ps and ask for its home page with curl.',
+        'Before you look: you start nginx without -p and ask curl for its home page on 9090. Will it answer?',
       objectives: {},
     },
     example: [
+      'docker run -d --name sinpuerto nginx:1.27-alpine',
+      'curl localhost:9090',
       'docker run -d --name demo -p 9090:80 nginx:1.27-alpine',
       'docker ps',
       'curl -s localhost:9090',
@@ -140,43 +146,49 @@ export const BEGINNER: Unit[] = [
       title: 'Parar, arrancar y borrar',
       goal: 'cache (redis) está parado: arráncalo. legacy ya no se usa: bórralo, aunque esté corriendo.',
       theory: {
-        what: 'Un contenedor pasa por created → running → exited → borrado. stop lo para con calma (SIGTERM y, si no acaba, SIGKILL a los 10 s); start lo vuelve a arrancar con la misma configuración; rm lo borra.',
+        what: 'stop para un contenedor (queda Exited), start lo arranca otra vez con su misma configuración y rm lo borra.',
         how: [
-          'docker stop web             # parar',
-          'docker start web            # volver a arrancar (mismo nombre, puertos y datos)',
-          'docker restart web          # stop + start',
-          'docker rm web               # borrar uno parado',
-          'docker rm -f web            # parar y borrar de una vez',
+          'docker stop web     # parar: queda Exited',
+          'docker start web    # arrancar con lo mismo',
+          'docker rm web       # borrar uno parado',
+          'docker rm -f web    # parar y borrar a la vez',
         ],
-        when: 'Para liberar memoria o puertos, aplicar una configuración nueva (se borra y se crea otra vez) o recoger lo que ya no sirve.',
+        when: 'Para liberar memoria o puertos, o quitar lo que ya no sirve.',
+        whenNot:
+          'stop conserva lo escrito dentro del contenedor; rm lo borra, y lo que no esté en un volumen se pierde.',
         problems:
-          'rm borra la capa propia del contenedor: lo que se escribió dentro y no está en un volumen se pierde. docker rm de uno que corre falla: hay que pararlo antes o usar -f.',
+          'Borrar uno que corre: docker rm legacy responde «cannot remove container "/legacy": container is running». Páralo antes o usa docker rm -f.',
       },
-      example:
-        'Miras los contenedores, paras legacy, lo ves Exited en docker ps -a y lo vuelves a arrancar.',
+      example: 'Antes de verlo: legacy está corriendo y escribes docker rm legacy. ¿Lo borra?',
       objectives: { 'gone:legacy': 'legacy ya no existe' },
     },
     en: {
       title: 'Stop, start and remove',
       goal: 'cache (redis) is stopped: start it. legacy is no longer used: remove it, even though it is running.',
       theory: {
-        what: 'A container goes created → running → exited → removed. stop stops it gently (SIGTERM, then SIGKILL after 10 s); start starts it again with the same configuration; rm removes it.',
+        what: 'stop stops a container (it becomes Exited), start starts it again with the same configuration and rm removes it.',
         how: [
-          'docker stop web             # stop',
-          'docker start web            # start again (same name, ports and data)',
-          'docker restart web          # stop + start',
-          'docker rm web               # remove a stopped one',
-          'docker rm -f web            # stop and remove in one go',
+          'docker stop web     # stop: becomes Exited',
+          'docker start web    # start with the same setup',
+          'docker rm web       # remove a stopped one',
+          'docker rm -f web    # stop and remove at once',
         ],
-        when: 'To free memory or ports, apply a new configuration (remove it and create it again) or clean up what is no longer needed.',
+        when: 'To free memory or ports, or to get rid of what is no longer needed.',
+        whenNot:
+          'stop keeps what was written inside the container; rm removes it, and whatever is not in a volume is lost.',
         problems:
-          'rm removes the container layer: whatever was written inside and is not in a volume is gone. docker rm on a running container fails: stop it first or use -f.',
+          'Removing a running one: docker rm legacy answers "cannot remove container "/legacy": container is running". Stop it first or use docker rm -f.',
       },
-      example:
-        'You list the containers, stop legacy, see it Exited in docker ps -a and start it again.',
+      example: 'Before you look: legacy is running and you type docker rm legacy. Does it go?',
       objectives: { 'gone:legacy': 'legacy no longer exists' },
     },
-    example: ['docker ps -a', 'docker stop legacy', 'docker ps -a', 'docker start legacy'],
+    example: [
+      'docker ps -a',
+      'docker rm legacy',
+      'docker stop legacy',
+      'docker ps -a',
+      'docker start legacy',
+    ],
     solution: ['docker start cache', 'docker rm -f legacy'],
     check: { containers: ['cache'], gone: ['legacy'] },
   },
@@ -192,39 +204,45 @@ export const BEGINNER: Unit[] = [
       title: 'Leer los registros',
       goal: 'db se ha caído nada más arrancar. Enseña sus 3 últimas líneas de registro: ahí está el porqué.',
       theory: {
-        what: 'docker logs enseña lo que el proceso del contenedor escribió en su salida (stdout y stderr), aunque ya esté parado. Es lo primero que se mira cuando algo no arranca.',
+        what: 'docker logs enseña lo que el proceso del contenedor escribió en su salida, aunque el contenedor ya esté parado.',
         how: [
-          'docker logs web             # todo el registro',
-          'docker logs --tail 20 web   # las 20 últimas líneas (también -n 20)',
-          'docker logs -f web          # seguir mirando lo que va saliendo',
-          'docker logs -t web          # con la hora de cada línea',
+          'docker ps -a               # quién está Exited',
+          'docker logs web            # todo el registro',
+          'docker logs --tail 20 web  # las 20 últimas',
+          'docker logs -f web         # seguir lo que sale',
         ],
-        when: 'Siempre que un contenedor sale con un código raro, se reinicia sin parar o no contesta: antes de tocar nada, lee.',
+        when: 'Cuando un contenedor se cae, se reinicia sin parar o no contesta: antes de tocar nada, lees su registro.',
+        whenNot:
+          'docker logs solo ve lo que la app escribe en su salida: si escribe en un fichero dentro del contenedor, ahí no sale.',
         problems:
-          'Solo sale lo que la app escribe en la salida estándar: si escribe en un fichero dentro del contenedor, docker logs no lo ve (por eso las imágenes oficiales mandan los registros a stdout).',
+          'Pedir el registro por la imagen y no por el contenedor: docker logs postgres:16 responde «No such container: postgres:16». Usa el nombre de la última columna de docker ps -a.',
       },
-      example: 'Miras los contenedores, ves db parado y lees el registro de web.',
+      example:
+        'Antes de verlo: db sale Exited en docker ps -a. ¿Tendrá registro aunque esté parado?',
       objectives: { output: 'Has enseñado las 3 últimas líneas del registro de db' },
     },
     en: {
       title: 'Reading the logs',
       goal: 'db crashed right after starting. Show its last 3 log lines: the reason is there.',
       theory: {
-        what: 'docker logs shows what the container process wrote to its output (stdout and stderr), even if it already stopped. It is the first thing to look at when something does not start.',
+        what: 'docker logs shows what the container process wrote to its output, even if the container already stopped.',
         how: [
-          'docker logs web             # the whole log',
-          'docker logs --tail 20 web   # the last 20 lines (also -n 20)',
-          'docker logs -f web          # keep watching what comes out',
-          'docker logs -t web          # with the time of each line',
+          'docker ps -a               # who is Exited',
+          'docker logs web            # the whole log',
+          'docker logs --tail 20 web  # the last 20 lines',
+          'docker logs -f web         # follow what comes out',
         ],
-        when: 'Whenever a container exits with an odd code, keeps restarting or does not answer: read before touching anything.',
+        when: 'When a container crashes, keeps restarting or does not answer: read its log before touching anything.',
+        whenNot:
+          'docker logs only sees what the app writes to its output: if it writes to a file inside the container, it does not show up.',
         problems:
-          'Only what the app writes to standard output shows up: if it writes to a file inside the container, docker logs cannot see it (that is why official images log to stdout).',
+          'Asking for the log by image instead of by container: docker logs postgres:16 answers "No such container: postgres:16". Use the name in the last column of docker ps -a.',
       },
-      example: 'You list the containers, see db stopped and read the log of web.',
+      example:
+        'Before you look: db is Exited in docker ps -a. Will it have a log even though it stopped?',
       objectives: { output: 'You showed the last 3 log lines of db' },
     },
-    example: ['docker ps -a', 'docker logs web'],
+    example: ['docker ps -a', 'docker logs --tail 1 db', 'docker logs postgres:16'],
     solution: ['docker logs --tail 3 db'],
     check: { output: true },
     requires: [['logs']],
@@ -239,46 +257,48 @@ export const BEGINNER: Unit[] = [
       title: 'Ejecutar dentro: exec',
       goal: 'Sin crear otro contenedor, cambia la portada de web para que curl localhost:8080 diga «Peer4U en mantenimiento».',
       theory: {
-        what: 'docker exec ejecuta una orden más dentro de un contenedor que ya corre (run, en cambio, crea uno nuevo). Para varias órdenes o redirecciones, pásalas a sh -c.',
+        what: 'docker exec ejecuta una orden más dentro de un contenedor que ya corre; docker run, en cambio, crea uno nuevo.',
         how: [
           'docker exec web ls /usr/share/nginx/html',
-          'docker exec web cat /etc/os-release',
-          "docker exec web sh -c 'echo hola > /tmp/x && cat /tmp/x'",
-          'docker exec -it web sh      # una shell dentro (aquí no hay sesión interactiva)',
+          "docker exec web sh -c 'echo hola > /tmp/x'",
+          'docker exec web cat /tmp/x   # hola',
         ],
         when: 'Para mirar y depurar: qué ficheros hay, qué variables ve la app, si llega a otro servicio.',
         whenNot:
-          'Para cambiar algo que tiene que durar: lo hecho con exec se pierde al recrear el contenedor. Lo que dura va en la imagen (Dockerfile) o en un volumen.',
+          'Lo hecho con exec se pierde al recrear el contenedor: lo que tiene que durar va en la imagen o en un volumen.',
         problems:
-          'La redirección > fuera de comillas la hace tu shell, no la del contenedor: docker exec web echo hola > f escribe f en tu máquina.',
+          "Dejar > fuera de comillas: en docker exec web echo hola > f redirige tu shell, y f aparece en tu máquina, no en el contenedor. Mete la orden en sh -c '…'.",
       },
-      example: 'Miras qué sirve nginx, lees su portada y pruebas una orden con sh -c.',
+      example:
+        'Antes de verlo: escribes docker exec web echo hola > f. ¿Dónde aparece f, en el contenedor o en tu máquina?',
       objectives: {},
     },
     en: {
       title: 'Running inside: exec',
       goal: 'Without creating another container, change the home page of web so that curl localhost:8080 says "Peer4U en mantenimiento".',
       theory: {
-        what: 'docker exec runs one more command inside a container that is already running (run, instead, creates a new one). For several commands or redirections, pass them to sh -c.',
+        what: 'docker exec runs one more command inside a container that is already running; docker run, instead, creates a new one.',
         how: [
           'docker exec web ls /usr/share/nginx/html',
-          'docker exec web cat /etc/os-release',
-          "docker exec web sh -c 'echo hi > /tmp/x && cat /tmp/x'",
-          'docker exec -it web sh      # a shell inside (no interactive session here)',
+          "docker exec web sh -c 'echo hola > /tmp/x'",
+          'docker exec web cat /tmp/x   # hola',
         ],
         when: 'To look around and debug: which files are there, which variables the app sees, whether it reaches another service.',
         whenNot:
-          'To change something that must last: whatever you do with exec is lost when the container is recreated. What lasts goes in the image (Dockerfile) or in a volume.',
+          'Whatever you do with exec is lost when the container is recreated: what must last goes in the image or in a volume.',
         problems:
-          'A > outside the quotes is handled by your shell, not the container one: docker exec web echo hi > f writes f on your machine.',
+          "Leaving > outside the quotes: in docker exec web echo hola > f your shell redirects, and f appears on your machine, not in the container. Wrap the command in sh -c '…'.",
       },
-      example: 'You check what nginx serves, read its home page and try a command with sh -c.',
+      example:
+        'Before you look: you type docker exec web echo hola > f. Where does f appear, in the container or on your machine?',
       objectives: {},
     },
     example: [
-      'docker exec web ls /usr/share/nginx/html',
-      'docker exec web cat /usr/share/nginx/html/index.html',
-      "docker exec web sh -c 'echo hola > /tmp/prueba && cat /tmp/prueba'",
+      'docker exec web echo hola > f',
+      'cat f',
+      'docker exec web ls /tmp',
+      "docker exec web sh -c 'echo hola > /tmp/x'",
+      'docker exec web cat /tmp/x',
     ],
     solution: [
       "docker exec web sh -c 'echo Peer4U en mantenimiento > /usr/share/nginx/html/index.html'",
@@ -342,43 +362,49 @@ export const BEGINNER: Unit[] = [
       title: 'Configurar con variables',
       goal: 'Deja una base de datos postgres:16 corriendo con el nombre db y la contraseña secreto.',
       theory: {
-        what: 'Las imágenes se configuran con variables de entorno: -e CLAVE=valor al crear el contenedor (o --env-file fichero). postgres no arranca sin POSTGRES_PASSWORD.',
+        what: '-e CLAVE=valor da una variable de entorno al crear el contenedor: así se configuran las imágenes. postgres, por ejemplo, no arranca sin POSTGRES_PASSWORD.',
         how: [
           'docker run -d --name db -e POSTGRES_PASSWORD=secreto postgres:16',
-          'docker run --env-file .env …        # muchas de una vez',
-          'docker exec db env                  # qué ve el contenedor',
+          'docker exec db env            # lo que ve dentro',
+          'docker run --env-file .env …  # muchas de una vez',
         ],
-        when: 'Para todo lo que cambia entre entornos: contraseñas, la URL de la base de datos, el puerto, el modo (desarrollo o producción).',
+        when: 'Para lo que cambia entre entornos: contraseñas, la URL de la base de datos, el modo de desarrollo o producción.',
+        whenNot:
+          'Lo que pasas con -e se ve en docker inspect: vale para configuración, no para secretos de producción.',
         problems:
-          'Una variable no se cambia en un contenedor que ya existe: hay que borrarlo y crearlo otra vez con el valor nuevo. Y lo que va en -e se ve en docker inspect: no es un sitio seguro para secretos de verdad.',
+          'Cambiar una variable creando otro contenedor con el mismo nombre: «Conflict. The container name "/db" is already in use». Borra el viejo con docker rm -f y créalo otra vez.',
       },
-      example: 'Arrancas postgres sin contraseña, lees por qué se cae y lo creas otra vez bien.',
+      example:
+        'Antes de verlo: arrancas postgres sin POSTGRES_PASSWORD. ¿Seguirá corriendo, y qué dirá su registro?',
       objectives: {},
     },
     en: {
       title: 'Configuring with variables',
       goal: 'Leave a postgres:16 database running named db with the password secreto.',
       theory: {
-        what: 'Images are configured with environment variables: -e KEY=value when you create the container (or --env-file file). postgres does not start without POSTGRES_PASSWORD.',
+        what: '-e KEY=value gives an environment variable when creating the container: that is how images are configured. postgres, for one, does not start without POSTGRES_PASSWORD.',
         how: [
           'docker run -d --name db -e POSTGRES_PASSWORD=secreto postgres:16',
-          'docker run --env-file .env …        # many at once',
-          'docker exec db env                  # what the container sees',
+          'docker exec db env            # what it sees inside',
+          'docker run --env-file .env …  # many at once',
         ],
-        when: 'For everything that changes between environments: passwords, the database URL, the port, the mode (development or production).',
+        when: 'For what changes between environments: passwords, the database URL, development or production mode.',
+        whenNot:
+          'What you pass with -e shows in docker inspect: fine for configuration, not for production secrets.',
         problems:
-          'You cannot change a variable on an existing container: remove it and create it again with the new value. And whatever goes in -e shows in docker inspect: not a safe place for real secrets.',
+          'Changing a variable by creating another container with the same name: "Conflict. The container name "/db" is already in use". Remove the old one with docker rm -f and create it again.',
       },
       example:
-        'You start postgres without a password, read why it crashes and create it again properly.',
+        'Before you look: you start postgres without POSTGRES_PASSWORD. Will it keep running, and what will its log say?',
       objectives: {},
     },
     example: [
       'docker run -d --name prueba postgres:16',
+      'docker ps -a',
       'docker logs prueba',
       'docker rm prueba',
       'docker run -d --name prueba -e POSTGRES_PASSWORD=demo postgres:16',
-      'docker ps',
+      'docker exec prueba env',
     ],
     solution: ['docker run -d --name db -e POSTGRES_PASSWORD=secreto postgres:16'],
     check: { containers: ['db'], exec: ['db pg_isready'] },
@@ -395,43 +421,46 @@ export const BEGINNER: Unit[] = [
       title: 'Inspeccionar',
       goal: 'Saca con una plantilla solo la IP de web (y nada más).',
       theory: {
-        what: 'docker inspect da todo lo que Docker sabe de un contenedor, una imagen, un volumen o una red, en JSON. Con -f y una plantilla de Go sacas solo un dato.',
+        what: 'docker inspect da en JSON todo lo que Docker sabe de un contenedor o una imagen. Con -f y una plantilla sacas un solo dato.',
         how: [
-          'docker inspect web',
+          'docker inspect web     # el JSON entero',
           "docker inspect -f '{{.State.Status}}' web",
-          "docker inspect -f '{{.NetworkSettings.IPAddress}}' web",
           "docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' web",
-          "docker inspect -f '{{json .Config.Env}}' web",
-          'docker port web             # los puertos publicados',
+          'docker port web        # los puertos publicados',
         ],
-        when: 'Para responder sin adivinar: qué variables tiene, con qué se arrancó, por qué salió (State.ExitCode, State.OOMKilled), dónde están sus datos (Mounts).',
+        when: 'Para responder sin adivinar: con qué se arrancó, por qué salió (State.ExitCode), qué variables tiene.',
+        whenNot:
+          'docker ps resume todos los contenedores en una tabla; inspect da uno solo, con todo el detalle.',
         problems:
-          'Las mayúsculas cuentan: {{.State.status}} no existe. Mira el JSON entero una vez para saber el camino.',
+          "Equivocar las mayúsculas del camino: -f '{{.State.status}}' no da error, imprime «<no value>». Mira el JSON entero una vez y copia el camino tal cual.",
       },
-      example: 'Miras el estado, la política de reinicio y los puertos de web.',
+      example:
+        'Antes de verlo: pides {{.State.status}}, con la s minúscula. ¿Qué imprime docker inspect?',
       objectives: { output: 'Has sacado la IP de web con una plantilla' },
     },
     en: {
       title: 'Inspecting',
       goal: 'Use a template to print only the IP address of web (and nothing else).',
       theory: {
-        what: 'docker inspect gives everything Docker knows about a container, an image, a volume or a network, as JSON. With -f and a Go template you print just one field.',
+        what: 'docker inspect gives, as JSON, everything Docker knows about a container or an image. With -f and a template you print a single field.',
         how: [
-          'docker inspect web',
+          'docker inspect web     # the whole JSON',
           "docker inspect -f '{{.State.Status}}' web",
-          "docker inspect -f '{{.NetworkSettings.IPAddress}}' web",
           "docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' web",
-          "docker inspect -f '{{json .Config.Env}}' web",
-          'docker port web             # published ports',
+          'docker port web        # published ports',
         ],
-        when: 'To answer without guessing: which variables it has, how it was started, why it exited (State.ExitCode, State.OOMKilled), where its data lives (Mounts).',
+        when: 'To answer without guessing: how it was started, why it exited (State.ExitCode), which variables it has.',
+        whenNot:
+          'docker ps sums up every container in a table; inspect gives just one, in full detail.',
         problems:
-          'Case matters: {{.State.status}} does not exist. Look at the whole JSON once to learn the path.',
+          'Getting the case of the path wrong: -f \'{{.State.status}}\' gives no error, it prints "<no value>". Look at the whole JSON once and copy the path as it is.',
       },
-      example: 'You check the status, the restart policy and the ports of web.',
+      example:
+        'Before you look: you ask for {{.State.status}}, with a lowercase s. What does docker inspect print?',
       objectives: { output: 'You printed the IP of web with a template' },
     },
     example: [
+      "docker inspect -f '{{.State.status}}' web",
       "docker inspect -f '{{.State.Status}}' web",
       "docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' web",
       'docker port web',
@@ -449,47 +478,51 @@ export const BEGINNER: Unit[] = [
       title: 'Imágenes, etiquetas y versiones',
       goal: 'Descarga nginx con la versión 1.27 en su variante alpine y ponle también la etiqueta peer4u/web:1.0.',
       theory: {
-        what: 'Una imagen se nombra repositorio:etiqueta (nginx:1.27-alpine). La etiqueta es un nombre que se puede mover; el digest (sha256:…) es la huella exacta. Las variantes -alpine y -slim pesan mucho menos.',
+        what: 'Una imagen se nombra repositorio:etiqueta (nginx:1.27-alpine). docker tag le pone otro nombre a la misma imagen, sin copiarla.',
         how: [
           'docker pull nginx:1.27-alpine',
-          'docker images',
-          'docker tag nginx:1.27-alpine peer4u/web:1.0   # otro nombre, la misma imagen',
-          "docker image inspect -f '{{.RepoDigests}}' nginx:1.27-alpine",
+          'docker tag nginx:1.27-alpine peer4u/web:1.0',
+          'docker images      # el mismo IMAGE ID dos veces',
+          'docker rmi peer4u/web:1.0   # quita solo el nombre',
         ],
-        when: 'Fija siempre una versión en lo que despliegas: así sabes qué corre y puedes volver atrás.',
+        when: 'Para fijar la versión de lo que despliegas: sabes qué corre y puedes volver atrás.',
         whenNot:
-          'latest no es «la última»: es la etiqueta por defecto. Úsala para probar, nunca en producción.',
+          'latest no es «la última versión»: es la etiqueta por defecto y cambia sin avisar. Para probar vale; en producción, una versión fija.',
         problems:
-          'docker tag no copia nada: dos nombres, el mismo IMAGE ID. Borrar un nombre (docker rmi) no borra la imagen mientras le quede otro.',
+          'Creer que docker tag duplica la imagen. docker images enseña el mismo IMAGE ID y tamaño en los dos nombres, y docker rmi de uno solo dice «Untagged: peer4u/demo:1.0».',
       },
-      example: 'Comparas lo que pesan nginx:1.27 y nginx:1.27-alpine y miras su digest.',
+      example:
+        'Antes de verlo: etiquetas nginx:1.27-alpine como peer4u/demo:1.0. ¿Cuánto más ocupará en docker images?',
       objectives: {},
     },
     en: {
       title: 'Images, tags and versions',
       goal: 'Pull nginx version 1.27 in its alpine flavour and also tag it peer4u/web:1.0.',
       theory: {
-        what: 'An image is named repository:tag (nginx:1.27-alpine). The tag is a name that can move; the digest (sha256:…) is the exact fingerprint. The -alpine and -slim flavours weigh much less.',
+        what: 'An image is named repository:tag (nginx:1.27-alpine). docker tag gives the same image another name, without copying it.',
         how: [
           'docker pull nginx:1.27-alpine',
-          'docker images',
-          'docker tag nginx:1.27-alpine peer4u/web:1.0   # another name, same image',
-          "docker image inspect -f '{{.RepoDigests}}' nginx:1.27-alpine",
+          'docker tag nginx:1.27-alpine peer4u/web:1.0',
+          'docker images      # the same IMAGE ID twice',
+          'docker rmi peer4u/web:1.0   # removes only the name',
         ],
-        when: 'Always pin a version in what you deploy: you know what runs and you can roll back.',
+        when: 'To pin the version of what you deploy: you know what runs and you can roll back.',
         whenNot:
-          'latest is not "the newest": it is just the default tag. Use it to try things, never in production.',
+          'latest is not "the newest version": it is the default tag and changes without warning. Fine for trying; in production, a pinned version.',
         problems:
-          'docker tag copies nothing: two names, the same IMAGE ID. Removing one name (docker rmi) does not remove the image while it has another.',
+          'Thinking docker tag duplicates the image. docker images shows the same IMAGE ID and size under both names, and docker rmi of one just says "Untagged: peer4u/demo:1.0".',
       },
-      example: 'You compare the size of nginx:1.27 and nginx:1.27-alpine and look at the digest.',
+      example:
+        'Before you look: you tag nginx:1.27-alpine as peer4u/demo:1.0. How much more space will docker images show?',
       objectives: {},
     },
     example: [
       'docker pull nginx:1.27',
       'docker pull nginx:1.27-alpine',
+      'docker tag nginx:1.27-alpine peer4u/demo:1.0',
       'docker images',
-      "docker image inspect -f '{{.RepoDigests}}' nginx:1.27-alpine",
+      'docker rmi peer4u/demo:1.0',
+      'docker images',
     ],
     solution: ['docker pull nginx:1.27-alpine', 'docker tag nginx:1.27-alpine peer4u/web:1.0'],
     check: { images: ['nginx:1.27-alpine', 'peer4u/web:1.0'], inspect: ['peer4u/web:1.0 {{.Id}}'] },
@@ -518,20 +551,21 @@ export const BEGINNER: Unit[] = [
       title: 'Limpiar la casa',
       goal: 'Borra los contenedores parados y las imágenes colgantes (<none>) sin tocar web, que sigue corriendo.',
       theory: {
-        what: 'Cada build que reutiliza una etiqueta deja la imagen vieja sin nombre (<none>, «colgante»), y cada docker run sin --rm deja un contenedor parado. docker system df dice cuánto ocupa todo y cuánto se puede recuperar.',
+        what: 'Cada build que reutiliza una etiqueta deja la imagen vieja sin nombre (<none>, «colgante»), y cada docker run deja un contenedor parado. prune los borra.',
         how: [
-          'docker system df                # qué ocupa y qué se puede borrar',
-          'docker container prune -f       # contenedores parados',
-          'docker image prune -f           # imágenes colgantes',
-          'docker image prune -a -f        # todas las que no usa ningún contenedor',
-          'docker system prune -f          # parados, colgantes, redes sin uso y caché',
-          'docker rmi hello-world          # una en concreto',
+          'docker system df           # qué ocupa y qué sobra',
+          'docker container prune -f  # contenedores parados',
+          'docker image prune -f      # imágenes colgantes',
+          'docker image prune -a -f   # también las que no se usan',
         ],
-        when: 'Cuando el disco de tu máquina o del servidor de CI se llena (pasa más de lo que parece).',
+        when: 'Cuando se llena el disco de tu máquina o del servidor de CI, que pasa más de lo que parece.',
+        whenNot:
+          'prune -a borra también imágenes que querrás mañana. Los volúmenes no los toca: ahí viven los datos.',
         problems:
-          'prune -a borra también imágenes que querrás mañana (y habrá que descargarlas otra vez). Los volúmenes no se tocan salvo que lo pidas: ahí viven los datos.',
+          'Borrar a mano la imagen de un contenedor que corre: docker rmi web:dev responde «conflict: unable to remove repository reference "web:dev" (must force)». prune ya se salta lo que está en uso.',
       },
-      example: 'Miras cuánto ocupa todo, las imágenes colgantes y los contenedores parados.',
+      example:
+        'Antes de verlo: web:dev se ha construido tres veces. ¿Cuántas imágenes <none> saldrán en docker images?',
       objectives: {
         'probe:stopped': 'No queda ningún contenedor parado',
         'probe:dangling': 'No queda ninguna imagen colgante',
@@ -541,27 +575,27 @@ export const BEGINNER: Unit[] = [
       title: 'Cleaning up',
       goal: 'Remove the stopped containers and the dangling images (<none>) without touching web, which is still running.',
       theory: {
-        what: 'Each build that reuses a tag leaves the old image without a name (<none>, "dangling"), and each docker run without --rm leaves a stopped container. docker system df tells you how much everything takes and how much you can reclaim.',
+        what: 'Each build that reuses a tag leaves the old image without a name (<none>, "dangling"), and each docker run leaves a stopped container. prune removes them.',
         how: [
-          'docker system df                # what takes space and what can go',
-          'docker container prune -f       # stopped containers',
-          'docker image prune -f           # dangling images',
-          'docker image prune -a -f        # every image no container uses',
-          'docker system prune -f          # stopped, dangling, unused networks and cache',
-          'docker rmi hello-world          # one in particular',
+          'docker system df           # what takes space',
+          'docker container prune -f  # stopped containers',
+          'docker image prune -f      # dangling images',
+          'docker image prune -a -f   # unused ones too',
         ],
-        when: 'When the disk of your machine or the CI server fills up (it happens more than you think).',
+        when: 'When the disk of your machine or the CI server fills up, which happens more than you think.',
+        whenNot:
+          'prune -a also removes images you will want tomorrow. It leaves volumes alone: that is where data lives.',
         problems:
-          'prune -a also removes images you will want tomorrow (and they must be pulled again). Volumes are left alone unless you ask: that is where data lives.',
+          'Removing by hand the image of a running container: docker rmi web:dev answers "conflict: unable to remove repository reference "web:dev" (must force)". prune already skips what is in use.',
       },
       example:
-        'You check how much everything takes, the dangling images and the stopped containers.',
+        'Before you look: web:dev was built three times. How many <none> images will docker images show?',
       objectives: {
         'probe:stopped': 'No stopped container left',
         'probe:dangling': 'No dangling image left',
       },
     },
-    example: ['docker system df', 'docker images', 'docker ps -a'],
+    example: ['docker system df', 'docker images', 'docker ps -a', 'docker rmi web:dev'],
     solution: ['docker container prune -f', 'docker image prune -f'],
     check: {
       containers: ['web'],
@@ -633,45 +667,56 @@ export const BEGINNER: Unit[] = [
       title: 'Tu primer Dockerfile',
       goal: 'En ~/web, construye la imagen miweb:1.0 (nginx:1.27-alpine con tu index.html) y déjala corriendo como miweb en el 8080.',
       theory: {
-        what: 'Un Dockerfile es la receta de una imagen: FROM dice de qué imagen partes y COPY mete ficheros de tu carpeta (el contexto). docker build -t nombre:versión CARPETA la construye.',
+        what: 'Un Dockerfile es la receta de una imagen: FROM dice de qué imagen partes y COPY mete ficheros de la carpeta que construyes (el contexto).',
         how: [
           "cat > Dockerfile <<'EOF'",
           'FROM nginx:1.27-alpine',
           'COPY index.html /usr/share/nginx/html/',
           'EOF',
-          'docker build -t miweb:1.0 .        # el punto: el contexto es esta carpeta',
+          'docker build -t miweb:1.0 .   # el punto: el contexto',
           'docker run -d --name miweb -p 8080:80 miweb:1.0',
         ],
-        when: 'En cuanto tu código tiene que correr igual en tu máquina, en la de otra persona, en CI y en producción.',
+        when: 'En cuanto tu código tiene que correr igual en tu máquina, en CI y en producción.',
+        whenNot:
+          'Cambiar index.html no cambia la imagen ya construida: hay que volver a hacer docker build.',
         problems:
-          'COPY solo ve lo que hay dentro del contexto: COPY ../otro no funciona. Si cambias el Dockerfile o los ficheros, hay que construir otra vez.',
+          'Copiar algo de fuera del contexto: con COPY ../index.html el build acaba en «ERROR: failed to solve» y «not found». Pon el fichero dentro de la carpeta que construyes.',
       },
       example:
-        'Escribes un Dockerfile de dos líneas en ~/web, lo construyes como prueba:1 y miras la imagen.',
+        'Antes de verlo: el Dockerfile copia ../index.html, de fuera de ~/web. ¿Se construirá la imagen?',
       objectives: {},
     },
     en: {
       title: 'Your first Dockerfile',
       goal: 'In ~/web, build the image miweb:1.0 (nginx:1.27-alpine with your index.html) and leave it running as miweb on 8080.',
       theory: {
-        what: 'A Dockerfile is the recipe of an image: FROM says which image you start from and COPY adds files from your folder (the context). docker build -t name:version FOLDER builds it.',
+        what: 'A Dockerfile is the recipe of an image: FROM says which image you start from and COPY adds files from the folder you build (the context).',
         how: [
           "cat > Dockerfile <<'EOF'",
           'FROM nginx:1.27-alpine',
           'COPY index.html /usr/share/nginx/html/',
           'EOF',
-          'docker build -t miweb:1.0 .        # the dot: this folder is the context',
+          'docker build -t miweb:1.0 .   # the dot: the context',
           'docker run -d --name miweb -p 8080:80 miweb:1.0',
         ],
-        when: 'As soon as your code has to run the same on your machine, someone else’s, CI and production.',
+        when: 'As soon as your code has to run the same on your machine, in CI and in production.',
+        whenNot:
+          'Changing index.html does not change the image already built: run docker build again.',
         problems:
-          'COPY only sees what is inside the context: COPY ../other does not work. If you change the Dockerfile or the files, build again.',
+          'Copying something outside the context: with COPY ../index.html the build ends in "ERROR: failed to solve" and "not found". Put the file inside the folder you build.',
       },
       example:
-        'You write a two-line Dockerfile in ~/web, build it as prueba:1 and look at the image.',
+        'Before you look: the Dockerfile copies ../index.html, from outside ~/web. Will the image build?',
       objectives: {},
     },
-    example: ['cd ~/web', WEB_DOCKERFILE, 'docker build -t prueba:1 .', 'docker images prueba'],
+    example: [
+      'cd ~/web',
+      "cat > Dockerfile <<'EOF'\nFROM nginx:1.27-alpine\nCOPY ../index.html /usr/share/nginx/html/\nEOF",
+      'docker build -t prueba:0 .',
+      WEB_DOCKERFILE,
+      'docker build -t prueba:1 .',
+      'docker images prueba',
+    ],
     solution: [
       'cd ~/web',
       WEB_DOCKERFILE,
@@ -689,7 +734,7 @@ export const BEGINNER: Unit[] = [
       title: 'Contenerizar la API',
       goal: 'Construye api:1.0 desde ~/api (Node 22 alpine, npm ci sin dependencias de desarrollo, node server.js) y déjala corriendo como api en el 3000.',
       theory: {
-        what: 'WORKDIR fija la carpeta de trabajo de la imagen, RUN ejecuta una orden al construir (instalar dependencias), EXPOSE documenta el puerto y CMD dice qué ejecutar al arrancar un contenedor.',
+        what: 'WORKDIR fija la carpeta de trabajo, RUN ejecuta una orden al construir, EXPOSE documenta el puerto y CMD dice qué arranca el contenedor.',
         how: [
           'FROM node:22-alpine',
           'WORKDIR /app',
@@ -698,19 +743,21 @@ export const BEGINNER: Unit[] = [
           'EXPOSE 3000',
           'CMD ["node", "server.js"]',
         ],
-        when: 'Para cualquier servicio del equipo: así no hace falta tener Node (ni su versión) en ninguna máquina.',
+        when: 'Para cualquier servicio del equipo: ninguna máquina necesita Node, ni su versión exacta.',
+        whenNot:
+          'RUN es al construir y CMD al arrancar: RUN node server.js dejaría el build esperando al servidor.',
         problems:
-          'RUN es al construir y CMD al arrancar: un RUN node server.js colgaría el build. EXPOSE no publica nada: -p sigue haciendo falta.',
+          'Creer que EXPOSE publica el puerto. docker ps enseña solo «3000/tcp» y curl dice «Failed to connect to localhost port 3000». Hace falta -p 3000:3000.',
       },
       example:
-        'Miras el package.json y el server.js de la API para saber qué instalar y qué arrancar.',
+        'Antes de verlo: construyes la API con EXPOSE 3000 y la arrancas sin -p. ¿Contestará curl localhost:3000/health?',
       objectives: {},
     },
     en: {
       title: 'Containerising the API',
       goal: 'Build api:1.0 from ~/api (Node 22 alpine, npm ci without dev dependencies, node server.js) and leave it running as api on 3000.',
       theory: {
-        what: 'WORKDIR sets the working folder of the image, RUN runs a command at build time (install dependencies), EXPOSE documents the port and CMD says what to run when a container starts.',
+        what: 'WORKDIR sets the working folder, RUN runs a command at build time, EXPOSE documents the port and CMD says what the container starts.',
         how: [
           'FROM node:22-alpine',
           'WORKDIR /app',
@@ -719,15 +766,25 @@ export const BEGINNER: Unit[] = [
           'EXPOSE 3000',
           'CMD ["node", "server.js"]',
         ],
-        when: 'For any team service: nobody needs Node (or its exact version) on any machine.',
+        when: 'For any team service: no machine needs Node, or its exact version.',
+        whenNot:
+          'RUN is at build time and CMD at start time: RUN node server.js would leave the build waiting for the server.',
         problems:
-          'RUN is at build time and CMD at start time: RUN node server.js would hang the build. EXPOSE publishes nothing: you still need -p.',
+          'Thinking EXPOSE publishes the port. docker ps shows only "3000/tcp" and curl says "Failed to connect to localhost port 3000". You need -p 3000:3000.',
       },
       example:
-        'You read the package.json and server.js of the API to know what to install and what to start.',
+        'Before you look: you build the API with EXPOSE 3000 and start it without -p. Will curl localhost:3000/health answer?',
       objectives: {},
     },
-    example: ['cd ~/api', 'ls -a', 'cat package.json', 'head -n 5 server.js'],
+    example: [
+      'cd ~/api',
+      'cat package.json',
+      API_DOCKERFILE,
+      'docker build -t prueba:1 .',
+      'docker run -d --name prueba prueba:1',
+      'docker ps',
+      'curl localhost:3000/health',
+    ],
     solution: [
       'cd ~/api',
       API_DOCKERFILE,
@@ -755,19 +812,21 @@ export const BEGINNER: Unit[] = [
       title: 'CMD frente a ENTRYPOINT',
       goal: 'En ~/pinger, construye la imagen pinger (alpine:3.20): siempre hace ping -c 3 y, si no le dices a quién, a localhost.',
       theory: {
-        what: 'ENTRYPOINT fija el programa; CMD da los argumentos por defecto. Lo que escribes tras la imagen en docker run sustituye al CMD, no al ENTRYPOINT (eso se cambia con --entrypoint).',
+        what: 'ENTRYPOINT fija el programa y CMD da sus argumentos por defecto. Lo que escribes tras la imagen en docker run sustituye al CMD, no al ENTRYPOINT.',
         how: [
-          'ENTRYPOINT ["ping", "-c", "3"]',
-          'CMD ["localhost"]',
-          'docker run --rm pinger              # ping -c 3 localhost',
-          'docker run --rm pinger peer4u.dev   # ping -c 3 peer4u.dev',
-          'docker run --rm --entrypoint cat pinger /etc/os-release',
+          'ENTRYPOINT ["echo", "hola"]',
+          'CMD ["equipo"]',
+          'docker run --rm saludo         # hola equipo',
+          'docker run --rm saludo peer4u  # hola peer4u',
         ],
-        when: 'ENTRYPOINT para imágenes que son una herramienta (se usan como un programa); solo CMD para servicios que a veces arrancas con otra orden.',
+        when: 'ENTRYPOINT para imágenes que se usan como una herramienta; solo CMD para servicios que a veces arrancas con otra orden.',
+        whenNot:
+          'Escríbelos en forma exec, con corchetes: en forma shell (CMD echo hola) Docker pone /bin/sh -c delante.',
         problems:
-          'Escríbelos en forma exec (["a", "b"]). En forma shell (CMD localhost) Docker pone /bin/sh -c delante y el ENTRYPOINT recibe argumentos que no esperabas.',
+          'Con solo CMD, lo que escribes sustituye al programa entero: docker run --rm alpine:3.20 peer4u falla con «exec: "peer4u": executable file not found in $PATH».',
       },
-      example: 'Con una imagen de alpine ves que lo que escribes tras el nombre sustituye al CMD.',
+      example:
+        'Antes de verlo: saludo tiene ENTRYPOINT echo hola y CMD equipo. ¿Qué escribe docker run --rm saludo peer4u?',
       objectives: {
         'probe:default': 'Sin argumentos hace 3 pings a localhost',
         'probe:other': 'Con un nombre, 3 pings a ese nombre',
@@ -777,27 +836,34 @@ export const BEGINNER: Unit[] = [
       title: 'CMD versus ENTRYPOINT',
       goal: 'In ~/pinger, build the image pinger (alpine:3.20): it always runs ping -c 3 and, if you do not say to whom, to localhost.',
       theory: {
-        what: 'ENTRYPOINT sets the program; CMD gives the default arguments. Whatever you type after the image in docker run replaces CMD, not ENTRYPOINT (that one changes with --entrypoint).',
+        what: 'ENTRYPOINT sets the program and CMD gives its default arguments. Whatever you type after the image in docker run replaces CMD, not ENTRYPOINT.',
         how: [
-          'ENTRYPOINT ["ping", "-c", "3"]',
-          'CMD ["localhost"]',
-          'docker run --rm pinger              # ping -c 3 localhost',
-          'docker run --rm pinger peer4u.dev   # ping -c 3 peer4u.dev',
-          'docker run --rm --entrypoint cat pinger /etc/os-release',
+          'ENTRYPOINT ["echo", "hola"]',
+          'CMD ["equipo"]',
+          'docker run --rm saludo         # hola equipo',
+          'docker run --rm saludo peer4u  # hola peer4u',
         ],
-        when: 'ENTRYPOINT for images that are a tool (used like a program); only CMD for services you sometimes start with another command.',
+        when: 'ENTRYPOINT for images used like a tool; only CMD for services you sometimes start with another command.',
+        whenNot:
+          'Write them in exec form, with brackets: in shell form (CMD echo hola) Docker puts /bin/sh -c in front.',
         problems:
-          'Write them in exec form (["a", "b"]). In shell form (CMD localhost) Docker adds /bin/sh -c and the ENTRYPOINT receives arguments you did not expect.',
+          'With only CMD, what you type replaces the whole program: docker run --rm alpine:3.20 peer4u fails with "exec: "peer4u": executable file not found in $PATH".',
       },
-      example: 'With an alpine image you see that whatever you type after the name replaces CMD.',
+      example:
+        'Before you look: saludo has ENTRYPOINT echo hola and CMD equipo. What does docker run --rm saludo peer4u print?',
       objectives: {
         'probe:default': 'Without arguments it pings localhost 3 times',
         'probe:other': 'With a name, it pings that name 3 times',
       },
     },
     example: [
-      'docker run --rm alpine:3.20 echo hola',
-      'docker run --rm alpine:3.20 cat /etc/os-release',
+      'mkdir ~/saludo',
+      'cd ~/saludo',
+      'cat > Dockerfile <<\'EOF\'\nFROM alpine:3.20\nENTRYPOINT ["echo", "hola"]\nCMD ["equipo"]\nEOF',
+      'docker build -t saludo .',
+      'docker run --rm saludo',
+      'docker run --rm saludo peer4u',
+      'docker run --rm alpine:3.20 peer4u',
     ],
     solution: [
       'cd ~/pinger',
@@ -818,20 +884,22 @@ export const BEGINNER: Unit[] = [
       title: 'ARG, ENV y LABEL',
       goal: 'En ~/api, haz que la versión de Node sea un ARG (22 por defecto), que la imagen tenga NODE_ENV=production y la etiqueta org.opencontainers.image.source=https://github.com/peer4u/api, y construye api:node20 con Node 20.',
       theory: {
-        what: 'ARG es una variable solo para construir (se cambia con --build-arg); ENV queda dentro de la imagen y la ven los contenedores; LABEL añade metadatos (de dónde sale, quién la mantiene).',
+        what: 'ARG es una variable solo para construir (se cambia con --build-arg); ENV queda en la imagen y la ven los contenedores; LABEL añade metadatos.',
         how: [
           'ARG NODE_VERSION=22',
           'FROM node:${NODE_VERSION}-alpine',
           'ENV NODE_ENV=production',
           'LABEL org.opencontainers.image.source=https://github.com/peer4u/api',
           'docker build --build-arg NODE_VERSION=20 -t api:node20 .',
-          "docker inspect -f '{{json .Config.Labels}}' api:node20",
         ],
-        when: 'ARG para lo que cambia al construir (versión de la base, el commit); ENV para lo que la app necesita al correr y es igual en todos los entornos.',
+        when: 'ARG para lo que cambia al construir (la versión de la base); ENV para lo que la app lee al correr.',
+        whenNot:
+          'Ni ARG ni ENV sirven para contraseñas: docker history enseña la línea «ENV MODO=production» a quien tenga la imagen, y igual una clave.',
         problems:
-          'Un ARG o un ENV con una contraseña queda guardado en el historial de la imagen (docker history): los secretos no van aquí (se ve en el nivel avanzado).',
+          'Esperar un ARG dentro del contenedor: printenv enseña «MODO=production» pero no COMMIT, que solo existe al construir. Si la app lo necesita, pásalo a un ENV.',
       },
-      example: 'Miras las variables y las etiquetas que traen las imágenes oficiales.',
+      example:
+        'Antes de verlo: el Dockerfile tiene ARG COMMIT y ENV MODO. ¿Cuál de los dos enseña printenv dentro del contenedor?',
       objectives: {
         'probe:node': 'El contenedor corre Node 20',
         'probe:env': 'Dentro, NODE_ENV vale production',
@@ -841,28 +909,34 @@ export const BEGINNER: Unit[] = [
       title: 'ARG, ENV and LABEL',
       goal: 'In ~/api, make the Node version an ARG (22 by default), give the image NODE_ENV=production and the label org.opencontainers.image.source=https://github.com/peer4u/api, and build api:node20 with Node 20.',
       theory: {
-        what: 'ARG is a build-time variable (change it with --build-arg); ENV stays in the image and containers see it; LABEL adds metadata (where it comes from, who maintains it).',
+        what: 'ARG is a build-only variable (change it with --build-arg); ENV stays in the image and containers see it; LABEL adds metadata.',
         how: [
           'ARG NODE_VERSION=22',
           'FROM node:${NODE_VERSION}-alpine',
           'ENV NODE_ENV=production',
           'LABEL org.opencontainers.image.source=https://github.com/peer4u/api',
           'docker build --build-arg NODE_VERSION=20 -t api:node20 .',
-          "docker inspect -f '{{json .Config.Labels}}' api:node20",
         ],
-        when: 'ARG for what changes at build time (base version, the commit); ENV for what the app needs at run time and is the same everywhere.',
+        when: 'ARG for what changes at build time (the base version); ENV for what the app reads at run time.',
+        whenNot:
+          'Neither ARG nor ENV is for passwords: docker history shows the line "ENV MODO=production" to anyone with the image, and a key just the same.',
         problems:
-          'An ARG or ENV holding a password is stored in the image history (docker history): secrets do not go here (more in the advanced level).',
+          'Expecting an ARG inside the container: printenv shows "MODO=production" but no COMMIT, which only exists while building. If the app needs it, copy it into an ENV.',
       },
-      example: 'You look at the variables and labels that official images ship with.',
+      example:
+        'Before you look: the Dockerfile has ARG COMMIT and ENV MODO. Which one does printenv show inside the container?',
       objectives: {
         'probe:node': 'The container runs Node 20',
         'probe:env': 'Inside, NODE_ENV is production',
       },
     },
     example: [
-      'docker run --rm node:22-alpine node -v',
-      "docker inspect -f '{{json .Config.Env}}' node:22-alpine",
+      'mkdir ~/vars',
+      'cd ~/vars',
+      'cat > Dockerfile <<\'EOF\'\nFROM alpine:3.20\nARG COMMIT=abc123\nENV MODO=production\nCMD ["printenv"]\nEOF',
+      'docker build -t vars .',
+      'docker run --rm vars',
+      'docker history vars',
     ],
     solution: [
       'cd ~/api',

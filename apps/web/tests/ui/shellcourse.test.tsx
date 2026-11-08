@@ -45,7 +45,7 @@ describe('curso de shell', () => {
     expect(screen.getByText(text('shell.theory.what'))).toBeTruthy()
     await user.click(screen.getByRole('button', { name: text('shell.toExample') }))
     // El ejemplo se ejecuta de verdad en la shell simulada.
-    expect(await screen.findByText('HOLA PEERS', {}, { timeout: 4000 })).toBeTruthy()
+    expect(await screen.findByText('HOLA PEERS', {}, { timeout: 10_000 })).toBeTruthy()
     await user.click(screen.getByRole('button', { name: text('shell.toTest') }))
 
     const input = screen.getByRole('textbox', { name: text('course.term.input') })

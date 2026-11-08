@@ -6,10 +6,11 @@ En producción hasta 7a69796. Si la CI falla: `gh run view --job <id> --log-fail
 
 ## Cola del 2026-11-08 (push y despliegue autorizados)
 
-Docker (999aecd) y Kubernetes (7466e8a) unidos; puntos 1–3 y 6 hechos.
-Agentes en worktrees: repaso de textos de los cursos (punto 4) y gamificación
-(punto 5, migración 89 reservada). Al acabar: unir, check, push, desplegar;
-luego el punto 7.
+Toda la cola hecha y desplegada: Docker, Kubernetes, repaso de los cursos,
+gamificación (clasificaciones y 22 logros), investigación de preguntas, plantillas
+y agente `didacta`, y la plantilla aplicada a las 138 unidades.
+Pendiente posible: diferencias de los simuladores con la herramienta real que
+listó el repaso (git log <ref>, rollout status con CrashLoop, etc.).
 
 3. **Orden de cursos sin bloqueo** (Alberto): sugerir shell → git → Docker →
    Kubernetes y cuál terminar antes, con enlace; nunca bloquear
