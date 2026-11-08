@@ -434,7 +434,7 @@ Detalle: [rendimiento.md](rendimiento.md#9-cargas-largas-2026-11-02).
 
 | Pestaña | Qué se hace |
 | --- | --- |
-| Consumo | Presupuesto de peticiones y sus ajustes; cuota de la API de 42 (modo, hasta dónde baja la copia, cola); uso de 42 por función y persona con topes; consumo por persona, últimas 48 h, quién más gasta y tope por hora a mano |
+| Consumo | Aviso si no hay secreto siguiente de la app de 42 puesto (el actual caduca cada cuatro semanas y la web pasa sola al siguiente); presupuesto de peticiones y sus ajustes; cuota de la API de 42 (modo, hasta dónde baja la copia, cola); uso de 42 por función y persona con topes; consumo por persona, últimas 48 h, quién más gasta y tope por hora a mano |
 | Permisos y bloqueos | Dar o quitar admin; bloquear 1, 7 o 30 días o siempre, con motivo; límites a mano; cuentas de staff (la clave se ve una vez); horas validadas de todo el mundo |
 | Incidencias | Pendientes y respondidas, denuncias por motivo, responder y borrar |
 | Mensajes | Registro de lo escrito en los chats de eventos, con filtro |

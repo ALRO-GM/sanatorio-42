@@ -23,6 +23,7 @@ import type {
   BudgetStatus,
   LimitLevel,
   Consumption,
+  FortyTwoSecretStatus,
   Ticket,
   ReportReason,
   TicketCategory,
@@ -71,6 +72,8 @@ export type AdminServiceOptions = {
   fixedAdmins: readonly string[]
   /** Peticiones a la API de 42 que quedan esta hora. */
   fortyTwoRemaining: () => number | undefined
+  /** Estado del secreto de la app de 42 (sin el secreto). */
+  fortyTwoSecret?: () => FortyTwoSecretStatus
   /**
    * Lo que dice la guardia de la máquina, que cuenta el tráfico de verdad. Si
    * va por delante de la cuenta de la web, manda ella.
@@ -668,6 +671,7 @@ export function createAdminService(options: AdminServiceOptions) {
 
       return {
         budget: budgetStatus(),
+        secret: options.fortyTwoSecret?.() ?? { expiresOn: null, hasNext: true, usingNext: false },
         limit: {
           budget: hourBudget,
           activePeople: thisHour.size,

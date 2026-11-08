@@ -7,6 +7,7 @@ import type { Env } from '../../config/env.js'
 import type { AppModule } from '../../core/module.js'
 import type { SessionReader } from '../../core/session.js'
 import type { ApiUser } from '../../integrations/forty-two/types.js'
+import type { SecretKeeper } from '../../integrations/forty-two/secrets.js'
 import type { ProfilesRepository } from '../profile/index.js'
 import { registerAuthRoutes } from './auth.routes.js'
 import { createAuthService } from './auth.service.js'
@@ -18,6 +19,8 @@ import { given } from '../../core/options.js'
 type AuthModuleDeps = {
   env: Env
   fetchImpl?: typeof fetch
+  /** El secreto de 42 con su relevo, compartido con el cliente de la API. */
+  secrets?: SecretKeeper
   /** Preferencias de cada persona: de ahí sale el campus que está mirando. */
   profiles: ProfilesRepository
   /**
@@ -51,7 +54,7 @@ export function createAuthModule(deps: AuthModuleDeps): AuthModule {
     authorizeUrl: `${env.FORTY_TWO_API_BASE}/oauth/authorize`,
     tokenUrl: env.FORTY_TWO_TOKEN_URL,
     clientId: env.FORTY_TWO_UID,
-    clientSecret: env.FORTY_TWO_SECRET,
+    clientSecret: deps.secrets ?? env.FORTY_TWO_SECRET,
     redirectUri: env.FORTY_TWO_REDIRECT_URI,
     userAgent: env.FORTY_TWO_USER_AGENT,
     scopes: env.oauthScopes,

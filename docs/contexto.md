@@ -312,9 +312,16 @@ Alberto pidió una revisión de todo; hecha y desplegada por bloques:
   de antes está en `/opt/sanatorio/infra/backups/antes-de-importar.db`.
 - La guardia de límites corre por cron cada cinco minutos
   (`sudo infra/scripts/limits-guard.sh status`).
-- **Secreto de 42**: rotado el 2026-10-11, pero el que está puesto se pegó en
-  una conversación. Pendiente de rotarlo otra vez, escribiéndolo Alberto
-  directamente en `infra/.env` y `apps/api/.env`.
+- **Secreto de 42**: caduca cada cuatro semanas. El 2026-11-08 caducó el del
+  2026-10-11 y la web se quedó sin login ni copia de 42 desde las 09:18 UTC
+  (`invalid_client`). Puesto el nuevo, válido hasta el 2026-12-06
+  (`FORTY_TWO_SECRET_EXPIRES`), con su relevo en `FORTY_TWO_NEXT_SECRET`: ese
+  día la web pasa sola al siguiente, o antes si 42 rechaza el actual
+  (`integrations/forty-two/secrets.ts`). Sin siguiente, avisa el panel
+  (pestaña Consumo). Tras cada relevo: el que se usa a `FORTY_TWO_SECRET`, su
+  fecha a `FORTY_TWO_SECRET_EXPIRES` y el nuevo «Next secret» a
+  `FORTY_TWO_NEXT_SECRET`. Los dos se pegaron en una conversación: conviene
+  regenerarlos escribiéndolos Alberto directamente en `infra/.env`.
 - **Por comprobar con sesión iniciada**: que la consola no dé errores de la
   política de contenido (fotos de perfil, QR, descarga del CSV).
 - Los reintentos de Oracle están parados (`oracle-stop`) y ya no hacen falta: las

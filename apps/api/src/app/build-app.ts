@@ -24,6 +24,7 @@ import type { SessionUser } from '../core/session.js'
 import { registerStatic } from '../core/http/static.js'
 import type { AppModule } from '../core/module.js'
 import { createApiClient } from '../integrations/forty-two/create-client.js'
+import { secretsFromEnv } from '../integrations/forty-two/secrets.js'
 import { createSlackPoster } from '../integrations/slack.js'
 import { createAuthModule } from '../modules/auth/index.js'
 import { diskPhotoStore, syncConfigFrom } from '../modules/replica/index.js'
@@ -87,36 +88,50 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
   }
 
   const fetchImpl = options.fetchImpl ?? fetch
-
-  const { services, modules: domainModules } = compose(db, createApiClient(env, fetchImpl), {
-    sync: syncConfigFrom(env),
-    backgroundSync: env.SYNC_ENABLED === 'true',
-    admins: env.adminLogins,
-    slack: createSlackPoster(env.SLACK_WEBHOOK_URL, (detail) => {
-      process.stderr.write(`[slack] ${detail}\n`)
-    }),
-    photos: diskPhotoStore(photoDirOf(env.DATABASE_URL)),
-    secret: env.SESSION_SECRET,
-    version: env.GIT_SHA,
-    ...(env.GUARD_LEVEL_FILE === ''
-      ? {}
-      : {
-          // Sin fichero, o vacío, no hay corte de la guardia.
-          guardLevel: async () =>
-            guardLevelFrom(await readFile(env.GUARD_LEVEL_FILE, 'utf8').catch(() => '')),
-        }),
-    // A stderr y no al log de Fastify: el sincronizador vive fuera de las
-    // peticiones. Lo que importa es que quede rastro, porque la web sigue
-    // funcionando con datos viejos y sin esto no habría forma de saberlo.
+  // Uno para todo: si el token de la aplicación descubre que el secreto ya no
+  // vale, el login usa el siguiente sin tener que descubrirlo otra vez.
+  const secrets = secretsFromEnv(env, {
+    ...given({ now: options.now }),
     log: (detail) => {
       process.stderr.write(`[42] ${detail}\n`)
     },
-    ...given({ now: options.now }),
   })
+
+  const { services, modules: domainModules } = compose(
+    db,
+    createApiClient(env, fetchImpl, secrets),
+    {
+      fortyTwoSecret: () => secrets.status(),
+      sync: syncConfigFrom(env),
+      backgroundSync: env.SYNC_ENABLED === 'true',
+      admins: env.adminLogins,
+      slack: createSlackPoster(env.SLACK_WEBHOOK_URL, (detail) => {
+        process.stderr.write(`[slack] ${detail}\n`)
+      }),
+      photos: diskPhotoStore(photoDirOf(env.DATABASE_URL)),
+      secret: env.SESSION_SECRET,
+      version: env.GIT_SHA,
+      ...(env.GUARD_LEVEL_FILE === ''
+        ? {}
+        : {
+            // Sin fichero, o vacío, no hay corte de la guardia.
+            guardLevel: async () =>
+              guardLevelFrom(await readFile(env.GUARD_LEVEL_FILE, 'utf8').catch(() => '')),
+          }),
+      // A stderr y no al log de Fastify: el sincronizador vive fuera de las
+      // peticiones. Lo que importa es que quede rastro, porque la web sigue
+      // funcionando con datos viejos y sin esto no habría forma de saberlo.
+      log: (detail) => {
+        process.stderr.write(`[42] ${detail}\n`)
+      },
+      ...given({ now: options.now }),
+    },
+  )
 
   const auth = createAuthModule({
     env,
     fetchImpl,
+    secrets,
     profiles: services.repositories.profiles,
     // El perfil de `/v2/me` trae el campus y todos los proyectos de quien entra:
     // se guarda en la réplica y la sala de espera ya no cuesta ninguna petición.

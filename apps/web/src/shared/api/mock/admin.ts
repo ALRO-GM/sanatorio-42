@@ -369,6 +369,7 @@ export const adminMock: Pick<
 
     return {
       budget: budgetStatus(),
+      secret: { expiresOn: '2026-12-06', hasNext: true, usingNext: false },
       limit: {
         budget,
         activePeople: 42,

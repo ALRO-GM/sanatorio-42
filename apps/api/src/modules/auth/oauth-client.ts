@@ -12,12 +12,14 @@ import type { ApiErrorBody } from '../../integrations/forty-two/errors.js'
 import type { ApiUser } from '../../integrations/forty-two/types.js'
 import { randomToken, base64url } from './signed-cookie.js'
 import { createHash } from 'node:crypto'
+import { keeperOf, type SecretKeeper } from '../../integrations/forty-two/secrets.js'
 
 type OAuthClientOptions = {
   authorizeUrl: string
   tokenUrl: string
   clientId: string
-  clientSecret: string
+  /** El secreto, o quien lo guarda con su relevo (ver `integrations/forty-two/secrets.ts`). */
+  clientSecret: string | SecretKeeper
   redirectUri: string
   userAgent: string
   /** Scopes que se piden. Por defecto, `DEFAULT_OAUTH_SCOPES`. */
@@ -78,6 +80,7 @@ type OAuthUserSession = {
 
 export function createOAuthClient(options: OAuthClientOptions) {
   const fetchImpl = options.fetchImpl ?? fetch
+  const secrets = keeperOf(options.clientSecret)
   const scopes = options.scopes ?? DEFAULT_OAUTH_SCOPES
 
   if (scopes.length === 0) {
@@ -115,7 +118,6 @@ export function createOAuthClient(options: OAuthClientOptions) {
       grant_type: 'authorization_code',
       code: params.code,
       client_id: options.clientId,
-      client_secret: options.clientSecret,
       redirect_uri: options.redirectUri,
     })
 
@@ -127,15 +129,15 @@ export function createOAuthClient(options: OAuthClientOptions) {
   }
 
   async function tokenRequest(body: URLSearchParams): Promise<TokenResponse> {
+    const secret = secrets.current()
+    body.set('client_secret', secret)
     let response: Response
 
     try {
       response = await fetchImpl(options.tokenUrl, {
         method: 'POST',
         headers: {
-          Authorization: `Basic ${Buffer.from(
-            `${options.clientId}:${options.clientSecret}`,
-          ).toString('base64')}`,
+          Authorization: `Basic ${Buffer.from(`${options.clientId}:${secret}`).toString('base64')}`,
           'Content-Type': 'application/x-www-form-urlencoded',
           Accept: 'application/json',
           'User-Agent': options.userAgent,
@@ -144,6 +146,12 @@ export function createOAuthClient(options: OAuthClientOptions) {
       })
     } catch (cause) {
       throw apiErrorFromNetwork('/oauth/token', cause)
+    }
+
+    // 42 no acepta el secreto (caducado o cambiado): si hay otro, se prueba.
+    // El código no se gasta: 42 mira el cliente antes que el código.
+    if (response.status === 401 && secrets.reject(secret)) {
+      return tokenRequest(body)
     }
 
     if (!response.ok) {

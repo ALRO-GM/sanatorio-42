@@ -9,9 +9,14 @@
 import { FortyTwoClient } from './client.js'
 import { createAppTokenProvider } from './app-token.js'
 import { SECONDLY_LIMIT, createThrottle } from './throttle.js'
+import { secretsFromEnv, type SecretKeeper } from './secrets.js'
 import type { Env } from '../../config/env.js'
 
-export function createApiClient(env: Env, fetchImpl: typeof fetch = fetch): FortyTwoClient {
+export function createApiClient(
+  env: Env,
+  fetchImpl: typeof fetch = fetch,
+  secrets: SecretKeeper = secretsFromEnv(env),
+): FortyTwoClient {
   // Con `MIN_REQUEST_INTERVAL_MS=0` (los tests, contra una API de mentira) no
   // hay topes propios; en producción, además del suelo, nunca más de 2 por segundo.
   const throttle = createThrottle({
@@ -22,7 +27,7 @@ export function createApiClient(env: Env, fetchImpl: typeof fetch = fetch): Fort
   const tokens = createAppTokenProvider({
     tokenUrl: env.FORTY_TWO_TOKEN_URL,
     uid: env.FORTY_TWO_UID,
-    secret: env.FORTY_TWO_SECRET,
+    secret: secrets,
     userAgent: env.FORTY_TWO_USER_AGENT,
     fetchImpl,
   })

@@ -19,6 +19,17 @@ const envSchema = z.object({
   FORTY_TWO_UID: z.string().min(1, 'FORTY_TWO_UID no puede estar vacía'),
   /** Client Secret de la aplicación OAuth. Es una credencial real: nunca al log. */
   FORTY_TWO_SECRET: z.string().min(1, 'FORTY_TWO_SECRET no puede estar vacía'),
+  /**
+   * El «Next secret» que enseña la intra, o vacío si aún no hay. 42 caduca el
+   * secreto cada cuatro semanas y lo sustituye por este: con él puesto, la web
+   * cambia sola (ver `integrations/forty-two/secrets.ts`).
+   */
+  FORTY_TWO_NEXT_SECRET: z.string().default(''),
+  /** Último día de validez de `FORTY_TWO_SECRET` (`YYYY-MM-DD`), o vacío si no se sabe. */
+  FORTY_TWO_SECRET_EXPIRES: z
+    .string()
+    .regex(/^(\d{4}-\d{2}-\d{2})?$/, 'FORTY_TWO_SECRET_EXPIRES debe ser YYYY-MM-DD')
+    .default(''),
 
   /**
    * Raíz de la API de 42.

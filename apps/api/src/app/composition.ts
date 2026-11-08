@@ -11,7 +11,7 @@
 
 import type { Db } from '../core/db/database.js'
 import { createEventBus } from '../core/events.js'
-import type { LimitLevel } from '@sanatorio/contracts'
+import type { FortyTwoSecretStatus, LimitLevel } from '@sanatorio/contracts'
 
 import type { EventBus, Notify } from '../core/events.js'
 import type { AppModule } from '../core/module.js'
@@ -96,6 +96,8 @@ type CompositionConfig = {
   admins?: readonly string[]
   /** Lo que dice la guardia de la máquina sobre los límites del plan, si la hay. */
   guardLevel?: () => Promise<LimitLevel>
+  /** Estado del secreto de 42 para el panel (ver `integrations/forty-two/secrets.ts`). */
+  fortyTwoSecret?: () => FortyTwoSecretStatus
   /** Dónde se guardan las fotos de perfil bajadas de 42. Sin él, en memoria. */
   photos?: PhotoStore
   /** Secreto del servidor (`SESSION_SECRET`): firma la cookie del panel y cifra el segundo factor. */
@@ -474,6 +476,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     db,
     fixedAdmins: config.admins ?? [],
     fortyTwoRemaining: () => client.hourlyRemaining(),
+    ...given({ fortyTwoSecret: config.fortyTwoSecret }),
     ...given({ guardLevel: config.guardLevel }),
     notify,
     settle: (about) => events.emit('notice.settled', about),

@@ -167,9 +167,20 @@ export type BudgetStatus = {
   }
 }
 
+/** El secreto de la app de 42: cuándo caduca y si ya hay relevo puesto. */
+export type FortyTwoSecretStatus = {
+  /** Último día de validez del secreto actual (`YYYY-MM-DD`), o `null` si no se sabe. */
+  expiresOn: string | null
+  /** `true` si hay un secreto siguiente esperando; si no, el panel avisa. */
+  hasNext: boolean
+  /** `true` si el actual ya caducó y se está usando el que era el siguiente. */
+  usingNext: boolean
+}
+
 /** `GET /admin/consumption`: cuánto se usa la web y cómo de cerca está de sus límites. */
 export type Consumption = {
   budget: BudgetStatus
+  secret: FortyTwoSecretStatus
   limit: {
     /** Peticiones de esta hora que se reparten entre quienes están usando la web. */
     budget: number

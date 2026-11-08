@@ -10,6 +10,7 @@
  */
 
 import { ApiError, apiErrorFromNetwork } from './errors.js'
+import { keeperOf, type SecretKeeper } from './secrets.js'
 
 /** El único permiso que pide el token de la aplicación. */
 const APP_SCOPE = 'public'
@@ -17,7 +18,8 @@ const APP_SCOPE = 'public'
 type AppTokenOptions = {
   tokenUrl: string
   uid: string
-  secret: string
+  /** El secreto, o quien lo guarda con su relevo (ver `secrets.ts`). */
+  secret: string | SecretKeeper
   userAgent: string
   fetchImpl?: typeof fetch
   /** Margen de seguridad antes de dar el token por caducado, en ms. */
@@ -36,18 +38,20 @@ type Cached = { token: string; expiresAt: number }
 export function createAppTokenProvider(options: AppTokenOptions) {
   const fetchImpl = options.fetchImpl ?? fetch
   const skewMs = options.skewMs ?? 60_000
+  const secrets = keeperOf(options.secret)
 
   let cached: Cached | null = null
   let inFlight: Promise<string> | null = null
 
   async function requestToken(): Promise<Cached> {
+    const secret = secrets.current()
     let response: Response
 
     try {
       response = await fetchImpl(options.tokenUrl, {
         method: 'POST',
         headers: {
-          Authorization: `Basic ${Buffer.from(`${options.uid}:${options.secret}`).toString('base64')}`,
+          Authorization: `Basic ${Buffer.from(`${options.uid}:${secret}`).toString('base64')}`,
           'Content-Type': 'application/x-www-form-urlencoded',
           Accept: 'application/json',
           'User-Agent': options.userAgent,
@@ -55,7 +59,7 @@ export function createAppTokenProvider(options: AppTokenOptions) {
         body: new URLSearchParams({
           grant_type: 'client_credentials',
           client_id: options.uid,
-          client_secret: options.secret,
+          client_secret: secret,
           // Solo lectura pública, aunque la app tenga más permisos marcados en la
           // intra: el servidor no necesita nada más (comprobado el 2026-10-16).
           scope: APP_SCOPE,
@@ -63,6 +67,11 @@ export function createAppTokenProvider(options: AppTokenOptions) {
       })
     } catch (cause) {
       throw apiErrorFromNetwork('/oauth/token', cause)
+    }
+
+    // 42 no acepta el secreto (caducado o cambiado): si hay otro, se prueba.
+    if (response.status === 401 && secrets.reject(secret)) {
+      return requestToken()
     }
 
     if (!response.ok) {

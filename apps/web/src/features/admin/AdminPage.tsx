@@ -15,6 +15,7 @@ import { PersonLink } from '../../shared/ui/PersonLink'
 import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
 import { QuotaCard } from './QuotaCard'
+import { SecretCard } from './SecretCard'
 import { ApiUsagePanel } from './ApiUsagePanel'
 import { BroadcastsTab } from './BroadcastsTab'
 import { ClickerPanel } from './ClickerPanel'
@@ -150,6 +151,7 @@ function ConsumptionTab() {
 
         return (
           <>
+            <SecretCard status={data.secret} />
             <BudgetCard status={data.budget} onChange={() => void consumption.reload()} />
             <QuotaCard />
             <ApiUsagePanel />

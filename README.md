@@ -180,7 +180,9 @@ npm run dev                              # API en :3000 y web en :5173
 Las cinco obligatorias son `FORTY_TWO_UID`, `FORTY_TWO_SECRET`,
 `FORTY_TWO_REDIRECT_URI`, `SESSION_SECRET` (32 caracteres o más) y
 `FRONTEND_URL`; conviene poner también `FORTY_TWO_USER_AGENT` (sin él, 42
-responde 403). El resto tiene valor de fábrica y está explicado en
+responde 403). Para que el cambio de secreto de 42 (cada cuatro semanas) no
+deje la web sin login, en producción van también `FORTY_TWO_NEXT_SECRET` y
+`FORTY_TWO_SECRET_EXPIRES`: ese día la web pasa sola al siguiente. El resto tiene valor de fábrica y está explicado en
 `apps/api/.env.example`. La base se crea y se migra sola al arrancar. La web
 llama a `/api` y Vite lo reenvía a la API local; en la app de 42, la URL de
 retorno de desarrollo es `http://localhost:3000/auth/callback`.
