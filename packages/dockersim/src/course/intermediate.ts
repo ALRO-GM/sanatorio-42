@@ -213,38 +213,38 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Aprovechar la caché',
       goal: 'Reordena el Dockerfile de ~/api para que cambiar el código no reinstale las dependencias, y construye api:1.1.',
       theory: {
-        what: 'Cada instrucción del Dockerfile es un paso con su caché (RUN, COPY y ADD dejan además una capa). Si un paso y lo que copia no cambian, Docker lo reutiliza (CACHED); en cuanto uno cambia, todos los de debajo se rehacen.',
+        what: 'Cada paso del Dockerfile tiene caché: si no cambia ni él ni lo que copia, sale CACHED. Si uno cambia, se rehacen todos los de debajo.',
         how: [
-          'COPY package*.json ./      # primero solo lo que define las dependencias',
-          'RUN npm ci --omit=dev      # se rehace solo si cambian esos ficheros',
-          'COPY . .                   # el código, que cambia a cada commit, al final',
-          'docker build -t api:1.1 .  # mira qué pasos salen CACHED',
+          'COPY package*.json ./   # antes, las dependencias',
+          'RUN npm ci --omit=dev   # solo si cambian esas',
+          'COPY . .                # el código, al final',
         ],
-        when: 'Siempre: lo que cambia poco arriba y lo que cambia mucho abajo. En CI ahorra minutos en cada build.',
+        when: 'Arriba lo que cambia poco; abajo, lo que cambia mucho. En CI ahorra minutos.',
+        whenNot: '--no-cache ignora la caché entera, para cuando guarda algo viejo.',
         problems:
-          'Un COPY . . antes de instalar invalida la caché con cualquier cambio (hasta un README). --no-cache la ignora entera cuando sospechas de ella.',
+          'Poner COPY . . antes de npm ci: cambiar una línea de server.js rehace «[4/4] RUN npm ci --omit=dev», sin CACHED. Copia antes solo package*.json.',
       },
       example:
-        'Construyes el Dockerfile lento, cambias una línea de código, vuelves a construir y ves que npm ci se repite.',
+        'Antes de verlo: con COPY . . arriba, cambias una línea de server.js y construyes otra vez. ¿Saldrá CACHED el npm ci?',
       objectives: { 'probe:cache': 'Cambiar el código no reinstala las dependencias' },
     },
     en: {
       title: 'Using the cache',
       goal: 'Reorder the Dockerfile in ~/api so that changing the code does not reinstall the dependencies, and build api:1.1.',
       theory: {
-        what: 'Each Dockerfile instruction is a cached step (RUN, COPY and ADD also leave a layer). If a step and what it copies do not change, Docker reuses it (CACHED); as soon as one changes, every step below it is rebuilt.',
+        what: 'Each Dockerfile step is cached: if neither it nor what it copies changes, it says CACHED. If one changes, every step below is rebuilt.',
         how: [
-          'COPY package*.json ./      # first only what defines the dependencies',
-          'RUN npm ci --omit=dev      # rebuilt only if those files change',
-          'COPY . .                   # the code, which changes every commit, last',
-          'docker build -t api:1.1 .  # look at which steps say CACHED',
+          'COPY package*.json ./   # dependencies first',
+          'RUN npm ci --omit=dev   # only if those change',
+          'COPY . .                # the code, last',
         ],
-        when: 'Always: what rarely changes at the top and what often changes at the bottom. In CI it saves minutes on every build.',
+        when: 'What rarely changes at the top; what often changes, at the bottom. In CI it saves minutes.',
+        whenNot: '--no-cache ignores the whole cache, for when it holds something stale.',
         problems:
-          'A COPY . . before installing invalidates the cache with any change (even a README). --no-cache ignores it completely when you suspect it.',
+          'Putting COPY . . before npm ci: changing one line of server.js reruns "[4/4] RUN npm ci --omit=dev", with no CACHED. Copy only package*.json first.',
       },
       example:
-        'You build the slow Dockerfile, change one line of code, build again and see npm ci run again.',
+        'Before you look: with COPY . . at the top, you change one line of server.js and build again. Will npm ci say CACHED?',
       objectives: { 'probe:cache': 'Changing the code does not reinstall the dependencies' },
     },
     example: [
@@ -277,18 +277,20 @@ export const INTERMEDIATE: Unit[] = [
       theory: {
         what: 'Antes de construir, Docker manda la carpeta entera (el contexto) al constructor. .dockerignore dice qué no mandar, con patrones como los de .gitignore.',
         how: [
-          'node_modules       # se instalan dentro con npm ci',
+          'node_modules   # se instalan dentro',
           '.git',
-          '.env               # secretos: nunca dentro de una imagen',
+          '.env           # secretos: nunca en la imagen',
           '*.log',
           'logs',
-          'docker build -t api:1.2 .   # «transferring context» baja de MB a kB',
         ],
-        when: 'En todo proyecto con Dockerfile: builds más rápidos y sin colar secretos ni basura en la imagen.',
+        when: 'En todo proyecto con Dockerfile: builds más rápidos y sin secretos ni basura dentro de la imagen.',
+        whenNot:
+          '.gitignore no cuenta aquí: Docker solo lee .dockerignore, y sin él manda «transferring context: 191MB».',
         problems:
-          '*.log solo vale para la raíz: para cualquier carpeta, **/*.log. Si ignoras un fichero que el Dockerfile copia, el COPY falla con «not found».',
+          'Ignorar algo que el Dockerfile copia: con *.json en .dockerignore, COPY package*.json falla con «"/package*.json": not found». Ignora solo lo que la imagen no necesita.',
       },
-      example: 'Construyes sin .dockerignore: mandas 190 MB y el .env acaba dentro de la imagen.',
+      example:
+        'Antes de verlo: ~/api no tiene .dockerignore y sí un .env. ¿Acabará el .env dentro de la imagen?',
       objectives: {
         'probe:env': 'El .env no está dentro de la imagen',
         'probe:git': 'El .git no está dentro de la imagen',
@@ -302,19 +304,20 @@ export const INTERMEDIATE: Unit[] = [
       theory: {
         what: 'Before building, Docker sends the whole folder (the context) to the builder. .dockerignore says what not to send, with patterns like .gitignore.',
         how: [
-          'node_modules       # installed inside with npm ci',
+          'node_modules   # installed inside',
           '.git',
-          '.env               # secrets: never inside an image',
+          '.env           # secrets: never in the image',
           '*.log',
           'logs',
-          'docker build -t api:1.2 .   # "transferring context" drops from MB to kB',
         ],
-        when: 'In every project with a Dockerfile: faster builds and no secrets or junk sneaking into the image.',
+        when: 'In every project with a Dockerfile: faster builds and no secrets or junk inside the image.',
+        whenNot:
+          '.gitignore does not count here: Docker only reads .dockerignore, and without it sends "transferring context: 191MB".',
         problems:
-          '*.log only applies to the root: for any folder, **/*.log. If you ignore a file the Dockerfile copies, the COPY fails with "not found".',
+          'Ignoring something the Dockerfile copies: with *.json in .dockerignore, COPY package*.json fails with ""/package*.json": not found". Ignore only what the image does not need.',
       },
       example:
-        'You build without .dockerignore: you send 190 MB and the .env ends up inside the image.',
+        'Before you look: ~/api has no .dockerignore but has a .env. Will the .env end up inside the image?',
       objectives: {
         'probe:env': 'The .env is not inside the image',
         'probe:git': 'The .git is not inside the image',
@@ -322,7 +325,13 @@ export const INTERMEDIATE: Unit[] = [
         'probe:context': 'The context sent weighs kilobytes',
       },
     },
-    example: ['cd ~/api', 'docker build -t api:gorda .', 'docker run --rm api:gorda cat /app/.env'],
+    example: [
+      'cd ~/api',
+      'docker build -t api:gorda .',
+      'docker run --rm api:gorda cat /app/.env',
+      "printf '*.json\\n' > .dockerignore",
+      'docker build -t api:rota .',
+    ],
     solution: ['cd ~/api', IGNORE_CMD, 'docker build -t api:1.2 .'],
     check: {
       images: ['api:1.2'],
@@ -343,44 +352,40 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Multi-stage',
       goal: 'En ~/front, construye front:1.0 en dos etapas (compilar con node:22 y servir dist con nginx:1.27-alpine), que pese menos de 60 MB, y déjala corriendo como front en el 8080.',
       theory: {
-        what: 'Un Dockerfile puede tener varias etapas (varios FROM). Compilas en una con todas las herramientas y copias solo el resultado a otra mínima con COPY --from: la imagen final no lleva ni Node ni node_modules.',
+        what: 'Un Dockerfile con varios FROM tiene varias etapas. Compilas en una con todas las herramientas y COPY --from copia solo el resultado a otra mínima.',
         how: [
           'FROM node:22 AS build',
-          'WORKDIR /app',
-          'COPY package*.json ./',
-          'RUN npm ci',
-          'COPY . .',
-          'RUN npm run build',
+          'RUN npm ci && npm run build   # tras WORKDIR y COPY',
           'FROM nginx:1.27-alpine',
           'COPY --from=build /app/dist /usr/share/nginx/html',
         ],
-        when: 'Siempre que haya un paso de compilación: frontends, Go, Java, TypeScript. La imagen pasa de más de 1 GB a unos 50 MB.',
+        when: 'Con compilación (frontends, Go, TypeScript): de 1,47 GB a unos 50 MB.',
+        whenNot: 'Sin compilación (una API de Node sin build), basta una etapa.',
         problems:
-          'En la etapa de compilar hacen falta las dependencias de desarrollo (npm ci sin --omit=dev): vite está ahí. --target build construye solo esa etapa, útil para depurar.',
+          'Copiar de la etapa una ruta que no está: COPY --from=build /dist (y no /app/dist) acaba en «"/dist": not found». Va la ruta de dentro, tras WORKDIR.',
       },
-      example: 'Construyes el front en una sola etapa con node:22 y ves lo que pesa.',
+      example:
+        'Antes de verlo: construyes el front en una sola etapa con node:22. ¿Cuánto pesará al lado de los 50 MB de nginx?',
       objectives: {},
     },
     en: {
       title: 'Multi-stage',
       goal: 'In ~/front, build front:1.0 in two stages (compile with node:22 and serve dist with nginx:1.27-alpine), under 60 MB, and leave it running as front on 8080.',
       theory: {
-        what: 'A Dockerfile can have several stages (several FROM). You compile in one with every tool and copy only the result into a minimal one with COPY --from: the final image carries neither Node nor node_modules.',
+        what: 'A Dockerfile with several FROM has several stages. You compile in one with every tool and COPY --from copies only the result into a minimal one.',
         how: [
           'FROM node:22 AS build',
-          'WORKDIR /app',
-          'COPY package*.json ./',
-          'RUN npm ci',
-          'COPY . .',
-          'RUN npm run build',
+          'RUN npm ci && npm run build   # after WORKDIR, COPY',
           'FROM nginx:1.27-alpine',
           'COPY --from=build /app/dist /usr/share/nginx/html',
         ],
-        when: 'Whenever there is a compile step: frontends, Go, Java, TypeScript. The image goes from over 1 GB to about 50 MB.',
+        when: 'With a compile step (frontends, Go, TypeScript): from 1.47 GB to about 50 MB.',
+        whenNot: 'Without a compile step (a Node API with no build), one stage is enough.',
         problems:
-          'The compile stage needs the dev dependencies (npm ci without --omit=dev): vite lives there. --target build builds just that stage, handy for debugging.',
+          'Copying a path the stage lacks: COPY --from=build /dist (not /app/dist) ends in ""/dist": not found". Use the path inside, after WORKDIR.',
       },
-      example: 'You build the front in a single stage with node:22 and look at its size.',
+      example:
+        'Before you look: you build the front in a single stage with node:22. How big will it be next to the 50 MB of nginx?',
       objectives: {},
     },
     example: [
@@ -418,42 +423,47 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Publicar en un registro',
       goal: 'Publica la imagen api:1.4 en el registro del equipo como ghcr.io/peer4u/api:1.4.0. El token está en ~/.ghcr-token.',
       theory: {
-        what: 'Un registro guarda imágenes para que otras máquinas las descarguen. El nombre completo dice dónde: registro/organización/repo:etiqueta. docker tag pone ese nombre, docker login da acceso y docker push sube las capas que falten.',
+        what: 'Un registro guarda imágenes para otras máquinas. El nombre dice dónde: ghcr.io/peer4u/api:1.4.0. docker login da acceso y docker push sube las capas.',
         how: [
           'docker tag api:1.4 ghcr.io/peer4u/api:1.4.0',
           'cat ~/.ghcr-token | docker login ghcr.io -u peer --password-stdin',
           'docker push ghcr.io/peer4u/api:1.4.0',
-          'docker pull ghcr.io/peer4u/api:1.4.0     # desde cualquier otra máquina',
         ],
         when: 'Para que CI, el servidor o Kubernetes usen la misma imagen que probaste, sin construirla otra vez.',
+        whenNot:
+          'Sin registro delante, el nombre va a Docker Hub: docker push api:1.4 responde «denied: requested access to the resource is denied».',
         problems:
-          'Sin login, el push da «unauthorized». Nunca pongas el token en la orden (-p queda en el historial de la shell): por la entrada, con --password-stdin.',
+          'Subir sin docker login: el push responde «unauthorized: unauthenticated». Entra antes, con el token por la entrada (--password-stdin) y no en la orden.',
       },
-      example: 'Etiquetas una prueba para ghcr.io e intentas subirla sin haber entrado.',
+      example:
+        'Antes de verlo: etiquetas una prueba para ghcr.io y la subes sin docker login. ¿Qué responde el registro?',
       objectives: {},
     },
     en: {
       title: 'Pushing to a registry',
       goal: 'Publish the image api:1.4 to the team registry as ghcr.io/peer4u/api:1.4.0. The token is in ~/.ghcr-token.',
       theory: {
-        what: 'A registry stores images so other machines can pull them. The full name says where: registry/organisation/repo:tag. docker tag sets that name, docker login grants access and docker push uploads the missing layers.',
+        what: 'A registry stores images for other machines. The name says where: ghcr.io/peer4u/api:1.4.0. docker login gives access and docker push uploads the layers.',
         how: [
           'docker tag api:1.4 ghcr.io/peer4u/api:1.4.0',
           'cat ~/.ghcr-token | docker login ghcr.io -u peer --password-stdin',
           'docker push ghcr.io/peer4u/api:1.4.0',
-          'docker pull ghcr.io/peer4u/api:1.4.0     # from any other machine',
         ],
-        when: 'So that CI, the server or Kubernetes use the very image you tested, without building it again.',
+        when: 'So that CI, the server or Kubernetes use the same image you tested, without building it again.',
+        whenNot:
+          'With no registry in front, the name goes to Docker Hub: docker push api:1.4 answers "denied: requested access to the resource is denied".',
         problems:
-          'Without login, push says "unauthorized". Never put the token in the command (-p stays in the shell history): pipe it in with --password-stdin.',
+          'Pushing without docker login: the push answers "unauthorized: unauthenticated". Log in first, with the token on the input (--password-stdin).',
       },
-      example: 'You tag a test image for ghcr.io and try to push it without logging in.',
+      example:
+        'Before you look: you tag a test image for ghcr.io and push it without docker login. What does the registry answer?',
       objectives: {},
     },
     example: [
       'docker tag api:1.4 ghcr.io/peer4u/prueba:0.1',
       'docker images ghcr.io/peer4u/prueba',
       'docker push ghcr.io/peer4u/prueba:0.1',
+      'docker push api:1.4',
     ],
     solution: [
       'docker tag api:1.4 ghcr.io/peer4u/api:1.4.0',
@@ -540,44 +550,42 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Volúmenes con nombre',
       goal: 'Alguien borró el contenedor db, pero sus datos estaban en el volumen pgdata. Vuelve a crear db (postgres:16, contraseña secreto) con esos datos: la tabla notas tiene que seguir ahí.',
       theory: {
-        what: 'Lo que un contenedor escribe en su capa muere con él. Un volumen con nombre vive aparte: lo gestiona Docker, sobrevive a docker rm y se monta en el contenedor que lo pida.',
+        what: 'Lo que un contenedor escribe muere con él. Un volumen con nombre vive aparte: sobrevive a docker rm y se monta con -v nombre:/ruta.',
         how: [
           'docker volume create pgdata',
           'docker run -d --name db -e POSTGRES_PASSWORD=secreto \\',
           '  -v pgdata:/var/lib/postgresql/data postgres:16',
           'docker volume ls',
-          'docker volume inspect pgdata',
         ],
-        when: 'Para los datos que tienen que durar: bases de datos, ficheros que suben los usuarios, colas.',
+        when: 'Para los datos que deben durar: bases de datos, ficheros subidos, colas.',
         whenNot:
-          'Para el código en desarrollo es mejor un bind mount (siguiente unidad): ves y editas los ficheros desde tu máquina.',
+          'docker volume rm sí borra los datos; con un contenedor usándolo, dice «volume is in use».',
         problems:
-          'docker volume rm, docker volume prune -a y docker compose down -v borran datos de verdad. Montar el volumen en otra ruta es como no montarlo.',
+          'Montarlo en otra ruta: con -v datos:/data, postgres escribe en su capa y \\dt dice «Did not find any relations». Usa la ruta de datos de la imagen.',
       },
       example:
-        'Sin volumen, creas una tabla, borras el contenedor y al recrearlo la tabla ya no está.',
+        'Antes de verlo: creas una tabla en un postgres sin volumen, lo borras y lo creas otra vez. ¿Seguirá la tabla?',
       objectives: {},
     },
     en: {
       title: 'Named volumes',
       goal: 'Someone removed the db container, but its data was in the pgdata volume. Create db again (postgres:16, password secreto) with that data: the notas table must still be there.',
       theory: {
-        what: 'What a container writes to its layer dies with it. A named volume lives apart: Docker manages it, it survives docker rm and it is mounted in whichever container asks for it.',
+        what: 'What a container writes dies with it. A named volume lives apart: it survives docker rm and is mounted with -v name:/path.',
         how: [
           'docker volume create pgdata',
           'docker run -d --name db -e POSTGRES_PASSWORD=secreto \\',
           '  -v pgdata:/var/lib/postgresql/data postgres:16',
           'docker volume ls',
-          'docker volume inspect pgdata',
         ],
-        when: 'For data that must last: databases, files users upload, queues.',
+        when: 'For data that must last: databases, files people upload, queues.',
         whenNot:
-          'For code in development a bind mount is better (next unit): you see and edit the files from your machine.',
+          'docker volume rm does delete the data; while a container uses it, it answers "volume is in use".',
         problems:
-          'docker volume rm, docker volume prune -a and docker compose down -v delete real data. Mounting the volume on another path is like not mounting it.',
+          'Mounting it on another path: with -v datos:/data, postgres keeps writing to its layer and \\dt says "Did not find any relations". Use the path where the image keeps its data.',
       },
       example:
-        'Without a volume, you create a table, remove the container and when you recreate it the table is gone.',
+        'Before you look: you create a table in a postgres without a volume, remove it and create it again. Is the table still there?',
       objectives: {},
     },
     example: [
@@ -586,7 +594,12 @@ export const INTERMEDIATE: Unit[] = [
       'docker rm -f prueba',
       'docker run -d --name prueba -e POSTGRES_PASSWORD=demo postgres:16',
       "docker exec prueba psql -U postgres -c '\\dt'",
-      'docker volume ls',
+      'docker rm -f prueba',
+      'docker run -d --name prueba -e POSTGRES_PASSWORD=demo -v datos:/var/lib/postgresql/data postgres:16',
+      "docker exec prueba psql -U postgres -c 'CREATE TABLE t (x int)'",
+      'docker rm -f prueba',
+      'docker run -d --name prueba -e POSTGRES_PASSWORD=demo -v datos:/var/lib/postgresql/data postgres:16',
+      "docker exec prueba psql -U postgres -c '\\dt'",
     ],
     solution: [
       'docker run -d --name db -e POSTGRES_PASSWORD=secreto -v pgdata:/var/lib/postgresql/data postgres:16',
@@ -602,46 +615,49 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Bind mounts para desarrollar',
       goal: 'Sirve ~/web con un contenedor dev (nginx:1.27-alpine) en el 8081 que la monte en solo lectura, y cambia ~/web/index.html para que diga «Peer4U en desarrollo» sin reconstruir nada.',
       theory: {
-        what: 'Un bind mount monta una carpeta de tu máquina dentro del contenedor: los dos ven los mismos ficheros. Con :ro, el contenedor no puede escribir en ella.',
+        what: 'Un bind mount monta una carpeta de tu máquina en el contenedor: los dos ven los mismos ficheros. Con :ro, el contenedor no escribe.',
         how: [
           'docker run -d --name dev -p 8081:80 \\',
           '  -v ~/web:/usr/share/nginx/html:ro nginx:1.27-alpine',
-          'docker run -v "$PWD":/app …                 # la carpeta en la que estás',
-          '--mount type=bind,source=$HOME/web,target=/usr/share/nginx/html,readonly',
+          'echo hola > ~/web/index.html   # se ve al momento',
         ],
-        when: 'En desarrollo: editas en tu editor y el contenedor lo ve al momento (recarga en caliente). También para pasar una configuración.',
-        whenNot:
-          'En producción el código va dentro de la imagen: un bind mount ata el contenedor a una carpeta de una máquina concreta.',
+        when: 'En desarrollo: editas en tu editor y el contenedor lo ve sin reconstruir.',
+        whenNot: 'En producción el código va en la imagen: un bind mount lo ata a una máquina.',
         problems:
-          'En -v, la ruta tiene que empezar por /, ./ o ~: web:/ruta, sin más, no es tu carpeta sino un volumen con nombre llamado web. Si la carpeta no existe, -v la crea vacía (y de root); --mount, en cambio, da error.',
+          'Escribir la ruta sin /, ./ ni ~: -v web:/… crea un volumen vacío llamado web, y nginx sirve su portada de fábrica, «Welcome to nginx!».',
       },
-      example: 'Montas ~/web en un nginx y miras lo que sirve.',
+      example:
+        'Antes de verlo: cambias ~/web/index.html con el contenedor en marcha. ¿Lo servirá nginx sin reconstruir?',
       objectives: {},
     },
     en: {
       title: 'Bind mounts for development',
       goal: 'Serve ~/web with a container dev (nginx:1.27-alpine) on 8081 that mounts it read-only, and change ~/web/index.html so it says "Peer4U en desarrollo" without rebuilding anything.',
       theory: {
-        what: 'A bind mount mounts a folder of your machine inside the container: both see the same files. With :ro, the container cannot write to it.',
+        what: 'A bind mount mounts a folder of your machine in the container: both see the same files. With :ro, the container cannot write.',
         how: [
           'docker run -d --name dev -p 8081:80 \\',
           '  -v ~/web:/usr/share/nginx/html:ro nginx:1.27-alpine',
-          'docker run -v "$PWD":/app …                 # the folder you are in',
-          '--mount type=bind,source=$HOME/web,target=/usr/share/nginx/html,readonly',
+          'echo hola > ~/web/index.html   # shows at once',
         ],
-        when: 'In development: you edit in your editor and the container sees it at once (hot reload). Also to pass in a configuration.',
+        when: 'In development: you edit and the container sees it without a rebuild.',
         whenNot:
-          'In production the code goes inside the image: a bind mount ties the container to a folder on one particular machine.',
+          'In production the code goes in the image: a bind mount ties the container to a folder on one machine.',
         problems:
-          'In -v, the path must start with /, ./ or ~: a bare web:/path is not your folder but a named volume called web. If the folder does not exist, -v creates it empty (and owned by root); --mount fails instead.',
+          'Writing the path without /, ./ or ~: -v web:/… creates an empty volume called web, and nginx serves its stock page, "Welcome to nginx!".',
       },
-      example: 'You mount ~/web on an nginx and look at what it serves.',
+      example:
+        'Before you look: you change ~/web/index.html with the container running. Will nginx serve it without a rebuild?',
       objectives: {},
     },
     example: [
       'docker run -d --name prueba -p 9090:80 -v ~/web:/usr/share/nginx/html:ro nginx:1.27-alpine',
       'curl -s localhost:9090',
+      "echo 'cambiado' > ~/web/index.html",
+      'curl -s localhost:9090',
       "docker exec prueba sh -c 'echo x > /usr/share/nginx/html/x.html'",
+      'docker run -d --name p2 -p 9091:80 -v web:/usr/share/nginx/html nginx:1.27-alpine',
+      'curl -s localhost:9091',
     ],
     solution: [
       'docker run -d --name dev -p 8081:80 -v ~/web:/usr/share/nginx/html:ro nginx:1.27-alpine',
@@ -663,42 +679,38 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Redes con nombre',
       goal: 'Crea la red peer4u y pon en ella db (postgres:16-alpine, contraseña secreto) y api (api:1.4, puerto 3000 publicado, DATABASE_URL=postgres://postgres:secreto@db:5432/postgres). /health tiene que decir db up.',
       theory: {
-        what: 'En una red creada por ti, los contenedores se encuentran por su nombre: Docker tiene un DNS interno. En la red bridge de siempre, no: solo por IP, que cambia.',
+        what: 'En una red creada por ti, los contenedores se encuentran por nombre. En la red de siempre, solo por IP.',
         how: [
           'docker network create peer4u',
-          'docker run -d --name db --network peer4u … postgres:16-alpine',
-          'docker run -d --name api --network peer4u -e DATABASE_URL=postgres://…@db:5432/… api:1.4',
-          'docker exec api ping -c 1 db',
-          'docker network connect peer4u web   # meter uno que ya corre',
-          'docker network inspect peer4u',
+          'docker run -d --name db --network peer4u …',
+          'docker run -d --name api --network peer4u …  # usa @db:5432',
         ],
-        when: 'Siempre que dos contenedores hablen entre sí (la API y su base de datos, nginx y la API).',
+        when: 'Cuando dos contenedores hablan: la API y su base de datos, nginx y la API.',
+        whenNot: 'La base de datos no necesita -p: dentro de la red ya llegas a su 5432.',
         problems:
-          'La base de datos no necesita -p: dentro de la red ya se llega a su 5432. Publicarla abre el puerto a todo el que llegue a tu máquina.',
+          "Dejarlos en la red de siempre y llamarse por nombre: ping responde «ping: bad address 'a2'». Crea una red y conéctalos a ella.",
       },
       example:
-        'Dos contenedores en la red de siempre no se encuentran por nombre; en una red propia, sí.',
+        'Antes de verlo: a1 y a2 están en la red de siempre. ¿Contestará docker exec a1 ping -c 1 a2?',
       objectives: {},
     },
     en: {
       title: 'Named networks',
       goal: 'Create the peer4u network and put db (postgres:16-alpine, password secreto) and api (api:1.4, port 3000 published, DATABASE_URL=postgres://postgres:secreto@db:5432/postgres) on it. /health must say db up.',
       theory: {
-        what: 'On a network you create, containers find each other by name: Docker runs an internal DNS. On the default bridge network they do not: only by IP, which changes.',
+        what: 'On a network you create, containers find each other by name. On the default network, only by IP.',
         how: [
           'docker network create peer4u',
-          'docker run -d --name db --network peer4u … postgres:16-alpine',
-          'docker run -d --name api --network peer4u -e DATABASE_URL=postgres://…@db:5432/… api:1.4',
-          'docker exec api ping -c 1 db',
-          'docker network connect peer4u web   # add one that is already running',
-          'docker network inspect peer4u',
+          'docker run -d --name db --network peer4u …',
+          'docker run -d --name api --network peer4u …  # uses @db:5432',
         ],
-        when: 'Whenever two containers talk to each other (the API and its database, nginx and the API).',
+        when: 'Whenever two containers talk: the API and its database, nginx and the API.',
+        whenNot: 'The database needs no -p: inside the network you already reach its 5432.',
         problems:
-          'The database does not need -p: inside the network its 5432 is reachable. Publishing it opens the port to anyone who reaches your machine.',
+          'Leaving them on the default network and calling by name: ping answers "ping: bad address \'a2\'". Create a network and connect them to it.',
       },
       example:
-        'Two containers on the default network cannot find each other by name; on a network of your own, they can.',
+        'Before you look: a1 and a2 are on the default network. Will docker exec a1 ping -c 1 a2 answer?',
       objectives: {},
     },
     example: [
@@ -727,38 +739,38 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Puertos: EXPOSE, -p y seguridad',
       goal: 'Arranca cache (redis:7-alpine) con su 6379 publicado solo para tu máquina (127.0.0.1), y web-nueva (nginx:1.27-alpine) en el 8090, porque el 8080 lo tiene web y tiene que seguir así.',
       theory: {
-        what: 'EXPOSE en el Dockerfile solo documenta. -p publica: -p 8080:80 escucha en todas las interfaces de tu máquina; -p 127.0.0.1:6379:6379 solo en ella misma. Un puerto del anfitrión solo lo puede tener un contenedor.',
+        what: '-p 8080:80 publica en todas las interfaces; -p 127.0.0.1:6379:6379, solo en tu máquina. Cada puerto del anfitrión es de un contenedor.',
         how: [
           'docker run -d --name cache -p 127.0.0.1:6379:6379 redis:7-alpine',
-          'docker port cache           # 6379/tcp -> 127.0.0.1:6379',
-          'docker run -d -p 8090:80 …  # el 8080 ya está cogido: otro puerto',
-          'docker ps                   # columna PORTS',
+          'docker port cache   # 6379/tcp -> 127.0.0.1:6379',
+          'docker run -d -p 8090:80 …   # el 8080 está cogido',
         ],
-        when: 'Publica solo lo que tiene que llegar desde fuera. Lo que es solo para ti (una caché, una base de datos de pruebas), en 127.0.0.1.',
+        when: 'Publica solo lo que debe llegar de fuera; lo tuyo, en 127.0.0.1.',
+        whenNot: 'EXPOSE en el Dockerfile solo documenta: el que publica es -p.',
         problems:
-          '«port is already allocated»: el contenedor se crea pero no arranca. Bórralo (o usa otro nombre) y créalo con otro puerto.',
+          'Usar un puerto ocupado: «Bind for 0.0.0.0:8080 failed: port is already allocated», y el contenedor queda Created, sin arrancar. Bórralo y créalo con otro puerto.',
       },
       example:
-        'Intentas otro nginx en el 8080 ocupado, ves el error y el contenedor creado sin arrancar.',
+        'Antes de verlo: web ya tiene el 8080 y arrancas otro nginx en el 8080. ¿Qué queda en docker ps -a?',
       objectives: {},
     },
     en: {
       title: 'Ports: EXPOSE, -p and security',
       goal: 'Start cache (redis:7-alpine) with its 6379 published only for your machine (127.0.0.1), and web-nueva (nginx:1.27-alpine) on 8090, because 8080 belongs to web and must stay that way.',
       theory: {
-        what: 'EXPOSE in the Dockerfile only documents. -p publishes: -p 8080:80 listens on every interface of your machine; -p 127.0.0.1:6379:6379 only on the machine itself. A host port can belong to one container only.',
+        what: '-p 8080:80 publishes on every interface; -p 127.0.0.1:6379:6379, only on your machine. Each host port belongs to one container.',
         how: [
           'docker run -d --name cache -p 127.0.0.1:6379:6379 redis:7-alpine',
-          'docker port cache           # 6379/tcp -> 127.0.0.1:6379',
-          'docker run -d -p 8090:80 …  # 8080 is taken: another port',
-          'docker ps                   # PORTS column',
+          'docker port cache   # 6379/tcp -> 127.0.0.1:6379',
+          'docker run -d -p 8090:80 …   # 8080 is taken',
         ],
-        when: 'Publish only what must be reached from outside. What is just for you (a cache, a test database), on 127.0.0.1.',
+        when: 'Publish only what must be reached from outside; your own things, on 127.0.0.1.',
+        whenNot: 'EXPOSE in the Dockerfile only documents: -p is what publishes.',
         problems:
-          '"port is already allocated": the container is created but does not start. Remove it (or use another name) and create it with another port.',
+          'Using a taken port: "Bind for 0.0.0.0:8080 failed: port is already allocated", and the container stays Created, not started. Remove it and create it on another port.',
       },
       example:
-        'You try another nginx on the busy 8080, see the error and the container created but not started.',
+        'Before you look: web already holds 8080 and you start another nginx on 8080. What is left in docker ps -a?',
       objectives: {},
     },
     example: [
@@ -789,41 +801,49 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Copiar ficheros y copias de seguridad',
       goal: 'Deja en ~/copias la configuración de nginx de web (/etc/nginx/conf.d/default.conf) y una copia del volumen pgdata en ~/copias/pgdata.tgz.',
       theory: {
-        what: 'docker cp copia ficheros entre un contenedor y tu máquina. Un volumen no se copia así: se monta en un contenedor de usar y tirar junto a una carpeta tuya y se empaqueta con tar.',
+        what: 'docker cp copia ficheros entre contenedor y anfitrión. Un volumen se monta en un contenedor de usar y tirar y se empaqueta con tar.',
         how: [
           'docker cp web:/etc/nginx/conf.d/default.conf ~/copias/',
-          'docker cp nuevo.conf web:/etc/nginx/conf.d/default.conf',
           'docker run --rm -v pgdata:/datos -v ~/copias:/backup alpine:3.20 \\',
           '  tar czf /backup/pgdata.tgz -C /datos .',
           'tar -tzf ~/copias/pgdata.tgz',
         ],
-        when: 'Antes de actualizar una base de datos, de borrar un volumen o de mover datos a otra máquina.',
+        when: 'Antes de actualizar una base de datos o mover datos a otra máquina.',
+        whenNot:
+          'Con la base de datos en uso, mejor pg_dump o pararla: un tar en caliente pilla ficheros a medias.',
         problems:
-          'Para una base de datos en uso, lo seguro es su propia herramienta (pg_dump) o pararla antes: un tar en caliente puede pillar ficheros a medias.',
+          'Pasarle el volumen a docker cp: docker cp pgdata:/ ~/copias/ responde «No such container: pgdata». cp solo habla con contenedores.',
       },
-      example: 'Miras qué hay dentro del volumen con un contenedor de usar y tirar.',
+      example:
+        'Antes de verlo: pgdata es un volumen, no un contenedor. ¿Qué responde docker cp pgdata:/ ~/copias/?',
       objectives: { 'probe:backup': 'La copia lleva los ficheros de la base de datos' },
     },
     en: {
       title: 'Copying files and backups',
       goal: 'Put in ~/copias the nginx configuration of web (/etc/nginx/conf.d/default.conf) and a copy of the pgdata volume as ~/copias/pgdata.tgz.',
       theory: {
-        what: 'docker cp copies files between a container and your machine. A volume is not copied that way: you mount it in a throwaway container next to a folder of yours and pack it with tar.',
+        what: 'docker cp copies files between a container and your machine. A volume is mounted in a throwaway container and packed with tar.',
         how: [
           'docker cp web:/etc/nginx/conf.d/default.conf ~/copias/',
-          'docker cp new.conf web:/etc/nginx/conf.d/default.conf',
           'docker run --rm -v pgdata:/datos -v ~/copias:/backup alpine:3.20 \\',
           '  tar czf /backup/pgdata.tgz -C /datos .',
           'tar -tzf ~/copias/pgdata.tgz',
         ],
-        when: 'Before upgrading a database, removing a volume or moving data to another machine.',
+        when: 'Before upgrading a database or moving data to another machine.',
+        whenNot:
+          'With the database in use, prefer pg_dump or stop it first: a live tar can catch half-written files.',
         problems:
-          'For a database in use, the safe way is its own tool (pg_dump) or stopping it first: a hot tar can catch half-written files.',
+          'Giving the volume to docker cp: docker cp pgdata:/ ~/copias/ answers "No such container: pgdata". cp only talks to containers.',
       },
-      example: 'You look at what is inside the volume with a throwaway container.',
+      example:
+        'Before you look: pgdata is a volume, not a container. What does docker cp pgdata:/ ~/copias/ answer?',
       objectives: { 'probe:backup': 'The copy holds the database files' },
     },
-    example: ['docker volume ls', 'docker run --rm -v pgdata:/datos alpine:3.20 ls /datos'],
+    example: [
+      'docker volume ls',
+      'docker run --rm -v pgdata:/datos alpine:3.20 ls /datos',
+      'docker cp pgdata:/ ~/copias/',
+    ],
     solution: [
       'docker cp web:/etc/nginx/conf.d/default.conf ~/copias/',
       'docker run --rm -v pgdata:/datos -v ~/copias:/backup alpine:3.20 tar czf /backup/pgdata.tgz -C /datos .',
@@ -910,53 +930,58 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Tu primer compose.yaml',
       goal: 'En ~/web, escribe un compose.yaml con un servicio web (nginx:1.27-alpine, 8080 a su 80) y levántalo en segundo plano.',
       theory: {
-        what: 'Compose describe en un fichero lo que harías con varios docker run: servicios, puertos, variables, volúmenes. docker compose up lo lleva a ese estado; down lo quita. El proyecto se llama como la carpeta.',
+        what: 'Compose describe en compose.yaml lo que harías con varios docker run. docker compose up -d lo crea y docker compose down lo quita.',
         how: [
           'services:',
           '  web:',
           '    image: nginx:1.27-alpine',
           '    ports:',
           '      - "8080:80"',
-          'docker compose up -d        # crea la red del proyecto y los contenedores',
-          'docker compose ps',
-          'docker compose logs web',
+          'docker compose up -d   # red y contenedores',
           'docker compose down',
         ],
-        when: 'En cuanto hay más de un contenedor o una orden de docker run que ya no cabe en la cabeza: el fichero va al repositorio y todo el equipo levanta lo mismo.',
+        when: 'En cuanto hay más de un contenedor: el fichero va al repositorio y todo el equipo levanta lo mismo.',
+        whenNot:
+          'Para probar algo una vez basta docker run. Y en YAML, sangrías de espacios, nunca tabuladores.',
         problems:
-          'YAML va por sangrías de espacios (nunca tabuladores). Pon los puertos entre comillas: "8080:80".',
+          'Lanzarlo desde otra carpeta: docker compose up -d en ~ responde «no configuration file provided: not found». Compose busca compose.yaml donde estás.',
       },
-      example: 'En ~/demo levantas un compose de un servicio, lo miras y lo quitas.',
+      example:
+        'Antes de verlo: en ~/demo el servicio se llama hola. ¿Qué nombre tendrá su contenedor en docker ps?',
       objectives: {},
     },
     en: {
       title: 'Your first compose.yaml',
       goal: 'In ~/web, write a compose.yaml with a web service (nginx:1.27-alpine, 8080 to its 80) and bring it up in the background.',
       theory: {
-        what: 'Compose describes in a file what you would do with several docker run: services, ports, variables, volumes. docker compose up brings everything to that state; down removes it. The project is named after the folder.',
+        what: 'Compose describes in compose.yaml what you would do with several docker run. docker compose up -d creates it and docker compose down removes it.',
         how: [
           'services:',
           '  web:',
           '    image: nginx:1.27-alpine',
           '    ports:',
           '      - "8080:80"',
-          'docker compose up -d        # creates the project network and the containers',
-          'docker compose ps',
-          'docker compose logs web',
+          'docker compose up -d   # network and containers',
           'docker compose down',
         ],
-        when: 'As soon as there is more than one container or a docker run line nobody can remember: the file goes in the repository and the whole team brings up the same thing.',
-        problems: 'YAML relies on space indentation (never tabs). Quote the ports: "8080:80".',
+        when: 'With more than one container: the file goes in the repository and the whole team starts the same.',
+        whenNot:
+          'To try something once, docker run is enough. In YAML, indent with spaces, never tabs.',
+        problems:
+          'Running it from another folder: docker compose up -d in ~ answers "no configuration file provided: not found". Compose looks for compose.yaml where you are.',
       },
-      example: 'In ~/demo you bring up a one-service compose, look at it and remove it.',
+      example:
+        'Before you look: in ~/demo the service is called hola. What name will its container have in docker ps?',
       objectives: {},
     },
     example: [
       'cd ~/demo',
       'cat compose.yaml',
       'docker compose up -d',
-      'docker compose ps',
+      'docker ps',
       'docker compose down',
+      'cd ~',
+      'docker compose up -d',
     ],
     solution: [
       'cd ~/web',
@@ -981,7 +1006,7 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Varios servicios',
       goal: 'En ~/api, un compose.yaml con api (construida desde la carpeta, 3000 publicado, DATABASE_URL=postgres://postgres:secreto@db:5432/postgres) y db (postgres:16-alpine, contraseña secreto, datos en el volumen pgdata). Levántalo: /health tiene que decir db up.',
       theory: {
-        what: 'build: construye la imagen del servicio desde una carpeta; image: usa una ya hecha. Todos los servicios van a la red del proyecto y se encuentran por el nombre del servicio. Los volúmenes con nombre se declaran abajo, en volumes:.',
+        what: 'build: construye la imagen del servicio desde una carpeta; image: usa una ya hecha. Los servicios se encuentran por su nombre, y los volúmenes se declaran abajo.',
         how: [
           'services:',
           '  api:',
@@ -994,20 +1019,22 @@ export const INTERMEDIATE: Unit[] = [
           '      - pgdata:/var/lib/postgresql/data',
           'volumes:',
           '  pgdata:',
-          'docker compose up -d --build   # vuelve a construir si cambió el código',
         ],
-        when: 'Para el entorno de desarrollo de un servicio con sus dependencias: base de datos, caché, colas.',
+        when: 'Para el entorno de desarrollo de un servicio con lo que necesita: base de datos, caché, colas.',
+        whenNot:
+          'Si cambias el código, up -d no reconstruye: hace falta docker compose up -d --build.',
         problems:
-          'Si cambias el código, up -d no reconstruye solo: --build. Un volumen usado y no declarado en volumes: da error.',
+          'Usar un volumen sin declararlo: up responde «service "db" refers to undefined volume datos». Añádelo en volumes:, al final del fichero.',
       },
-      example: 'Miras el Dockerfile y la configuración que espera la API.',
+      example:
+        'Antes de verlo: el compose monta el volumen datos, pero no lo declara en volumes:. ¿Arrancará db?',
       objectives: {},
     },
     en: {
       title: 'Several services',
       goal: 'In ~/api, a compose.yaml with api (built from the folder, 3000 published, DATABASE_URL=postgres://postgres:secreto@db:5432/postgres) and db (postgres:16-alpine, password secreto, data in the pgdata volume). Bring it up: /health must say db up.',
       theory: {
-        what: 'build: builds the service image from a folder; image: uses a ready one. Every service joins the project network and finds the others by service name. Named volumes are declared at the bottom, under volumes:.',
+        what: 'build: builds the service image from a folder; image: uses a ready one. Services find each other by name, and volumes are declared at the bottom.',
         how: [
           'services:',
           '  api:',
@@ -1020,16 +1047,31 @@ export const INTERMEDIATE: Unit[] = [
           '      - pgdata:/var/lib/postgresql/data',
           'volumes:',
           '  pgdata:',
-          'docker compose up -d --build   # rebuild if the code changed',
         ],
-        when: 'For the development environment of a service with its dependencies: database, cache, queues.',
+        when: 'For the development setup of a service with what it needs: database, cache, queues.',
+        whenNot:
+          'If you change the code, up -d does not rebuild: you need docker compose up -d --build.',
         problems:
-          'If you change the code, up -d does not rebuild by itself: --build. A volume used but not declared under volumes: is an error.',
+          'Using a volume without declaring it: up answers "service "db" refers to undefined volume datos". Add it under volumes:, at the end of the file.',
       },
-      example: 'You read the Dockerfile and the configuration the API expects.',
+      example:
+        'Before you look: the compose mounts the volume datos but does not declare it in volumes:. Will db start?',
       objectives: {},
     },
-    example: ['cd ~/api', 'cat Dockerfile', 'cat README.md'],
+    example: [
+      'cd ~/api',
+      'cat README.md',
+      heredoc('compose.yaml', [
+        'services:',
+        '  db:',
+        '    image: postgres:16-alpine',
+        '    environment:',
+        '      POSTGRES_PASSWORD: demo',
+        '    volumes:',
+        '      - datos:/var/lib/postgresql/data',
+      ]),
+      'docker compose up -d',
+    ],
     solution: ['cd ~/api', heredoc('compose.yaml', COMPOSE_MULTI), 'docker compose up -d'],
     check: {
       containers: ['api-api-1', 'api-db-1'],
@@ -1050,19 +1092,21 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Variables y .env',
       goal: 'Saca la contraseña y el puerto de ~/api/compose.yaml a un .env (POSTGRES_PASSWORD=secreto, API_PORT=3000) y usa ${POSTGRES_PASSWORD} y ${API_PORT} en el compose: en él no puede quedar «secreto».',
       theory: {
-        what: 'Compose sustituye ${VAR} con las variables de tu shell y, si no están, con las del fichero .env de la carpeta del proyecto. docker compose config enseña el resultado ya sustituido.',
+        what: 'Compose cambia ${VAR} por la variable de tu shell o, si no está, por la del fichero .env del proyecto. docker compose config enseña el resultado.',
         how: [
           "printf 'POSTGRES_PASSWORD=secreto\\nAPI_PORT=3000\\n' > .env",
           '      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}',
           '      - "${API_PORT}:3000"',
-          '${API_PORT:-3000}          # con valor por defecto',
-          'docker compose config      # el compose tal como lo entiende',
+          'docker compose config   # ya sustituido',
         ],
-        when: 'Para que el compose.yaml vaya al repositorio y lo que cambia por persona o entorno (contraseñas, puertos) no.',
+        when: 'Para que compose.yaml vaya al repositorio y las contraseñas y puertos de cada cual, no.',
+        whenNot:
+          '${API_PORT:-3000} pone un valor por defecto. Y el .env no se sube: va en .gitignore.',
         problems:
-          'El .env no se sube: va en .gitignore. Una variable que falta se queda vacía con un aviso (WARN): mira siempre docker compose config.',
+          'Una variable que falta se queda vacía con solo un aviso: «The "CLAVE" variable is not set. Defaulting to a blank string.». Mira docker compose config antes de up.',
       },
-      example: 'Miras el compose con la contraseña escrita y cómo lo entiende Compose.',
+      example:
+        'Antes de verlo: cambias secreto por ${CLAVE} y CLAVE no existe. ¿Qué contraseña enseñará docker compose config?',
       objectives: {
         'probe:secret': 'La contraseña ya no está escrita en compose.yaml',
         'probe:port': 'El puerto sale de API_PORT',
@@ -1074,19 +1118,21 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Variables and .env',
       goal: 'Move the password and the port out of ~/api/compose.yaml into a .env (POSTGRES_PASSWORD=secreto, API_PORT=3000) and use ${POSTGRES_PASSWORD} and ${API_PORT} in the compose: "secreto" must not remain in it.',
       theory: {
-        what: 'Compose replaces ${VAR} with your shell variables and, if missing, with those in the .env file of the project folder. docker compose config shows the result already replaced.',
+        what: 'Compose replaces ${VAR} with the variable from your shell or, if missing, from the project .env file. docker compose config shows the result.',
         how: [
           "printf 'POSTGRES_PASSWORD=secreto\\nAPI_PORT=3000\\n' > .env",
           '      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}',
           '      - "${API_PORT}:3000"',
-          '${API_PORT:-3000}          # with a default value',
-          'docker compose config      # the compose as Compose understands it',
+          'docker compose config   # already replaced',
         ],
-        when: 'So that compose.yaml goes into the repository and what changes per person or environment (passwords, ports) does not.',
+        when: 'So that compose.yaml goes in the repository and everyone’s own passwords and ports do not.',
+        whenNot:
+          '${API_PORT:-3000} sets a default if it is missing. And the .env is not committed: it goes in .gitignore.',
         problems:
-          'The .env is not committed: it goes in .gitignore. A missing variable becomes empty with a warning (WARN): always check docker compose config.',
+          'A missing variable becomes empty with just a warning: "The "CLAVE" variable is not set. Defaulting to a blank string.". Check docker compose config before up.',
       },
-      example: 'You look at the compose with the password written in and how Compose reads it.',
+      example:
+        'Before you look: you replace secreto with ${CLAVE} and CLAVE does not exist. Which password will docker compose config show?',
       objectives: {
         'probe:secret': 'The password is no longer written in compose.yaml',
         'probe:port': 'The port comes from API_PORT',
@@ -1094,7 +1140,13 @@ export const INTERMEDIATE: Unit[] = [
         'probe:valid': 'The compose is still valid',
       },
     },
-    example: ['cd ~/api', 'cat compose.yaml', 'docker compose config'],
+    example: [
+      'cd ~/api',
+      "sed -i 's/secreto/${CLAVE}/' compose.yaml",
+      'docker compose config',
+      "printf 'CLAVE=demo\\n' > .env",
+      'docker compose config',
+    ],
     solution: [
       'cd ~/api',
       "printf 'POSTGRES_PASSWORD=secreto\\nAPI_PORT=3000\\n' > .env",
@@ -1130,47 +1182,71 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Healthchecks y orden de arranque',
       goal: 'Añade a db un healthcheck con pg_isready -U postgres y haz que api espere a que db esté sana (condition: service_healthy). Aplícalo.',
       theory: {
-        what: 'depends_on solo ordena el arranque: no espera a que la base de datos acepte conexiones. Con un healthcheck, Docker sabe si el servicio responde, y condition: service_healthy hace esperar a quien depende de él.',
+        what: 'depends_on solo ordena el arranque; no espera a que la base de datos acepte conexiones. Con un healthcheck y condition: service_healthy, sí.',
         how: [
           '    healthcheck:',
           '      test: ["CMD-SHELL", "pg_isready -U postgres"]',
-          '      interval: 5s',
-          '      retries: 5',
           '    depends_on:',
           '      db:',
           '        condition: service_healthy',
-          'docker compose ps          # STATUS: Up (healthy)',
+          'docker compose ps   # Up (healthy)',
         ],
-        when: 'Siempre que un servicio necesite a otro listo al arrancar: la API y su base de datos, unas migraciones.',
+        when: 'Cuando un servicio necesita a otro listo al arrancar: la API y su base de datos, unas migraciones.',
+        whenNot:
+          'Sin healthcheck, docker compose ps solo dice Up: corre, pero no sabes si responde.',
         problems:
-          'Un healthcheck que siempre falla deja el servicio unhealthy y los que dependen de él no arrancan («dependency failed to start»). La prueba se ejecuta dentro del contenedor: tiene que existir ahí.',
+          'Una prueba que nunca pasa: db queda «(unhealthy)» y up responde «dependency failed to start: container api-db-1 is unhealthy». La prueba corre dentro del contenedor: usa lo que haya ahí.',
       },
-      example: 'Miras el estado de los servicios: ninguno dice si está sano.',
+      example:
+        'Antes de verlo: la prueba de db hace curl al 5432 de postgres. ¿Arrancará api, que espera a db sana?',
       objectives: { 'probe:waits': 'api espera a que db esté sana' },
     },
     en: {
       title: 'Healthchecks and start order',
       goal: 'Add a healthcheck with pg_isready -U postgres to db and make api wait until db is healthy (condition: service_healthy). Apply it.',
       theory: {
-        what: 'depends_on only orders the start: it does not wait for the database to accept connections. With a healthcheck, Docker knows whether the service answers, and condition: service_healthy makes its dependants wait.',
+        what: 'depends_on only orders the start; it does not wait for the database to accept connections. With a healthcheck and condition: service_healthy, it does.',
         how: [
           '    healthcheck:',
           '      test: ["CMD-SHELL", "pg_isready -U postgres"]',
-          '      interval: 5s',
-          '      retries: 5',
           '    depends_on:',
           '      db:',
           '        condition: service_healthy',
-          'docker compose ps          # STATUS: Up (healthy)',
+          'docker compose ps   # Up (healthy)',
         ],
-        when: 'Whenever a service needs another one ready when it starts: the API and its database, some migrations.',
+        when: 'When a service needs another one ready at start: the API and its database, some migrations.',
+        whenNot:
+          'Without a healthcheck, docker compose ps only says Up: it runs, but you do not know if it answers.',
         problems:
-          'A healthcheck that always fails leaves the service unhealthy and its dependants do not start ("dependency failed to start"). The test runs inside the container: it must exist there.',
+          'A test that never passes: db stays "(unhealthy)" and up answers "dependency failed to start: container api-db-1 is unhealthy". The test runs inside the container.',
       },
-      example: 'You look at the services status: none says whether it is healthy.',
+      example:
+        'Before you look: the db test runs curl against postgres on 5432. Will api, which waits for a healthy db, start?',
       objectives: { 'probe:waits': 'api waits until db is healthy' },
     },
-    example: ['cd ~/api', 'docker compose ps', "docker inspect -f '{{.State.Status}}' api-db-1"],
+    example: [
+      'cd ~/api',
+      'docker compose ps',
+      'docker compose down',
+      heredoc('compose.yaml', [
+        'services:',
+        '  api:',
+        '    build: .',
+        '    depends_on:',
+        '      db:',
+        '        condition: service_healthy',
+        '  db:',
+        '    image: postgres:16-alpine',
+        '    environment:',
+        '      POSTGRES_PASSWORD: demo',
+        '    healthcheck:',
+        '      test: ["CMD-SHELL", "curl -f localhost:5432"]',
+        '      interval: 5s',
+        '      retries: 3',
+      ]),
+      'docker compose up -d',
+      'docker compose ps',
+    ],
     solution: ['cd ~/api', heredoc('compose.yaml', COMPOSE_HEALTH), 'docker compose up -d'],
     check: {
       inspect: ['api-db-1 {{.State.Health.Status}}'],
@@ -1195,47 +1271,50 @@ export const INTERMEDIATE: Unit[] = [
       title: 'Operar un stack',
       goal: 'En ~/api: crea la tabla pedidos en db con compose exec, pon 3 réplicas de worker y comprueba que, tras un down y un up, la tabla sigue ahí.',
       theory: {
-        what: 'Compose también sirve para el día a día: exec entra en un servicio por su nombre, logs junta los registros de todos, restart reinicia, --scale cambia cuántas réplicas hay y down lo quita todo menos los volúmenes.',
+        what: 'Compose también sirve a diario: exec por nombre de servicio, --scale para réplicas y down, que lo quita todo menos los volúmenes.',
         how: [
           "docker compose exec db psql -U postgres -c '\\dt'",
-          'docker compose logs --tail 20 api',
-          'docker compose restart api',
           'docker compose up -d --scale worker=3',
-          'docker compose down        # los datos siguen en el volumen',
-          'docker compose down -v     # borra también los volúmenes: cuidado',
+          'docker compose down -v   # también los volúmenes',
         ],
-        when: 'Cada día con el entorno de desarrollo: mirar, reiniciar lo que cambió, probar con más workers.',
+        when: 'A diario en desarrollo: mirar, reiniciar, probar con más workers.',
+        whenNot:
+          'down -v borra la base de datos: tras otro up, \\dt dice «Did not find any relations».',
         problems:
-          'down -v borra la base de datos. --scale de un servicio con un puerto fijo publicado choca: solo una réplica puede tener ese puerto.',
+          'Usar docker exec con el nombre del servicio: docker exec db responde «No such container: db», porque el contenedor se llama api-db-1. Usa docker compose exec db.',
       },
-      example: 'Miras los registros de la API y reinicias el worker.',
+      example:
+        'Antes de verlo: creas una tabla, haces docker compose down -v y lo levantas otra vez. ¿Seguirá la tabla?',
       objectives: {},
     },
     en: {
       title: 'Operating a stack',
       goal: 'In ~/api: create the pedidos table in db with compose exec, run 3 worker replicas and check that, after a down and an up, the table is still there.',
       theory: {
-        what: 'Compose is for daily work too: exec gets into a service by its name, logs gathers everyone’s logs, restart restarts, --scale changes the number of replicas and down removes everything but the volumes.',
+        what: 'Compose also helps every day: exec by service name, --scale for replicas and down, which removes everything but the volumes.',
         how: [
           "docker compose exec db psql -U postgres -c '\\dt'",
-          'docker compose logs --tail 20 api',
-          'docker compose restart api',
           'docker compose up -d --scale worker=3',
-          'docker compose down        # the data stays in the volume',
-          'docker compose down -v     # also removes the volumes: careful',
+          'docker compose down -v   # volumes too',
         ],
-        when: 'Every day with the development environment: look around, restart what changed, try more workers.',
+        when: 'Every day in development: look, restart, try with more workers.',
+        whenNot:
+          'down -v deletes the database: after another up, \\dt says "Did not find any relations".',
         problems:
-          'down -v deletes the database. --scale on a service with a fixed published port clashes: only one replica can own that port.',
+          'Using docker exec with the service name: docker exec db answers "No such container: db", because the container is called api-db-1. Use docker compose exec db.',
       },
-      example: 'You read the API logs and restart the worker.',
+      example:
+        'Before you look: you create a table, run docker compose down -v and bring it up again. Is the table still there?',
       objectives: {},
     },
     example: [
       'cd ~/api',
       'docker compose ps',
-      'docker compose logs --tail 5 api',
-      'docker compose restart worker',
+      "docker compose exec db psql -U postgres -c 'CREATE TABLE t (x int)'",
+      'docker compose down -v',
+      'docker compose up -d',
+      "docker compose exec db psql -U postgres -c '\\dt'",
+      "docker exec db psql -U postgres -c '\\dt'",
     ],
     solution: [
       'cd ~/api',

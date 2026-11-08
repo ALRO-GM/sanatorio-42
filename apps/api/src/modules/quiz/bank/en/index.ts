@@ -10,6 +10,7 @@ import { PISCINE_C08_C13_EN } from './piscine-c08-c13.js'
 import type { ConceptText } from '../types.js'
 import { ALGORITHMS_EN } from './algorithms.js'
 import { C_BASICS_EN } from './c-basics.js'
+import { COURSES_EN } from './courses.js'
 import { CPP_EN } from './cpp.js'
 import { GENERAL_EN } from './general.js'
 import { GIT_EN } from './git.js'
@@ -28,6 +29,7 @@ export const BANK_EN: Readonly<Record<string, ConceptText>> = {
   ...CPP_EN,
   ...PYTHON_EN,
   ...GIT_EN,
+  ...COURSES_EN,
   ...PISCINE_SHELL_EN,
   ...PISCINE_C00_C03_EN,
   ...PISCINE_C04_C07_EN,

@@ -198,7 +198,8 @@ sin uso.
 ## Ejemplo 1: shell, rutas (`cd`)
 
 Comprueba la unidad `cd` (ver [plantilla-explicacion.md](plantilla-explicacion.md)).
-Afirmaciones comprobadas en el motor de shell el 2026-11-08.
+Afirmaciones comprobadas en el motor de shell el 2026-11-08. Está en el banco
+(`bank/courses.ts`), junto a `docker-ports` y `k8s-pod-status`.
 
 ```ts
 {
@@ -209,15 +210,17 @@ Afirmaciones comprobadas en el motor de shell el 2026-11-08.
   level: 1,
   forms: [
     {
-      // Predicción
+      // Predicción. Con `cd ..` a secas la buena (`/var/log`) estaría escrita
+      // dentro del enunciado (`/var/log/nginx`) y el test lo rechaza: por eso
+      // `cd ../peer4u`.
       ask: [
-        'Estás en `/var/log/nginx` y escribes `cd ..`. ¿Dónde acabas?',
-        'Desde `/var/log/nginx`, `cd ..` te lleva a…',
+        'Estás en `/var/log/nginx` y escribes `cd ../peer4u`. ¿Dónde acabas?',
+        'Desde `/var/log/nginx`, `cd ../peer4u` te lleva a…',
       ],
-      right: ['`/var/log`'],
-      // Raíz (cree que .. va arriba del todo), casa (lo confunde con ~),
-      // sube dos, no se mueve.
-      wrong: ['`/`', '`/home/peer`', '`/var`', '`/var/log/nginx`'],
+      right: ['`/var/log/peer4u`'],
+      // No sube (ignora ..), raíz (cree que .. va arriba del todo), sube dos,
+      // casa (lo confunde con ~).
+      wrong: ['`/var/log/nginx/peer4u`', '`/peer4u`', '`/var/peer4u`', '`/home/peer/peer4u`'],
     },
     {
       // Diagnóstico
