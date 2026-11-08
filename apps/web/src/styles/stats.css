@@ -12,6 +12,10 @@
   gap: 1rem;
   margin-top: 1rem;
 }
+/* Las clasificaciones de los cursos, debajo de las de Ayuda (`CourseStats.tsx`). */
+.help-stats-courses {
+  margin-top: 2rem;
+}
 .help-stats-card {
   display: grid;
   align-content: start;

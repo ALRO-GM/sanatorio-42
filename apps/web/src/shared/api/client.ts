@@ -308,6 +308,7 @@ export const realApi: Api = {
 
   getLeaderboard: (period) => getJson(`/leaderboard?period=${period}`),
   getHelpStats: (period) => getJson(`/stats?period=${period}`),
+  getCourseRanking: (period) => getJson(`/courses/ranking?period=${period}`),
   getStatsProgress: (others, campuses = null) => {
     const params = new URLSearchParams()
 

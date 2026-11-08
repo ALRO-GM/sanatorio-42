@@ -71,6 +71,7 @@ de datos.
 | Expediente | Cómo se gana XP (y cuánta llevas): se abre al pulsar el número del nivel | S (cerrado) | Detalle, a un clic de donde se mira |
 | Expediente | Título y banner: desplegable con el activo a la vista; cada título trae su banner, que se ve también en tu perfil público y en tu ficha | S (cerrado) | Lo tuyo, sin ocupar sitio fijo |
 | Expediente | Tu red de correcciones, logros y reacciones, clasificación | N | Es reconocimiento, no utilidad |
+| Expediente | Logros de los cursos (22, en columnas, bajo los demás logros); cada uno conseguido es un título más del desplegable, con el banner de su curso (`docs/cursos-logros.md`) | N (los títulos, S) | Dentro del bloque de logros; el título sale donde ya se elige |
 | Expediente | En tu red de correcciones: la endogamia y con quién te cruzas más | D | En la Red son del modo de datos; aquí igual (2026-11) |
 | Guardia | Preevaluaciones, franjas de hoy, reservas | S | Es la guardia |
 | Guardia | Franjas de hoy recogidas: las cuatro horas desde ahora y la hora de cada cosa que tengas más tarde (franja, reserva, corrección), con una raya donde se saltan horas vacías; «Ver el resto del día» las abre todas (`shortStarts` en `features/help/time.ts`) | S | Las 24 horas eran lo que más ocupaba la página (2026-11) |
@@ -118,6 +119,7 @@ de datos.
 | Cabecera | Burbuja de sugerencias: se arrastra hasta un sitio (o se pulsa), panel con dónde, el problema y tu propuesta; va al buzón de incidencias como mejora con el sitio (`docs/sugerencias.md`) | S | Contar que algo no se entiende es justo para quien se pierde; pequeña y sin abrir nada hasta que se usa |
 | Pestañas | Clasificaciones (en Campus; en el código, `estadisticas`) | N | Clasificaciones: el simplificado no enseña rankings |
 | Estadísticas | Cifras del campus y clasificación de cada sección, con fotos | N | La sección en sí |
+| Estadísticas | Clasificaciones de los cursos debajo de las de Ayuda, con el mismo periodo: los cuatro juntos, cada curso, jefes vencidos y certificados; progreso animado mientras cargan (`docs/cursos-logros.md`) | N | Bloque en una sección que existe, pedido por Alberto (2026-11-08): es otra clasificación del campus |
 | Calendario | Vistas día/semana/mes, tipos de evento (también leyenda) | S | Básico |
 | Calendario | Formas del día (lista, entera, ajustada, desde ahora) | N | Comodidad |
 | Red | Grafo, filtros, totales, cómo se lee | N | La sección en sí |

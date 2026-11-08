@@ -132,6 +132,7 @@ import type {
   HolyGraph,
   CollectionGroup,
   CorrectionCollection,
+  CourseRanking,
   HelpStats,
   StatsFastest,
   StatsProgress,
@@ -591,6 +592,8 @@ export type Api = {
   getLeaderboard: (period: LeaderboardPeriod) => Promise<Leaderboard>
   /** Estadísticas de Ayuda: cifras y clasificación de cada sección. */
   getHelpStats: (period: LeaderboardPeriod) => Promise<HelpStats>
+  /** Clasificaciones de los cursos del campus: total, cada curso, jefes y certificados. */
+  getCourseRanking: (period: LeaderboardPeriod) => Promise<CourseRanking>
   /**
    * El avance en el common core a lo largo del tiempo; con `others`, también el
    * de esas personas (hasta 5). `campuses`: los campus de los que se quieren las

@@ -72,6 +72,8 @@ import type { ShellCourseModule } from '../modules/shellcourse/index.js'
 import { createDockerCourseModule } from '../modules/dockercourse/index.js'
 import type { DockerCourseModule } from '../modules/dockercourse/index.js'
 import { createK8sCourseModule } from '../modules/k8scourse/index.js'
+import { createCoursesModule } from '../modules/courses/index.js'
+import type { CoursesModule } from '../modules/courses/index.js'
 import type { K8sCourseModule } from '../modules/k8scourse/index.js'
 import type { FacilityModule } from '../modules/facility/index.js'
 import { createStatsModule } from '../modules/stats/index.js'
@@ -165,6 +167,8 @@ export type Services = {
   shellCourse: ShellCourseModule['service']
   dockerCourse: DockerCourseModule['service']
   k8sCourse: K8sCourseModule['service']
+  /** La parte de juego de los cursos: clasificaciones y logros. */
+  courses: CoursesModule['service']
   pool: PoolModule['service']
   poolMembers: ReplicaModule['poolMembers']
   /** Quién ve a quién: estudiantes y piscineros separados. */
@@ -260,6 +264,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const notify: Notify = (notice) => events.emit('notice', notice)
   // `audience`: quién ve a quién, para los módulos que enseñan gente (`docs/piscineros.md`).
   const common = { db, replica: replica.repository, audience, ...clock }
+  // La parte de juego de los cursos (`docs/cursos-logros.md`): el perfil saca de aquí sus logros.
+  const courses = createCoursesModule({ db, audience, ...clock })
   const profile = createProfileModule({
     ...common,
     curriculum: replica.curriculum,
@@ -275,6 +281,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       [...(await late.get('network').correctedByProject(login)).values()].filter(
         (times) => times >= MASTER_AT,
       ).length,
+    courses: (login) => courses.service.achievements(login),
   })
   const presence = createPresence({
     profiles: profile.profiles,
@@ -596,6 +603,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     shellCourse,
     dockerCourse,
     k8sCourse,
+    courses,
     pool,
     // El álbum de correcciones del tablón (`docs/correcciones-coleccion.md`).
     createCollectionModule({
@@ -661,6 +669,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       shellCourse: shellCourse.service,
       dockerCourse: dockerCourse.service,
       k8sCourse: k8sCourse.service,
+      courses: courses.service,
       pool: pool.service,
       poolMembers: replica.poolMembers,
       audience,

@@ -54,6 +54,7 @@ Sin el permiso, a un piscinero la portada solo le da la bienvenida.
 | Tarjeta: foto, login, título, nivel, barra de XP, siguiente título, enlace a la intra | S | Todos | `features/profile/Expediente.tsx` (bloque `record`) |
 | Cómo se gana XP y cuánta llevas de cada cosa (al pulsar el nivel) | S | Todos | `LevelButton.tsx` |
 | Elegir título; cada título trae su banner, que ven los demás | S | Todos | `TitlePicker.tsx` |
+| Títulos de los cursos: cada logro de los cursos conseguido es un título con el banner de su curso (patrón por curso, color por nivel) | S | Con logros de los cursos | `TitlePicker.tsx`, `shared/ui/TitleBanner.tsx`, `styles/banners.css` ([cursos-logros.md](cursos-logros.md)) |
 | Certificados del curso de shell | S | Con certificados `[shellcourse]` | `shared/course/Certificates.tsx` |
 | Certificados del curso de Docker | S | Con certificados `[dockercourse]` | `MyDockerCertificates` en `shared/course/Certificates.tsx` |
 | Certificados del curso de Kubernetes | S | Con certificados `[k8scourse]` | `MyK8sCertificates` en `shared/course/Certificates.tsx` |
@@ -62,6 +63,7 @@ Sin el permiso, a un piscinero la portada solo le da la bienvenida.
 | Compararte en Avance desde el health check | N | Todos `[avance]` | `progressHref` |
 | Tu red de correcciones en pequeño | N | Todos `[expediente.network]` | `NetworkCard.tsx` (bloque `network`) |
 | Logros y reacciones recibidas | N | Todos `[expediente.achievements]` | `Achievements.tsx` (bloque `achievements`) |
+| Logros de los cursos: primer punto, cada certificado y todos los jefes con tres estrellas de cada curso (en git, pruebas de grupo y jefe final), y empezar, terminar y terminar en el orden sugerido los cuatro | N | Todos `[expediente.achievements]` | `Achievements.tsx`, `modules/courses` ([cursos-logros.md](cursos-logros.md)) |
 | Quién ayuda más (del mes o siempre) y «cómo te han descrito» | N | Todos `[expediente.ranking]` | `LeaderboardCard.tsx`, `AskedCard.tsx` (bloque `ranking`) |
 | Plegar y ordenar los bloques; «Ordenar o plegar estos bloques» | S | Todos | `shared/layout/Blocks.tsx` |
 | Perfil de otra persona (`#/expediente/<login>`): su estilo, nivel, salud, red, logros y botón para escribirle | S | Todos | `PublicRecord.tsx` |
@@ -339,6 +341,7 @@ Pedido por Alberto el 2026-11-06 ([abandono.md](abandono.md)). Solo quien admini
 | --- | --- | --- | --- |
 | Clasificación de cada sección de Ayuda (sesiones validadas, dudas resueltas, sprints, pizarras, partidas), del mes o siempre, con fotos y tu fila; los puestos se cuentan solo entre la gente que ves | N | Todos | `features/stats/HelpStatsPage.tsx` |
 | Tu mejor puesto en una frase | N | Todos | `HelpStatsPage.tsx` |
+| Clasificaciones de los cursos, del mismo periodo: estrellas de los cuatro juntos y de cada curso, jefes vencidos y certificados, con las cifras del campus, fotos y tu fila; solo gente del campus y de tu mundo, sin ocultos | N | Todos | `CourseStats.tsx`, `StatsCard.tsx`, `modules/courses` ([cursos-logros.md](cursos-logros.md)) |
 | Demostración | N | Todos | `HelpStatsTour.tsx` |
 
 ## Cabecera

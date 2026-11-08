@@ -48,6 +48,52 @@ describe('Estadísticas de Ayuda', () => {
     await expect.poll(doubts).not.toBe(before)
   }, 20_000)
 
+  it('debajo, las clasificaciones de los cursos: total, cada curso, jefes y certificados', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/estadisticas')
+    const block = must(
+      (await screen.findByRole('heading', { name: text('stats.courses.title'), level: 2 })).closest(
+        'section',
+      ),
+      'el bloque de los cursos',
+    )
+    const titles = [
+      'stats.courses.total',
+      'nav.cursoshell',
+      'nav.cursogit',
+      'nav.cursodocker',
+      'nav.cursok8s',
+      'stats.courses.bosses',
+      'stats.courses.certificates',
+    ]
+
+    for (const key of titles) {
+      expect(await within(block).findByRole('heading', { name: text(key), level: 3 })).toBeTruthy()
+    }
+
+    // La tarjeta del total se busca cada vez: al cambiar el periodo se vuelve a pintar.
+    const total = (): HTMLElement =>
+      must(
+        screen
+          .getByRole('heading', { name: text('stats.courses.total') })
+          .closest<HTMLElement>('article'),
+        'la tarjeta del total',
+      )
+    const ranking = within(total()).getByRole('list', { name: text('stats.courses.total.rank') })
+
+    // Quien más estrellas suma va primero, con su foto y enlace a su perfil.
+    expect(within(ranking).getAllByRole('link')[0]?.textContent).toBe('lruiz')
+    const passed = (): string | null | undefined =>
+      within(total()).queryByText(text('stats.courses.sum.units'))?.nextElementSibling?.textContent
+    const before = passed()
+
+    // El periodo de arriba cambia también los cursos.
+    await user.click(screen.getByRole('button', { name: text('rank.all') }))
+    await expect.poll(passed, { timeout: 5000 }).not.toBe(before)
+    expect(passed()).toBeTruthy()
+  }, 20_000)
+
   it('al pasar el ratón por un login sale su ficha con la foto y lo que está haciendo', async () => {
     const user = userEvent.setup()
 

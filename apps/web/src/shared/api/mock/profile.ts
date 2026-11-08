@@ -6,6 +6,7 @@ import { mockHacker } from './clicker'
 import type { PaceRef, TitleId } from '@sanatorio/contracts'
 
 import { LEVEL_FLOORS, ME, RANKING, TITLES } from './data'
+import { mockCourseAchievements } from './courses'
 import { poolPreviewing } from './pool'
 import { portrait } from './portrait'
 import type { Api } from '../types'
@@ -114,6 +115,7 @@ export const profileMock: Pick<
         achievement('selfless_help', seed % 7, 10),
         achievement('board_teacher', seed % 2, 1),
         achievement('campus_guardian', seed % 25, 25),
+        ...mockCourseAchievements(seed),
       ],
       reactions: { bug: seed % 6, code: seed % 4, concept: seed % 8, patient: seed % 5 },
       health: await this.getHealth(),
@@ -125,6 +127,8 @@ export const profileMock: Pick<
     const xp = levelFor(state.xp)
     const helps = Object.values(state.reactions).reduce((sum, count) => sum + count, 0)
     const hacker = mockHacker()
+    const courses = mockCourseAchievements()
+
     return {
       login: ME.login,
       campusId: state.campusId,
@@ -146,6 +150,10 @@ export const profileMock: Pick<
         ...TITLES.map((title) => ({ ...title, unlocked: xp.level >= title.level })),
         ...(hacker.title === null ? [] : [{ id: hacker.title, level: 0, unlocked: true }]),
         { id: 'maestro' as const, level: 0, unlocked: true },
+        // Los de los cursos, solo los conseguidos (como en la API).
+        ...courses
+          .filter((entry) => entry.unlocked)
+          .map((entry) => ({ id: entry.id, level: 0, unlocked: true })),
       ],
       achievements: [
         achievement('first_duty', localStorage.getItem(AVAILABLE_KEY) === null ? 0 : 1, 1),
@@ -153,6 +161,7 @@ export const profileMock: Pick<
         achievement('selfless_help', 10, 10),
         achievement('board_teacher', 0, 1),
         achievement('campus_guardian', helps, 25),
+        ...courses,
       ],
       reactions: state.reactions,
       rules: {

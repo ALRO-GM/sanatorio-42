@@ -1,24 +1,25 @@
 import { useState } from 'react'
 
-import type { LeaderboardPeriod, StatsEntry, StatsSection } from '@sanatorio/contracts'
+import type { LeaderboardPeriod, StatsSection } from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
-import { useFormat } from '../../shared/i18n/useFormat'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { SectionTitle } from '../../shared/ui/SectionTitle'
-import { RankingList, withMe } from '../../shared/ui/RankingList'
+import { CourseStats } from './CourseStats'
 import { HelpStatsTour } from './HelpStatsTour'
+import { StatsCard } from './StatsCard'
 
 const PERIODS = ['month', 'all'] as const satisfies readonly LeaderboardPeriod[]
 
 /**
  * Estadísticas de Ayuda: qué se mueve en el campus en cada sección (sala de
  * espera, tablón, terapia, pizarras y Not-games) y quién más lo mueve, del mes
- * o de siempre. Las cuentas son de la API. Quién va más rápido en el curso
- * está en el Avance (`ProgressRanking`).
+ * o de siempre. Las cuentas son de la API. Debajo, las de los cuatro cursos
+ * (`CourseStats`). Quién va más rápido en el common core está en el Avance
+ * (`ProgressRanking`).
  */
 export function HelpStatsPage({ me }: { me: string }) {
   const { t } = useI18n()
@@ -65,50 +66,28 @@ export function HelpStatsPage({ me }: { me: string }) {
           <SectionCard key={section.id} section={section} me={me} />
         ))}
       </div>
+
+      {/* Los cursos, con el mismo periodo (`docs/cursos-logros.md`). */}
+      <CourseStats me={me} period={period} />
     </section>
   )
 }
 
 function SectionCard({ section, me }: { section: StatsSection; me: string }) {
   const { t } = useI18n()
-  const { number } = useFormat()
-  const mine = section.me
-  const rows: StatsEntry[] = withMe(section.ranking, mine)
 
   return (
-    <article className="card help-stats-card" aria-labelledby={`stats-${section.id}`}>
-      <h3 id={`stats-${section.id}`}>{t(`nav.${section.id}`)}</h3>
-      <dl className="help-stats-totals">
-        {section.totals.map((total) => (
-          <div key={total.key}>
-            <dt>{t(`stats.${section.id}.${total.key}`)}</dt>
-            <dd>
-              {/* Las horas llegan en minutos: se enseñan en horas, con un decimal. */}
-              {total.key === 'minutes'
-                ? number(Math.round(total.value / 6) / 10)
-                : number(total.value)}
-            </dd>
-          </div>
-        ))}
-      </dl>
-
-      <span className="eyebrow">{t(`stats.${section.id}.rank`)}</span>
-      {rows.length === 0 ? (
-        <p className="estado">{t('stats.empty')}</p>
-      ) : (
-        <RankingList
-          rows={rows}
-          me={me}
-          label={t(`stats.${section.id}.rank`)}
-          value={(entry) => (
-            <span className="row-count">
-              <strong>{t(`stats.${section.id}.value`, { n: entry.value })}</strong>
-              <small>{t(`stats.${section.id}.extra`, { n: entry.extra })}</small>
-            </span>
-          )}
-        />
-      )}
-      {rows.length > 0 && mine === null && <p className="hint">{t('stats.notYet')}</p>}
-    </article>
+    <StatsCard
+      id={section.id}
+      title={t(`nav.${section.id}`)}
+      rankLabel={t(`stats.${section.id}.rank`)}
+      totals={section.totals}
+      totalLabel={(key) => t(`stats.${section.id}.${key}`)}
+      ranking={section.ranking}
+      mine={section.me}
+      me={me}
+      value={(entry) => t(`stats.${section.id}.value`, { n: entry.value })}
+      extra={(entry) => t(`stats.${section.id}.extra`, { n: entry.extra })}
+    />
   )
 }
