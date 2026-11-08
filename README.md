@@ -612,6 +612,7 @@ moderar desde la propia denuncia y aplicación instalable (PWA).
 - [docs/correcciones-coleccion.md](docs/correcciones-coleccion.md) (álbum de correcciones), [docs/preguntas.md](docs/preguntas.md) (banco de preguntas).
 - [docs/agenda.md](docs/agenda.md), [docs/asientos.md](docs/asientos.md), [docs/blackhole.md](docs/blackhole.md) (Avance), [docs/red-vistas.md](docs/red-vistas.md).
 - [docs/curso-git.md](docs/curso-git.md), [docs/curso-shell.md](docs/curso-shell.md), [docs/curso-shell-investigacion.md](docs/curso-shell-investigacion.md), [docs/plantilla-cursos.md](docs/plantilla-cursos.md).
+- [docs/plantilla-explicacion.md](docs/plantilla-explicacion.md) (cómo se explica un concepto en los cursos), [docs/plantilla-preguntas.md](docs/plantilla-preguntas.md) (cómo se escribe una pregunta, sus variantes y sus malas) y su investigación, [docs/referencia/preguntas-investigacion.md](docs/referencia/preguntas-investigacion.md).
 - [docs/pomodoro-startup.md](docs/pomodoro-startup.md), [docs/pomodoro-sonidos.md](docs/pomodoro-sonidos.md), [docs/code-clicker.md](docs/code-clicker.md).
 - [docs/piscineros.md](docs/piscineros.md), [docs/personas-ocultas.md](docs/personas-ocultas.md), [docs/mantenimiento.md](docs/mantenimiento.md), [docs/avisos-cuenta-atras.md](docs/avisos-cuenta-atras.md), [docs/sugerencias.md](docs/sugerencias.md).
 - [docs/demos.md](docs/demos.md): criterios y plantilla de las demostraciones animadas.
