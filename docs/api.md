@@ -251,6 +251,10 @@ GET /me/profile
 
 Ids de título: `paciente`, `interno`, `residente`, `especialista`, `jefe`.
 Ids de logro: `first_duty`, `group_therapy`, `selfless_help`, `board_teacher`, `campus_guardian`.
+Detrás van los 22 logros de los cursos (`CourseAchievementId`, ver «Juego de los
+cursos»), con el mismo `{ id, progress, goal, unlocked }`. Cada uno conseguido es
+también un título (`level: 0`) que sale en `titles` y se puede elegir con
+`PUT /me/settings`; los que no se tienen no salen en `titles` y elegirlos da `403`.
 Los textos de unos y otros los pone el front (`apps/web/src/shared/i18n/`).
 
 `reactions` son las valoraciones recibidas al ayudar (ver «Guardia: ayuda
@@ -2024,6 +2028,42 @@ cerrado (`locked: false`), `short` es el nombre corto (`Shell 00`, `C 07`,
 (`pool_members`) y `currentCircle` y `knownUpTo` valen `1`. Un examen
 suspendido sale como por hacer (`todo`); un rush buscando grupo, en curso. Los
 avisos siguen las mismas reglas.
+
+## Juego de los cursos (`modules/courses`)
+
+Clasificaciones y logros de los cuatro cursos (`docs/cursos-logros.md`). No tiene
+tablas: solo lee `shell_progress`, `git_progress`, `docker_progress` y `k8s_progress`.
+
+```
+GET /courses/ranking?period=month|all  → CourseRanking: { period, boards: CourseBoard[] }
+```
+
+- Un `CourseBoard` por clasificación, en este orden: `total` (los cuatro cursos
+  juntos), `shell`, `git`, `docker`, `k8s`, `bosses` y `certificates`. Cada uno con
+  la forma de una `StatsSection`: `totals`, `ranking` (los 10 primeros) y `me`.
+- Qué ordena cada una: en `total` y en cada curso, los **puntos** (las estrellas de
+  los puntos superados; extra: puntos superados); en `bosses`, los jefes vencidos
+  (contrarrelojes de bloque y finales; en git, los repasos de mundo y el jefe
+  final; extra: puntos); en `certificates`, los certificados de nivel (en git, su
+  jefe final; extra: jefes). Quien tiene 0 no sale; empates en las dos cifras,
+  mismo puesto.
+- `totals`: en `total` y en cada curso, `people`, `units` y `finished` (cursos
+  terminados); en `bosses`, `people` y `bosses`; en `certificates`, `people` y
+  `certificates`. `people` es quien sale en esa clasificación.
+- Solo gente del campus que miras (`campus_members`) y del mundo de quien mira:
+  ni piscineros a un estudiante ni personas ocultas, antes de poner los puestos.
+- «Este mes» cuenta lo superado por primera vez desde el día 1 (UTC). Otro
+  `period` da `400`.
+
+Logros (`CourseAchievementId`), que también son títulos: de shell, Docker y
+Kubernetes, `<curso>_first` (el primer punto), `<curso>_beginner`,
+`<curso>_intermediate`, `<curso>_advanced` (cada certificado) y `<curso>_bosses`
+(todos los jefes con tres estrellas); de git, `git_first`, `git_group` (las tres
+pruebas de grupo), `git_boss` (el jefe final) y `git_bosses` (repasos de mundo y
+jefe final con tres estrellas); y `courses_explorer` (empezar los cuatro),
+`courses_all` (terminarlos) y `courses_order` (terminarlos en el orden sugerido,
+shell → git → Docker → Kubernetes, cada uno no antes que el anterior). Salen en
+`achievements` de `/me/profile` y de `/users/:login/profile`.
 
 ## Avance (`modules/stats`, Datos → Avance)
 

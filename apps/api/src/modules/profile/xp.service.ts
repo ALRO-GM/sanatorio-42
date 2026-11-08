@@ -8,6 +8,7 @@
  */
 
 import type {
+  CourseAchievementId,
   Expediente,
   FoundPerson,
   PublicProfile,
@@ -42,6 +43,14 @@ import type { Audience } from '../../core/audience.js'
 import type { Actor } from '../../core/actor.js'
 import { dayOf, isoAt } from '../../core/time.js'
 
+/** Un logro de los cursos, tal como lo da `courses`. */
+type CourseAchievementRow = {
+  id: CourseAchievementId
+  progress: number
+  goal: number
+  unlocked: boolean
+}
+
 export type XpServiceOptions = {
   xp: XpRepository
   profiles: ProfilesRepository
@@ -62,6 +71,11 @@ export type XpServiceOptions = {
    * el título de maestro del código. Lo sabe `network`.
    */
   master?: (login: string) => Promise<number>
+  /**
+   * Los logros de los cursos de alguien; los conseguidos son también títulos.
+   * Lo sabe `courses` (`docs/cursos-logros.md`).
+   */
+  courses?: (login: string) => Promise<CourseAchievementRow[]>
   /** Las horas que alguien lleva en ordenadores del clúster, si se saben. Lo sabe `replica`. */
   logtime?: (login: string, userId: number | null) => Promise<number | null>
   now?: () => number
@@ -106,9 +120,14 @@ function activeTitle(
   level: number,
   hacker: TitleId | null,
   master: number,
+  courses: readonly TitleId[] = [],
 ): TitleId {
   if (chosen !== null && chosen === hacker) return hacker
   if (chosen === 'maestro' && master > 0) return 'maestro'
+
+  const course = courses.find((id) => id === chosen)
+
+  if (course !== undefined) return course
 
   const picked = TITLES.find((title) => title.id === chosen && level >= title.level)
   const best = [...TITLES].reverse().find((title) => level >= title.level) ?? TITLES[0]
@@ -125,6 +144,19 @@ export function createXpService(options: XpServiceOptions) {
   /** Si no se puede saber, es que no hay título: el expediente no se cae por esto. */
   const masterOf = async (login: string): Promise<number> =>
     (await options.master?.(login).catch(() => 0)) ?? 0
+
+  /** Los logros de los cursos; si no se pueden saber, ninguno. */
+  const coursesOf = async (login: string): Promise<CourseAchievementRow[]> =>
+    (await options.courses?.(login).catch(() => undefined)) ?? []
+  /** Los títulos de los cursos que alguien ya tiene. */
+  const courseTitlesOf = async (login: string): Promise<CourseAchievementId[]> =>
+    (await coursesOf(login)).filter((entry) => entry.unlocked).map((entry) => entry.id)
+  /** Un título que no es de nivel, de Code Clicker ni de maestro: puede ser de un curso. */
+  const maybeCourse = (title: string | null | undefined): boolean =>
+    typeof title === 'string' &&
+    !TITLES.some((entry) => entry.id === title) &&
+    title !== 'maestro' &&
+    !title.startsWith('hacker_')
 
   const hackerOf = async (login: string): Promise<{ title: TitleId | null; caught: number }> =>
     (await options.hacker?.(login).catch(() => undefined)) ?? { title: null, caught: 0 }
@@ -146,8 +178,11 @@ export function createXpService(options: XpServiceOptions) {
         hackerOf(login),
         masterOf(login),
       ])
+      const chosen = profile?.title ?? null
+      // Los cursos solo se miran si el título elegido puede ser de uno: la ficha sale a menudo.
+      const courses = maybeCourse(chosen) ? await courseTitlesOf(login) : []
 
-      return activeTitle(profile?.title ?? null, levelFor(total).level, hacker.title, master)
+      return activeTitle(chosen, levelFor(total).level, hacker.title, master, courses)
     },
 
     /** Anota la primera vez que alguien se pone de guardia. */
@@ -226,14 +261,16 @@ export function createXpService(options: XpServiceOptions) {
 
     /** Expediente completo de quien pregunta. */
     async expediente(actor: Actor): Promise<Expediente> {
-      const [total, earned, received, profile, hacker, master] = await Promise.all([
+      const [total, earned, received, profile, hacker, master, courses] = await Promise.all([
         xp.total(actor.login),
         xp.earnedByKind(actor.login),
         xp.reactionsReceived(actor.login),
         profiles.get(actor.login),
         hackerOf(actor.login),
         masterOf(actor.login),
+        coursesOf(actor.login),
       ])
+      const courseTitles = courses.filter((entry) => entry.unlocked).map((entry) => entry.id)
       const level = levelFor(total)
       const count = (kind: XpKind): number => earned.get(kind)?.times ?? 0
 
@@ -248,7 +285,13 @@ export function createXpService(options: XpServiceOptions) {
         campus_guardian: count(XP_KIND.SPECIALIST_HELP) + count(XP_KIND.PEER_HELP),
       }
 
-      const title = activeTitle(profile?.title ?? null, level.level, hacker.title, master)
+      const title = activeTitle(
+        profile?.title ?? null,
+        level.level,
+        hacker.title,
+        master,
+        courseTitles,
+      )
 
       return {
         login: actor.login,
@@ -266,13 +309,18 @@ export function createXpService(options: XpServiceOptions) {
           ...TITLES.map((entry) => ({ ...entry, unlocked: level.level >= entry.level })),
           ...(hacker.title === null ? [] : [{ id: hacker.title, level: 0, unlocked: true }]),
           ...(master > 0 ? [{ id: 'maestro' as const, level: 0, unlocked: true }] : []),
+          // Los de los cursos, solo los conseguidos: son muchos para enseñarlos apagados.
+          ...courseTitles.map((id) => ({ id, level: 0, unlocked: true })),
         ],
-        achievements: ACHIEVEMENTS.map((entry) => ({
-          id: entry.id,
-          goal: entry.goal,
-          progress: Math.min(progress[entry.id], entry.goal),
-          unlocked: progress[entry.id] >= entry.goal,
-        })),
+        achievements: [
+          ...ACHIEVEMENTS.map((entry) => ({
+            id: entry.id,
+            goal: entry.goal,
+            progress: Math.min(progress[entry.id], entry.goal),
+            unlocked: progress[entry.id] >= entry.goal,
+          })),
+          ...courses,
+        ],
         reactions: {
           bug: received.get('bug') ?? 0,
           code: received.get('code') ?? 0,
@@ -463,7 +511,11 @@ export function createXpService(options: XpServiceOptions) {
         if (
           !titleUnlocked(settings.title, level) &&
           settings.title !== (await hackerOf(actor.login)).title &&
-          !(settings.title === 'maestro' && (await masterOf(actor.login)) > 0)
+          !(settings.title === 'maestro' && (await masterOf(actor.login)) > 0) &&
+          !(
+            maybeCourse(settings.title) &&
+            (await courseTitlesOf(actor.login)).some((id) => id === settings.title)
+          )
         ) {
           throw domainError('forbidden', 'Ese título todavía no lo has desbloqueado')
         }

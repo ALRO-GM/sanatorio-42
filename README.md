@@ -41,8 +41,8 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
-| **Tamaño**      | 37 módulos de API con 263 rutas, 88 migraciones, 8 paquetes compartidos; 4 categorías con 20 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
-| **Calidad**     | 7 326 tests en 270 ficheros (6 354 de la API y 972 de la web, con 75 ficheros de pantallas; medido el 2026-11-08), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
+| **Tamaño**      | 38 módulos de API con 264 rutas, 88 migraciones, 8 paquetes compartidos; 4 categorías con 20 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
+| **Calidad**     | 7 337 tests en 271 ficheros (6 363 de la API y 974 de la web, con 75 ficheros de pantallas; medido el 2026-11-08), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
 | **Coste**       | 0 € al mes. La web y la máquina se cortan solas antes de pasar de la capa gratuita                                                                   |
@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-08 | Clasificaciones · Perfil | Juego de los cursos: en Clasificaciones, quién suma más estrellas en cada curso y en los cuatro, más jefes vencidos y certificados (del mes o siempre); y 22 logros de los cursos (primer punto, cada certificado, todos los jefes con tres estrellas, los cuatro cursos y el orden sugerido) que se lucen como título con su banner ([docs/cursos-logros.md](docs/cursos-logros.md)) |
 | 2026-11-08 | Curso de Kubernetes    | Curso nuevo en Aprender: 3 niveles, 9 bloques, 34 unidades, 9 jefes y 3 jefes finales con certificado, con kubectl, Kustomize y Helm sobre dos clústeres k3s simulados; despliega las imágenes que publica el curso de Docker y sugiere hacer antes su nivel principiante sin bloquear ([docs/curso-kubernetes.md](docs/curso-kubernetes.md)) |
 | 2026-11-08 | Curso de Docker        | Curso nuevo en Aprender: 3 niveles, 9 bloques, 37 unidades, 9 jefes y 3 jefes finales con certificado, en una terminal con Docker simulado (Dockerfiles, compose, registro); sugiere hacer antes el de shell sin bloquear ([docs/curso-docker.md](docs/curso-docker.md)) |
 | 2026-11-07 | Abandono | En las piscinas terminadas el abandono ya no se estima: quien vino hasta dos días antes del examen final la terminó; el resto la dejó tras el último día que vino a un puesto, examen o corrección ([docs/abandono.md](docs/abandono.md)) |
@@ -274,7 +275,7 @@ seguridad. La base es un fichero de SQLite. Un bucle de fondo copia el campus de
 ```mermaid
 flowchart LR
   P["Navegador<br/>React 19"] -->|HTTPS| C["Caddy<br/>TLS, CSP, HSTS"]
-  C --> A["Fastify<br/>37 módulos"]
+  C --> A["Fastify<br/>38 módulos"]
   A --> D[("SQLite en WAL<br/>datos propios y réplica")]
   S["Réplica y 17 trabajos<br/>en el mismo proceso"] --> D
   S -->|"cuota 1 200/h<br/>con tres escalones"| Q["API de 42"]
@@ -342,6 +343,7 @@ Cada uno por dentro, con diagramas: [docs/componentes.md](docs/componentes.md).
 | `client-errors` | Fallos de la web en el navegador de cada cual, para enterarse |
 | `collection` | Álbum de correcciones: rareza de cada proyecto y clasificaciones de completitud |
 | `countdowns` | Cuentas atrás: las del panel (taquillas) y lo que cada cual fija |
+| `courses` | El juego de los cuatro cursos: clasificaciones por campus y logros que son títulos (solo lee, sin tablas) |
 | `dockercourse` | Curso de Docker con Docker simulado, jefes y certificados (el servicio de `shellcourse` con otro motor) |
 | `doubts` | Tablón de dudas por proyecto, guía que mantienen los seniors y el grafo del plan |
 | `exams` | Exámenes: intentos y notas, examen en vivo, días por círculo y black hole, por plan y kickoff |

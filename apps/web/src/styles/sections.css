@@ -684,6 +684,16 @@ input[type='checkbox'] {
 .two-col .eyebrow {
   margin-top: 0;
 }
+/* Los logros de los cursos son muchos: en columnas, debajo de los demás. */
+.course-achievements {
+  margin-top: 0.9rem;
+}
+.course-achievements .eyebrow {
+  margin-top: 0;
+}
+.course-achievements .rows {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+}
 .rows {
   list-style: none;
   padding: 0;

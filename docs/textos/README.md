@@ -18,9 +18,9 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [curso-kubernetes](curso-kubernetes.md) | 30 | 0 | 0 | 0 | 0 |
 | [curso-shell](curso-shell.md) | 66 | 0 | 0 | 0 | 0 |
 | [demos](demos.md) | 268 | 0 | 0 | 0 | 0 |
-| [estadisticas](estadisticas.md) | 195 | 0 | 0 | 0 | 0 |
+| [estadisticas](estadisticas.md) | 215 | 0 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 71 | 0 | 0 | 0 | 0 |
-| [expediente](expediente.md) | 146 | 0 | 0 | 0 | 0 |
+| [expediente](expediente.md) | 214 | 0 | 0 | 0 | 0 |
 | [gestion](gestion.md) | 716 | 0 | 71 | 71 | 71 |
 | [guardia](guardia.md) | 80 | 0 | 0 | 0 | 0 |
 | [legal](legal.md) | 86 | 0 | 0 | 0 | 0 |

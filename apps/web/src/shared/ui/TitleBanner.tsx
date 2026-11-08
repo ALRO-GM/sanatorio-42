@@ -1,11 +1,13 @@
-import type { TitleId } from '@sanatorio/contracts'
+import type { CourseAchievementId, TitleId } from '@sanatorio/contracts'
 
+import { courseIcon, isCourseAchievement } from '../courseTitles'
 import { Icon } from './Icon'
 import type { IconName } from './Icon'
 
 /**
  * El icono de cada título en su banner. El dibujo de fondo (patrón y color)
- * está en `styles/banners.css`, por `data-title`.
+ * está en `styles/banners.css`, por `data-title`. Los de los cursos llevan el
+ * icono de su curso (`shared/courseTitles.ts`) y el patrón va por prefijo.
  */
 const BANNER_ICON = new Map<string, IconName>(
   Object.entries({
@@ -18,8 +20,11 @@ const BANNER_ICON = new Map<string, IconName>(
     hacker_etico: 'escudo',
     hacker_poco_etico: 'bicho',
     hacker_cazado: 'lupa',
-  } satisfies Record<TitleId, IconName>),
+  } satisfies Record<Exclude<TitleId, CourseAchievementId>, IconName>),
 )
+
+const iconOf = (title: string): IconName | null =>
+  BANNER_ICON.get(title) ?? (isCourseAchievement(title) ? courseIcon(title) : null)
 
 type TitleBannerProps = {
   /** El título que luce la persona (el de su expediente). */
@@ -37,7 +42,7 @@ type TitleBannerProps = {
  */
 export function TitleBanner({ title, mini = false, locked = false }: TitleBannerProps) {
   // Un título que la web aún no conoce sale con la franja de siempre.
-  const icon = BANNER_ICON.get(title) ?? null
+  const icon = iconOf(title)
 
   return (
     <div

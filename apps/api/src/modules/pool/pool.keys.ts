@@ -135,7 +135,8 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
     '/gitcourse/rooms/:id/run',
     '/gitcourse/rooms/:id/start',
   ],
-  estadisticas: ['/stats'],
+  // Las clasificaciones de los cursos van en la misma pestaña (`docs/cursos-logros.md`).
+  estadisticas: ['/stats', '/courses/ranking'],
   calendario: [
     '/calendar',
     // Fijarse una cuenta atrás sale del calendario (`docs/avisos-cuenta-atras.md`).

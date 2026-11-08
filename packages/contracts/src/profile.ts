@@ -1,3 +1,4 @@
+import type { CourseAchievementId } from './courses.js'
 import type { Segment } from './usage.js'
 
 /** Motivos por los que se gana XP. */
@@ -15,7 +16,13 @@ export type XpKind =
 export type ReactionKind = 'bug' | 'code' | 'concept' | 'patient'
 
 export type AchievementId =
-  'first_duty' | 'group_therapy' | 'selfless_help' | 'board_teacher' | 'campus_guardian'
+  | 'first_duty'
+  | 'group_therapy'
+  | 'selfless_help'
+  | 'board_teacher'
+  | 'campus_guardian'
+  // Los de los cursos (`courses.ts`).
+  | CourseAchievementId
 
 export type TitleId =
   | 'paciente'
@@ -29,6 +36,8 @@ export type TitleId =
   | 'hacker_cazado'
   // Quien ha corregido diez veces un mismo proyecto. Lleva al lado en cuántos.
   | 'maestro'
+  // Cada logro de los cursos es también un título (`courses.ts`).
+  | CourseAchievementId
 
 export type Lang = 'es' | 'en' | 'ca' | 'eu' | 'fr'
 

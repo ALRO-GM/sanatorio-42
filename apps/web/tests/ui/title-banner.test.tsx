@@ -120,6 +120,36 @@ describe('perfil: nivel, títulos y banners', () => {
     expect(picker.open).toBe(false)
   }, 20_000)
 
+  it('un logro de los cursos es un título: sale solo si lo tienes y trae el banner de su curso', async () => {
+    const user = userEvent.setup()
+
+    await openApp('#/expediente')
+    const picker = must(
+      (await screen.findByText(text('xp.titles'), {}, WAIT)).closest<HTMLDetailsElement>('details'),
+      'desplegable de títulos',
+    )
+
+    await user.click(must(picker.querySelector('summary'), 'resumen'))
+    // En la demo hay dos certificados de shell; Kubernetes, ni empezado.
+    expect(
+      within(picker).queryByRole('button', { name: new RegExp(text('title.k8s_first')) }),
+    ).toBeNull()
+    await user.click(
+      within(picker).getByRole('button', { name: new RegExp(text('title.shell_intermediate')) }),
+    )
+    await settle()
+    expect(bannerTitle()).toBe('shell_intermediate')
+    expect(document.querySelector('.record-title')?.textContent).toBe(
+      text('title.shell_intermediate'),
+    )
+
+    // Y en la lista de logros de los cursos, lo conseguido y lo que falta.
+    const list = await screen.findByRole('list', { name: text('xp.courseAchievementsList') }, WAIT)
+
+    expect(within(list).getByText(text('ach.shell_intermediate'))).toBeTruthy()
+    expect(within(list).getByText(text('ach.k8s_first'))).toBeTruthy()
+  }, 20_000)
+
   it('el perfil de otra persona lleva el banner de su título', async () => {
     await openApp('#/expediente/mgarcia')
     await screen.findByText(text('title.maestro'), {}, WAIT)

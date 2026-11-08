@@ -128,6 +128,54 @@
   opacity: 0.22;
 }
 
+/* ── Títulos de los cursos (`docs/cursos-logros.md`) ─────────────────────────
+   El patrón va por curso (el prefijo del id) y el color por lo conseguido (el
+   final): el primer punto, con el acento; principiante y las pruebas de grupo,
+   en verde; intermedio, en el acento; avanzado y el jefe final, en dorado;
+   todos los jefes con tres estrellas, en el color de peligro. Los de todos los
+   cursos, en dorado. */
+/* Shell: la invitación de la terminal, `$ _`. */
+.title-banner[data-title^='shell_'] {
+  --veil-angle: 140deg;
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='28'%3E%3Ctext x='4' y='17' font-family='monospace' font-size='13' font-weight='bold'%3E$%3C/text%3E%3Crect x='16' y='14' width='9' height='2.5' rx='1'/%3E%3C/svg%3E");
+}
+/* Git: ramas que se separan y se vuelven a unir. */
+.title-banner[data-title^='git_'] {
+  --veil-angle: 100deg;
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='34'%3E%3Cpath d='M4 24h52M14 24c6 0 6-14 14-14s8 14 14 14' fill='none' stroke='black' stroke-width='2'/%3E%3Ccircle cx='14' cy='24' r='3'/%3E%3Ccircle cx='28' cy='10' r='3'/%3E%3Ccircle cx='42' cy='24' r='3'/%3E%3C/svg%3E");
+}
+/* Docker: contenedores apilados. */
+.title-banner[data-title^='docker_'] {
+  --veil-angle: 160deg;
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='34'%3E%3Cg fill='none' stroke='black' stroke-width='2'%3E%3Crect x='4' y='18' width='10' height='8'/%3E%3Crect x='16' y='18' width='10' height='8'/%3E%3Crect x='10' y='8' width='10' height='8'/%3E%3C/g%3E%3C/svg%3E");
+}
+/* Kubernetes: un panal de nodos. */
+.title-banner[data-title^='k8s_'] {
+  --veil-angle: 60deg;
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='36'%3E%3Cpath d='M12 4l8 4.5v9L12 22l-8-4.5v-9z' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='31' cy='27' r='2'/%3E%3C/svg%3E");
+}
+/* Los cuatro cursos: la bandera de cuadros de la meta. */
+.title-banner[data-title^='courses_'] {
+  --ink: var(--gold);
+  --veil-angle: 180deg;
+  --pattern: conic-gradient(black 25%, transparent 0 50%, black 0 75%, transparent 0) 0 0 / 16px
+    16px;
+}
+.title-banner[data-title$='_beginner'],
+.title-banner[data-title='git_group'] {
+  --ink: var(--ok);
+}
+.title-banner[data-title$='_advanced'],
+.title-banner[data-title='git_boss'] {
+  --ink: var(--gold);
+}
+.title-banner[data-title$='_bosses'] {
+  --ink: var(--danger);
+}
+.title-banner[data-title$='_bosses'] .banner-art {
+  opacity: 0.3;
+}
+
 /* La muestra del desplegable de títulos: el mismo dibujo, en pequeño. No lleva
    la clase `banner`, así que no le tocan las medidas que cada estilo da a la
    franja del perfil. */
