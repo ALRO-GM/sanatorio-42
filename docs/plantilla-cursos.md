@@ -64,6 +64,15 @@ Los cursos que la siguen:
    banco de preguntas); en catalán y euskera se enseña el castellano.
 9. **Tono**: equipo de programación (on-call, producción, despliegues), en
    segunda persona y sin formas con género cuando se pueda.
+10. **Cómo se explica y cómo se comprueba.** La teoría y el ejemplo de cada
+    unidad siguen [plantilla-explicacion.md](plantilla-explicacion.md) (idea
+    en una línea, por qué importa, demostración con predicción, error típico
+    con su síntoma, contraste, y límite de palabras por nivel). Las preguntas
+    del curso en Not-games siguen [plantilla-preguntas.md](plantilla-preguntas.md):
+    la mala principal de cada una es el error típico de su unidad. El porqué,
+    con fuentes, en
+    [referencia/preguntas-investigacion.md](referencia/preguntas-investigacion.md);
+    el subagente `didacta` escribe y revisa con las dos plantillas.
 
 ## Tiempo estimado y tiempo real
 

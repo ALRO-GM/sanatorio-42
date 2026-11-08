@@ -7,6 +7,12 @@ tres malas de su misma pinta, `buildRound` en `quiz.rules.ts`). Traducciones
 en `bank/en/` y `bank/fr/` (mismas posiciones y cantidades) y Repaso en
 `bank/review-*.ts`.
 
+Cómo escribir un concepto nuevo (enunciado, opciones, de dónde salen las
+malas, variantes y formas negativas): [plantilla-preguntas.md](plantilla-preguntas.md),
+con su investigación en
+[referencia/preguntas-investigacion.md](referencia/preguntas-investigacion.md).
+Lo escribe y revisa el subagente `didacta`.
+
 ## Criterio de coherencia
 
 Una pregunta no se puede acertar sin saber nada. Para eso:

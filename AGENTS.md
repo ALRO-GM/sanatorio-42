@@ -36,9 +36,11 @@ leer sus fallos), `revisar` (lista de revisión de este fichero), `desplegar`
 (push, despliegue desacoplado del SSH, vigilancia y cupo de GitHub),
 `paralelo` (repartir tareas entre agentes con worktrees) y `retomar` (al
 empezar una sesión o antes de compactar). Y en `.claude/agents/`, los
-subagentes `implementador`, `traductor`, `probador`, `revisor` y
-`desplegador`. Úsalos antes de improvisar el procedimiento; si cambia una
-regla de aquí, cambia también la skill que la repite.
+subagentes `implementador`, `traductor`, `probador`, `revisor`,
+`desplegador` y `didacta` (preguntas de Not-games y explicaciones de los
+cursos, con `docs/plantilla-preguntas.md` y `docs/plantilla-explicacion.md`).
+Úsalos antes de improvisar el procedimiento; si cambia una regla de aquí,
+cambia también la skill que la repite.
 
 ## Reglas de código
 
