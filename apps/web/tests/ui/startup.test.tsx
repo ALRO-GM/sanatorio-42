@@ -170,9 +170,9 @@ describe('startup del Pomodoro', () => {
       </I18nProvider>,
     )
 
-    const rate = await screen.findByTitle(text('startup.rate'))
-
-    expect(rate.textContent).toContain('+0')
+    // Lo que ya rinde la startup del primer test (la persona contratada sale al
+    // azar y puede sumar o no): implementar el producto lo sube.
+    const before = (await screen.findByTitle(text('startup.rate'))).textContent
 
     const product = await screen.findByRole('button', {
       name: text('startup.item.product-insights'),
@@ -183,7 +183,7 @@ describe('startup del Pomodoro', () => {
     })
     fireEvent.click(product)
     await waitFor(() => {
-      expect(screen.getByTitle(text('startup.rate')).textContent).not.toContain('+0')
+      expect(screen.getByTitle(text('startup.rate')).textContent).not.toBe(before)
     })
     // El dinero se paga con dinero: sin él, el coworking no se puede alquilar.
     expect(
