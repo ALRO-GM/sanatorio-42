@@ -9,11 +9,21 @@
 
 import { clean, filesUnder, imageOf, isDir, readFile, writeFile } from './fsview.js'
 import type { Env } from './fsview.js'
-import type { Container } from './model.js'
+import type { Container, Image } from './model.js'
 import { envValue } from './model.js'
 import { httpOf, ipOf, pgData, resolveIn } from './runtime.js'
+import { canWrite, idLine, ownerOf, userName } from './users.js'
 
-type ExecResult = { code: number; out: string; err: string }
+type ExecResult = {
+  code: number
+  out: string
+  err: string
+  /**
+   * El proceso principal ni arranca (el programa no existe o no se puede
+   * ejecutar): Docker lo dice al crear la tarea y el contenedor queda Created.
+   */
+  start?: string
+}
 
 type ExecOptions = {
   /** Es el proceso principal (su salida va al registro del contenedor). */
@@ -23,6 +33,8 @@ type ExecOptions = {
   user?: string
   env?: string[]
   workdir?: string
+  /** Lo que llega por la entrada (`docker exec -i`). */
+  stdin?: string
 }
 
 type Run = {
@@ -34,30 +46,28 @@ type Run = {
   out: string[]
   err: string[]
   stdin: string
+  /** La entrada de la orden entera (la de `docker exec -i`). */
+  input: string
+  /** `$0`, `$1`… de un `sh -c 'orden' nombre args` (lo de detrás de la orden). */
+  params: string[]
+  /** `$?`: el código de la última orden. */
+  last: number
 }
 
 const SHELLS = new Set(['sh', '/bin/sh', 'bash', '/bin/bash', 'ash', '/bin/ash'])
 
-/** Los números de usuario que tiene cada cuenta de las imágenes del catálogo. */
-const UIDS: Record<string, number> = {
-  root: 0,
-  nginx: 101,
-  node: 1000,
-  postgres: 70,
-  redis: 999,
-  nonroot: 65532,
-}
+/** `$?`, `$#`, `$@`, `$*` y `$0`…`$9` de la shell de dentro. */
+function special(run: Run, c: string): string {
+  if (c === '?') return String(run.last)
+  if (c === '#') return String(Math.max(run.params.length - 1, 0))
+  if (c === '@' || c === '*') return run.params.slice(1).join(' ')
 
-function idLine(name: string): string {
-  if (/^\d+$/.test(name)) return `uid=${name} gid=${name === '0' ? '0(root)' : name} groups=${name}`
-
-  const uid = UIDS[name] ?? 1001
-
-  return `uid=${uid}(${name}) gid=${uid}(${name}) groups=${uid}(${name})`
+  return run.params[Number(c)] ?? ''
 }
 
 /** Las palabras de una orden de `sh -c`, con comillas y `$VARIABLES`. */
-function words(src: string, vars: readonly string[]): string[] {
+function words(src: string, run: Run): string[] {
+  const vars = run.vars
   const out: string[] = []
   let current = ''
   let has = false
@@ -69,6 +79,12 @@ function words(src: string, vars: readonly string[]): string[] {
     if (quote === "'") {
       if (c === "'") quote = null
       else current += c
+      continue
+    }
+    if (c === '$' && /[?#@*0-9]/.test(src[i + 1] ?? '')) {
+      current += special(run, src[i + 1] ?? '')
+      has = true
+      i++
       continue
     }
     if (c === '$' && /[A-Za-z_{]/.test(src[i + 1] ?? '')) {
@@ -153,31 +169,48 @@ export function execIn(
     cwd: opts.workdir ?? container.workdir,
     out: [],
     err: [],
-    stdin: '',
+    stdin: opts.stdin ?? '',
+    input: opts.stdin ?? '',
+    params: ['sh'],
+    last: 0,
   }
   const name = argv[0] ?? ''
 
+  const missing = (reason: string, code: number): ExecResult =>
+    opts.main === true
+      ? { code, out: '', err: '', start: `exec: "${name}": ${reason}` }
+      : {
+          code,
+          out: '',
+          err: `OCI runtime exec failed: exec failed: unable to start container process: exec: "${name}": ${reason}: unknown\n`,
+        }
+
   if (image?.kind === 'distroless' && name !== '/nodejs/bin/node' && name !== 'node')
-    return {
-      code: 127,
-      out: '',
-      err: `OCI runtime exec failed: exec failed: unable to start container process: exec: "${name}": executable file not found in $PATH: unknown\n`,
-    }
+    return missing('executable file not found in $PATH', 127)
   if (image?.kind === 'hello' && name !== '/hello')
-    return { code: 127, out: '', err: `exec: "${name}": executable file not found in $PATH\n` }
+    return missing('executable file not found in $PATH', 127)
 
   let code: number
 
-  if (SHELLS.has(name) && argv[1] === '-c') code = script(run, argv.slice(2).join(' '))
+  // `sh -c 'orden' a b`: solo la orden es el guion; lo demás son `$0`, `$1`… (por eso la forma
+  // shell de ENTRYPOINT no ve el CMD ni lo que escribes tras la imagen).
+  if (SHELLS.has(name) && argv[1] === '-c') code = script(run, argv[2] ?? '', argv.slice(3))
   else if (SHELLS.has(name)) code = 0
   else code = program(run, argv, true)
 
-  return { code, out: run.out.join(''), err: run.err.join('') }
+  const err = run.err.join('')
+
+  if ((code === 127 || code === 126) && err.startsWith('OCI runtime exec failed'))
+    return missing(code === 126 ? 'permission denied' : 'executable file not found in $PATH', code)
+
+  return { code, out: run.out.join(''), err }
 }
 
 /** Una línea de `sh -c`: órdenes unidas por `&&`, `||`, `;` y tuberías sencillas. */
-function script(run: Run, src: string): number {
+function script(run: Run, src: string, params?: string[]): number {
   let code = 0
+
+  if (params !== undefined && params.length > 0) run.params = params
   let skip = false
   let pipeIn: string | null = null
 
@@ -188,7 +221,7 @@ function script(run: Run, src: string): number {
       continue
     }
 
-    const argv = words(part.text, run.vars)
+    const argv = words(part.text, run)
     let target: { path: string; append: boolean } | null = null
     const clean_: string[] = []
 
@@ -207,7 +240,7 @@ function script(run: Run, src: string): number {
 
     const before = run.out.length
 
-    run.stdin = pipeIn ?? ''
+    run.stdin = pipeIn ?? run.input
     code = clean_.length === 0 ? 0 : program(run, clean_, false)
 
     const produced = run.out.splice(before).join('')
@@ -219,6 +252,7 @@ function script(run: Run, src: string): number {
         const path = clean(target.path, run.cwd)
 
         try {
+          if (!writable(run, path)) throw new Error('Permission denied')
           writeFile(
             run.env,
             run.container,
@@ -226,11 +260,14 @@ function script(run: Run, src: string): number {
             (target.append ? (readFile(run.env, run.container, path) ?? '') : '') + produced,
           )
         } catch (error) {
-          run.err.push(`sh: ${error instanceof Error ? error.message : 'error'}\n`)
+          run.err.push(
+            `sh: can't create ${target.path}: ${error instanceof Error ? error.message : 'error'}\n`,
+          )
           code = 1
         }
       } else if (target === null) run.out.push(produced)
     }
+    run.last = code
     if (part.op === '&&' && code !== 0) skip = true
     if (part.op === '||' && code === 0) skip = true
   }
@@ -238,14 +275,53 @@ function script(run: Run, src: string): number {
   return code
 }
 
+/**
+ * ¿Puede el usuario de la orden escribir ahí? root, sí; los demás, en lo montado, en lo que ya
+ * escribieron al correr, en `/tmp` y en lo que es suyo en la imagen.
+ */
+function writable(run: Run, path: string): boolean {
+  const { env, container } = run
+  const inside = (dir: string) => dir === '/' || path === dir || path.startsWith(`${dir}/`)
+  const parent = path.slice(0, path.lastIndexOf('/')) || '/'
+
+  if (container.mounts.some((mount) => inside(mount.target))) return true
+  if (container.files[path] !== undefined || container.files[`${parent}/.keep`] !== undefined)
+    return true
+
+  return canWrite(imageOf(env, container), run.user, path)
+}
+
+/**
+ * ¿Trae la imagen `curl` o `wget`? Las de alpine traen el `wget` de busybox y no
+ * `curl`; las `-slim` de debian, ninguno; `node:22` (la completa), los dos; las
+ * de nginx traen `curl`. Lo instalado al construir (`apk add curl`) también vale.
+ */
+function hasTool(image: Image | undefined, tool: string): boolean {
+  if (image === undefined) return false
+  if ((image.packages ?? []).includes(tool)) return true
+
+  const base = image.base
+  const alpine = base.includes('alpine') || image.kind === 'alpine'
+  const slim = base.includes('slim')
+
+  if (image.kind === 'distroless' || image.kind === 'hello') return false
+  if (tool === 'wget') return alpine || (image.kind === 'node' && !slim)
+  if (image.kind === 'nginx') return true
+
+  return image.kind === 'node' && !alpine && !slim
+}
+
 const FOUND_NOT = (run: Run, name: string, direct: boolean): number => {
+  // Una ruta a un fichero que existe pero no es un programa (`/etc/hosts`): permiso denegado.
+  const file = name.includes('/') && readFile(run.env, run.container, clean(name, run.cwd)) !== null
+
   run.err.push(
     direct
-      ? `OCI runtime exec failed: exec failed: unable to start container process: exec: "${name}": executable file not found in $PATH: unknown\n`
-      : `sh: ${name}: not found\n`,
+      ? `OCI runtime exec failed: exec failed: unable to start container process: exec: "${name}": ${file ? 'permission denied' : 'executable file not found in $PATH'}: unknown\n`
+      : `sh: ${name}: ${file ? 'Permission denied' : 'not found'}\n`,
   )
 
-  return 127
+  return file ? 126 : 127
 }
 
 /** Un programa de dentro del contenedor. */
@@ -273,7 +349,67 @@ function program(run: Run, argv: string[], direct: boolean): number {
     case 'sh':
     case 'bash':
     case 'ash':
-      return args[0] === '-c' ? script(run, args.slice(1).join(' ')) : 0
+      return args[0] === '-c' ? script(run, args[1] ?? '', args.slice(2)) : 0
+    case 'cd': {
+      const target = path(args[0] ?? '/root')
+
+      if (!isDir(env, container, target)) {
+        err(`sh: cd: can't cd to ${args[0] ?? ''}: No such file or directory\n`)
+
+        return 2
+      }
+      run.cwd = target
+
+      return 0
+    }
+    case 'printf': {
+      // Lo de busybox: el formato con %s, %d y \\n, que se repite si sobran argumentos.
+      const [format = '', ...values] = args
+      const unescape = (text: string) =>
+        text.replace(/\\(n|t|\\)/g, (_, c: string) => (c === 'n' ? '\n' : c === 't' ? '\t' : '\\'))
+      const rest = [...values]
+      let text = ''
+
+      for (;;) {
+        const before = rest.length
+
+        text += unescape(format).replace(/%[sd%]/g, (spec) =>
+          spec === '%%' ? '%' : (rest.shift() ?? (spec === '%d' ? '0' : '')),
+        )
+        if (rest.length === 0 || rest.length === before) break
+      }
+      out(text)
+
+      return 0
+    }
+    case 'tee': {
+      const append = args.some((arg) => /^-\w*a/.test(arg))
+
+      for (const arg of args.filter((each) => !each.startsWith('-'))) {
+        const target = path(arg)
+
+        if (!writable(run, target)) {
+          err(`tee: ${arg}: Permission denied\n`)
+
+          return 1
+        }
+        try {
+          writeFile(
+            env,
+            container,
+            target,
+            (append ? (readFile(env, container, target) ?? '') : '') + run.stdin,
+          )
+        } catch (error) {
+          err(`tee: ${arg}: ${error instanceof Error ? error.message : 'error'}\n`)
+
+          return 1
+        }
+      }
+      out(run.stdin)
+
+      return 0
+    }
     case 'echo':
       out(`${args.filter((arg) => arg !== '-n').join(' ')}${args[0] === '-n' ? '' : '\n'}`)
 
@@ -292,14 +428,20 @@ function program(run: Run, argv: string[], direct: boolean): number {
       out(`${container.id.slice(0, 12)}\n`)
 
       return 0
-    case 'whoami':
-      out(
-        `${/^\d+$/.test(run.user) ? (run.user === '0' ? 'root' : `whoami: unknown uid ${run.user}`) : run.user.split(':')[0]}\n`,
-      )
+    case 'whoami': {
+      const who = userName(imageOf(env, container), run.user)
+
+      if (/^\d+$/.test(who)) {
+        err(`whoami: unknown uid ${who}\n`)
+
+        return 1
+      }
+      out(`${who}\n`)
 
       return 0
+    }
     case 'id':
-      out(`${idLine(run.user.split(':')[0] ?? 'root')}\n`)
+      out(`${idLine(imageOf(env, container), run.user)}\n`)
 
       return 0
     case 'env':
@@ -355,8 +497,16 @@ function program(run: Run, argv: string[], direct: boolean): number {
       return code
     }
     case 'ls': {
-      const all = args.some((arg) => /^-\w*a/.test(arg))
+      const all = args.some((arg) => /^-\w*[aA]/.test(arg))
       const long = args.some((arg) => /^-\w*l/.test(arg))
+      const self = args.some((arg) => /^-\w*d/.test(arg))
+      const image = imageOf(env, container)
+      const row = (full: string, shown: string): string => {
+        const dir = readFile(env, container, full) === null
+        const who = ownerOf(image, full).padEnd(8)
+
+        return `${dir ? 'drwxr-xr-x' : '-rw-r--r--'}    1 ${who} ${who} ${dir ? '4096' : '   0'} Nov  8 09:00 ${shown}\n`
+      }
       const targets = args.filter((arg) => !arg.startsWith('-'))
       let code = 0
 
@@ -364,12 +514,17 @@ function program(run: Run, argv: string[], direct: boolean): number {
         const dir = path(target)
 
         if (readFile(env, container, dir) !== null) {
-          out(`${target}\n`)
+          out(long ? row(dir, target) : `${target}\n`)
           continue
         }
         if (!isDir(env, container, dir)) {
           err(`ls: ${target}: No such file or directory\n`)
           code = 1
+          continue
+        }
+
+        if (self) {
+          out(long ? row(dir, target) : `${target}\n`)
           continue
         }
 
@@ -383,12 +538,13 @@ function program(run: Run, argv: string[], direct: boolean): number {
           .filter((each) => each !== '' && (all || !each.startsWith('.')))
           .sort()
 
+        // `ls -a` también enseña `.` y `..` (con -A, no).
+        if (args.some((arg) => /^-\w*a/.test(arg))) names.unshift('.', '..')
+
         if (targets.length > 1) out(`${target}:\n`)
         out(
           long
-            ? names
-                .map((each) => `-rw-r--r--    1 root     root          0 Nov  8 09:00 ${each}\n`)
-                .join('')
+            ? names.map((each) => row(clean(each, dir), each)).join('')
             : names.length > 0
               ? `${names.join('\n')}\n`
               : '',
@@ -406,6 +562,7 @@ function program(run: Run, argv: string[], direct: boolean): number {
         const target = path(arg)
 
         try {
+          if (!writable(run, target)) throw new Error('Permission denied')
           if (name === 'touch')
             writeFile(env, container, target, readFile(env, container, target) ?? '')
           else if (name === 'mkdir') writeFile(env, container, `${target}/.keep`, '')
@@ -421,7 +578,16 @@ function program(run: Run, argv: string[], direct: boolean): number {
             for (const file of files) writeFile(env, container, file, null)
           }
         } catch (error) {
-          err(`${name}: ${error instanceof Error ? error.message : 'error'}\n`)
+          const reason = error instanceof Error ? error.message : 'error'
+
+          // Como busybox: «touch: x: …», «mkdir: can't create directory 'x': …», «rm: can't remove 'x': …».
+          err(
+            name === 'touch'
+              ? `touch: ${arg}: ${reason}\n`
+              : name === 'mkdir'
+                ? `mkdir: can't create directory '${arg}': ${reason}\n`
+                : `rm: can't remove '${arg}': ${reason}\n`,
+          )
           code = 1
         }
       }
@@ -483,9 +649,13 @@ function program(run: Run, argv: string[], direct: boolean): number {
     }
     case 'wget':
     case 'curl':
+      if (!hasTool(imageOf(env, container), name)) return FOUND_NOT(run, name, direct)
+
       return httpGet(run, name, args)
     case 'psql':
-      return kind === 'postgres' || args.includes('-h')
+      // psql viene con las imágenes de postgres; en otra, solo si se instaló (postgresql-client).
+      return kind === 'postgres' ||
+        (imageOf(env, container)?.packages ?? []).some((each) => each.startsWith('postgresql'))
         ? psql(run, args)
         : FOUND_NOT(run, name, direct)
     case 'pg_isready':
@@ -546,7 +716,12 @@ function ping(run: Run, args: string[]): number {
     return 1
   }
 
-  const ip = target === null ? '93.184.215.14' : ipOf(target, run.container) || '127.0.0.1'
+  const ip =
+    target === null
+      ? '93.184.215.14'
+      : /^\d+\.\d+\.\d+\.\d+$/.test(host)
+        ? host
+        : ipOf(target, run.container) || '127.0.0.1'
   const lines = Array.from(
     { length: Math.min(count, 10) },
     (_, i) => `64 bytes from ${ip}: seq=${i} ttl=64 time=0.0${80 + i} ms`,

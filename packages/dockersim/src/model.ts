@@ -47,6 +47,14 @@ export type Image = {
   sizes: Record<string, number>
   /** Usuarios que existen dentro (`root`, `nginx`, `node`, el `app` que se crea…). */
   users: string[]
+  /** Las cuentas creadas al construir (`adduser`): uid, gid y grupo. */
+  accounts?: Record<string, { uid: number; gid: number; group: string }>
+  /** Los grupos creados al construir (`addgroup`): nombre → gid. */
+  groups?: Record<string, number>
+  /** Dueño de las rutas que no son de root (ficheros y carpetas). */
+  owners?: Record<string, string>
+  /** Paquetes instalados al construir (`apk add curl`, `apt-get install -y wget`). */
+  packages?: string[]
   kind: Kind
   /** La imagen del catálogo de la que parte (`node:22-alpine`). */
   base: string

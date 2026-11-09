@@ -9,6 +9,7 @@ import type { StarGoals, Stars, TimeGoals } from '@sanatorio/course'
 import { cloneWorld, commandsIn } from '@sanatorio/shellsim'
 import type { World } from '@sanatorio/shellsim'
 
+import { fromCatalog } from '../catalog.js'
 import { findContainer, findImage } from '../engine.js'
 import { envOfWorld } from '../fsview.js'
 import type { Env } from '../fsview.js'
@@ -109,6 +110,29 @@ const split = (spec: string): [string, string] => {
   return at < 0 ? [spec, ''] : [spec.slice(0, at), spec.slice(at + 1)]
 }
 
+/**
+ * La imagen pedida, con las versiones más concretas de la misma etiqueta
+ * juntas: `redis:7.4-alpine` cuenta como `redis:7-alpine` (fijar más la versión
+ * también vale), pero `nginx:latest` no cuenta como `nginx:1.27`.
+ */
+function pinnedRef(ref: string): string {
+  const image = fromCatalog(ref)
+
+  if (image === undefined || image.base === ref) return ref
+
+  const split = (name: string) => /^(.*):(\d+(?:\.\d+)*)(.*)$/.exec(name)
+  const asked = split(ref)
+  const base = split(image.base)
+
+  return asked !== null &&
+    base !== null &&
+    asked[1] === base[1] &&
+    (asked[2] === base[2] || asked[2]?.startsWith(`${base[2] ?? ''}.`) === true) &&
+    (asked[3] ?? '').startsWith(base[3] ?? '')
+    ? image.base
+    : ref
+}
+
 /** Cómo está el mundo en lo que mira la unidad (una clave por cosa). Mira una copia: no cambia nada. */
 function snapshot(original: World, check: Check): Goal {
   const world = cloneWorld(original)
@@ -123,7 +147,7 @@ function snapshot(original: World, check: Check): Goal {
         ? '∅'
         : [
             c.status === 'exited' ? `exited(${c.exitCode})` : c.status,
-            c.ref,
+            pinnedRef(c.ref),
             c.status === 'running'
               ? c.ports
                   .map((p) => `${p.ip === '0.0.0.0' ? '' : `${p.ip}:`}${p.host}->${p.container}`)

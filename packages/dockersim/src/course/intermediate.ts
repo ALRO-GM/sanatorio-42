@@ -1158,10 +1158,10 @@ export const INTERMEDIATE: Unit[] = [
       containers: ['api-api-1', 'api-db-1'],
       http: ['localhost:3000/health'],
       probes: {
-        secret: ['grep -c secreto ~/api/compose.yaml'],
-        port: ['grep -c API_PORT ~/api/compose.yaml'],
+        secret: ['cat ~/api/*compose.y*ml | grep -c secreto'],
+        port: ['cat ~/api/*compose.y*ml | grep -c API_PORT'],
         env: ['grep -c POSTGRES_PASSWORD=secreto ~/api/.env'],
-        valid: ['docker compose -f ~/api/compose.yaml config -q'],
+        valid: ['docker compose --project-directory ~/api config -q'],
       },
     },
   },
@@ -1251,7 +1251,9 @@ export const INTERMEDIATE: Unit[] = [
     check: {
       inspect: ['api-db-1 {{.State.Health.Status}}'],
       http: ['localhost:3000/health'],
-      probes: { waits: ['docker compose -f ~/api/compose.yaml config | grep -c service_healthy'] },
+      probes: {
+        waits: ['docker compose --project-directory ~/api config | grep -c service_healthy'],
+      },
     },
   },
   {
@@ -1387,7 +1389,7 @@ export const INTERMEDIATE: Unit[] = [
     check: {
       containers: ['tienda-front-1', 'tienda-api-1', 'tienda-db-1', 'tienda-cache-1'],
       http: ['localhost:8080/', 'localhost:8080/api/health'],
-      probes: { published: [PUBLISHED], secret: ['grep -c secreto ~/tienda/compose.yaml'] },
+      probes: { published: [PUBLISHED], secret: ['cat ~/tienda/*compose.y*ml | grep -c secreto'] },
     },
   },
   {
@@ -1448,7 +1450,7 @@ export const INTERMEDIATE: Unit[] = [
       probes: {
         env: ['docker run --rm equipo-api cat /app/.env'],
         published: [PUBLISHED],
-        secret: ['grep -c secreto ~/equipo/compose.yaml'],
+        secret: ['cat ~/equipo/*compose.y*ml | grep -c secreto'],
       },
     },
   },

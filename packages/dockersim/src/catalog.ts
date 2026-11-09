@@ -71,7 +71,7 @@ const ENTRIES: Entry[] = [
     config: { cmd: ['/hello'] },
   },
   {
-    tags: ['alpine:3.20', 'alpine:latest'],
+    tags: ['alpine:3.20', 'alpine:latest', 'alpine:3.20.3', 'alpine:3'],
     kind: 'alpine',
     layers: [['ADD alpine-minirootfs-3.20.3-x86_64.tar.gz / # buildkit', 7.8]],
     config: { cmd: ['/bin/sh'], env: PATH },
@@ -84,7 +84,7 @@ const ENTRIES: Entry[] = [
     config: { cmd: ['sh'], env: PATH },
   },
   {
-    tags: ['nginx:1.27', 'nginx:latest', 'nginx:1'],
+    tags: ['nginx:1.27', 'nginx:latest', 'nginx:1', 'nginx:1.27.2', 'nginx:1.27-bookworm'],
     kind: 'nginx',
     layers: [
       ['ADD rootfs.tar.xz / # debian bookworm', 74.8],
@@ -103,7 +103,7 @@ const ENTRIES: Entry[] = [
     cves: { critical: 0, high: 4, medium: 17 },
   },
   {
-    tags: ['nginx:1.27-alpine', 'nginx:alpine'],
+    tags: ['nginx:1.27-alpine', 'nginx:alpine', 'nginx:1.27.2-alpine', 'nginx:1-alpine'],
     kind: 'nginx',
     layers: [
       ['ADD alpine-minirootfs-3.20.3-x86_64.tar.gz / # buildkit', 7.8],
@@ -121,7 +121,7 @@ const ENTRIES: Entry[] = [
     users: ['root', 'nginx'],
   },
   {
-    tags: ['redis:7', 'redis:latest'],
+    tags: ['redis:7', 'redis:latest', 'redis:7.4', 'redis:7.4.1'],
     kind: 'redis',
     layers: [
       ['ADD rootfs.tar.xz / # debian bookworm', 74.8],
@@ -139,7 +139,7 @@ const ENTRIES: Entry[] = [
     cves: { critical: 0, high: 2, medium: 9 },
   },
   {
-    tags: ['redis:7-alpine', 'redis:alpine'],
+    tags: ['redis:7-alpine', 'redis:alpine', 'redis:7.4-alpine', 'redis:7.4.1-alpine'],
     kind: 'redis',
     layers: [
       ['ADD alpine-minirootfs-3.20.3-x86_64.tar.gz / # buildkit', 7.8],
@@ -156,7 +156,7 @@ const ENTRIES: Entry[] = [
     users: ['root', 'redis'],
   },
   {
-    tags: ['postgres:16', 'postgres:latest'],
+    tags: ['postgres:16', 'postgres:latest', 'postgres:16.4', 'postgres:16-bookworm'],
     kind: 'postgres',
     layers: [
       ['ADD rootfs.tar.xz / # debian bookworm', 74.8],
@@ -175,7 +175,7 @@ const ENTRIES: Entry[] = [
     cves: { critical: 0, high: 3, medium: 21 },
   },
   {
-    tags: ['postgres:16-alpine', 'postgres:alpine'],
+    tags: ['postgres:16-alpine', 'postgres:alpine', 'postgres:16.4-alpine'],
     kind: 'postgres',
     layers: [
       ['ADD alpine-minirootfs-3.20.3-x86_64.tar.gz / # buildkit', 7.8],
@@ -193,7 +193,7 @@ const ENTRIES: Entry[] = [
     users: ['root', 'postgres'],
   },
   {
-    tags: ['node:22', 'node:latest', 'node:lts'],
+    tags: ['node:22', 'node:latest', 'node:lts', 'node:22.11.0', 'node:22.11', 'node:22-bookworm'],
     kind: 'node',
     layers: [
       ['ADD rootfs.tar.xz / # debian bookworm', 116.5],
@@ -209,7 +209,7 @@ const ENTRIES: Entry[] = [
     cves: { critical: 0, high: 12, medium: 48 },
   },
   {
-    tags: ['node:22-slim', 'node:lts-slim'],
+    tags: ['node:22-slim', 'node:lts-slim', 'node:22.11.0-slim', 'node:22-bookworm-slim'],
     kind: 'node',
     layers: [
       ['ADD rootfs.tar.xz / # debian bookworm-slim', 74.8],
@@ -224,7 +224,13 @@ const ENTRIES: Entry[] = [
     cves: { critical: 0, high: 1, medium: 14 },
   },
   {
-    tags: ['node:22-alpine', 'node:lts-alpine'],
+    tags: [
+      'node:22-alpine',
+      'node:lts-alpine',
+      'node:22.11.0-alpine',
+      'node:22.11-alpine',
+      'node:22-alpine3.20',
+    ],
     kind: 'node',
     layers: [
       ['ADD alpine-minirootfs-3.20.3-x86_64.tar.gz / # buildkit', 7.8],
@@ -384,6 +390,11 @@ for (const entry of ENTRIES) {
   const image = imageOf(entry)
 
   for (const tag of entry.tags) CATALOG.set(tag, image)
+}
+
+/** ¿Existe el repositorio en el Docker Hub del simulador (con alguna etiqueta)? */
+export function knownRepo(repo: string): boolean {
+  return [...CATALOG.keys()].some((tag) => tag.slice(0, tag.lastIndexOf(':')) === repo)
 }
 
 /** Una imagen del catálogo por su referencia (también `nginx@sha256:…`). */

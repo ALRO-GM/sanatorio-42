@@ -223,7 +223,7 @@ export const ADVANCED: Unit[] = [
         how: [
           'RUN addgroup -S app && adduser -S app -G app',
           'USER app',
-          'docker run --rm api:2.0 id   # uid=1001(app)',
+          'docker run --rm api:2.0 id   # uid=100(app)',
         ],
         when: 'En toda imagen de producción: Kubernetes puede exigirlo (runAsNonRoot).',
         whenNot: 'Para depurar, docker run -u 0 da root esa vez.',
@@ -245,7 +245,7 @@ export const ADVANCED: Unit[] = [
         how: [
           'RUN addgroup -S app && adduser -S app -G app',
           'USER app',
-          'docker run --rm api:2.0 id   # uid=1001(app)',
+          'docker run --rm api:2.0 id   # uid=100(app)',
         ],
         when: 'In every production image: Kubernetes may require it (runAsNonRoot).',
         whenNot: 'To debug, docker run -u 0 gives root that once.',
@@ -649,7 +649,7 @@ export const ADVANCED: Unit[] = [
         when: 'En CI, en cada build: salen CVE nuevas cada día.',
         whenNot: 'Cero críticas hoy no es para siempre: reconstruye a menudo.',
         problems:
-          'Escanear en CI sin --exit-code: dice «Detected 153 vulnerabilities», pero sale con 0 y la tubería sigue. Con --exit-code, sale con 2.',
+          'Escanear en CI sin --exit-code: dice «153 vulnerabilities», pero sale con 0 y la tubería sigue. Con --exit-code, sale con 2.',
       },
       example:
         'Antes de verlo: api:old parte de node:18. ¿Cuántas críticas tendrá, y cuántas node:22-alpine?',
@@ -667,7 +667,7 @@ export const ADVANCED: Unit[] = [
         when: 'In CI, on every build: new CVEs appear every day.',
         whenNot: 'Zero criticals today is not forever: rebuild often.',
         problems:
-          'Scanning in CI without --exit-code: it says "Detected 153 vulnerabilities" but exits with 0 and the pipeline goes on. With --exit-code, it exits with 2.',
+          'Scanning in CI without --exit-code: it says "153 vulnerabilities" but exits with 0 and the pipeline goes on. With --exit-code, it exits with 2.',
       },
       example:
         'Before you look: api:old starts from node:18. How many criticals will it have, and node:22-alpine?',

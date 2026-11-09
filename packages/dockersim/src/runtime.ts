@@ -35,14 +35,18 @@ export function programOf(env: Env, container: Container): Program {
   const kind = imageOf(env, container)?.kind
 
   if (ENTRYPOINTS.has(argv[0] ?? '')) argv = argv.slice(1)
-  // La forma shell (`CMD node server.js`) es `/bin/sh -c "node server.js"`: lo que arranca es lo de dentro.
+  // La forma shell (`CMD node server.js`) es `/bin/sh -c "node server.js"`: lo que arranca es lo de
+  // dentro. Lo que venga detrás (el CMD tras un ENTRYPOINT en forma shell, o lo que escribes tras
+  // la imagen) son `$0`, `$1`… de esa sh: no llega al programa.
   if (
     ['/bin/sh', 'sh'].includes(argv[0] ?? '') &&
     argv[1] === '-c' &&
-    /^[\w./ -]+$/.test(argv[2] ?? '') &&
-    argv.length === 3
+    /^(exec\s+)?[\w./ -]+$/.test(argv[2] ?? '')
   )
-    argv = (argv[2] ?? '').split(/\s+/).filter(Boolean)
+    argv = (argv[2] ?? '')
+      .replace(/^exec\s+/, '')
+      .split(/\s+/)
+      .filter(Boolean)
   if (argv.length === 0) return { kind: 'oneshot', argv: [] }
 
   const name = base(argv[0] ?? '')
@@ -139,7 +143,10 @@ function upstreams(
 }
 
 /** Arranca (o vuelve a arrancar) el proceso principal; devuelve lo que escribe si acaba. */
-export function boot(env: Env, container: Container): { code: number; output: string } {
+export function boot(
+  env: Env,
+  container: Container,
+): { code: number; output: string; error?: string } {
   const image = imageOf(env, container)
   const program = programOf(env, container)
   const log = (...lines: string[]) => {
@@ -160,6 +167,19 @@ export function boot(env: Env, container: Container): { code: number; output: st
   }
   if (program.kind === 'oneshot') {
     const result = execIn(env, container, program.argv, { main: true })
+
+    // El programa no existe: el contenedor ni arranca (queda Created, con el código en ExitCode).
+    if (result.start !== undefined) {
+      container.status = 'created'
+      container.started = -1
+      container.exitCode = result.code
+
+      return {
+        code: result.code,
+        output: '',
+        error: `Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: ${result.start}: unknown`,
+      }
+    }
     const output = result.out + result.err
 
     log(...output.split('\n').filter((line, index, all) => line !== '' || index < all.length - 1))
@@ -311,9 +331,10 @@ export function resolveIn(env: Env, from: Container, name: string): Container | 
 
 /** La IP de un contenedor en la primera red que comparte con otro (o en la suya). */
 export function ipOf(container: Container, near?: Container): string {
-  const shared = Object.keys(container.networks).find(
-    (name) => near === undefined || own(near.networks, name) !== undefined,
-  )
+  // Por nombre responde el DNS de una red creada por ti: la IP de esa red, no la de `bridge`.
+  const shared = Object.keys(container.networks)
+    .filter((name) => near === undefined || own(near.networks, name) !== undefined)
+    .sort((a, b) => Number(a === 'bridge') - Number(b === 'bridge'))[0]
 
   return own(container.networks, shared ?? Object.keys(container.networks)[0] ?? '')?.ip ?? ''
 }
@@ -469,4 +490,38 @@ export function hostHttp(env: Env, host: string, port: number, path: string): Ht
   }
 
   return null
+}
+
+/**
+ * Lo que pasa al conectar a un puerto publicado que no contesta HTTP: si el
+ * contenedor no escucha en el puerto de dentro (`-p 8080:8080` a un nginx que
+ * escucha en el 80), Docker acepta la conexión y la corta (`reset`); si escucha
+ * pero no habla HTTP (postgres, redis), la cierra sin responder (`empty`).
+ * `null`: no es un puerto publicado o sí contesta. Mira sin dejar registros.
+ */
+export function hostSocket(env: Env, host: string, port: number): 'reset' | 'empty' | null {
+  if (!['localhost', '127.0.0.1', '0.0.0.0', env.host.name, '::1'].includes(host)) return null
+
+  const container = env.state.containers.find(
+    (each) => each.status === 'running' && each.ports.some((binding) => binding.host === port),
+  )
+  const binding = container?.ports.find((each) => each.host === port)
+
+  if (container === undefined || binding === undefined) return null
+
+  const logs = env.state.containers.map((each) => each.logs.length)
+  const reply = httpOf(env, container, binding.container, '/')
+
+  env.state.containers.forEach((each, i) => {
+    each.logs.length = logs[i] ?? each.logs.length
+  })
+  if (reply !== null) return null
+
+  const program = programOf(env, container)
+  const role = program.kind === 'server' ? program.role : ''
+
+  return (role === 'postgres' && binding.container === 5432) ||
+    (role === 'redis' && binding.container === 6379)
+    ? 'empty'
+    : 'reset'
 }
