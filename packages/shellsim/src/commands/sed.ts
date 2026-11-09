@@ -6,7 +6,8 @@
  * `-E` y `-e`. Las expresiones regulares son las del motor lineal.
  */
 
-import { Fail, lookup, writeText } from '../fs.js'
+import { can, Fail, lookup, parentOf, writeText } from '../fs.js'
+import { own } from '../limits.js'
 import { regex } from '../regex.js'
 import type { Regex } from '../regex.js'
 import type { CommandFn } from './types.js'
@@ -201,17 +202,8 @@ function replace(
 
     if (wanted) {
       out += line.slice(from, match.start)
-      out += (cmd.replacement ?? '').replace(
-        /\\(\d)|\\n|\\t|\\&|\\\\|&/g,
-        (all, group?: string) => {
-          if (all === '&') return line.slice(match.start, match.end)
-          if (all === '\\&') return '&'
-          if (all === '\\n') return '\n'
-          if (all === '\\t') return '\t'
-          if (all === '\\\\') return '\\'
-
-          return match.groups[Number(group)] ?? ''
-        },
+      out += replaced(cmd.replacement ?? '', (group) =>
+        group === 0 ? line.slice(match.start, match.end) : (match.groups[group] ?? ''),
       )
       done = true
     } else out += line.slice(from, match.end)
@@ -224,6 +216,44 @@ function replace(
   if (!done) return { text: line, done: false }
 
   return { text: out + line.slice(from), done: true }
+}
+
+/**
+ * El texto de reemplazo de `s///`: `&`, `\1`…, `\n`, `\t` y, como GNU sed,
+ * `\U`/`\L` (lo que sigue, en mayúsculas o minúsculas, hasta `\E`) y
+ * `\u`/`\l` (solo el carácter siguiente).
+ */
+function replaced(replacement: string, group: (n: number) => string): string {
+  let out = ''
+  let mode: 'U' | 'L' | null = null
+  let once: 'u' | 'l' | null = null
+  const put = (text: string) => {
+    let piece = mode === 'U' ? text.toUpperCase() : mode === 'L' ? text.toLowerCase() : text
+
+    if (once !== null && piece !== '') {
+      const first = once === 'u' ? (piece[0] ?? '').toUpperCase() : (piece[0] ?? '').toLowerCase()
+
+      piece = first + piece.slice(1)
+      once = null
+    }
+    out += piece
+  }
+
+  for (const token of replacement.match(/\\[\s\S]|&|[^\\&]+/g) ?? []) {
+    if (token === '&') put(group(0))
+    else if (!token.startsWith('\\')) put(token)
+    else {
+      const c = token[1] ?? ''
+
+      if (/\d/.test(c)) put(group(Number(c)))
+      else if (c === 'U' || c === 'L') mode = c
+      else if (c === 'E') mode = null
+      else if (c === 'u' || c === 'l') once = c
+      else put(c === 'n' ? '\n' : c === 't' ? '\t' : c)
+    }
+  }
+
+  return out
 }
 
 const sed: CommandFn = (ctx) => {
@@ -339,7 +369,20 @@ const sed: CommandFn = (ctx) => {
         throw new Fail(`sed: can't read ${file}: No such file or directory`, 2)
 
       const opts = { now: ctx.sh.now(), umask: ctx.sh.session().umask }
+      const dir = lookup(machine, user, parentOf(path))
 
+      // sed -i escribe un fichero temporal al lado y lo cambia por el original:
+      // hace falta poder escribir en la carpeta, no en el fichero.
+      if (dir !== null && !can(user, dir.node, 'w'))
+        throw new Fail(
+          `sed: couldn't open temporary file ${parentOf(path)}/sedAx3kPq: Permission denied`,
+          4,
+        )
+
+      const node = own(machine.fs, path)
+
+      if (node?.kind === 'file' && !can(user, node, 'w') && user.uid !== 0)
+        Object.assign(node, { owner: user.name, group: user.groups[0] ?? user.name })
       if (inPlace !== '')
         writeText(machine, user, path + inPlace, input.text, {
           cmd: 'sed',
@@ -361,9 +404,8 @@ const sed: CommandFn = (ctx) => {
       ctx.io.out(process(read?.text ?? ''))
     } catch (error) {
       if (!(error instanceof Fail)) throw error
-      ctx.io.err(
-        `${error.message.replace(/^sed: (.*): No such file or directory$/, "sed: can't read $1: No such file or directory")}\n`,
-      )
+      // El mensaje ya viene como el de GNU sed («sed: can't read x: …», de `inputs`).
+      ctx.io.err(`${error.message}\n`)
       code = 2
     }
   }

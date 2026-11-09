@@ -20,11 +20,13 @@ import {
   normalize,
   parentOf,
   readText,
+  sizeOf,
   writeText,
 } from '../fs.js'
 import { drop, own } from '../limits.js'
-import type { Machine, Service } from '../model.js'
+import type { FsNode, Machine, Service } from '../model.js'
 import { progName } from '../model.js'
+import { globMatch } from '../expand.js'
 import type { CommandFn, Ctx } from './types.js'
 import { getopts, joinLines } from './types.js'
 
@@ -567,18 +569,12 @@ const ssh: CommandFn = (ctx) => {
   return 0
 }
 
-/** Copia `from` (de una máquina) a `to` (de otra o la misma), como lo harían scp o rsync. */
+/** Copia `from` (de una máquina) a `to` (de otra o la misma), como scp. */
 function transfer(
   ctx: Ctx,
   from: ReturnType<typeof remote>,
   to: ReturnType<typeof remote>,
-  opts: {
-    recursive: boolean
-    contents: boolean
-    verbose: string[] | null
-    del: boolean
-    dry: boolean
-  },
+  recursive: boolean,
 ): void {
   const fromUser = own(from.machine.users, from.user)
   const toUser = own(to.machine.users, to.user)
@@ -590,55 +586,42 @@ function transfer(
 
   if (src === null) throw new Fail(`${ctx.name}: ${from.label}: ${ENOENT}`)
   if (!can(fromUser, src.node, 'r')) throw new Fail(`${ctx.name}: ${from.label}: ${EACCES}`)
-  if (src.node.kind === 'dir' && !opts.recursive)
-    throw new Fail(
-      ctx.name === 'scp'
-        ? `scp: ${from.label}: not a regular file`
-        : `skipping directory ${from.label}`,
-    )
+  if (src.node.kind === 'dir' && !recursive)
+    throw new Fail(`scp: ${from.label}: not a regular file`)
 
   const dst = lookup(to.machine, toUser, to.path)
-  const into =
-    src.node.kind === 'dir' && opts.contents
-      ? to.path
-      : dst?.node.kind === 'dir'
-        ? joinPath(dst.path, baseOf(src.path))
-        : to.path
+
+  // `scp x ~/restore/` con la barra: tiene que ser una carpeta que ya exista.
+  if (dst === null && to.label.endsWith('/'))
+    throw new Fail(`scp: dest open "${to.path}/": No such file or directory`)
+
+  const into = dst?.node.kind === 'dir' ? joinPath(dst.path, baseOf(src.path)) : to.path
   const parent = lookup(to.machine, toUser, parentOf(into))
 
   if (parent === null) throw new Fail(`${ctx.name}: ${to.label}: ${ENOENT}`)
   if (!can(toUser, parent.node, 'w')) throw new Fail(`${ctx.name}: ${to.label}: ${EACCES}`)
+  copyTree(from.machine, to.machine, toUser, src.path, into, { now: ctx.sh.now(), keep: false })
+}
 
-  const relative = [src.path, ...descendantsOf(from.machine, src.path)].map((path) =>
-    path.slice(src.path.length),
-  )
+/**
+ * `scp 'db1:/var/backups/db/*.gz' .`: el comodín de una ruta remota lo
+ * expande la otra máquina (aquí, mirando sus ficheros).
+ */
+function remoteGlob(ctx: Ctx, from: ReturnType<typeof remote>): ReturnType<typeof remote>[] {
+  const name = baseOf(from.path)
 
-  if (opts.verbose !== null)
-    for (const each of relative)
-      opts.verbose.push(
-        src.node.kind === 'dir' && opts.contents
-          ? each.replace(/^\//, '') || './'
-          : baseOf(src.path) + each,
-      )
-  if (opts.dry) return
-  if (opts.del && src.node.kind === 'dir' && own(to.machine.fs, into)?.kind === 'dir') {
-    for (const path of descendantsOf(to.machine, into))
-      if (own(from.machine.fs, src.path + path.slice(into.length)) === undefined) {
-        drop(to.machine.fs, path)
-        opts.verbose?.push(`deleting ${path.slice(into.length + 1)}`)
-      }
-  }
-  if (src.node.kind === 'dir' && own(to.machine.fs, into)?.kind === 'dir') {
-    for (const name of childrenOf(from.machine, src.path))
-      copyTree(from.machine, to.machine, toUser, joinPath(src.path, name), joinPath(into, name), {
-        now: ctx.sh.now(),
-        keep: ctx.name === 'rsync',
-      })
-  } else
-    copyTree(from.machine, to.machine, toUser, src.path, into, {
-      now: ctx.sh.now(),
-      keep: ctx.name === 'rsync',
-    })
+  if (!/[*?[]/.test(name) || from.machine === ctx.sh.machine()) return [from]
+
+  const dir = parentOf(from.path)
+  const found = childrenOf(from.machine, dir)
+    .filter((each) => !each.startsWith('.') && globMatch(name, each, ctx.sh.budget))
+    .map((each) => ({
+      ...from,
+      path: joinPath(dir, each),
+      label: `${from.label.split(':')[0] ?? ''}:${joinPath(dir, each)}`,
+    }))
+
+  return found.length > 0 ? found : [from]
 }
 
 const scp: CommandFn = (ctx) => {
@@ -649,15 +632,180 @@ const scp: CommandFn = (ctx) => {
   const to = remote(ctx, rest.at(-1) ?? '')
 
   for (const src of rest.slice(0, -1))
-    transfer(ctx, remote(ctx, src), to, {
-      recursive: flags.has('r'),
-      contents: false,
-      verbose: null,
-      del: false,
-      dry: false,
-    })
+    for (const from of remoteGlob(ctx, remote(ctx, src))) transfer(ctx, from, to, flags.has('r'))
 
   return 0
+}
+
+type RsyncOpts = {
+  recursive: boolean
+  archive: boolean
+  del: boolean
+  dry: boolean
+  /** Lo que sale con `-v`: lo que cambia, lo que se borra y las carpetas creadas. */
+  list: string[]
+  errors: string[]
+  /** Bytes de los ficheros enviados (para el resumen). */
+  sent: number
+  total: number
+}
+
+/**
+ * Una fuente de rsync, como el de verdad: `src/` copia lo de dentro y `src`,
+ * la carpeta entera (`dst/src`); solo pasa lo nuevo o cambiado; `--delete`
+ * borra del destino lo que ya no está en la fuente; con `-n` no toca nada.
+ */
+function rsyncOne(
+  ctx: Ctx,
+  from: ReturnType<typeof remote>,
+  to: ReturnType<typeof remote>,
+  opts: RsyncOpts,
+): void {
+  const fromUser = own(from.machine.users, from.user)
+  const toUser = own(to.machine.users, to.user)
+
+  if (fromUser === undefined || toUser === undefined) throw new Fail(`rsync: usuario desconocido`)
+
+  const src = lookup(from.machine, fromUser, from.path)
+
+  if (src === null) {
+    opts.errors.push(
+      `rsync: [sender] link_stat "${from.path}" failed: No such file or directory (2)`,
+    )
+
+    return
+  }
+  if (!can(fromUser, src.node, 'r')) {
+    opts.errors.push(`rsync: [sender] send_files failed to open "${from.path}": ${EACCES} (13)`)
+
+    return
+  }
+  if (src.node.kind === 'dir' && !opts.recursive) {
+    opts.list.push(`skipping directory ${baseOf(src.path)}`)
+
+    return
+  }
+
+  const contents = src.node.kind === 'dir' && from.label.endsWith('/')
+  const dst = lookup(to.machine, toUser, to.path)
+  // Lo que hay que crear arriba del todo («created directory …»), si hace falta.
+  const needsDir = src.node.kind === 'dir' || to.label.endsWith('/')
+  const top = dst === null ? to.path : dst.path
+
+  if (dst !== null && dst.node.kind !== 'dir' && src.node.kind === 'dir')
+    throw new Fail(`ERROR: cannot overwrite non-directory "${to.label}" with a directory`, 23)
+  if (dst === null && needsDir) {
+    const parent = lookup(to.machine, toUser, parentOf(to.path))
+
+    if (parent?.node.kind !== 'dir')
+      throw new Fail(
+        `rsync: [Receiver] mkdir "${to.path}" failed: No such file or directory (2)\nrsync error: error in file IO (code 11) at main.c(791) [Receiver=3.2.7]`,
+        11,
+      )
+    if (!can(toUser, parent.node, 'w'))
+      throw new Fail(
+        `rsync: [Receiver] mkdir "${to.path}" failed: Permission denied (13)\nrsync error: error in file IO (code 11) at main.c(791) [Receiver=3.2.7]`,
+        11,
+      )
+    opts.list.push(`created directory ${to.label.replace(/\/+$/, '')}`)
+    if (!opts.dry)
+      to.machine.fs[top] = {
+        kind: 'dir',
+        mode: 0o755,
+        owner: toUser.name,
+        group: toUser.groups[0] ?? toUser.name,
+        mtime: ctx.sh.now(),
+      }
+  }
+
+  const root = contents
+    ? top
+    : needsDir || dst?.node.kind === 'dir'
+      ? joinPath(top, baseOf(src.path))
+      : top
+  const label = (rel: string, dir: boolean): string =>
+    (contents ? rel.replace(/^\//, '') || '.' : baseOf(src.path) + rel) + (dir ? '/' : '')
+  const copy = (node: FsNode): FsNode => {
+    const keepOwner = opts.archive && toUser.uid === 0
+
+    return {
+      ...node,
+      owner: keepOwner ? node.owner : toUser.name,
+      group: keepOwner ? node.group : (toUser.groups[0] ?? toUser.name),
+      mtime: opts.archive ? node.mtime : ctx.sh.now(),
+    }
+  }
+  const writable = (path: string): boolean => {
+    const parent = own(to.machine.fs, parentOf(path))
+
+    return parent === undefined || can(toUser, parent, 'w')
+  }
+  const rels = [
+    '',
+    ...(src.node.kind === 'dir' ? descendantsOf(from.machine, src.path) : []).map((path) =>
+      path.slice(src.path.length),
+    ),
+  ]
+
+  for (const rel of rels) {
+    const node = own(from.machine.fs, src.path + rel)
+
+    if (node === undefined) continue
+
+    const target = root + rel
+    const there = own(to.machine.fs, target)
+
+    if (node.kind === 'dir') {
+      const mine = childrenOf(from.machine, src.path + rel)
+      const theirs = there?.kind === 'dir' ? childrenOf(to.machine, target) : []
+      const gone = opts.del ? theirs.filter((name) => !mine.includes(name)) : []
+
+      // Con `--delete`, lo que sobra en esta carpeta se borra antes de copiar en ella.
+      for (const name of gone) {
+        const path = joinPath(target, name)
+        const inner = descendantsOf(to.machine, path).reverse()
+
+        if (!writable(path)) {
+          opts.errors.push(
+            `rsync: [generator] delete_file: unlink(${label(rel + '/' + name, false)}) failed: Permission denied (13)`,
+          )
+          continue
+        }
+        for (const each of [...inner, path]) {
+          const kind = own(to.machine.fs, each)?.kind
+
+          opts.list.push(`deleting ${label(each.slice(root.length), kind === 'dir')}`)
+          if (!opts.dry) drop(to.machine.fs, each)
+        }
+      }
+      // Una carpeta sale en la lista si es nueva o si le llega algo nuevo.
+      if (there?.kind === 'dir' && mine.every((name) => theirs.includes(name))) continue
+      opts.list.push(label(rel, true))
+      if (opts.dry || there?.kind === 'dir') continue
+      if (!writable(target)) {
+        opts.errors.push(`rsync: [Receiver] mkdir "${target}" failed: Permission denied (13)`)
+        continue
+      }
+      to.machine.fs[target] = copy(node)
+      continue
+    }
+
+    const same =
+      there?.kind === node.kind &&
+      (node.kind !== 'file' ||
+        (there.kind === 'file' && there.text === node.text && there.size === node.size)) &&
+      (!opts.archive || there.mtime === node.mtime)
+
+    if (node.kind === 'file') opts.total += sizeOf(node)
+    if (same) continue
+    if (!writable(target)) {
+      opts.errors.push(`rsync: [Receiver] mkstemp "${target}" failed: Permission denied (13)`)
+      continue
+    }
+    opts.list.push(label(rel, false))
+    opts.sent += sizeOf(node)
+    if (!opts.dry) to.machine.fs[target] = copy(node)
+  }
 }
 
 const rsync: CommandFn = (ctx) => {
@@ -669,31 +817,61 @@ const rsync: CommandFn = (ctx) => {
     'dry-run': 'n',
     compress: 'z',
     progress: 'P',
-    human: 'h',
+    'human-readable': 'h',
+    times: 't',
+    perms: 'p',
+    links: 'l',
+    owner: 'o',
+    group: 'g',
   })
 
   if (rest.length < 2) throw new Fail('rsync: usage: rsync [OPTION]... SRC [SRC]... DEST', 1)
+  if (flags.has('D') && !flags.has('a') && !flags.has('r'))
+    throw new Fail(
+      'rsync: --delete does not work without --recursive (-r) or --dirs (-d).\nrsync error: syntax or usage error (code 1) at main.c(1817) [client=3.2.7]',
+      1,
+    )
 
   const to = remote(ctx, rest.at(-1) ?? '')
-  const listed: string[] = []
+  const opts: RsyncOpts = {
+    recursive: flags.has('a') || flags.has('r'),
+    archive: flags.has('a') || flags.has('t'),
+    del: flags.has('D'),
+    dry: flags.has('n'),
+    list: [],
+    errors: [],
+    sent: 0,
+    total: 0,
+  }
 
-  for (const src of rest.slice(0, -1))
-    transfer(ctx, remote(ctx, src), to, {
-      recursive: flags.has('a') || flags.has('r'),
-      contents: src.endsWith('/'),
-      verbose: listed,
-      del: flags.has('D'),
-      dry: flags.has('n'),
-    })
-  if (flags.has('v') || flags.has('n'))
+  for (const src of rest.slice(0, -1)) rsyncOne(ctx, remote(ctx, src), to, opts)
+
+  const verbose = flags.has('v')
+
+  if (verbose) {
+    const sent = 40 + opts.list.length * 20 + opts.sent
+    const received = 19 + opts.list.length * 8
+
     ctx.io.out(
       joinLines([
         'sending incremental file list',
-        ...listed,
+        ...opts.list,
         '',
-        `sent ${listed.length * 120} bytes  received 35 bytes  total size ${listed.length * 1000}${flags.has('n') ? ' (DRY RUN)' : ''}`,
+        `sent ${sent} bytes  received ${received} bytes  ${((sent + received) * 2).toFixed(2)} bytes/sec`,
+        `total size is ${opts.total}  speedup is ${(opts.total / (sent + received)).toFixed(2)}${opts.dry ? ' (DRY RUN)' : ''}`,
       ]),
     )
+  } else ctx.io.out(joinLines(opts.list.filter((line) => line.startsWith('skipping directory '))))
+  if (opts.errors.length > 0) {
+    ctx.io.err(
+      joinLines([
+        ...opts.errors,
+        'rsync error: some files/attrs were not transferred (see previous errors) (code 23) at main.c(1338) [sender=3.2.7]',
+      ]),
+    )
+
+    return 23
+  }
 
   return 0
 }

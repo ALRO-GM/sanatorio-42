@@ -63,6 +63,17 @@ export type Check = {
   modes?: string[]
   /** Algo de lo que escribiste en la terminal es exactamente la salida de la solución. */
   output?: boolean
+  /**
+   * La salida es una lista de nombres (`ls`): vale también en formato largo
+   * (`ls -l`, `ls -la`), sin contar `total`, `.` ni `..`.
+   */
+  listing?: boolean
+  /**
+   * Otras órdenes que dan la misma respuesta con otra forma (`groups deploy`
+   * frente a `id deploy`): se ejecutan sobre el mundo de la solución y su
+   * salida también vale.
+   */
+  answers?: string[]
   /** La carpeta en la que acabas. */
   cwd?: boolean
   /** Servicios: activo y arrancado al inicio. */

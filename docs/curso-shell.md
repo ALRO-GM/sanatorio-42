@@ -169,6 +169,19 @@ guarda (`course_times`) para ajustarlo.
 - A diferencia del curso de git, **no exige un puesto del clúster**: no hay
   pruebas de grupo y la trampa obvia (decir «hecho» o «tardé poco») no sirve.
 
+## Revisión de 2026-11-09
+
+Cada unidad y cada jefe se revisó contra bash y GNU de verdad: lo que dice la
+teoría, si es la forma profesional y qué otras formas buenas acepta la
+prueba. La tabla por unidad, los arreglos del motor (mensajes de `chown`,
+`touch`, `cp`, `head`/`tail`; `rsync` con y sin barra y su `-n --delete`;
+`ps aux | grep` con su propia línea; `ls -lh`; errores con «guion: line N:»…)
+y lo que se queda distinto a propósito están en
+[revision-cursos/shell.md](revision-cursos/shell.md). La corrección acepta
+también `ls -l` donde se pide listar (`listing`), respuestas con otra forma
+(`answers`) y un crontab equivalente (`03` = `3`, `bash guion.sh`,
+`>> log 2>&1`).
+
 ## Límites conocidos
 
 - La shell es un subconjunto: no hay editores a pantalla completa (se escribe

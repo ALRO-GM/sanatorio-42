@@ -39,17 +39,22 @@ function count(ctx: Ctx): {
 
 const head: CommandFn = (ctx) => {
   const { n, files, bytes } = count(ctx)
+  let first = true
 
   return eachInput(ctx, files, ({ name, text }) => {
-    if (files.length > 1) ctx.io.out(`==> ${name} <==\n`)
+    // Con varios ficheros, cada uno con su cabecera y una línea en blanco entre ellos.
+    if (files.length > 1) ctx.io.out(`${first ? '' : '\n'}==> ${name} <==\n`)
+    first = false
     ctx.io.out(bytes !== null ? text.slice(0, bytes) : joinLines(linesOf(text).slice(0, n)))
   })
 }
 
 const tail: CommandFn = (ctx) => {
   const { n, from, files, bytes, follow } = count(ctx)
+  let first = true
   const code = eachInput(ctx, files, ({ name, text }) => {
-    if (files.length > 1) ctx.io.out(`==> ${name} <==\n`)
+    if (files.length > 1) ctx.io.out(`${first ? '' : '\n'}==> ${name} <==\n`)
+    first = false
 
     const lines = linesOf(text)
 
@@ -501,20 +506,32 @@ const zgrep: CommandFn = (ctx) => grepCore(ctx, true)
 /* ---------- Más filtros ---------- */
 
 const xargs: CommandFn = (ctx) => {
-  const { values, rest } = getopts(ctx.args, 'nIdL', {}, true)
+  // `-0` (lo que deja `find -print0`): los nombres van separados por el carácter nulo.
+  const lead = ctx.args.findIndex((arg) => !/^-(0|-null|r|-no-run-if-empty|t)$/.test(arg))
+  const head = lead === -1 ? ctx.args : ctx.args.slice(0, lead)
+  const nul = head.some((arg) => arg === '-0' || arg === '--null')
+  const { flags, values, rest } = getopts(
+    ctx.args.filter((arg, index) => index >= head.length || (arg !== '-0' && arg !== '--null')),
+    'nIdL',
+    { 'no-run-if-empty': 'r' },
+    true,
+  )
   const text = ctx.io.stdin.readAll()
-  const items = values.has('d')
-    ? text.split(values.get('d') ?? '\n').filter(Boolean)
-    : values.has('I') || values.has('L')
-      ? linesOf(text)
-      : text.split(/\s+/).filter(Boolean)
+  const items = nul
+    ? text.split('\0').filter(Boolean)
+    : values.has('d')
+      ? text.split(values.get('d') ?? '\n').filter(Boolean)
+      : values.has('I') || values.has('L')
+        ? linesOf(text)
+        : text.split(/\s+/).filter(Boolean)
   const command = rest.length === 0 ? ['echo'] : rest
   const placeholder = values.get('I')
   const per =
     placeholder !== undefined ? 1 : Number(values.get('n') ?? values.get('L') ?? items.length) || 1
   let code = 0
 
-  if (items.length === 0 && placeholder === undefined) return ctx.sh.runArgv(command, ctx.io)
+  if (items.length === 0 && (placeholder !== undefined || flags.has('r'))) return 0
+  if (items.length === 0) return ctx.sh.runArgv(command, ctx.io)
   for (let i = 0; i < items.length; i += per) {
     const chunk = items.slice(i, i + per)
     const argv =

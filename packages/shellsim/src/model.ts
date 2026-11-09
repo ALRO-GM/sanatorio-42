@@ -55,7 +55,8 @@ export type Proc = {
   mem: number
   /** Memoria residente en kB. */
   rss: number
-  state: 'R' | 'S' | 'T' | 'Z'
+  /** `+`: en primer plano de su terminal (lo que corre mientras miras con `ps`). */
+  state: 'R' | 'S' | 'T' | 'Z' | 'R+' | 'S+'
   tty: string
   /** El servicio al que pertenece, si es de uno. */
   service?: string
@@ -136,6 +137,8 @@ export type Session = {
   history: string[]
   oldpwd: string
   umask: number
+  /** La pila de `pushd`/`popd` (sin la carpeta actual). */
+  dirs?: string[]
 }
 
 export type World = {

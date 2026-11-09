@@ -80,7 +80,7 @@ export const BEGINNER: Unit[] = [
     },
     example: ['pwd', 'ls', 'ls -l /var/log', 'ls Notas.txt', 'ls notas.txt'],
     solution: ['ls /srv/peer4u'],
-    check: { output: true },
+    check: { output: true, listing: true },
   },
   {
     id: 'cd',
@@ -929,7 +929,7 @@ export const BEGINNER: Unit[] = [
     },
     example: ['ls -l /etc/passwd /etc/shadow', 'id', 'cat /etc/shadow'],
     solution: ['ls -l /etc/peer4u/app.env', 'id deploy'],
-    check: { output: true },
+    check: { output: true, answers: ['id -Gn deploy', 'id -G deploy', 'groups deploy'] },
   },
   {
     id: 'chmod',

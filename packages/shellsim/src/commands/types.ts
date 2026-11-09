@@ -41,6 +41,8 @@ export type Io = {
   out: (text: string) => void
   err: (text: string) => void
   tty?: boolean
+  /** Las órdenes de la tubería en la que va este programa y cuál es él (para que `ps` las vea). */
+  pipeline?: { cmds: string[]; index: number }
 }
 
 export type ShellApi = {

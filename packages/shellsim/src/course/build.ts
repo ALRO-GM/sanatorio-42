@@ -135,6 +135,22 @@ function normalized(text: string): string {
 /** Para comparar respuestas: los espacios y saltos de línea, de uno en uno (ls en columnas o en líneas da igual). */
 const loose = (text: string): string => text.trim().split(/\s+/).join(' ')
 
+/** Los nombres de una salida de `ls`, en columnas, en líneas o en formato largo. */
+function namesIn(text: string): string {
+  const long = /^[-dlcbps][-rwxsStT]{9}\S*\s+\d+\s+\S+\s+\S+\s+\S+\s+\S+\s+\d+\s+[\d:]+\s(.*)$/
+
+  return text
+    .split('\n')
+    .filter((line) => !/^total \S+$/.test(line))
+    .flatMap((line) => {
+      const name = long.exec(line)?.[1]
+
+      return name === undefined ? line.trim().split(/\s+/) : [name.replace(/ -> .*$/, '')]
+    })
+    .filter((name) => name !== '' && name !== '.' && name !== '..')
+    .join(' ')
+}
+
 export type Tally = {
   world: World
   /** Cada orden: si salió bien, cuántos comandos contó, y lo que escribió. */
@@ -187,7 +203,58 @@ function nodeAt(world: World, spec: string): FsNode | null {
   }
 }
 
-/** La tabla de cron, sin comentarios ni espacios de más, y con `~` como la carpeta personal. */
+/** `@daily` y compañía, como los cinco campos que equivalen. */
+const CRON_NICKNAMES: Record<string, string> = {
+  '@hourly': '0 * * * *',
+  '@daily': '0 0 * * *',
+  '@midnight': '0 0 * * *',
+  '@weekly': '0 0 * * 0',
+  '@monthly': '0 0 1 * *',
+  '@yearly': '0 0 1 1 *',
+  '@annually': '0 0 1 1 *',
+}
+
+/** El rango entero de cada campo de cron (`0-59` en minutos es lo mismo que `*`). */
+const CRON_FULL = [['0-59'], ['0-23'], ['1-31'], ['1-12'], ['0-6', '0-7', '1-7']]
+
+/**
+ * Una línea de cron por lo que hace: la hora sin ceros de más ni rangos que
+ * lo cubren todo (`03` = `3`, `0-6` = `*`), y la orden sin el intérprete de
+ * delante (`bash guion.sh` = `guion.sh`) ni a dónde va su salida
+ * (`>> log 2>&1`), que no cambian qué se ejecuta ni cuándo.
+ */
+function cronLine(line: string, home: string): string {
+  let text = line.replace(/(^|\s)(~|\$HOME)\//g, `$1${home}/`)
+  const nick = /^(@\w+)\s+(.*)$/.exec(text)
+
+  if (nick !== null) text = `${CRON_NICKNAMES[nick[1] ?? ''] ?? nick[1] ?? ''} ${nick[2] ?? ''}`
+
+  const parts = text.split(' ')
+
+  if (parts.length < 6) return text
+
+  const fields = parts.slice(0, 5).map((field, i) => {
+    const plain = field.replace(/(^|[^\d])0+(\d)/g, '$1$2').replace(/^\*\/1$/, '*')
+
+    return CRON_FULL[i]?.includes(plain) === true ? '*' : plain
+  })
+  let command = parts.slice(5).join(' ')
+
+  for (;;) {
+    const next = command
+      .replace(/\s+\d?>&\d$/, '')
+      .replace(/\s+(?:\d|&)?>>?\s*\S+$/, '')
+      .trim()
+
+    if (next === command) break
+    command = next
+  }
+  command = command.replace(/^(?:\/usr)?(?:\/bin\/)?(?:ba)?sh\s+(?=\S)/, '')
+
+  return [...fields, command].join(' ')
+}
+
+/** La tabla de cron, sin comentarios, variables ni espacios de más, y con `~` como la carpeta personal. */
 function cronOf(world: World, spec: string): string {
   const { host, path: user } = split(named(spec))
   const name = user.replace(/^\//, '')
@@ -197,14 +264,9 @@ function cronOf(world: World, spec: string): string {
 
   return text
     .split('\n')
-    .map((line) =>
-      line
-        .replace(/#.*/, '')
-        .trim()
-        .replace(/\s+/g, ' ')
-        .replace(/(^|\s)(~|\$HOME)\//g, `$1${home}/`),
-    )
-    .filter(Boolean)
+    .map((line) => line.replace(/#.*/, '').trim().replace(/\s+/g, ' '))
+    .filter((line) => line !== '' && !/^[A-Za-z_][A-Za-z0-9_]*\s*=/.test(line))
+    .map((line) => cronLine(line, home))
     .join('\n')
 }
 
@@ -247,7 +309,12 @@ function probe(world: World, entries: readonly string[]): string[] {
 
     current = result.world
 
-    return `${normalized(result.output.join('\n'))}\n[${result.code}]`
+    // El aviso de tar con rutas absolutas no cambia lo que hace el guion: no cuenta.
+    const output = result.output.filter(
+      (line) => line !== "tar: Removing leading `/' from member names",
+    )
+
+    return `${normalized(output.join('\n'))}\n[${result.code}]`
   })
 }
 
@@ -320,10 +387,12 @@ function snapshot(world: World, check: Check): Goal {
   return out
 }
 
-const goals = new Map<string, { goal: Goal; output: string | null; par: number }>()
+type Target = { goal: Goal; output: string | null; answers: string[]; par: number }
+
+const goals = new Map<string, Target>()
 
 /** Lo que hay que conseguir (y la salida esperada, si la unidad pide una). */
-export function goalOf(unit: Unit): { goal: Goal; output: string | null; par: number } {
+export function goalOf(unit: Unit): Target {
   const known = goals.get(unit.id)
 
   if (known !== undefined) return known
@@ -332,7 +401,19 @@ export function goalOf(unit: Unit): { goal: Goal; output: string | null; par: nu
   const last = solved.lines.at(-1)
   const result = {
     goal: snapshot(solved.world, unit.check),
-    output: unit.check.output === true ? loose(last?.stdout ?? '') : null,
+    output:
+      unit.check.output === true
+        ? unit.check.listing === true
+          ? namesIn(last?.stdout ?? '')
+          : loose(last?.stdout ?? '')
+        : null,
+    answers: (unit.check.answers ?? []).map((line) => {
+      const answer = run(solved.world, line)
+
+      if (!answer.ok) throw new UnitError(`${unit.id} (respuesta): ${line}`)
+
+      return (unit.check.listing === true ? namesIn : loose)(answer.stdout)
+    }),
     par: solved.commands,
   }
 
@@ -343,11 +424,15 @@ export function goalOf(unit: Unit): { goal: Goal; output: string | null; par: nu
 
 /** Qué falta: las claves de `snapshot` que no coinciden, `output` y `requires`. */
 export function missing(unit: Unit, tallied: Tally, entries: readonly string[]): string[] {
-  const { goal, output } = goalOf(unit)
+  const { goal, output, answers } = goalOf(unit)
   const now = snapshot(tallied.world, unit.check)
   const misses = Object.keys(goal).filter((key) => now[key] !== goal[key])
 
-  if (output !== null && !tallied.lines.some((line) => line.ok && loose(line.stdout) === output))
+  const seen = unit.check.listing === true ? namesIn : loose
+
+  const valid = new Set([output, ...answers])
+
+  if (output !== null && !tallied.lines.some((line) => line.ok && valid.has(seen(line.stdout))))
     misses.push('output')
 
   const used = new Set(

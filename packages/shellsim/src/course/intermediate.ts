@@ -240,7 +240,7 @@ export const INTERMEDIATE: Unit[] = [
           '... | sort | uniq -c | sort -rn | head -n 3',
         ],
         problems:
-          'uniq sin sort antes solo junta repetidas seguidas: con access.log, uniq -c saca «3 200» y, tres líneas más abajo, «2 200». Ordena primero.',
+          'uniq sin sort antes solo junta repetidas seguidas: con access.log, uniq -c saca «3 200» y, cuatro líneas más abajo, «2 200». Ordena primero.',
         whenNot: 'sort -u quita repetidas sin contarlas; para contar, sort | uniq -c.',
       },
       example:
@@ -258,7 +258,7 @@ export const INTERMEDIATE: Unit[] = [
           '... | sort | uniq -c | sort -rn | head -n 3',
         ],
         problems:
-          'uniq without sort first only merges adjacent repeats: with access.log, uniq -c prints "3 200" and, three lines down, "2 200". Sort first.',
+          'uniq without sort first only merges adjacent repeats: with access.log, uniq -c prints "3 200" and, four lines down, "2 200". Sort first.',
         whenNot: 'sort -u removes repeats without counting; to count, sort | uniq -c.',
       },
       example:
@@ -276,7 +276,7 @@ export const INTERMEDIATE: Unit[] = [
           '... | sort | uniq -c | sort -rn | head -n 3',
         ],
         problems:
-          'uniq sans sort ne regroupe que les voisines : avec access.log, uniq -c sort « 3 200 » puis, trois lignes plus bas, « 2 200 ». Trie d’abord.',
+          'uniq sans sort ne regroupe que les voisines : avec access.log, uniq -c sort « 3 200 » puis, quatre lignes plus bas, « 2 200 ». Trie d’abord.',
         whenNot: 'sort -u enlève les répétitions sans les compter ; pour compter, sort | uniq -c.',
       },
       example:
@@ -551,7 +551,8 @@ export const INTERMEDIATE: Unit[] = [
       'find /etc -type d -name nginx',
     ],
     solution: ["find /var/log -name '*.log' -size +2k"],
-    check: { output: true },
+    // Desde /var/log, `find .` da las mismas rutas en relativo: también vale.
+    check: { output: true, answers: ["cd /var/log && find . -name '*.log' -size +2k"] },
   },
   {
     id: 'find-exec',
