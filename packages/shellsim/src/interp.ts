@@ -197,6 +197,7 @@ export class Shell implements ShellApi {
       positional: () => this.frame().args,
       special: (name) => this.special(name),
       home: () => this.homeOf(this.world.session.user),
+      homeOf: (user) => own(this.machine().users, user)?.home,
       substitute: (src) => this.substitute(src, io),
       glob: (pattern) => this.glob(pattern),
       nounset: () => this.world.session.opts.nounset,
@@ -752,7 +753,11 @@ export class Shell implements ShellApi {
         const at = assign.indexOf('=')
         const plus = assign[at - 1] === '+'
         const name = assign.slice(0, plus ? at - 1 : at)
-        const value = expandWord(assign.slice(at + 1), env, { split: false, glob: false }).join(' ')
+        const value = expandWord(assign.slice(at + 1), env, {
+          split: false,
+          glob: false,
+          assignment: true,
+        }).join(' ')
 
         assigns.push([name, plus ? (this.getVar(name) ?? '') + value : value])
       }

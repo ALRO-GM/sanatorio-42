@@ -243,6 +243,15 @@ describe('Kubernetes simulado: manifiestos y salidas de kubectl', () => {
     // El servidor descarta el campo: no se guarda.
     expect(warn[1]?.out).not.toContain('replica:')
     expect(last(EMPTY, apply(typo, '--validate=false ')).out).toBe('deployment.apps/demo created')
+    // `--validate` a secas es `--validate=strict` y no se come lo que va detrás.
+    expect(last(EMPTY, apply(typo, '--validate ')).out).toBe(strict.out)
+    expect(
+      last(
+        EMPTY,
+        `kubectl run x --image=nginx:1.27 --dry-run=client -o yaml > x.yaml`,
+        'kubectl apply --validate -f x.yaml',
+      ).out,
+    ).toBe('pod/x created')
     expect(last(EMPTY, apply(typo, '--dry-run=true ')).out).toContain(
       'Invalid dry-run value (true)',
     )
@@ -430,5 +439,34 @@ EOF`
     expect(out[0]?.out).toContain('Pulled: registry-1.docker.io/bitnamicharts/redis:20.2.1')
     expect(out[0]?.out).toContain('Release "cache" does not exist. Installing it now.')
     expect(out[1]?.out).toMatch(/cache\s+tienda\s+1\s+.*deployed\s+redis-20\.2\.1/)
+  })
+})
+
+describe('Kubernetes simulado: textos en bloque del YAML', () => {
+  it('un fichero de configuración en un ConfigMap (`|`) guarda su sangría', () => {
+    const out = steps(
+      EMPTY,
+      `cat > cm.yaml <<'EOF'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: web
+data:
+  default.conf: |
+    server {
+      listen 80;
+    }
+  motd: >-
+    hola
+    a todos
+EOF`,
+      'kubectl apply -f cm.yaml',
+      "kubectl get cm web -o jsonpath='{.data.default\\.conf}'",
+      "kubectl get cm web -o jsonpath='{.data.motd}'",
+    )
+
+    expect(out[1]?.out).toBe('configmap/web created')
+    expect(out[2]?.out).toBe('server {\n  listen 80;\n}')
+    expect(out[3]?.out).toBe('hola a todos')
   })
 })

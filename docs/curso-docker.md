@@ -149,7 +149,8 @@ Dentro del curso, el camino se abre de uno en uno.
   - `users.ts`: las cuentas de cada imagen (los uid y gid que dan `adduser` y
     `addgroup`), de quién es cada ruta y quién puede escribir dónde.
   - `yaml.ts`: el YAML de un compose (bloques, listas y mapas en línea,
-    comillas, `|` y `>`), con topes.
+    comillas, textos en bloque `|` y `>` como YAML 1.2), con topes. Lo usa
+    también `packages/k8ssim` para los manifiestos.
   - `course/`: los bloques, las unidades (castellano e inglés) y la corrección
     (`checkAttempt`, `goalOf`, `starGoals`, `timeGoalsOf`).
 - `apps/api/src/modules/dockercourse`: el mismo servicio que el de shell

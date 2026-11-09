@@ -91,58 +91,6 @@ function typed(value: Yaml, key: string, free: boolean): Json {
 }
 
 /**
- * Los textos en bloque (`|`, `|-`, `>`) pasados a una línea entre comillas,
- * con su sangría relativa. El lector del curso de Docker quita la sangría de
- * cada línea del bloque, y aquí importa: un parche de Kustomize en línea
- * (`patch: |-` con `- op: replace` y `path:` debajo) o un fichero de
- * configuración dentro de un ConfigMap son YAML o texto con sangría.
- */
-function unfoldBlocks(source: string): string {
-  const lines = source.split('\n')
-  const out: string[] = []
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i] ?? ''
-    const head = /^(\s*)(- )?([^\s#][^#]*?):\s+([|>])([-+]?)\s*(#.*)?$/.exec(line)
-
-    if (head === null) {
-      out.push(line)
-      continue
-    }
-
-    // El bloque es lo que va más adentro que la clave (las líneas en blanco, dentro).
-    const column = (head[1] ?? '').length + (head[2] ?? '').length
-    const body: string[] = []
-
-    while (i + 1 < lines.length) {
-      const next = lines[i + 1] ?? ''
-
-      if (next.trim() !== '' && next.length - next.trimStart().length <= column) break
-      body.push(next)
-      i++
-    }
-    while (body.length > 0 && (body.at(-1) ?? '').trim() === '') body.pop()
-
-    const indents = body
-      .filter((each) => each.trim() !== '')
-      .map((each) => each.length - each.trimStart().length)
-    const base = indents.length === 0 ? 0 : Math.min(...indents)
-    const kept = body.map((each) => each.slice(base))
-    const joined = head[4] === '|' ? kept.join('\n') : kept.map((each) => each.trim()).join(' ')
-    const text = head[5] === '-' || joined === '' ? joined : `${joined}\n`
-    const quoted = text
-      .replace(/\\/g, '\\\\')
-      .replace(/"/g, '\\"')
-      .replace(/\n/g, '\\n')
-      .replace(/\t/g, '\\t')
-
-    out.push(`${head[1] ?? ''}${head[2] ?? ''}${head[3] ?? ''}: "${quoted}"`)
-  }
-
-  return out.join('\n')
-}
-
-/**
  * Un valor leído de un parche JSON 6902 (`value: 4` en `/spec/replicas`), con
  * el tipo que le toca por el campo al que va.
  */
@@ -166,7 +114,7 @@ export function parseDocs(source: string, file: string): JsonObject[] {
     let value: Yaml
 
     try {
-      value = parseYaml(unfoldBlocks(doc))
+      value = parseYaml(doc)
     } catch (error) {
       if (error instanceof YamlError)
         throw new ShellError(

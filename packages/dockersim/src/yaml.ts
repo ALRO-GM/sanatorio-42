@@ -1,7 +1,8 @@
 /**
  * Un YAML pequeño, lo justo para un compose.yaml: mapas y listas en bloque,
  * listas y mapas en línea (`[a, b]`, `{a: b}`), textos con y sin comillas,
- * comentarios y textos de varias líneas (`|` y `>`). Todo valor es un texto
+ * comentarios y textos en bloque (`|` y `>`, con sangría y final como en
+ * YAML 1.2). Todo valor es un texto
  * (o `null`): compose ya sabe qué espera en cada sitio. Sin anclas ni
  * etiquetas, que en un compose de trabajo casi no salen. Recorre cada línea
  * una vez y tiene tope de tamaño y de profundidad: nada de lo que se escriba
@@ -14,7 +15,8 @@ export type Yaml = string | null | Yaml[] | { [key: string]: Yaml }
 
 export class YamlError extends Error {}
 
-type Line = { n: number; indent: number; text: string }
+/** `block`: el texto ya leído de un bloque (`|`, `>`) que abre esta línea. */
+type Line = { n: number; indent: number; text: string; block?: string }
 
 /** Quita un comentario (`# …` fuera de comillas) del final de una línea. */
 function uncomment(line: string): string {
@@ -186,12 +188,12 @@ class Parser {
       if (colonAt(rest) > 0 && !rest.startsWith('"') && !rest.startsWith("'")) {
         const inner = indent + (line.text.length - rest.length)
 
-        this.lines[this.pos] = { n: line.n, indent: inner, text: rest }
+        this.lines[this.pos] = { ...line, indent: inner, text: rest }
         out.push(this.mapping(inner, depth + 1))
         continue
       }
       this.pos++
-      out.push(flow(rest, line.n, depth))
+      out.push(line.block ?? flow(rest, line.n, depth))
     }
 
     return out
@@ -215,8 +217,8 @@ class Parser {
       if (Object.hasOwn(out, key))
         throw new YamlError(`line ${line.n}: mapping key "${key}" already defined`)
       this.pos++
-      if (rest === '|' || rest === '>' || rest === '|-' || rest === '>-') {
-        out[key] = this.text(indent, rest)
+      if (line.block !== undefined) {
+        out[key] = line.block
         continue
       }
       if (rest !== '') {
@@ -237,21 +239,115 @@ class Parser {
 
     return out
   }
+}
 
-  /** Un texto en bloque: `|` guarda los saltos de línea; `>` los junta con espacios. */
-  private text(indent: number, style: string): string {
-    const parts: string[] = []
+/**
+ * La cabecera de un texto en bloque al final de una línea (`clave: |`,
+ * `- >-`, `clave: |2+`): estilo, sangría pedida (1–9) y cómo acaba.
+ */
+const HEADER = /(^-|:)\s+([|>])([1-9+-]{0,2})$/
 
-    for (let line = this.lines[this.pos]; line !== undefined; line = this.lines[this.pos]) {
-      if (line.indent <= indent) break
-      parts.push(line.text)
-      this.pos++
+type Header = { style: string; parent: number; width: number; chomp: string }
+
+function header(text: string, indent: number, n: number): Header | null {
+  const match = HEADER.exec(text)
+
+  if (match === null) return null
+
+  const indicators = match[3] ?? ''
+  const width = indicators.replace(/[+-]/g, '')
+  const chomp = indicators.replace(/\d/g, '')
+
+  if (width.length > 1 || chomp.length > 1)
+    throw new YamlError(`line ${n}: did not find expected comment or line break`)
+
+  // La sangría de quien lo contiene: la clave (también en `- clave: |`) o el guion.
+  const keyAt = match[1] === ':' && text.startsWith('- ') ? text.slice(1).search(/\S/) + 1 : 0
+
+  return {
+    style: match[2] ?? '|',
+    parent: indent + keyAt,
+    width: width === '' ? 0 : Number(width),
+    chomp,
+  }
+}
+
+/**
+ * Junta las líneas de un `>`: un salto entre dos líneas normales es un
+ * espacio, las líneas vacías son saltos, y las que van más adentro (y los
+ * saltos a su lado) se quedan como están.
+ */
+function fold(lines: string[]): string {
+  let out = ''
+  let empty = 0
+  let first = true
+  let wasIndented = false
+
+  for (const line of lines) {
+    if (line === '') {
+      empty++
+      continue
     }
 
-    const joined = style.startsWith('|') ? parts.join('\n') : parts.join(' ')
+    const indented = /^[ \t]/.test(line)
 
-    return style.endsWith('-') ? joined : `${joined}\n`
+    if (first) out += '\n'.repeat(empty)
+    else if (!indented && !wasIndented) out += empty === 0 ? ' ' : '\n'.repeat(empty)
+    else out += '\n'.repeat(empty + 1)
+    out += line
+    first = false
+    wasIndented = indented
+    empty = 0
   }
+
+  return out
+}
+
+/**
+ * Lee el cuerpo de un texto en bloque desde `raws[from]` como YAML 1.2: la
+ * sangría la da la primera línea con algo (o el número de la cabecera), cada
+ * línea guarda lo que va más adentro, `>` junta y el final se recorta (`-`),
+ * deja un salto (sin indicador) o los guarda todos (`+`). Devuelve el texto y
+ * la primera línea que ya no es suya.
+ */
+function blockBody(raws: string[], from: number, head: Header): { text: string; next: number } {
+  let width = head.width === 0 ? 0 : head.parent + head.width
+
+  if (width === 0)
+    for (let i = from; i < raws.length; i++) {
+      const raw = raws[i] ?? ''
+
+      if (raw.trim() === '') continue
+      width = raw.length - raw.trimStart().length
+      break
+    }
+
+  const body: string[] = []
+  let i = from
+
+  for (; i < raws.length; i++) {
+    const raw = (raws[i] ?? '').replace(/\r$/, '')
+    const spaces = raw.length - raw.replace(/^ +/, '').length
+
+    if (raw.trim() === '' && spaces <= width) body.push('')
+    else if (width > head.parent && spaces >= width) body.push(raw.slice(width))
+    else break
+  }
+
+  let trailing = 0
+
+  while (body.length > 0 && body.at(-1) === '') {
+    body.pop()
+    trailing++
+  }
+
+  const text = head.style === '|' ? body.join('\n') : fold(body)
+  const content = body.length > 0
+
+  if (head.chomp === '-') return { text, next: i }
+  if (head.chomp === '+') return { text: text + '\n'.repeat(trailing + (content ? 1 : 0)), next: i }
+
+  return { text: content ? `${text}\n` : '', next: i }
 }
 
 /** Lee un YAML; lanza `YamlError` con la línea si está mal escrito. */
@@ -260,20 +356,36 @@ export function parseYaml(source: string): Yaml {
     throw new YamlError(`the file is too big for this sandbox (max ${LIMITS.yamlChars} chars)`)
 
   const lines: Line[] = []
+  const raws = source.split('\n')
 
-  source.split('\n').forEach((raw, index) => {
+  // Lo que va tras el último salto no es una línea (cuenta en un `|+`).
+  if (raws.length > 1 && raws.at(-1) === '') raws.pop()
+
+  for (let index = 0; index < raws.length; index++) {
+    const raw = raws[index] ?? ''
+
     if (raw.includes('\t') && /^\s*\t/.test(raw))
       throw new YamlError(`line ${index + 1}: found character that cannot start any token (a tab)`)
 
     const clean = uncomment(raw).replace(/\s+$/, '')
 
-    if (clean.trim() === '' || clean.trim() === '---') return
-    lines.push({
+    if (clean.trim() === '' || clean.trim() === '---') continue
+
+    const line: Line = {
       n: index + 1,
       indent: clean.length - clean.trimStart().length,
       text: clean.trim(),
-    })
-  })
+    }
+    const head = header(line.text, line.indent, line.n)
+
+    if (head !== null) {
+      const { text, next } = blockBody(raws, index + 1, head)
+
+      line.block = text
+      index = next - 1
+    }
+    lines.push(line)
+  }
 
   return new Parser(lines).parse()
 }
