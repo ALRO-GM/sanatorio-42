@@ -13,7 +13,7 @@ export const REVIEW_GIT_EN: Readonly<Record<string, ReviewEntry>> = {
     title: 'git status',
     definition:
       'Tells you which branch you are on, what is staged for the next commit and what has changed but is not staged. You see the history with git log.',
-    example: 'git status → "Changes not staged for commit: main.c"',
+    example: 'git status → "Changes not staged for commit: modified: main.c"',
   },
   'git-branch-what': {
     title: 'Branch',
@@ -44,7 +44,7 @@ export const REVIEW_GIT_EN: Readonly<Record<string, ReviewEntry>> = {
     definition:
       'If both branches have moved forward, git combines their changes from the common ancestor into a commit with two parents.',
     example:
-      'git switch main && git merge feature → "Merge feature", with parents main and feature.',
+      'git switch main && git merge feature → "Merge branch \'feature\'", with parents main and feature.',
   },
   'git-branch-delete': {
     title: 'Deleting branches',
@@ -55,7 +55,7 @@ export const REVIEW_GIT_EN: Readonly<Record<string, ReviewEntry>> = {
   'git-fetch': {
     title: 'fetch and pull',
     definition:
-      'fetch downloads what is new from the remote and moves origin/branch, without touching your branches. pull is fetch plus merge (or plus rebase with --rebase).',
+      'fetch downloads what is new from the remote and moves origin/branch, without touching your branches. pull is fetch plus joining: merge with --no-rebase, rebase with --rebase; if the branches have diverged and you do not say which, git refuses and asks you to choose.',
     example: 'git fetch && git log --oneline --all; then git merge origin/main.',
   },
   'git-tracking': {

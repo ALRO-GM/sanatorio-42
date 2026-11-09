@@ -353,7 +353,7 @@ Cada uno por dentro, con diagramas: [docs/componentes.md](docs/componentes.md).
 | `exams` | Exámenes: intentos y notas, examen en vivo, días por círculo y black hole, por plan y kickoff |
 | `facility` | Avisos al staff de problemas del edificio o de los ordenadores |
 | `focus` | Pomodoro: sesiones, paradas y estadísticas |
-| `gitcourse` | Curso de git con git simulado y pruebas de grupo |
+| `gitcourse` | Curso de git con git simulado (contesta y se porta como git de verdad) y pruebas de grupo |
 | `help` | Ayuda reservada: franjas, reservas, valoración mutua, bloqueos y XP |
 | `k8scourse` | Curso de Kubernetes con dos clústeres simulados, jefes y certificados (el servicio de `shellcourse` con otro motor) |
 | `legal` | Privacidad y condiciones, y descarga de los datos de cada cual |

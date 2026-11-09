@@ -67,6 +67,15 @@ function table(gate: string, logins: string[]) {
 
 type Table = ReturnType<typeof table>
 
+/** Un commit en main, al día con origin, y push directo: lo que dice origin (protegida). */
+function protectedPush(gate: string): string {
+  const game = table(gate, ['ana', 'bea', 'dani'])
+
+  game.play('ana', 'git pull --ff-only', 'echo x > x.txt', 'git add x.txt', 'git commit -m x')
+
+  return game.fails('ana', 'git push origin main')
+}
+
 /** Grupo 1: rama, commit, push, y unirla en main con merge (trayendo main antes). */
 function group1(game: Table, login: string) {
   game.play(
@@ -93,10 +102,10 @@ function group2(game: Table, login: string, lines: string[]) {
     'git commit -m "Me apunto"',
     `git push origin ${login}`,
   )
-  expect(game.fails(login, `gh pr merge ${login}`)).toContain('conflictos en equipo.txt')
+  expect(game.fails(login, `gh pr merge ${login}`)).toContain('choca en equipo.txt')
   game.play(
     login,
-    'git pull origin main',
+    'git pull --no-rebase origin main',
     `echo "${lines[0] ?? ''}" > equipo.txt`,
     ...lines.slice(1).map((line) => `echo "${line}" >> equipo.txt`),
     'git add equipo.txt',
@@ -116,11 +125,11 @@ function group3(game: Table, login: string, n: number) {
     `git add ${login}.txt`,
     'git commit -m "Mi funcionalidad"',
     'git switch develop',
-    'git pull',
+    'git pull --no-rebase',
     `git merge --no-ff feature/${login}`,
     'git push origin develop',
     'git switch main',
-    'git pull',
+    'git pull --no-rebase',
     `git switch -c hotfix/1.0.${n}`,
     `echo arreglado > arreglo-${login}.txt`,
     `git add arreglo-${login}.txt`,
@@ -129,14 +138,14 @@ function group3(game: Table, login: string, n: number) {
     `git merge --no-ff hotfix/1.0.${n}`,
     `git tag v1.0.${n}`,
     'git switch develop',
-    'git pull',
+    'git pull --no-rebase',
     `git merge --no-ff hotfix/1.0.${n}`,
     `git switch -c release/1.${n}`,
     `echo notas > notas-1.${n}.txt`,
     `git add notas-1.${n}.txt`,
     'git commit -m "Versión"',
     'git switch main',
-    'git pull',
+    'git pull --no-rebase',
     `git merge --no-ff release/1.${n}`,
     `git tag v1.${n}`,
     'git switch develop',
@@ -165,7 +174,7 @@ describe('pruebas de grupo del curso de git', () => {
       'git merge --no-ff bea',
     )
     expect(game.fails('bea', 'git push')).toContain('git pull')
-    game.play('bea', 'git pull', 'git push')
+    game.play('bea', 'git pull --no-rebase', 'git push')
     expect(game.missing()).toEqual([])
   })
 
@@ -188,7 +197,7 @@ describe('pruebas de grupo del curso de git', () => {
   it('grupo 2: a todas les choca el pull request y cada cual resuelve el suyo', () => {
     const game = table('group2', ['ana', 'bea', 'dani'])
 
-    expect(game.fails('ana', 'git push origin main')).toContain('protegida')
+    expect(protectedPush('group2')).toContain('GH006')
     group2(game, 'ana', ['# Equipo', '- coordinación', '- ana'])
     group2(game, 'bea', ['# Equipo', '- coordinación', '- ana', '- bea'])
     expect(game.done()).toBe(false)
@@ -203,7 +212,7 @@ describe('pruebas de grupo del curso de git', () => {
     expect(game.missing().some((each) => each.text.includes('coordinación'))).toBe(true)
   })
 
-  it('grupo 2: no se puede confirmar el conflicto con las marcas puestas', () => {
+  it('grupo 2: confirmar el conflicto con las marcas puestas no vale (git lo deja, la misión no)', () => {
     const game = table('group2', ['ana', 'bea', 'dani'])
 
     game.play(
@@ -212,10 +221,24 @@ describe('pruebas de grupo del curso de git', () => {
       'echo "- ana" >> equipo.txt',
       'git add equipo.txt',
       'git commit -m "Me apunto"',
-      'git pull origin main',
-      'git add equipo.txt',
+      'git pull --no-rebase origin main',
     )
-    expect(game.fails('ana', 'git commit -m "Sin mirar"')).toContain('conflictos sin resolver')
+    // Sin git add, git no deja confirmar; con add, sí (git no mira las marcas).
+    expect(game.fails('ana', 'git commit -m "Sin mirar"')).toContain('unmerged files')
+    game.play(
+      'ana',
+      'git add equipo.txt',
+      'git commit -m "Sin mirar"',
+      'git push origin ana',
+      'gh pr merge ana',
+    )
+    expect(
+      game
+        .missing()
+        .some(
+          (each) => each.text.includes('sin marcas') || each.text.includes('marcas de conflicto'),
+        ),
+    ).toBe(true)
   })
 
   it('grupo 3: cada cual hace funcionalidad, hotfix y versión, aunque se pisen los pushes', () => {
@@ -296,7 +319,7 @@ describe('jefe final del curso de git', () => {
   it('cada cual deshace lo suyo, mete su funcionalidad sin merges y publica su versión', () => {
     const game = table('boss', ['ana', 'bea'])
 
-    expect(game.fails('ana', 'git push origin main')).toContain('protegida')
+    expect(protectedPush('boss')).toContain('GH006')
     boss(game, 'ana', 1)
     boss(game, 'bea', 2)
     expect(game.done()).toBe(false)
@@ -354,7 +377,14 @@ describe('ids en un origin común', () => {
   it('las copias de commits ajenos llevan un id propio: no chocan entre personas', () => {
     const game = table('group1', ['ana', 'bea', 'dani'])
 
-    game.play('ana', 'git switch -c ana', 'git commit -m "a"', 'git push origin ana')
+    game.play(
+      'ana',
+      'git switch -c ana',
+      'echo a > a',
+      'git add a',
+      'git commit -m "a"',
+      'git push origin ana',
+    )
     for (const login of ['bea', 'dani']) {
       game.play(login, 'git fetch', `git switch -c ${login}`, 'git cherry-pick origin/ana')
       game.play(login, `git push origin ${login}`)

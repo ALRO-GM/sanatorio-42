@@ -88,10 +88,13 @@ y se ejecuta desde la raíz del repo con
 `npx tsx --conditions=source <guion>.ts` (la condición `source` hace que
 importe los `.ts` de los paquetes sin compilarlos).
 
-Ojo con git: el motor resume la salida (`git status` dice «Preparado para el
-commit: a.txt»), y git de verdad lo dice más largo y en el idioma de su
-instalación. La teoría habla de lo que se ve en el curso y no cita mensajes de
-git de verdad salvo que se hayan copiado de una ejecución real.
+Ojo con git: desde el 2026-11-09 el motor contesta como git 2.4x en inglés,
+como los de shell y Docker (`git status` dice «Changes to be committed:» y
+«nothing to commit, working tree clean»), pero resumido: sin hashes largos, sin
+fechas y sin las líneas de ayuda «(use "git add" …)». La teoría cita los
+mensajes tal como los da el motor; lo que el motor hace distinto de git a
+sabiendas está en [curso-git.md](curso-git.md) («Lo que el simulador hace
+distinto»).
 
 ## Lista de revisión de una unidad
 
@@ -157,7 +160,7 @@ Unas 120 palabras de teoría en español: dentro del límite de principiante.
 ## Ejemplo completo: git, el índice (`git add`)
 
 Punto `w0-add` del mundo 0 (`packages/gitsim/src/levels/basics.ts`). Salida
-del motor de git, ejecutada el 2026-11-08.
+del motor de git, ejecutada el 2026-11-09.
 
 - **Idea** (`what`): entre tus ficheros y el commit está el índice. `git add`
   elige qué cambios entran en el próximo commit; lo que no añades se queda
@@ -180,19 +183,27 @@ del motor de git, ejecutada el 2026-11-08.
   ```text
   $ git add a.txt
   $ git status
-  En la rama main
-  Preparado para el commit: a.txt
-  Cambios sin preparar: b.txt
+  On branch main
+  Changes to be committed:
+          new file:   a.txt
+
+  Untracked files:
+          b.txt
   $ git commit -m "Primero"
-  [c1] Primero
+  [main c1] Primero
+   1 file changed, 1 insertion(+)
+   create mode 100644 a.txt
   $ git status
-  En la rama main
-  Cambios sin preparar: b.txt
+  On branch main
+  Untracked files:
+          b.txt
+
+  nothing added to commit but untracked files present (use "git add" to track)
   ```
 
 - **Error típico** (`problems`): creer que el commit guarda todo lo que hay en
-  la carpeta. Se nota en que, tras el commit, `git status` sigue diciendo
-  «Cambios sin preparar: b.txt». Añádelo y haz otro commit.
+  la carpeta. Se nota en que, tras el commit, `git status` sigue enseñando
+  b.txt en «Untracked files». Añádelo y haz otro commit.
 - **Contraste** (`whenNot`): `git add .` añade todo de golpe, también lo que
   no querías (binarios, `.o`, claves). Mira `git status` antes.
 - **Cómo se ve** (`looks`): el índice no se dibuja; es lo que irá dentro del

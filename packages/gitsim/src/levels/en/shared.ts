@@ -11,13 +11,13 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
       how: [
         'git clone',
         'git commit -m "mi parte"',
-        'git push                    # “Subido main a origin”',
+        'git push                    # “main -> main”',
       ],
       when: 'clone, once at the start; push, when your work is ready.',
       whenNot: 'Do not push code that does not compile to a shared branch.',
       looks: 'origin/main appears: where main was on origin the last time you talked to it.',
       problems:
-        'Forgetting to push: git log --oneline --all still shows “(origin/main) init” and your commit only lives here.',
+        "Forgetting the push: git status says “Your branch is ahead of 'origin/main' by 1 commit.” and your commit only lives here.",
     },
   },
   'w2-fetch': {
@@ -25,46 +25,47 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
     goal: 'Your teammate has pushed two commits: get them with fetch and move main up to origin/main.',
     theory: {
       what: 'git fetch downloads what is new on origin and moves origin/main, without touching your branches.',
-      how: ['git fetch                   # “Bajados 2 commits de origin”', 'git merge origin/main'],
+      how: ['git fetch                   # “main -> origin/main”', 'git merge origin/main'],
       when: 'To see what others pushed before mixing it with your work.',
       whenNot: 'clone is done once; fetch, whenever you want what is new.',
       looks: 'origin/main moves forward; main stays put until you merge.',
       problems:
-        'Thinking fetch already merges: git log --oneline still has “init” on top. You still need git merge origin/main.',
+        "Thinking fetch already merges: git status says “Your branch is behind 'origin/main' by 2 commits”. You still need git merge origin/main.",
     },
   },
   'w2-pull': {
     title: 'pull: fetch and merge',
-    goal: 'You and your teammate made a commit at the same time: bring in theirs with pull and push the result.',
+    goal: 'You and your teammate made a commit at the same time: bring in theirs with pull, joining it with a merge, and push the result.',
     theory: {
-      what: 'git pull is fetch plus merge in one go. If you have both moved on, it creates a merge commit.',
+      what: 'git pull is fetch plus joining. If you have both moved on, tell it how: --no-rebase joins with a merge commit.',
       how: [
-        'git push                    # rejected: origin is ahead',
-        'git pull                    # fetches theirs and merges',
+        'git push                    # rejected: “fetch first”',
+        'git pull --no-rebase        # fetches theirs and merges',
         'git push',
       ],
       when: 'Before you start working and before you push.',
-      whenNot: 'If you want to look before merging, use git fetch: pull merges without asking.',
+      whenNot:
+        'If you want to look before merging, use git fetch. To stop typing --no-rebase: git config pull.rebase false, once.',
       looks: 'A merge commit joining your main with origin/main.',
       problems:
-        'Pushing without pulling: git push answers “rechazado: origin/main tiene commits que tú no tienes. Haz git pull primero” (rejected).',
+        'A plain git pull, with both branches ahead, refuses: “fatal: Need to specify how to reconcile divergent branches.”. Choose: --no-rebase (merge) or --rebase.',
     },
   },
   'w2-branch': {
     title: 'Push your branch',
     goal: 'main is protected on origin: create the branch login, make two commits and push it to origin.',
     theory: {
-      what: 'git push origin branch uploads any branch. In teams, main is usually protected: changes go in through a pull request.',
+      what: 'git push origin branch uploads any branch; with -u it also tracks it, so later a plain git push is enough. In teams, main is usually protected.',
       how: [
         'git switch -c login',
         'git commit -m "formulario"',
-        'git push origin login       # “Subido login a origin”',
+        'git push -u origin login    # “[new branch] login -> login”',
       ],
       when: 'In a team: your branch on origin is your backup and what the others review.',
       whenNot: 'Without protections, git push uploads main directly, with no review.',
       looks: 'origin/login appears next to your login.',
       problems:
-        'Pushing commits on main: “main está protegida en origin: sube tu rama y únela con un pull request” (protected).',
+        'A plain git push on a new branch refuses: “fatal: The current branch login has no upstream branch.”. Say where: git push -u origin login.',
     },
   },
   'w2-world': {
@@ -74,14 +75,14 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
       what: 'git pull --rebase fetches origin and puts your commits on top: history stays in a line.',
       how: [
         'git push                    # rejected',
-        'git pull --rebase           # “Rebase hecho”',
+        'git pull --rebase           # “Successfully rebased”',
         'git push',
       ],
       when: 'With commits you have not pushed yet.',
       whenNot: 'Not with commits already pushed: rebase changes their ids.',
       looks: 'Your commit leaves and a copy (with a quote mark) appears on top of theirs.',
       problems:
-        'Plain git pull answers “Merge hecho” and leaves a merge commit the challenge does not want.',
+        'git pull --no-rebase leaves a merge commit the challenge does not want, and a plain git pull refuses (“Need to specify how to reconcile divergent branches”).',
     },
   },
   'w3-relative': {
@@ -90,15 +91,16 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
     theory: {
       what: 'HEAD~2 is “two commits before HEAD”; main^, main’s parent. You reach a commit without copying its id.',
       how: [
-        'git checkout HEAD~2         # “HEAD separado en c1”',
-        'git checkout main^',
+        'git checkout HEAD~2         # “HEAD is now at c1 uno”',
+        'git switch --detach main^   # the same, with switch',
         'git switch main             # back to the branch',
       ],
       when: 'To look at the code from a few commits ago.',
-      whenNot: 'HEAD~1 and main~1 only match when you are on main.',
+      whenNot:
+        'git switch without --detach only goes to branches: git switch HEAD~2 answers “fatal: a branch is expected”.',
       looks: 'HEAD points at a commit, not a branch (detached HEAD).',
       problems:
-        'Commits with a detached HEAD: the course warns “lo que hagas aquí no está en ninguna rama” (on no branch). Create a branch first.',
+        'Committing with a detached HEAD and going back to main: git warns “you are leaving 1 commit behind”. Before making them, create a branch: git switch -c nueva.',
     },
   },
   'w3-amend': {
@@ -114,7 +116,7 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
       whenNot: 'If you already pushed it, no: the others have the old one.',
       looks: 'The last circle is replaced by a copy (with a quote mark).',
       problems:
-        'Making another commit: git log --oneline shows both, “aregla el parsr” and “Arregla el parser”.',
+        'Making another commit: with no changes git says “nothing to commit”; with changes, git log --oneline shows both, “aregla el parsr” and “Arregla el parser”.',
     },
   },
   'w3-cherry': {
@@ -138,13 +140,13 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
     goal: 'Put the commits of feature on top of main, with no merge commit.',
     theory: {
       what: 'git rebase copies your branch’s commits on top of another: history stays in a line.',
-      how: ['git switch feature', 'git rebase main             # “Rebase hecho”'],
+      how: ['git switch feature', 'git rebase main             # “Successfully rebased”'],
       when: 'To bring your branch up to date before merging it, if only you use it.',
       whenNot:
         'Not on shared branches: their commits change id and everyone else’s history breaks.',
       looks: 'The feature circles go away and copies (with a quote mark) appear on top of main.',
       problems:
-        'From main, git rebase main says “Avance rápido hasta c3” and feature does not move. Switch to feature.',
+        'From main, git rebase main says “Current branch main is up to date.” and feature does not move. Switch to feature.',
     },
   },
   'w3-world': {
@@ -156,29 +158,29 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
         'git switch bugfix',
         'git rebase main',
         'git switch main',
-        'git merge bugfix            # fast-forward',
+        'git merge bugfix            # “Fast-forward”',
       ],
       when: 'In teams that prefer a linear history, like many open-source projects.',
       whenNot: 'If the team wants to see where each branch was merged, a normal merge is better.',
       looks: 'A single line of circles, with the bugfix copy at the end.',
       problems:
-        'Merging without rebasing first: git merge bugfix answers “Merge hecho: c4” and leaves a merge commit.',
+        "Merging without rebasing first: git merge bugfix says “Merge made by the 'ort' strategy.” and leaves a merge commit.",
     },
   },
   'w4-reset': {
     title: 'Go back: reset',
     goal: 'The last two commits are not needed (they have not been pushed): move main two commits back.',
     theory: {
-      what: 'git reset moves the branch to another commit. --soft keeps changes staged; no option, unstaged; --hard deletes them.',
+      what: 'git reset moves the branch to another commit. --soft keeps changes staged; no option (--mixed), unstaged; --hard deletes them.',
       how: [
-        'git reset HEAD~2            # changes stay',
+        'git reset HEAD~2            # changes stay in your directory',
         'git reset --hard HEAD~2     # and deletes them',
       ],
       when: 'To undo commits only you have.',
       whenNot: 'Not with commits already pushed: the push gets rejected.',
       looks: 'main moves back; the circles ahead are left with no branch.',
       problems:
-        '--hard says “cambios descartados” (discarded): they do not come back. If unsure, no option.',
+        '--hard says “HEAD is now at c1 bien” and what mal and peor added disappears from your directory: it does not come back. If unsure, no option.',
     },
   },
   'w4-revert': {
@@ -186,34 +188,38 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
     goal: 'Someone pushed secreto.txt to origin: undo it with a new commit and push it (without forcing).',
     theory: {
       what: 'git revert makes a commit that does the opposite of another. It does not rewrite history.',
-      how: ['git revert HEAD', 'git push                    # no forcing'],
+      how: [
+        'git revert HEAD             # “Revert "ups"”',
+        'git push                    # no forcing',
+      ],
       when: 'To undo something already on origin.',
       whenNot: 'If you pushed a key, revert is not enough: it stays in history. Change it.',
       looks: 'A new circle at the end; the bad one stays.',
       problems:
-        'reset on what is pushed: git push answers “rechazado: origin/main tiene commits que tú no tienes” (rejected).',
+        'reset on what is pushed: git push answers “! [rejected] main -> main (non-fast-forward)”.',
     },
   },
   'w4-stash': {
     title: 'Park changes: stash',
-    goal: 'You are halfway through something on main and someone asks you for a fix: park your changes, make a commit on fix, come back and commit what you had.',
+    goal: 'You are halfway through f.c on main and someone asks you to fix it on fix, where f.c is different: park your changes, fix f.c on fix with a commit, come back and commit what you had.',
     theory: {
       what: 'git stash parks your uncommitted changes and leaves the directory clean; git stash pop brings them back.',
       how: ['git stash', 'git switch fix', 'git switch main', 'git stash pop'],
       when: 'To switch branch for a moment without a half-done commit.',
-      whenNot: 'It is not storage: what lasts goes in a commit.',
+      whenNot:
+        'If the file is the same on both branches, git switch takes your changes along. And the stash is not storage: what lasts goes in a commit.',
       looks: 'Nothing in the tree: the stash is not a branch.',
       problems:
-        'Without parking, git switch answers “tienes cambios sin guardar: haz commit o stash antes de cambiar de rama”.',
+        'Without parking, git switch fix refuses: “error: Your local changes to the following files would be overwritten by checkout: f.c”.',
     },
   },
   'w4-conflict': {
     title: 'Conflicts',
     goal: 'Merge rama into main; the conflict in f.c is resolved by leaving the line «los dos».',
     theory: {
-      what: 'If two branches change the same line, git marks the file with <<<<<<< and >>>>>>> and waits.',
+      what: 'If two branches change the same line, git marks the file with <<<<<<< and >>>>>>> and waits. git add marks the file as resolved.',
       how: [
-        'git merge rama              # “CONFLICTO en f.c”',
+        'git merge rama              # “CONFLICT (content): Merge conflict in f.c”',
         'echo "los dos" > f.c',
         'git add f.c',
         'git commit -m "Une rama"',
@@ -221,7 +227,8 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
       when: 'It comes with a merge; you decide what stays.',
       whenNot: 'If it is not a good moment, git merge --abort puts it back.',
       looks: 'A normal merge commit once you finish.',
-      problems: 'Commit without add: “quedan conflictos sin resolver: f.c”. Run git add f.c first.',
+      problems:
+        'Commit without add: “error: Committing is not possible because you have unmerged files.”. And git add does not look at the markers: remove them before adding.',
     },
   },
   'w4-world': {
@@ -233,7 +240,8 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
       when: 'Before pushing a branch with commits like “test”, “another test”, “now it works”.',
       whenNot: 'If they are already on origin, do not squash them: the push would be rejected.',
       looks: 'Three circles become one.',
-      problems: 'With --hard you get “cambios descartados” and ls says “(vacío)” (empty).',
+      problems:
+        'With --hard you get “HEAD is now at c1 base” and ls no longer shows a.c, b.c or c.c: they are lost.',
     },
   },
   'w5-github-flow': {
@@ -241,12 +249,12 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
     goal: 'main is protected: get the latest changes, create the branch api from main, make two commits and push it for the pull request.',
     theory: {
       what: 'GitHub flow: main always works; each change goes in a short branch reviewed in a pull request.',
-      how: ['git pull', 'git switch -c api', 'git commit -m "rutas"', 'git push origin api'],
+      how: ['git pull', 'git switch -c api', 'git commit -m "rutas"', 'git push -u origin api'],
       when: 'Small teams that deploy often.',
       whenNot: 'With several live versions (1.x and 2.x), Gitflow fits better.',
       looks: 'Short branches leaving main and coming back.',
       problems:
-        'Pushing commits on main: “main está protegida en origin: sube tu rama y únela con un pull request”.',
+        'Pushing main: “remote: error: GH006: Protected branch update failed for refs/heads/main.”. Push your branch and merge it with a pull request.',
     },
   },
   'w5-tag': {
@@ -259,11 +267,11 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
         'git tag v0.9 HEAD~1         # on the one before',
         'git log --oneline           # “tag: v1.0”',
       ],
-      when: 'When you deliver or publish a version.',
+      when: 'When you deliver or publish a version. To publish it, git push origin v1.0 (or --tags).',
       whenNot: 'For something that moves with each commit, a branch.',
       looks: 'A label stuck to a circle for good.',
       problems:
-        'Reusing a name: “ya existe el tag v1.0”. A published tag does not move: release another version.',
+        "Repeating a name: “fatal: tag 'v1.0' already exists”. A published tag does not move: release another version.",
     },
   },
   'w5-release': {
@@ -280,8 +288,7 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
       when: 'Software with numbered versions and delivery dates.',
       whenNot: 'For websites deployed every day, GitHub flow is better.',
       looks: 'Two long branches and a release between them.',
-      problems:
-        'Without --no-ff you get “Avance rápido (fast-forward) hasta c4” and no merge commit.',
+      problems: 'Without --no-ff you get “Fast-forward” and no merge commit is left.',
     },
   },
   'w5-hotfix': {
@@ -294,7 +301,7 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
         'git switch main',
         'git merge --no-ff hotfix',
         'git switch develop',
-        'git merge hotfix',
+        'git merge --no-ff hotfix',
       ],
       when: 'For a serious published bug that cannot wait.',
       whenNot: 'If the bug is not published, fix it on develop.',
@@ -319,7 +326,7 @@ export const SHARED_EN: Readonly<Record<string, LevelText>> = {
       whenNot: 'Not without automated tests: each merge can break main.',
       looks: 'A single line on main, no merges.',
       problems:
-        'Merging without pulling first: git push answers “rechazado: origin/main tiene commits que tú no tienes”.',
+        'Merging without fetching first: git push answers “! [rejected] main -> main (fetch first)”.',
     },
   },
 }

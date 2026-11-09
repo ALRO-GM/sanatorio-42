@@ -5,10 +5,11 @@ import type { LevelText } from './types.js'
 export const BASICS_EN: Readonly<Record<string, LevelText>> = {
   'w0-commit': {
     title: 'Your first commit',
-    goal: 'Make two commits on main.',
+    goal: 'The Makefile is already staged: save it in a commit.',
     theory: {
-      what: 'A commit saves a snapshot of your files with a message. Each commit points to the one before: that is how history is built.',
+      what: 'A commit saves a snapshot of what you have staged, with a message. Each commit points to the one before: that is how history is built.',
       how: [
+        'git status                          # Makefile, staged',
         'git commit -m "Añade el Makefile"   # a new circle on main',
         'git log --oneline                   # the history, newest on top',
       ],
@@ -17,7 +18,7 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
         'One giant commit of “various changes” is unreadable later: better several small ones, one per change.',
       looks: 'A new circle on top of the previous one, and main moves forward to it.',
       problems:
-        'Leaving the message empty: git commit -m "" answers “el mensaje está vacío: git commit -m "qué has hecho"” (empty message). Say what the change does.',
+        'Committing with nothing staged: git answers “nothing to commit, working tree clean” and saves nothing. There has to be a staged change first.',
     },
   },
   'w0-add': {
@@ -27,7 +28,7 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
       what: 'Between your files and the commit sits the index. git add chooses which changes go into the next commit; what you do not add stays out.',
       how: [
         'echo "int main(void)" > hola.c',
-        'git status                    # hola.c, not staged',
+        'git status                    # hola.c, under “Untracked files”',
         'git add hola.c                # into the index',
         'git commit -m "Añade hola.c"',
       ],
@@ -36,7 +37,7 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
         'git add . adds everything at once, including what you did not want (binaries, .o files, keys). Check git status first.',
       looks: 'The index is not drawn: it is what will go inside the next circle.',
       problems:
-        'Forgetting the add: the commit goes out without hola.c and git status still says “Cambios sin preparar: hola.c” (not staged). Run git add hola.c and commit again.',
+        'Forgetting the add: git commit answers “nothing added to commit but untracked files present” and saves nothing. Run git add hola.c and commit again.',
     },
   },
   'w0-status': {
@@ -45,9 +46,9 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
     theory: {
       what: 'git status tells you which branch you are on, what is staged for the commit and what is not.',
       how: [
-        'git status                  # libft.h and main.c, not staged',
+        'git status                  # libft.h and main.c, “not staged”',
         'git add libft.h',
-        'git status                  # only libft.h, staged',
+        'git status                  # libft.h, “to be committed”',
         'git commit -m "Prototipos"',
       ],
       when: 'Before every add and every commit: it is free and avoids surprises.',
@@ -55,7 +56,7 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
         'git status does not show history: the commits already made are in git log --oneline.',
       looks: 'Only libft.h goes into the commit; main.c is still modified in your directory.',
       problems:
-        'git add . without looking: git status says “Preparado para el commit: libft.h, main.c” (staged) and the commit would take both. Add by name: git add libft.h.',
+        'git add . without looking: git status lists libft.h and main.c under “Changes to be committed” and the commit would take both. Add by name: git add libft.h.',
     },
   },
   'w0-world': {
@@ -75,12 +76,12 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
         'To save just one of several changes, -a is no good: it stages everything. Use git add with its name.',
       looks: 'Three circles in a row on main.',
       problems:
-        'Using -a with a new file: it does not add it. The commit goes out without it and git status says “Cambios sin preparar: notas.txt”. Run git add first.',
+        'Using -a with a new file: git commit -am answers “nothing added to commit but untracked files present”. -a does not add new files: run git add first.',
     },
   },
   'w1-branch': {
     title: 'Create a branch',
-    goal: 'Create the branch feature, switch to it and make a commit there.',
+    goal: 'Create the branch feature, switch to it and make a commit there (with a new file).',
     theory: {
       what: 'A branch is a name that points to a commit. Creating one copies nothing: it lets you work without touching main.',
       how: [
@@ -93,7 +94,7 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
         'A branch that lives for months without merging drifts away from main: merging it later costs much more.',
       looks: 'A new label on the same circle; once you commit on it, it splits off from main.',
       problems:
-        'Committing after git branch without switching: the commit lands on main, and git status says so: “En la rama main” (on branch main). Use git switch first.',
+        'Committing after git branch without switching: the commit lands on main, and git status says so: “On branch main”. Use git switch first.',
     },
   },
   'w1-head': {
@@ -111,7 +112,7 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
         'git log --oneline only shows the history of where you are; with --all you also see the other branches.',
       looks: 'Two paths leaving the same commit: history forks.',
       problems:
-        'Switching branch with uncommitted changes: the course answers “tienes cambios sin guardar: haz commit o stash antes de cambiar de rama” (unsaved changes). Commit first.',
+        'Switching branch with uncommitted changes: git switch takes them along (it shows an “M” before the file) and they would end up in the other branch’s commit. Commit before switching.',
     },
   },
   'w1-ff': {
@@ -119,13 +120,13 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
     goal: 'Merge feature into main without creating a new commit (fast-forward).',
     theory: {
       what: 'If main has not moved since you branched feature off, merging only moves main forward: a fast-forward, with no new commit.',
-      how: ['git switch main', 'git merge feature           # “Avance rápido (fast-forward)”'],
+      how: ['git switch main', 'git merge feature           # “Fast-forward”'],
       when: 'When nobody touched main while you worked on your branch.',
       whenNot:
         'To keep a trace of the branch, git merge --no-ff makes a merge commit even when it could fast-forward.',
       looks: 'The main label jumps to feature. No new circle appears.',
       problems:
-        'Merging the wrong way, from feature: git merge main says “Ya está todo unido” (already merged) and main does not move. Switch to main and merge feature.',
+        'Merging the wrong way, from feature: git merge main says “Already up to date.” and main does not move. Switch to main and merge feature.',
     },
   },
   'w1-merge': {
@@ -135,15 +136,15 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
       what: 'If both branches have new commits, git combines their changes since the common ancestor in a merge commit with two parents.',
       how: [
         'git switch main',
-        'git merge feature           # “Merge hecho: c4”',
-        'git log --oneline           # “Merge feature” on top',
+        "git merge feature           # “Merge made by the 'ort' strategy.”",
+        "git log --oneline           # “Merge branch 'feature'” on top",
       ],
       when: 'To bring a branch’s finished work into main.',
       whenNot:
         'If both branches change the same line, there is a conflict: you will see it in world 4.',
       looks: 'A new circle with two arrows: one to each branch.',
       problems:
-        'Merging from the wrong branch: on feature, git merge main leaves “(HEAD -> feature) Merge main” in the log and main untouched. Switch to main first.',
+        "Merging from the wrong branch: on feature, git merge main leaves “(HEAD -> feature) Merge branch 'main' into feature” in the log and main untouched. Switch to main first.",
     },
   },
   'w1-delete': {
@@ -156,13 +157,13 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
         'git commit -m "arreglo"',
         'git switch main',
         'git merge fix',
-        'git branch -d fix           # “Rama fix borrada”',
+        'git branch -d fix           # “Deleted branch fix”',
       ],
       when: 'When you finish each branch: that way the branch list shows what is alive.',
       whenNot: 'git branch -D deletes even if unmerged: its commits are left with no branch.',
       looks: 'The fix label disappears; the circles are still there, inside main.',
       problems:
-        'Deleting before merging: git branch -d fix answers “fix tiene commits sin unir: usa -D para borrarla igualmente” (unmerged commits). Merge first.',
+        "Deleting before merging: git branch -d fix answers “error: The branch 'fix' is not fully merged.”. Merge first.",
     },
   },
   'w1-world': {
@@ -182,7 +183,7 @@ export const BASICS_EN: Readonly<Record<string, LevelText>> = {
         'Order matters: the first branch you merge fast-forwards; the second one needs a merge.',
       looks: 'main fast-forwards to a and then merges b.',
       problems:
-        'Creating b without going back to main: git switch -c b says “Rama b creada en c2”, a’s commit, so b takes a1 along. Go back to main first.',
+        'Creating b without going back to main: b starts from a and takes a1 along; git log --oneline b shows it. Go back to main before git switch -c b.',
     },
   },
 }

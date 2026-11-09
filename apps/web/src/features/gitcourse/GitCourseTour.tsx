@@ -49,9 +49,14 @@ export const TOUR = defineTour<GitCourse>(
 
 /** Los dos momentos del repositorio de mentira: antes y después del comando. */
 const step = (lines: string[]): World => {
+  // Como en git, cada commit lleva su cambio: dos.txt queda preparado antes del comando.
   const result = runAll({ repo: emptyRepo(), remote: null }, [
+    'echo uno > uno.txt',
+    'git add uno.txt',
     'git commit -m uno',
     'git switch -c ana',
+    'echo dos > dos.txt',
+    'git add dos.txt',
     ...lines,
   ])
 

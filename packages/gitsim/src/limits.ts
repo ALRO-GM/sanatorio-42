@@ -62,23 +62,25 @@ export function safePath(path: string): string {
   const parts = path.replace(/^\.\//, '').split('/')
 
   if (path.startsWith('/') || path.startsWith('~'))
-    throw new GitError(`${path}: aquí no hay rutas absolutas; todo pasa dentro de ~/repo`)
+    throw new GitError(
+      `peer4u-sandbox: ${path}: aquí no hay rutas absolutas; todo pasa dentro de ~/repo`,
+    )
   if (parts.some((part) => part === '..'))
-    throw new GitError(`${path}: no se puede salir del repositorio con ..`)
+    throw new GitError(`peer4u-sandbox: ${path}: no se puede salir del repositorio con ..`)
   if (
     path.length > LIMITS.name ||
     !parts.every((part) => /^[A-Za-z0-9._-]+$/.test(part) && part !== '.') ||
     parts.some((part) => part === '.git' || reserved(part))
   )
     throw new GitError(
-      `«${path.slice(0, LIMITS.name)}» no vale como fichero: letras, números, . _ - y carpetas con /`,
+      `peer4u-sandbox: «${path.slice(0, LIMITS.name)}» no vale como fichero: letras, números, . _ - y carpetas con /`,
     )
 
   return parts.join('/')
 }
 
 /** El nombre de una rama o un tag nuevo, con las reglas de git (las que importan aquí). */
-export function safeRef(name: string, what: 'rama' | 'tag'): string {
+export function safeRef(name: string, what: 'branch' | 'tag'): string {
   if (
     name.length === 0 ||
     name.length > LIMITS.name ||
@@ -93,7 +95,9 @@ export function safeRef(name: string, what: 'rama' | 'tag'): string {
     name === 'HEAD' ||
     name.split('/').some((part) => part.startsWith('.') || reserved(part))
   )
-    throw new GitError(`«${name.slice(0, LIMITS.name)}» no vale como nombre de ${what}`)
+    throw new GitError(
+      `fatal: '${name.slice(0, LIMITS.name)}' is not a valid ${what} name${what === 'tag' ? '.' : ''}`,
+    )
 
   return name
 }
@@ -106,16 +110,18 @@ function filesWithin(files: Record<string, string>, where: string): void {
 
   if (paths.length > LIMITS.files)
     throw new GitError(
-      `demasiados ficheros en ${where} (${paths.length}): el máximo es ${LIMITS.files}`,
+      `peer4u-sandbox: demasiados ficheros en ${where} (${paths.length}): el máximo es ${LIMITS.files}`,
     )
 
   const big = paths.find((path) => (files[path] ?? '').length > LIMITS.fileChars)
 
   if (big !== undefined)
-    throw new GitError(`${big} es demasiado grande: como mucho ${LIMITS.fileChars} caracteres`)
+    throw new GitError(
+      `peer4u-sandbox: ${big} es demasiado grande: como mucho ${LIMITS.fileChars} caracteres`,
+    )
   if (size(files) > LIMITS.totalChars)
     throw new GitError(
-      `los ficheros ocupan demasiado: como mucho ${LIMITS.totalChars} caracteres entre todos`,
+      `peer4u-sandbox: los ficheros ocupan demasiado: como mucho ${LIMITS.totalChars} caracteres entre todos`,
     )
 }
 
@@ -133,20 +139,24 @@ export function withinLimits(repo: Repo, remote: Remote | null): void {
   )
 
   if (commits > LIMITS.commits)
-    throw new GitError(`demasiados commits (${commits}): el máximo es ${LIMITS.commits}`)
+    throw new GitError(
+      `peer4u-sandbox: demasiados commits (${commits}): el máximo es ${LIMITS.commits}`,
+    )
   if (Object.keys(repo.branches).length > LIMITS.branches)
-    throw new GitError(`demasiadas ramas: el máximo es ${LIMITS.branches}`)
+    throw new GitError(`peer4u-sandbox: demasiadas ramas: el máximo es ${LIMITS.branches}`)
   if (Object.keys(repo.tags).length > LIMITS.tags)
-    throw new GitError(`demasiados tags: el máximo es ${LIMITS.tags}`)
+    throw new GitError(`peer4u-sandbox: demasiados tags: el máximo es ${LIMITS.tags}`)
   // En origin suben las ramas y los tags de todo el grupo (hasta seis personas).
   if (
     remote !== null &&
     (Object.keys(remote.branches).length > LIMITS.branches * 2 ||
       Object.keys(remote.tags).length > LIMITS.tags * 2)
   )
-    throw new GitError('origin ya tiene demasiadas ramas o tags')
+    throw new GitError('peer4u-sandbox: origin ya tiene demasiadas ramas o tags')
   if (repo.stash.length > LIMITS.stash)
-    throw new GitError(`el stash está lleno: como mucho ${LIMITS.stash} entradas`)
+    throw new GitError(`peer4u-sandbox: el stash está lleno: como mucho ${LIMITS.stash} entradas`)
   if (JSON.stringify({ repo, remote }).length > LIMITS.worldBytes)
-    throw new GitError('el repositorio ha crecido demasiado para este simulador: empieza de nuevo')
+    throw new GitError(
+      'peer4u-sandbox: el repositorio ha crecido demasiado para este simulador: empieza de nuevo',
+    )
 }

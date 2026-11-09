@@ -16,7 +16,7 @@ export const REVIEW_GIT: Record<string, ReviewEntry> = {
     title: 'git status',
     definition:
       'Dice en qué rama estás, qué está preparado para el próximo commit y qué ha cambiado sin preparar. La historia se ve con git log.',
-    example: 'git status → «Cambios sin preparar: main.c»',
+    example: 'git status → «Changes not staged for commit: modified: main.c»',
   },
   'git-branch-what': {
     title: 'Rama',
@@ -45,7 +45,8 @@ export const REVIEW_GIT: Record<string, ReviewEntry> = {
     title: 'Commit de merge',
     definition:
       'Si las dos ramas han avanzado, git junta sus cambios desde el ancestro común en un commit con dos padres.',
-    example: 'git switch main && git merge feature → «Merge feature», con padres main y feature.',
+    example:
+      "git switch main && git merge feature → «Merge branch 'feature'», con padres main y feature.",
   },
   'git-branch-delete': {
     title: 'Borrar ramas',
@@ -56,7 +57,7 @@ export const REVIEW_GIT: Record<string, ReviewEntry> = {
   'git-fetch': {
     title: 'fetch y pull',
     definition:
-      'fetch baja lo nuevo del remoto y mueve origin/rama, sin tocar tus ramas. pull es fetch más merge (o más rebase con --rebase).',
+      'fetch baja lo nuevo del remoto y mueve origin/rama, sin tocar tus ramas. pull es fetch más unir: merge con --no-rebase, rebase con --rebase; si las ramas se han separado y no lo dices, git se niega y pide elegir.',
     example: 'git fetch && git log --oneline --all; luego git merge origin/main.',
   },
   'git-tracking': {

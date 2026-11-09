@@ -112,15 +112,15 @@ describe('curso de git', () => {
 
     // Sin hacer lo que se pide no hay punto.
     expect(
-      await gitCourse.attempt(actor('ana'), first.id, { lines: ['git commit'] }),
+      await gitCourse.attempt(actor('ana'), first.id, { lines: ['git status'] }),
     ).toMatchObject({
       done: false,
       stars: 0,
-      misses: ['main'],
+      misses: ['main', 'main:Makefile'],
       course: { seat: 'c1r2s3', stars: {}, gates: {} },
     })
 
-    const slow = ['git commit', 'git branch x', 'git branch -D x', 'git commit']
+    const slow = ['git commit', 'git branch x', 'git branch -D x']
     const better = await gitCourse.attempt(actor('ana'), first.id, { lines: slow })
 
     expect(better).toMatchObject({ done: true, stars: 2 })
@@ -148,11 +148,11 @@ describe('curso de git: lo que manda la web no se cree', () => {
     // La web no manda estrellas ni recuento: si los manda, no se usan.
     expect(
       await gitCourse.attempt(actor('ana'), first.id, {
-        lines: ['git commit', 'git branch x', 'git branch -D x', 'git commit'],
+        lines: ['git commit', 'git branch x', 'git branch -D x'],
         stars: 3,
         commands: 1,
       }),
-    ).toMatchObject({ done: true, stars: 2, commands: 4 })
+    ).toMatchObject({ done: true, stars: 2, commands: 3 })
     await expectCode(
       gitCourse.attempt(actor('ana'), first.id, { lines: ['x'.repeat(LIMITS.line + 1)] }),
       'invalid_input',
@@ -344,7 +344,7 @@ describe('curso de git: pruebas de grupo', () => {
     await expectCode(rooms.run(actor('bea'), id, { line: 'git status' }), 'forbidden')
     await seat({ ana: 'c1r1s1', bea: 'c1r1s2' })
 
-    await play('bea', 'git pull')
+    await play('bea', 'git pull --no-rebase')
     // Un intento de llenar la sala falla con un mensaje y no cambia nada.
     for (const line of ['echo x > ../../etc/passwd', 'git add . && rm -rf /']) {
       const result = await rooms.run(actor('bea'), id, { line })

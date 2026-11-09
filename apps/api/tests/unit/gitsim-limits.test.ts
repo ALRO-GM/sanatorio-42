@@ -73,7 +73,7 @@ describe('git simulado: topes', () => {
   it('commits, ramas, tags y stash', () => {
     const commits = hammer(
       start(),
-      times(LIMITS.commits + 10, () => 'git commit'),
+      times(LIMITS.commits + 10, () => 'git commit --allow-empty'),
     )
 
     expect(Object.keys(commits.world.repo.commits)).toHaveLength(LIMITS.commits)
@@ -95,7 +95,7 @@ describe('git simulado: topes', () => {
     expect(Object.keys(tags.world.repo.tags)).toHaveLength(LIMITS.tags)
 
     const stash = hammer(
-      ok(start(), 'echo a > a', 'git add a', 'git commit'),
+      ok(start(), 'echo a > a', 'git add a', 'git commit -m a'),
       times(LIMITS.stash + 5, (i) => `echo ${i} > a`).flatMap((line) => [line, 'git stash']),
     )
 
@@ -106,7 +106,7 @@ describe('git simulado: topes', () => {
   it('la historia no crece sin fin: el repositorio entero tiene un tope', () => {
     // Ocho ficheros de 850 caracteres: cada commit guarda una foto de unos 7 KB.
     const files = times(8, (i) => times(5, () => `echo ${'y'.repeat(169)} >> g${i}`)).flat()
-    let world = ok(start(), ...files, 'git add .', 'git commit')
+    let world = ok(start(), ...files, 'git add .', 'git commit -m todo')
     const errors: string[] = []
 
     for (let i = 0; i < LIMITS.commits && errors.length === 0; i++) {
@@ -182,7 +182,7 @@ describe('git simulado: no se sale del repositorio', () => {
   })
 
   it('nombres trampa: ni rompen nada ni tocan los prototipos', () => {
-    const world = ok(start(), 'git commit')
+    const world = ok(start(), 'git commit --allow-empty')
 
     for (const line of [
       'git branch constructor',
@@ -209,7 +209,7 @@ describe('git simulado: no se sale del repositorio', () => {
   it('referencias y patrones enormes no cuelgan', () => {
     const world = ok(
       start(),
-      'git commit',
+      'git commit --allow-empty',
       ...times(LIMITS.files - 1, (i) => `echo a > ${'a'.repeat(40)}${i}`),
     )
     const before = Date.now()
