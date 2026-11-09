@@ -15,6 +15,7 @@ import { createNetworkService } from './network.service.js'
 import type { NetworkService } from './network.service.js'
 import { createSeatWeights } from './seat-weights.js'
 import { createSeatingService } from './seating.service.js'
+import { createSeatUsage } from './seating.usage.js'
 import { createCorrectionSync, PISCINE_CURSUS } from './network.sync.js'
 import type { CorrectionSync } from './network.sync.js'
 import { given } from '../../core/options.js'
@@ -66,6 +67,13 @@ const SYNC_EVERY_MS = 20_000
 const WARM_EVERY_MS = 15 * 60_000
 
 /**
+ * Cada cuánto se suma al uso de los puestos (`seat_usage`) lo nuevo: el mapa de
+ * calor va por horas y días, así que con una vez por hora basta. La primera
+ * vuelta, al arrancar, suma todo el historial que falte.
+ */
+const USAGE_EVERY_MS = 60 * 60_000
+
+/**
  * Hasta dónde mira atrás la copia de la piscina. Un piscinero lo es durante
  * 60 días desde que empieza (`docs/piscineros.md`); con 90 cabe su piscina
  * entera y lo anterior, de piscinas ya terminadas, no se pide.
@@ -101,9 +109,11 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     ...clock,
   })
   const weights = createSeatWeights({ db: deps.db, ...clock })
+  const usage = createSeatUsage({ db: deps.db, ...given({ log: deps.log }), ...clock })
   const seating = createSeatingService({
     db: deps.db,
     weights,
+    usage,
     knownSeats: (campusId) => deps.replica.knownSeats(campusId),
     ...given({ audience: deps.audience }),
     ...clock,
@@ -121,6 +131,20 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
     routes: (app, context) => {
       registerNetworkRoutes(app, context, service, seating, weights)
     },
+    // El uso sumado de los puestos lleva login: sale con los datos de cada cual.
+    // La primera suma al arrancar, sin esperar la hora: tras un despliegue
+    // solo falta lo de mientras estaba parada.
+    start: () => {
+      usage
+        .step()
+        .then(() => seating.warmHeat(deps.campusIds))
+        .catch((error: unknown) => {
+          deps.log?.(
+            `uso de los puestos: ${error instanceof Error ? error.message : String(error)}`,
+          )
+        })
+    },
+    personal: [{ table: 'seat_usage', logins: ['login'], source: '42' }],
     jobs: [
       {
         name: 'copia de correcciones',
@@ -133,6 +157,16 @@ export function createNetworkModule(deps: NetworkModuleDeps): NetworkModule {
         usage: 'pool-corrections',
         everyMs: SYNC_EVERY_MS,
         run: () => poolSync.step(),
+      },
+      {
+        // El mapa de calor de Clústeres lee de aquí (`seating.usage.ts`). Solo
+        // suma lo que ha cambiado desde la última vuelta.
+        name: 'uso de los puestos',
+        everyMs: USAGE_EVERY_MS,
+        run: async () => {
+          await usage.step()
+          await seating.warmHeat(deps.campusIds)
+        },
       },
       {
         // La vista de entrada de Amigos («todo») lleva segundos: se deja hecha

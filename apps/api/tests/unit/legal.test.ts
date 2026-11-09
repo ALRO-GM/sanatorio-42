@@ -226,6 +226,7 @@ describe('privacidad y condiciones', () => {
       'broken_seats.host',
       'presence.host',
       'seat_sessions.host',
+      'seat_usage.host',
       'piscine_sessions.host',
     ])
     // Columnas con gente dentro que no son un login suelto ni una lista: se

@@ -12,7 +12,7 @@ va lo que no está en el código.
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
 que hacer, en orden. Este documento es el porqué; aquel, el qué.
 
-## Estado a 2026-11-09 (desplegado, esquema 90)
+## Estado a 2026-11-09 (desplegado, esquema 91)
 
 Lo hecho desde el 2026-10-27, con su documento. El detalle fecha a fecha está en
 la tabla de novedades del README.
@@ -36,6 +36,9 @@ la tabla de novedades del README.
   pasa al siguiente, y el panel avisa mientras no haya siguiente
   (`integrations/forty-two/secrets.ts`). Caduca cada 4 semanas: hay que poner el
   nuevo «Next secret» de la intra antes de cada relevo.
+- **Uso de los puestos ya sumado** (2026-11-09, migración 91,
+  `docs/asientos.md#uso-ya-sumado`): `seat_usage` por persona, puesto y día,
+  puesta al día cada hora; el mapa de calor de Clústeres lee de ahí.
 - **Límites configurables** (2026-11-09, migración 89, `docs/limites.md`):
   pestaña Límites del panel; 13 topes por persona con valor de fábrica, cambio
   para todos o por persona (persona > todos > fábrica). Los topes del plan

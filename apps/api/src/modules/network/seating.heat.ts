@@ -53,6 +53,25 @@ export function seatHeatOf(
     }
   }
 
+  const counted = (map: Map<string, Usage>): Map<string, SeatTotal> =>
+    new Map([...map].map(([key, entry]) => [key, { ms: entry.ms, people: entry.people.size }]))
+
+  return seatHeatFrom(counted(usage), counted(byCluster), known)
+}
+
+/** Lo usado de un puesto o de un clúster: tiempo y gente distinta. */
+export type SeatTotal = { ms: number; people: number }
+
+/**
+ * El mapa de calor con lo usado ya sumado: por puesto (en minúsculas) y por
+ * clúster. Es lo que sale de `seat_usage` (`seating.usage.ts`) sin pasar por
+ * las sesiones, y lo que acaba haciendo `seatHeatOf` con ellas.
+ */
+export function seatHeatFrom(
+  usage: ReadonlyMap<string, SeatTotal>,
+  byCluster: ReadonlyMap<string, SeatTotal>,
+  known: readonly string[],
+): { clusters: SeatHeatCluster[]; max: number } {
   // El tamaño de cada clúster y la letra de sus puestos (`s` o `p`), como en
   // el mapa: un puesto con una errata en el número no agranda la cuadrícula
   // (`clusterBounds`). Sus horas siguen en las cuentas del clúster.
@@ -78,18 +97,18 @@ export function seatHeatOf(
           const hours = round1((entry?.ms ?? 0) / HOUR_MS)
 
           max = Math.max(max, hours)
-          cells.push({ host, row, seat, hours, people: entry?.people.size ?? 0 })
+          cells.push({ host, row, seat, hours, people: entry?.people ?? 0 })
         }
       }
 
-      const total = byCluster.get(limit.cluster) ?? emptyUsage()
+      const total = byCluster.get(limit.cluster) ?? { ms: 0, people: 0 }
 
       return {
         id: limit.cluster,
         rows: limit.row,
         seatsPerRow: limit.seat,
         hours: round1(total.ms / HOUR_MS),
-        people: total.people.size,
+        people: total.people,
         cells,
       }
     })

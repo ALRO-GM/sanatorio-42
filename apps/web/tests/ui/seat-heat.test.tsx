@@ -41,6 +41,7 @@ function clusterOf(
 
 const HEAT: SeatHeat = {
   days: 30,
+  through: null,
   clusters: [
     clusterOf('c1', 2, 3, { c1r1s1: 37, c1r2s3: 4 }, 9),
     clusterOf('c2', 1, 2, { c2r1s1: 1 }, 1),
@@ -229,11 +230,11 @@ describe('mapa de calor de los puestos', () => {
   })
 
   it('sin puestos conocidos lo dice, y sin horas todo sale vacío y sin escala', () => {
-    show({ days: 7, clusters: [], max: 0 })
+    show({ days: 7, through: null, clusters: [], max: 0 })
     expect(screen.getByText(text('seats.heat.empty'))).toBeTruthy()
     cleanup()
 
-    const cells = show({ days: 7, clusters: [clusterOf('c1', 2, 3, {}, 0)], max: 0 })
+    const cells = show({ days: 7, through: null, clusters: [clusterOf('c1', 2, 3, {}, 0)], max: 0 })
 
     expect(cells).toHaveLength(6)
     expect(cells.every((cell) => cell.classList.contains('free'))).toBe(true)
@@ -244,6 +245,7 @@ describe('mapa de calor de los puestos', () => {
   it('si todos los puestos usados tienen las mismas horas, van al final de la escala', () => {
     const cells = show({
       days: 7,
+      through: null,
       clusters: [clusterOf('c1', 1, 2, { c1r1s1: 5, c1r1s2: 5 }, 2)],
       max: 5,
     })

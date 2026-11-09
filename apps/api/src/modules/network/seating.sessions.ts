@@ -33,7 +33,7 @@ type SessionRow = Readonly<Record<string, unknown>>
  * cuenta nada: desde que se vio (con el margen de la foto), no desde la
  * entrada que da 42, que puede ser de días antes, y como mucho 12 h.
  */
-function countedSpan(
+export function countedSpan(
   row: SessionRow,
   since: number,
   until: number,

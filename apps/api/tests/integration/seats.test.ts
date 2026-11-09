@@ -6,6 +6,7 @@ import type {
   SeatWeightsPreview,
   SeatWeightsState,
 } from '@sanatorio/contracts'
+import { createSeatUsage } from '../../src/modules/network/seating.usage.js'
 import { json, makeApp } from '../helpers/test-app.js'
 import type { TestApp } from '../helpers/test-app.js'
 
@@ -250,6 +251,42 @@ describe('red de asientos (docs/asientos.md)', () => {
         url,
       ).toBe(status)
     }
+
+    // Con el uso ya sumado (`seat_usage`) sale lo mismo, sin leer las sesiones.
+    const usage = createSeatUsage({ db: built.db })
+
+    expect(heat.through).toBeNull()
+    expect(await usage.step()).toBeGreaterThan(0)
+    // Lo ya sumado no se vuelve a sumar.
+    expect(await usage.step()).toBe(0)
+
+    const summed = await get<SeatHeat>('/network/seats/heat?days=8')
+
+    expect(summed.through).not.toBeNull()
+    expect(summed.clusters).toEqual(heat.clusters)
+    expect(summed.max).toBe(heat.max)
+
+    // Una sesión abierta que se alarga suma solo lo nuevo: una hora más.
+    await built.db.execute({
+      sql: "UPDATE seat_sessions SET seen_at = ? WHERE login = 'ayer'",
+      args: [ago(26)],
+    })
+    expect(await usage.step()).toBe(1)
+
+    const longer = await get<SeatHeat>('/network/seats/heat?days=9')
+    const longerCell = longer.clusters[0]?.cells.find((one) => one.host === 'c2r2s3')
+
+    expect(longerCell).toMatchObject({ hours: 8, people: 2 })
+    expect(longer.clusters[0]?.people).toBe(3)
+
+    // Hoy solo: lo de ayer no cuenta, y el piscinero tampoco.
+    const today = await get<SeatHeat>('/network/seats/heat?days=1')
+
+    expect(today.clusters[0]?.cells.find((one) => one.host === 'c2r2s3')?.people).toBe(1)
+    expect(today.clusters[0]?.cells.find((one) => one.host === 'c2r1s2')).toMatchObject({
+      hours: 0,
+      people: 0,
+    })
   })
 
   it('una fecha que no existe es un 400 y los periodos nuevos tienen tope por minuto', async () => {

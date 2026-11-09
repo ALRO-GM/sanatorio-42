@@ -80,6 +80,11 @@ export type SeatHeat = {
   clusters: SeatHeatCluster[]
   /** Las horas del puesto más usado, para la escala de colores. */
   max: number
+  /**
+   * Hasta cuándo están sumadas las horas (ISO): se ponen al día cada hora.
+   * `null` mientras se suma el historial por primera vez y se cuenta al momento.
+   */
+  through: string | null
 }
 
 /**

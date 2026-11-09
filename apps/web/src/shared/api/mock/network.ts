@@ -497,5 +497,10 @@ export function mockSeatHeat(days: number): SeatHeat {
     }
   })
 
-  return { days, clusters, max }
+  // La última puesta al día: en punto, como la tarea de cada hora.
+  const through = new Date()
+
+  through.setMinutes(0, 0, 0)
+
+  return { days, clusters, max, through: through.toISOString() }
 }

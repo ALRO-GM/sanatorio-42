@@ -204,6 +204,9 @@ ruta va con el permiso de la pestaña Clústeres (`clusters`), no con
   eligió así, y no contar a todo el mundo, para que el mapa y el grafo sumen lo
   mismo y para que una persona oculta no deje rastro de dónde se sienta. No
   lleva nombres: solo horas y número de personas por puesto.
+- **Uso ya sumado** (pedido por Alberto el 2026-11-09, migración 91), en
+  [su apartado](#uso-ya-sumado): las horas no se cuentan sesión a sesión en
+  cada visita, sino de una tabla que se pone al día cada hora.
 - **Todos los clústeres a la vez, en miniatura** (rediseño pedido por Alberto
   el 2026-10-25). Cada clúster es una cuadrícula plana, sin imitar el plano:
   nada de desplazar ni canto de pantalla. **Filas y puestos van en el orden
@@ -369,3 +372,39 @@ vista (con los recortes de «con quién más» y «solo las de la persona elegid
 sumada por persona. El área es proporcional a esa parte del total, con la
 misma escala que la red de correcciones (la más grande, a tamaño máximo). Se
 calcula en la web (`SeatsPage.tsx`), así que cambia al momento al recortar.
+
+## Uso ya sumado
+
+Pedido por Alberto el 2026-11-09: el mapa de calor tardaba mucho en salir
+porque cada visita recorría todo el historial de sesiones del periodo (con
+«todo», tres millones en París: 44 s en los registros), y lo pasado no cambia.
+
+- **La tabla** `seat_usage` (migración 91, `network/seating.usage.ts`): cuánto
+  tiempo usó cada persona cada puesto cada día (UTC), con su clúster. Se mide
+  como siempre (`countedSpan`: desde que se vio, 12 h como mucho) y lo que
+  cruza la medianoche se reparte entre los dos días. Lleva el login porque la
+  gente distinta no se puede sumar entre días y porque cada cual solo cuenta a
+  quien puede ver; sale con los datos de cada persona (`personal` del módulo).
+- **Qué falta por sumar.** Cada sesión guarda el `seen_at` ya sumado
+  (`counted_seen_at`). Las nuevas y las abiertas que se han alargado quedan
+  con los dos distintos, y un índice parcial
+  (`WHERE counted_seen_at IS NOT seen_at`) es justo esa lista. De cada una se
+  suma la diferencia entre lo que mide ahora y lo que medía, por tandas de
+  2000 (cada una para la web un momento), y se marca con el `seen_at` leído:
+  si se ha alargado mientras tanto, sigue pendiente. La suma y la marca van en la misma escritura.
+- **Cuándo.** Al arrancar (la primera vez suma todo el historial, unos minutos
+  por tandas sin parar la web; después, lo de mientras estaba parada) y cada
+  hora (tarea «uso de los puestos»). `seat_usage_state` guarda hasta cuándo
+  está sumado; sin esa fila, el mapa se calcula como antes, con las sesiones.
+  Tras cada vuelta se deja hecho el mapa de «todo» de cada campus, el único
+  que tarda: con tres millones de filas, una consulta de unos 3 s; un mes,
+  menos de 0,1 s (medido en local con datos de ese tamaño).
+- **Cómo se lee.** Dos consultas agrupadas en la base (por puesto y por
+  clúster) con la gente que ve quien mira (`worldOf`: solo su piscina, o todos
+  menos piscineros y ocultos), y `seatHeatFrom` las pone en el plano como
+  antes. Va por días enteros: «los últimos N días» son N días contando hoy, y
+  unas fechas a mano, de la primera a la última incluidas. Lo de la última
+  hora entra en la siguiente puesta al día; bajo el mapa sale «Datos hasta…».
+- **La red de asientos** (el grafo de Amigos) sigue leyendo las sesiones: le
+  hace falta quién estaba sentado a la vez y a qué distancia, no el total del
+  día.

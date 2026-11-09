@@ -6,6 +6,7 @@ import { api } from '../../shared/api'
 import type { SeatDates } from '../../shared/api/types'
 import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
+import { useFormat } from '../../shared/i18n/useFormat'
 import { daysOf } from '../../shared/period'
 import type { Period } from '../../shared/period'
 import { PeriodPicker } from '../../shared/ui/PeriodPicker'
@@ -23,6 +24,7 @@ const ALL_DAYS = 3650
  */
 export function SeatHeatCard() {
   const { t } = useI18n()
+  const { dateTime } = useFormat()
   const [period, setPeriod] = useState<Period>('1')
   const [dates, setDates] = useState<SeatDates>({ from: '', to: '' })
   // A mano, hasta que haya fecha de inicio se sigue con el último mes.
@@ -61,6 +63,9 @@ export function SeatHeatCard() {
         <>
           <ReloadState loading={heat.loading} error={heat.error} />
           <SeatHeatMap heat={heat.data} />
+          {heat.data.through === null ? null : (
+            <p className="hint">{t('seats.heat.through', { when: dateTime(heat.data.through) })}</p>
+          )}
         </>
       )}
     </article>

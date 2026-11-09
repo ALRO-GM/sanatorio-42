@@ -128,6 +128,8 @@ describe('migraciones', () => {
       'scrum_entries',
       'scrum_goals',
       'seat_sessions',
+      'seat_usage',
+      'seat_usage_state',
       'seats',
       'settings',
       'shell_progress',

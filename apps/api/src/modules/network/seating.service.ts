@@ -17,7 +17,7 @@ import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
 import { assertAdmin } from '../../core/actor.js'
-import { audienceKey, NO_POOL, seesFor } from '../../core/audience.js'
+import { audienceKey, NO_POOL, seesFor, worldOf } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Db } from '../../core/db/database.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
@@ -25,19 +25,26 @@ import { domainError } from '../../core/errors.js'
 import { createRateLimit } from '../../core/rate-limit.js'
 import { day, parse } from '../../core/validation.js'
 import { communitiesOf, GRAPH_BUDGET } from './network.analysis.js'
-import { seatHeatOf } from './seating.heat.js'
+import { seatHeatFrom, seatHeatOf } from './seating.heat.js'
 import { seatWeightsSchema, weightsKey } from './seat-weights.js'
 import type { SeatWeightsStore } from './seat-weights.js'
 import { groupQuality } from './seating.quality.js'
 import { DEFAULT_SEAT_WEIGHTS, seatingOf, trimSeating } from './seating.rules.js'
 import type { SeatSession, SeatWeights } from './seating.rules.js'
 import { seatSessionsIn } from './seating.sessions.js'
+import { dayOf } from './seating.usage.js'
+import type { SeatUsage } from './seating.usage.js'
 
 type SeatingOptions = {
   db: Db
   audience?: Audience
   /** Los puestos que se han visto ocupados alguna vez en un campus (`replica.knownSeats`). */
   knownSeats?: (campusId: number) => Promise<string[]>
+  /**
+   * El uso de los puestos ya sumado (`seat_usage`). Con él, y acabada su
+   * primera suma, el mapa de calor sale de ahí; sin él, de las sesiones.
+   */
+  usage?: SeatUsage
   /** Los pesos de los puestos, que se cambian en el panel. Sin ella, los de siempre. */
   weights?: Pick<SeatWeightsStore, 'grid'>
   now?: () => number
@@ -63,6 +70,11 @@ export type SeatingService = {
    * mundo) de cada campus, para que la primera persona que la abre no espere.
    */
   warm: (campusIds: readonly number[]) => Promise<void>
+  /**
+   * Lo mismo con el mapa de calor de «todo», el único que tarda (unos segundos
+   * en un campus grande aun ya sumado): se rehace tras cada puesta al día.
+   */
+  warmHeat: (campusIds: readonly number[]) => Promise<void>
 }
 
 const DAY_MS = 86_400_000
@@ -107,12 +119,15 @@ const querySchema = z.object({
 
 const previewSchema = querySchema.extend({ grid: seatWeightsSchema })
 
-/** El tramo que se mira, en ms, y cuántos días son. */
-type Span = { since: number; until: number; days: number }
+/**
+ * El tramo que se mira, en ms, y cuántos días son. `rolling`, si son los
+ * últimos `days` días hasta ahora (y no unas fechas a mano).
+ */
+type Span = { since: number; until: number; days: number; rolling?: boolean }
 
 function spanOf(query: z.infer<typeof querySchema>, now: number): Span {
   if (query.from === undefined) {
-    return { since: now - query.days * DAY_MS, until: now, days: query.days }
+    return { since: now - query.days * DAY_MS, until: now, days: query.days, rolling: true }
   }
 
   const since = Date.parse(`${query.from}T00:00:00.000Z`)
@@ -174,10 +189,11 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
     maxEntries: 12,
     now,
   })
+  // Cada periodo de cada campus y mundo es una entrada; ocupan poco.
   const heatCache = createTtlCache<SeatHeat>({
     ttlMs: CACHE_TTL_MS,
     staleMs: STALE_MS,
-    maxEntries: 12,
+    maxEntries: 48,
     now,
   })
   // Un cálculo a la vez: con todo el historial de un campus grande cada uno
@@ -217,12 +233,31 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
    */
   async function loadHeat(actor: Actor, span: Span): Promise<SeatHeat> {
     const { days } = span
+    const through = options.usage === undefined ? null : await options.usage.through()
+
+    // Ya sumado, va por días enteros (UTC): los últimos `days` son ese número
+    // de días contando hoy; a mano, de la primera fecha a la última, incluidas.
+    if (options.usage !== undefined && through !== null) {
+      const first = span.rolling === true ? span.until - (days - 1) * DAY_MS : span.since
+      const [{ hosts, clusters }, known] = await Promise.all([
+        options.usage.totals(
+          actor.campusId,
+          dayOf(first),
+          dayOf(span.until - 1),
+          await worldOf(audience, actor),
+        ),
+        knownSeats(actor.campusId),
+      ])
+
+      return { days, through, ...seatHeatFrom(hosts, clusters, known) }
+    }
+
     const [{ sessions }, known] = await Promise.all([
       sessionsOf(actor, span),
       knownSeats(actor.campusId),
     ])
 
-    return { days, ...seatHeatOf(sessions, known) }
+    return { days, through: null, ...seatHeatOf(sessions, known) }
   }
 
   /**
@@ -357,6 +392,12 @@ export function createSeatingService(options: SeatingOptions): SeatingService {
       // clave que comparte casi todo el mundo (`audienceKey`).
       for (const campusId of campusIds) {
         await builtFor({ login: '', campusId, admin: false }, { days: ALL_DAYS }, false)
+      }
+    },
+
+    async warmHeat(campusIds) {
+      for (const campusId of campusIds) {
+        await this.heat({ login: '', campusId, admin: false }, { days: ALL_DAYS })
       }
     },
 
