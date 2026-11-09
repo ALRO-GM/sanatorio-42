@@ -15,6 +15,7 @@ import { registerTherapyRoutes } from './therapy.routes.js'
 import { createTherapyService } from './therapy.service.js'
 import type { TherapyService } from './therapy.service.js'
 import { given } from '../../core/options.js'
+import type { Limits } from '../../core/limits.js'
 
 type TherapyModuleDeps = {
   db: Db
@@ -24,6 +25,8 @@ type TherapyModuleDeps = {
   sync: Syncer
   xp: XpService
   notify?: Notify
+  /** Topes regulables desde el panel (`core/limits.ts`). */
+  limits?: Limits
   now?: () => number
 }
 
@@ -35,7 +38,12 @@ export function createTherapyModule(deps: TherapyModuleDeps): TherapyModule {
     replica: deps.replica,
     sync: deps.sync,
     xp: deps.xp,
-    ...given({ audience: deps.audience, notify: deps.notify, now: deps.now }),
+    ...given({
+      audience: deps.audience,
+      notify: deps.notify,
+      limits: deps.limits,
+      now: deps.now,
+    }),
   })
 
   return {

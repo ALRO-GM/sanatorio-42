@@ -15,6 +15,7 @@ import { registerHelpRoutes } from './help.routes.js'
 import { createHelpService } from './help.service.js'
 import type { Commitments, HelpService } from './help.service.js'
 import { given } from '../../core/options.js'
+import type { Limits } from '../../core/limits.js'
 
 type HelpModuleDeps = {
   db: Db
@@ -29,6 +30,8 @@ type HelpModuleDeps = {
   commitments?: Commitments
   /** Interruptor de guardia y puesto de alguien: lo sabe `peers`. */
   presenceOf?: (login: string) => Promise<{ available: boolean; seat: string | null }>
+  /** Topes regulables desde el panel (`core/limits.ts`). */
+  limits?: Limits
   now?: () => number
 }
 
@@ -46,6 +49,7 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
       notify: deps.notify,
       commitments: deps.commitments,
       presenceOf: deps.presenceOf,
+      limits: deps.limits,
       now: deps.now,
     }),
   })

@@ -33,6 +33,8 @@ import type { Clock } from '../../core/options.js'
 import { isoAt } from '../../core/time.js'
 import { id, optionalText, parse, text } from '../../core/validation.js'
 import { labelOf } from '../calendar/index.js'
+import { ACTION_LIMITS, fixedLimits } from '../../core/limits.js'
+import type { Limits } from '../../core/limits.js'
 
 const MINUTE = 60_000
 const DAY = 24 * 60 * MINUTE
@@ -43,7 +45,7 @@ const MAX_AHEAD_MS = 366 * DAY
 /** Cuánto se mira hacia delante para el próximo compromiso y para fijar un evento. */
 const LOOKAHEAD_MS = 60 * DAY
 /** Lo fijado por persona a la vez: una ventanita, no una agenda. */
-export const MAX_PINS = 12
+export const MAX_PINS: number = ACTION_LIMITS['countdowns.pins'].default
 /** Avisos que se enseñan en el panel, del más reciente al más antiguo. */
 const REPORT_LIMIT = 50
 
@@ -76,6 +78,8 @@ type EventsOf = (actor: Actor, from: number, to: number) => Promise<CalendarEven
 
 export type CountdownsServiceOptions = Clock & {
   db: Db
+  /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
+  limits?: Limits
   /** Sin calendario (tests de otros módulos), no hay eventos que fijar. */
   events?: EventsOf
 }
@@ -109,6 +113,7 @@ function nextOf(events: readonly CalendarEvent[], now: number): CalendarEvent | 
 export function createCountdownsService(options: CountdownsServiceOptions) {
   const { db } = options
   const now = clockOf(options)
+  const limits = options.limits ?? fixedLimits
   const eventsOf: EventsOf = options.events ?? (() => Promise.resolve([]))
 
   const notice = (row: Record<string, unknown>): Countdown => ({
@@ -219,7 +224,7 @@ export function createCountdownsService(options: CountdownsServiceOptions) {
      *
      * @throws {DomainError} `not_found` si el evento no está en tu calendario;
      *   `invalid_input` si ya ha empezado o la hora no vale; `conflict` si ya
-     *   tienes `MAX_PINS`.
+     *   tienes las del tope `countdowns.pins`.
      */
     async pin(actor: Actor, input: unknown): Promise<Countdown[]> {
       const wanted = parse(pinSchema, input)
@@ -236,8 +241,11 @@ export function createCountdownsService(options: CountdownsServiceOptions) {
           : wanted.kind === 'event' && live.some((row) => row.event_id === wanted.eventId)
 
       if (repeated) return this.list(actor)
-      if (live.length >= MAX_PINS) {
-        throw domainError('conflict', `Como mucho, ${MAX_PINS} cuentas atrás a la vez`)
+
+      const most = await limits.of('countdowns.pins', actor.login)
+
+      if (live.length >= most) {
+        throw domainError('conflict', `Como mucho, ${most} cuentas atrás a la vez`)
       }
 
       let row: { title: string | null; at: string | null; eventId: string | null } = {

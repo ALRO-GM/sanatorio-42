@@ -25,6 +25,8 @@ import type { MaintenanceService } from './maintenance.js'
 import { ELEVATION_COOKIE, ELEVATION_MS, createSecondFactor } from './second-factor.js'
 import type { SecondFactor } from './second-factor.js'
 import { given } from '../../core/options.js'
+import { createLimits } from '../../core/limits.js'
+import type { LimitsAdmin } from '../../core/limits.js'
 
 export type AdminModule = AppModule & {
   service: AdminService
@@ -33,6 +35,8 @@ export type AdminModule = AppModule & {
 }
 
 type AdminModuleDeps = AdminServiceOptions & {
+  /** Topes regulables (`core/limits.ts`): el panel los cambia. Sin ellos, unos propios. */
+  limits?: LimitsAdmin
   /**
    * Secreto del servidor (`SESSION_SECRET`) para el segundo factor del panel.
    * Sin él (tests de servicios), uno al azar: las cookies del panel valen hasta
@@ -88,7 +92,8 @@ function routePath(request: FastifyRequest): string {
 }
 
 export function createAdminModule(deps: AdminModuleDeps): AdminModule {
-  const service = createAdminService(deps)
+  const limits = deps.limits ?? createLimits({ db: deps.db, ...given({ now: deps.now }) })
+  const service = createAdminService({ ...deps, limits })
   const growth = createGrowthService(deps.db)
   const secondFactor = createSecondFactor({
     db: deps.db,
@@ -139,6 +144,12 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
       },
       { table: 'request_stats', logins: ['login'] },
       { table: 'user_limits', logins: ['login'] },
+      // Los topes propios de cada cual; de quien los puso, que los puso.
+      {
+        table: 'action_limits',
+        logins: ['login', 'set_by'],
+        give: { set_by: ['key', 'set_by', 'set_at'] },
+      },
       // El secreto del segundo factor no se da nunca: con él se sacan códigos.
       { table: 'admin_second_factor', logins: ['login'], omit: ['secret'] },
     ],
@@ -436,6 +447,24 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
 
         return reply.code(204).send()
       })
+
+      /** `GET /admin/action-limits?login=` → `ActionLimits`: los topes por persona regulables. */
+      app.get('/admin/action-limits', async (request, reply) => {
+        return reply.send(await limits.list(await session.actor(request), request.query))
+      })
+
+      /** `PUT /admin/action-limits` → `{ key, value, login? }` (`null` quita); devuelve cómo quedan. */
+      app.put('/admin/action-limits', async (request, reply) => {
+        return reply.send(await limits.set(await session.actor(request), request.body))
+      })
+
+      /** `DELETE /admin/action-limits/:login` → quita todos los topes propios de esa persona. */
+      app.delete<{ Params: { login: string } }>(
+        '/admin/action-limits/:login',
+        async (request, reply) => {
+          return reply.send(await limits.reset(await session.actor(request), request.params.login))
+        },
+      )
 
       /** `PUT /admin/budget` → los ajustes del presupuesto que cambian; devuelve cómo queda. */
       app.put('/admin/budget', async (request, reply) => {

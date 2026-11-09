@@ -16,6 +16,8 @@ import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
 import { isoAt } from '../../core/time.js'
+import { fixedLimits } from '../../core/limits.js'
+import type { Limits } from '../../core/limits.js'
 
 const FACILITY_CATEGORIES = [
   'computer',
@@ -40,8 +42,8 @@ const LABEL: Record<FacilityCategory, string> = {
   other: 'Otro',
 }
 
-/** Avisos por persona y día, como mucho: es para avisar, no para charlar. */
-const PER_DAY = 10
+// Avisos por persona y día, como mucho: es para avisar, no para charlar.
+// De fábrica, 10: se regula desde el panel (`facility.perDay` en `core/limits.ts`).
 const DAY_MS = 86_400_000
 /** Lo resuelto se enseña una semana; después, solo lo abierto. */
 const RESOLVED_SHOWN_MS = 7 * DAY_MS
@@ -59,6 +61,8 @@ const reportSchema = z
 
 type FacilityOptions = {
   db: Db
+  /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
+  limits?: Limits
   /** Dónde está sentada ahora esa persona, para cuando no dice dónde. */
   seatOf: (campusId: number, login: string) => Promise<string | null>
   /**
@@ -74,6 +78,7 @@ type FacilityOptions = {
 export function createFacilityService(options: FacilityOptions) {
   const { db } = options
   const now = options.now ?? Date.now
+  const limits = options.limits ?? fixedLimits
 
   const rowOf = (row: Record<string, unknown>): FacilityReport => ({
     id: toNumber(row.id),
@@ -120,7 +125,7 @@ export function createFacilityService(options: FacilityOptions) {
         args: [actor.login, isoAt(now() - DAY_MS)],
       })
 
-      if (toNumber(today.rows[0]?.n) >= PER_DAY) {
+      if (toNumber(today.rows[0]?.n) >= (await limits.of('facility.perDay', actor.login))) {
         throw domainError(
           'rate_limited',
           'Ya has mandado muchos avisos hoy: el staff los está viendo',

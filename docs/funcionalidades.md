@@ -466,6 +466,7 @@ Detalle: [rendimiento.md](rendimiento.md#9-cargas-largas-2026-11-02).
 | --- | --- |
 | Consumo | Aviso si no hay secreto siguiente de la app de 42 puesto (el actual caduca cada cuatro semanas y la web pasa sola al siguiente); presupuesto de peticiones y sus ajustes; cuota de la API de 42 (modo, hasta dónde baja la copia, cola); uso de 42 por función y persona con topes; consumo por persona, últimas 48 h, quién más gasta y tope por hora a mano |
 | Permisos y bloqueos | Dar o quitar admin; bloquear 1, 7 o 30 días o siempre, con motivo; límites a mano; cuentas de staff (la clave se ve una vez); horas validadas de todo el mundo; quién puede hacer el curso de git fuera del clúster y el último sitio que dijo |
+| Límites | Topes por persona (mensajes por minuto, incidencias, sugerencias, dudas, reservas de ayuda, sprints, pizarras, puestos rotos, avisos del edificio, metas, cuentas atrás): lo de fábrica, cambiarlo para todo el mundo o, eligiendo a alguien, solo para esa persona, y volver a lo de fábrica. Manda persona > todo el mundo > fábrica. Los cortes del plan (90 %) no se regulan |
 | Incidencias | Pendientes y respondidas, denuncias por motivo, responder y borrar |
 | Mensajes | Registro de lo escrito en los chats de eventos, con filtro |
 | Qué se usa | Mapa de calor de cada elemento, recorridos entre secciones y mapa de clics |
@@ -483,7 +484,8 @@ Detalle: [rendimiento.md](rendimiento.md#9-cargas-largas-2026-11-02).
 
 Detalle: [mantenimiento.md](mantenimiento.md),
 [avisos-cuenta-atras.md](avisos-cuenta-atras.md),
-[personas-ocultas.md](personas-ocultas.md), [consumo-api.md](consumo-api.md).
+[personas-ocultas.md](personas-ocultas.md), [consumo-api.md](consumo-api.md),
+[limites.md](limites.md).
 
 ## Staff
 

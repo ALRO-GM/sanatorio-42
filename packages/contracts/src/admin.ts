@@ -312,3 +312,51 @@ export type AdminGrowth = {
   /** Cuánta gente había ya en cada campus antes de `from`, para sumar el total. */
   before: { campusId: number; people: number }[]
 }
+
+/**
+ * Topes por persona que se regulan desde el panel (`docs/limites.md`). Los del
+ * plan (90 % de Oracle, cupo de 42) no están aquí: no se regulan.
+ */
+export type ActionLimitKey =
+  | 'messages.perMinute'
+  | 'messages.perMinuteChat'
+  | 'tickets.open'
+  | 'tickets.per10Minutes'
+  | 'suggestions.perDay'
+  | 'brokenSeats.active'
+  | 'doubts.perDay'
+  | 'help.activeRequests'
+  | 'therapy.openGroups'
+  | 'boards.upcoming'
+  | 'facility.perDay'
+  | 'agenda.activeGoals'
+  | 'countdowns.pins'
+
+/** En qué se cuenta un tope: por minuto, cada 10 min, por día o cuántos a la vez. */
+export type ActionLimitUnit = 'per_minute' | 'per_10_minutes' | 'per_day' | 'at_once'
+
+/** Un tope con lo que vale de fábrica, para todo el mundo y para una persona. */
+export type ActionLimit = {
+  key: ActionLimitKey
+  unit: ActionLimitUnit
+  /** Lo de fábrica: lo que vale si nadie lo cambia. */
+  default: number
+  /** Lo que admite el panel: fuera de ahí, 400. */
+  min: number
+  max: number
+  /** Lo puesto para todo el mundo, o `null` (de fábrica). */
+  global: number | null
+  /** Lo puesto a la persona elegida, o `null`. Siempre `null` sin persona. */
+  user: number | null
+  /** Lo que vale: persona > todo el mundo > fábrica. */
+  effective: number
+}
+
+/** `GET /admin/action-limits?login=`: los topes y quién tiene alguno propio. */
+export type ActionLimits = {
+  /** La persona elegida, o `null` si se mira lo de todo el mundo. */
+  login: string | null
+  limits: ActionLimit[]
+  /** Quién tiene algún tope propio y cuántos. */
+  people: { login: string; count: number }[]
+}

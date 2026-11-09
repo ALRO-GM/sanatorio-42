@@ -41,7 +41,7 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
-| **Tamaño**      | 38 módulos de API con 264 rutas, 88 migraciones, 8 paquetes compartidos; 4 categorías con 20 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
+| **Tamaño**      | 38 módulos de API con 270 rutas, 89 migraciones, 8 paquetes compartidos; 4 categorías con 20 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
 | **Calidad**     | 7 337 tests en 271 ficheros (6 363 de la API y 974 de la web, con 75 ficheros de pantallas; medido el 2026-11-08), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-09 | Panel de gestión         | Pestaña Límites: los 13 topes por persona (mensajes por minuto, incidencias, sugerencias, dudas, reservas, sprints, pizarras, puestos rotos, avisos del edificio, metas, cuentas atrás) se cambian para todo el mundo o para una persona, sin tocar lo de fábrica; los cortes del plan al 90 % siguen sin regularse ([docs/limites.md](docs/limites.md)) |
 | 2026-11-08 | Clasificaciones · Perfil | Juego de los cursos: en Clasificaciones, quién suma más estrellas en cada curso y en los cuatro, más jefes vencidos y certificados (del mes o siempre); y 22 logros de los cursos (primer punto, cada certificado, todos los jefes con tres estrellas, los cuatro cursos y el orden sugerido) que se lucen como título con su banner ([docs/cursos-logros.md](docs/cursos-logros.md)) |
 | 2026-11-08 | Cursos · Not-games     | Las 138 unidades de shell, git, Docker y Kubernetes siguen la plantilla de explicación: idea, por qué, ejemplo que ejecuta el motor con una pregunta de predicción, error típico con su mensaje literal y contraste, dentro del límite de palabras de su nivel; el banco gana 18 formas de aplicar en git y 3 conceptos de los otros cursos ([docs/plantilla-explicacion.md](docs/plantilla-explicacion.md), [docs/preguntas.md](docs/preguntas.md)) |
 | 2026-11-08 | Curso de Kubernetes    | Curso nuevo en Aprender: 3 niveles, 9 bloques, 34 unidades, 9 jefes y 3 jefes finales con certificado, con kubectl, Kustomize y Helm sobre dos clústeres k3s simulados; despliega las imágenes que publica el curso de Docker y sugiere hacer antes su nivel principiante sin bloquear ([docs/curso-kubernetes.md](docs/curso-kubernetes.md)) |
@@ -333,7 +334,7 @@ Cada uno por dentro, con diagramas: [docs/componentes.md](docs/componentes.md).
 
 | Módulo | Qué hace |
 | --- | --- |
-| `admin` | Permisos, bloqueos, incidencias, consumo y presupuesto de peticiones; sus ganchos cortan a las cuentas bloqueadas y apuntan lo servido |
+| `admin` | Permisos, bloqueos, incidencias, consumo y presupuesto de peticiones, y los topes por persona regulables (`core/limits.ts`); sus ganchos cortan a las cuentas bloqueadas y apuntan lo servido |
 | `agenda` | Scrum individual: metas por proyecto (con día y hora), checkpoints, dailies, weeklies y tablero del sprint |
 | `attendance` | Asistencia con un código de llegada y el tiempo validado que sale de ella (sin rutas propias: las pone `meet`) |
 | `auth` | OAuth de 42, cookie de sesión firmada, staff con clave y quién hace cada petición |

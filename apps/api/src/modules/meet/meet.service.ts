@@ -64,9 +64,13 @@ const numberOf = (part: string | undefined): number =>
 import type { TherapyService } from '../therapy/index.js'
 import { given } from '../../core/options.js'
 import { isoAt } from '../../core/time.js'
+import { fixedLimits } from '../../core/limits.js'
+import type { Limits } from '../../core/limits.js'
 
 export type MeetServiceOptions = {
   db: Db
+  /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
+  limits?: Limits
   calendar: CalendarService
   boards: BoardsService
   help: HelpService
@@ -96,12 +100,10 @@ const LOOK_AHEAD_MS = 14 * 24 * HOUR
 /** Mensajes que se devuelven de un evento: los últimos. */
 const THREAD_LIMIT = 200
 
-/**
- * Mensajes que puede mandar una persona en un minuto: a un mismo evento y en
- * total. Un chat de quedar no necesita más, y así nadie lo inunda.
- */
-const MAX_PER_MINUTE_EVENT = 8
-const MAX_PER_MINUTE_TOTAL = 20
+// Mensajes que puede mandar una persona en un minuto: a un mismo evento y en
+// total. Un chat de quedar no necesita más, y así nadie lo inunda.
+// De fábrica, 8: se regula desde el panel (`messages.perMinuteChat` en `core/limits.ts`).
+// De fábrica, 20: se regula desde el panel (`messages.perMinute` en `core/limits.ts`).
 
 const REASONS = ['evaluation', 'other_event', 'on_my_way', 'transport', 'other'] as const
 
@@ -154,6 +156,7 @@ export function createMeetService(options: MeetServiceOptions) {
   const now = options.now ?? Date.now
   const notify: Notify = options.notify ?? (() => Promise.resolve())
   const audience = options.audience ?? NO_POOL
+  const limits = options.limits ?? fixedLimits
 
   /** A quién puede ver `actor`: a la gente de su mundo y, siempre, a sí mismo. */
   const seerOf = async (actor: Actor): Promise<(login: string) => boolean> => {
@@ -421,11 +424,12 @@ export function createMeetService(options: MeetServiceOptions) {
           args: [message.id, actor.login, isoAt(now() - 60_000)],
         })
       ).rows[0]
+      const [perChat, perMinute] = await Promise.all([
+        limits.of('messages.perMinuteChat', actor.login),
+        limits.of('messages.perMinute', actor.login),
+      ])
 
-      if (
-        toNumber(recent?.here ?? 0) >= MAX_PER_MINUTE_EVENT ||
-        toNumber(recent?.total) >= MAX_PER_MINUTE_TOTAL
-      ) {
+      if (toNumber(recent?.here ?? 0) >= perChat || toNumber(recent?.total) >= perMinute) {
         throw domainError('conflict', 'Demasiados mensajes seguidos: espera un minuto')
       }
 

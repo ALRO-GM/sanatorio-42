@@ -40,9 +40,13 @@ import type { GuideChangesRepository, StrikeRole } from './guide-changes.reposit
 import type { Actor } from '../../core/actor.js'
 import type { Notify } from '../../core/events.js'
 import { isoAt, startOfDayIso } from '../../core/time.js'
+import { fixedLimits } from '../../core/limits.js'
+import type { Limits } from '../../core/limits.js'
 
 export type DoubtsServiceOptions = {
   doubts: DoubtsRepository
+  /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
+  limits?: Limits
   changes: GuideChangesRepository
   curriculum: Curriculum
   xp: XpService
@@ -94,8 +98,8 @@ const solvedSchema = z.object({
   answerId: z.number().int().positive().nullish(),
 })
 
-/** Dudas que puede poner una persona al día. */
-const MAX_DOUBTS_PER_DAY = 10
+// Dudas que puede poner una persona al día.
+// De fábrica, 10: se regula desde el panel (`doubts.perDay` en `core/limits.ts`).
 
 const doubtSchema = z.object({ body: text(280, 5) })
 const answerSchema = z.object({ body: text(1000, 2) })
@@ -165,6 +169,7 @@ export function shortName(name: string): string {
 export function createDoubtsService(options: DoubtsServiceOptions) {
   const { doubts, changes, curriculum, replica, xp } = options
   const now = options.now ?? Date.now
+  const limits = options.limits ?? fixedLimits
   const notify: Notify = options.notify ?? (() => Promise.resolve())
 
   function statusOf(doubt: DoubtRow): DoubtStatus {
@@ -502,7 +507,10 @@ export function createDoubtsService(options: DoubtsServiceOptions) {
       const { body } = parse(doubtSchema, input)
       await mustKnowProject(projectId)
 
-      if ((await doubts.countBySince(actor.login, startOfDayIso(now()))) >= MAX_DOUBTS_PER_DAY) {
+      if (
+        (await doubts.countBySince(actor.login, startOfDayIso(now()))) >=
+        (await limits.of('doubts.perDay', actor.login))
+      ) {
         throw domainError('conflict', 'Ya has puesto muchas dudas hoy. Mañana más')
       }
 

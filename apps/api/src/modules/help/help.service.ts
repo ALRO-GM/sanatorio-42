@@ -42,9 +42,13 @@ import type { AttendanceEvent, AttendanceService } from '../attendance/index.js'
 import type { XpService } from '../profile/index.js'
 import type { Agenda, ReplicaRepository } from '../replica/index.js'
 import type { BookingRow, HelpRepository, Span } from './help.repository.js'
+import { fixedLimits } from '../../core/limits.js'
+import type { Limits } from '../../core/limits.js'
 
 type HelpServiceOptions = {
   help: HelpRepository
+  /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
+  limits?: Limits
   /** Quién ve a quién: nadie se ofrece ni reserva a alguien del otro grupo. */
   audience?: Audience
   replica: ReplicaRepository
@@ -84,8 +88,8 @@ const MAX_DAY_MINUTES = 480
 /** Duraciones que se pueden reservar. */
 const BOOKING_MINUTES = [30, 60, 90, 120] as const
 
-/** Reservas vivas que puede tener a la vez quien pide ayuda. */
-const MAX_ACTIVE_REQUESTS = 3
+// Reservas vivas que puede tener a la vez quien pide ayuda.
+// De fábrica, 3: se regula desde el panel (`help.activeRequests` en `core/limits.ts`).
 
 const HELPER_TAGS = ['bug', 'code', 'concept', 'patient'] as const satisfies HelperTag[]
 const REQUESTER_TAGS = [
@@ -186,6 +190,7 @@ const bookedMinutes = (bookings: readonly BookingRow[]): number =>
 export function createHelpService(options: HelpServiceOptions) {
   const { help, replica, agenda, xp, attendance } = options
   const now = options.now ?? Date.now
+  const limits = options.limits ?? fixedLimits
   const notify: Notify = options.notify ?? (() => Promise.resolve())
 
   /** Día y minuto actuales en la hora local de un campus. */
@@ -704,7 +709,7 @@ export function createHelpService(options: HelpServiceOptions) {
           (booking.status === 'pending' || booking.status === 'confirmed'),
       )
 
-      if (mine.length >= MAX_ACTIVE_REQUESTS) {
+      if (mine.length >= (await limits.of('help.activeRequests', actor.login))) {
         throw domainError('conflict', 'Ya tienes varias reservas hoy')
       }
 

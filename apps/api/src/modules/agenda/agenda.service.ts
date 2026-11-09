@@ -54,10 +54,12 @@ import {
   mondayOf,
   stuckOn,
 } from './agenda.rules.js'
+import { fixedLimits } from '../../core/limits.js'
+import type { Limits } from '../../core/limits.js'
 
 const DAY_MS = 86_400_000
-/** Metas en marcha a la vez: una agenda, no una lista de deseos. */
-const MAX_ACTIVE_GOALS = 8
+// Metas en marcha a la vez: una agenda, no una lista de deseos.
+// De fábrica, 8: se regula desde el panel (`agenda.activeGoals` en `core/limits.ts`).
 /** Checkpoints por meta. */
 const MAX_CHECKPOINTS = 15
 /** Hasta dónde se puede poner una meta: medio año da para cualquier proyecto. */
@@ -178,6 +180,8 @@ export type BlockerEvent = {
 
 export type AgendaServiceOptions = Clock & {
   repository: AgendaRepository
+  /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
+  limits?: Limits
   /** Quién ve a quién en el tablero del sprint (`docs/piscineros.md`, `docs/personas-ocultas.md`). */
   audience?: Audience
   /** Los proyectos de la persona en la réplica (en curso y aprobados). */
@@ -208,6 +212,7 @@ export type AgendaServiceOptions = Clock & {
 export function createAgendaService(options: AgendaServiceOptions) {
   const { repository } = options
   const now = clockOf(options)
+  const limits = options.limits ?? fixedLimits
   const audience = options.audience ?? NO_POOL
   const onBlocker = options.onBlocker ?? (() => Promise.resolve())
 
@@ -341,7 +346,7 @@ export function createAgendaService(options: AgendaServiceOptions) {
      *
      * @throws {DomainError} `not_found` si el proyecto no está en la réplica;
      *   `invalid_input` si el día ya pasó o está a más de medio año; `conflict`
-     *   con `MAX_ACTIVE_GOALS` en marcha.
+     *   con el tope `agenda.activeGoals` en marcha.
      */
     async create(actor: Actor, input: unknown): Promise<AgendaGoal> {
       const wanted = parse(goalSchema, input)
@@ -351,11 +356,11 @@ export function createAgendaService(options: AgendaServiceOptions) {
         throw domainError('not_found', `El proyecto ${wanted.projectId} no existe en 42`)
       }
       checkTarget(wanted.targetDay, await todayIn(actor.campusId))
-      if ((await repository.countActive(actor.login)) >= MAX_ACTIVE_GOALS) {
-        throw domainError(
-          'conflict',
-          `Ya tienes ${MAX_ACTIVE_GOALS} metas en marcha. Cierra alguna antes`,
-        )
+
+      const most = await limits.of('agenda.activeGoals', actor.login)
+
+      if ((await repository.countActive(actor.login)) >= most) {
+        throw domainError('conflict', `Ya tienes ${most} metas en marcha. Cierra alguna antes`)
       }
 
       const kind = kindOf(name)
@@ -390,12 +395,12 @@ export function createAgendaService(options: AgendaServiceOptions) {
       if (change.targetDay !== undefined && change.targetDay !== goal.targetDay) {
         checkTarget(change.targetDay, await todayIn(actor.campusId))
       }
-      if (
-        status === 'active' &&
-        goal.status !== 'active' &&
-        (await repository.countActive(actor.login)) >= MAX_ACTIVE_GOALS
-      ) {
-        throw domainError('conflict', `Ya tienes ${MAX_ACTIVE_GOALS} metas en marcha`)
+      if (status === 'active' && goal.status !== 'active') {
+        const most = await limits.of('agenda.activeGoals', actor.login)
+
+        if ((await repository.countActive(actor.login)) >= most) {
+          throw domainError('conflict', `Ya tienes ${most} metas en marcha`)
+        }
       }
 
       await repository.update(

@@ -94,6 +94,7 @@ import { piscineHistorySchema } from './0085-piscine-history.js'
 import { courseRemoteSchema } from './0086-course-remote.js'
 import { dockerCourseSchema } from './0087-docker-course.js'
 import { k8sCourseSchema } from './0088-k8s-course.js'
+import { actionLimitsSchema } from './0089-action-limits.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -185,6 +186,7 @@ export const MIGRATIONS: readonly Migration[] = [
   courseRemoteSchema,
   dockerCourseSchema,
   k8sCourseSchema,
+  actionLimitsSchema,
 ]
 
 /** Versión más alta que existe en el código. */

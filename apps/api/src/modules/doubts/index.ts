@@ -17,6 +17,7 @@ import { registerDoubtsRoutes } from './doubts.routes.js'
 import { createDoubtsService } from './doubts.service.js'
 import type { DoubtsService, DoubtsServiceOptions } from './doubts.service.js'
 import { given } from '../../core/options.js'
+import type { Limits } from '../../core/limits.js'
 
 type DoubtsModuleDeps = {
   /** Quién ve a quién: estudiantes y piscineros separados (`docs/piscineros.md`). */
@@ -28,6 +29,8 @@ type DoubtsModuleDeps = {
   notify?: Notify
   /** Las correcciones copiadas de 42, para el grafo de correcciones. */
   corrections?: DoubtsServiceOptions['corrections']
+  /** Topes regulables desde el panel (`core/limits.ts`). */
+  limits?: Limits
   now?: () => number
 }
 
@@ -40,7 +43,12 @@ export function createDoubtsModule(deps: DoubtsModuleDeps): DoubtsModule {
     curriculum: deps.curriculum,
     xp: deps.xp,
     replica: deps.replica,
-    ...given({ notify: deps.notify, corrections: deps.corrections, now: deps.now }),
+    ...given({
+      notify: deps.notify,
+      corrections: deps.corrections,
+      limits: deps.limits,
+      now: deps.now,
+    }),
   })
 
   return {

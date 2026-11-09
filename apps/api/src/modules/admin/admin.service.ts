@@ -64,10 +64,14 @@ import {
   withdrawUntil,
 } from './tickets.rules.js'
 import { dayOf, isoAt } from '../../core/time.js'
-import { SUGGESTIONS_PER_DAY, placeFrom, suggestionSchema } from './suggestions.js'
+import { placeFrom, suggestionSchema } from './suggestions.js'
+import { fixedLimits } from '../../core/limits.js'
+import type { Limits } from '../../core/limits.js'
 
 export type AdminServiceOptions = {
   db: Db
+  /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
+  limits?: Limits
   /** Admins fijos (`ADMIN_LOGINS`): no se pueden quitar desde el panel. */
   fixedAdmins: readonly string[]
   /** Peticiones a la API de 42 que quedan esta hora. */
@@ -170,11 +174,11 @@ const answerSchema = z.object({
   status: z.enum(['answered', 'closed']).default('answered'),
 })
 
-/** Tickets abiertos que puede tener una persona a la vez: el buzón no es un chat. */
-const MAX_OPEN_TICKETS = 10
+// Tickets abiertos que puede tener una persona a la vez: el buzón no es un chat.
+// De fábrica, 10: se regula desde el panel (`tickets.open` en `core/limits.ts`).
 
-/** Y los que puede mandar en diez minutos, abiertos o no. */
-const MAX_TICKETS_PER_WINDOW = 3
+// Y los que puede mandar en diez minutos, abiertos o no.
+// De fábrica, 3: se regula desde el panel (`tickets.per10Minutes` en `core/limits.ts`).
 const TICKET_WINDOW_MS = 10 * 60_000
 
 function toTicket(row: Record<string, unknown>, now: number): Ticket {
@@ -209,6 +213,7 @@ export function createAdminService(options: AdminServiceOptions) {
   const now = options.now ?? Date.now
   const notify: Notify = options.notify ?? (() => Promise.resolve())
   const settle: Settle = options.settle ?? (() => Promise.resolve())
+  const limits = options.limits ?? fixedLimits
   const iso = (): string => isoAt(now())
   // Permisos y bloqueos se miran en cada petición con sesión: se recuerdan medio minuto.
   const access = createTtlCache<{
@@ -756,7 +761,7 @@ export function createAdminService(options: AdminServiceOptions) {
         args: [actor.login, isoAt(now() - 24 * HOUR)],
       })
 
-      if (toNumber(today.rows[0]?.total) >= SUGGESTIONS_PER_DAY) {
+      if (toNumber(today.rows[0]?.total) >= (await limits.of('suggestions.perDay', actor.login))) {
         throw domainError(
           'conflict',
           'Ya has mandado muchas sugerencias hoy: gracias, sigue mañana',
@@ -794,7 +799,7 @@ export function createAdminService(options: AdminServiceOptions) {
         args: [actor.login],
       })
 
-      if (toNumber(open.rows[0]?.total) >= MAX_OPEN_TICKETS) {
+      if (toNumber(open.rows[0]?.total) >= (await limits.of('tickets.open', actor.login))) {
         throw domainError(
           'conflict',
           'Tienes demasiados avisos sin responder: espera a que se resuelvan',
@@ -806,7 +811,9 @@ export function createAdminService(options: AdminServiceOptions) {
         args: [actor.login, isoAt(now() - TICKET_WINDOW_MS)],
       })
 
-      if (toNumber(recent.rows[0]?.total) >= MAX_TICKETS_PER_WINDOW) {
+      if (
+        toNumber(recent.rows[0]?.total) >= (await limits.of('tickets.per10Minutes', actor.login))
+      ) {
         throw domainError('conflict', 'Has mandado varios avisos seguidos: espera unos minutos')
       }
     },
