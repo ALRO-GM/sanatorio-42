@@ -239,9 +239,16 @@ export function podSpecOf(value: Json | undefined): PodSpec {
   const spec = obj(value)
   const security = obj(spec.securityContext)
   const restart = str(spec.restartPolicy, 'Always')
+  // Un init con `restartPolicy: Always` es un sidecar nativo (estable desde la
+  // 1.33): no acaba, corre junto a la app y cuenta en READY (2/2).
+  const sidecar = (item: Json): boolean => str(obj(item).restartPolicy) === 'Always'
   const out: PodSpec = {
-    containers: arr(spec.containers).map(containerOf),
-    init: arr(spec.initContainers).map(containerOf),
+    containers: [...arr(spec.containers), ...arr(spec.initContainers).filter(sidecar)].map(
+      containerOf,
+    ),
+    init: arr(spec.initContainers)
+      .filter((item) => !sidecar(item))
+      .map(containerOf),
     restartPolicy: restart === 'Never' || restart === 'OnFailure' ? restart : 'Always',
     pullSecrets: arr(spec.imagePullSecrets).map((item) => str(obj(item).name)),
     volumes: arr(spec.volumes).map((item) => {

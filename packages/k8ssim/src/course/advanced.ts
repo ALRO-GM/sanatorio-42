@@ -354,7 +354,7 @@ export const ADVANCED: Unit[] = [
         when: 'For tasks that finish: migrations, backups.',
         whenNot: 'kubectl create job ya --from=cronjob/copia tries it without waiting.',
         problems:
-          'Relaunching a Job with the same name: it answers "jobs.batch "hola" already exists" and does not run. Delete it first.',
+          'Relaunching a Job with the same name: "jobs.batch "hola" already exists", and it does not run. Delete it first.',
       },
       example:
         'Before you look: hola already finished and you create it again with the same name. Will it run again?',
@@ -387,7 +387,7 @@ export const ADVANCED: Unit[] = [
       title: 'Contenedores init y sidecar',
       goal: 'Añade a la API (en ~/tienda/api.yaml) un contenedor init espera-db (busybox:1.36) que espere a que db:5432 conteste, y aplícalo.',
       theory: {
-        what: 'Los initContainers se ejecutan antes que la app y tienen que acabar bien; un sidecar acompaña a la app todo el rato.',
+        what: 'Los initContainers se ejecutan antes que la app y tienen que acabar bien; un sidecar (init con restartPolicy: Always) la acompaña siempre.',
         how: [
           'initContainers:',
           '- name: espera-db',
@@ -411,7 +411,7 @@ export const ADVANCED: Unit[] = [
       title: 'Init and sidecar containers',
       goal: 'Add to the API (in ~/tienda/api.yaml) an init container espera-db (busybox:1.36) that waits until db:5432 answers, and apply it.',
       theory: {
-        what: 'initContainers run before the app and must finish well; a sidecar stays with the app all the time.',
+        what: 'initContainers run before the app and must finish well; a sidecar (an init with restartPolicy: Always) stays with it.',
         how: [
           'initContainers:',
           '- name: espera-db',
@@ -523,16 +523,16 @@ export const ADVANCED: Unit[] = [
       title: 'Ingress (y Gateway API)',
       goal: 'Publica la tienda en tienda.local con un Ingress tienda (clase traefik): / al front y /api a la API.',
       theory: {
-        what: 'Un Ingress es la puerta HTTP del clúster: según el host y la ruta, manda cada petición a un Service.',
+        what: 'Un Ingress es la puerta HTTP del clúster: según host y ruta, manda cada petición a un Service.',
         how: [
           'kubectl create ingress tienda --class=traefik \\',
           '  --rule="tienda.local/*=front:80" --rule="tienda.local/api*=api:3000"',
           'curl -H "Host: tienda.local" http://10.0.0.11/api/health',
         ],
-        when: 'Para publicar varias webs por una sola entrada.',
+        when: 'Publicar varias webs por una entrada. Lo nuevo: Gateway API (Gateway y HTTPRoute); Ingress ya no crece.',
         whenNot: 'La regla de /api casa /api/health pero no /apiv2, que cae en la de /.',
         problems:
-          'Probar con un host que ninguna regla nombra: Traefik responde «404 page not found». Manda la cabecera Host del Ingress.',
+          'Un host que ninguna regla nombra: Traefik responde «404 page not found». Manda la cabecera Host.',
       },
       example:
         'Antes de verlo: con el Ingress creado, ¿a qué Service irá /apiv2: a la API o al front?',
@@ -545,16 +545,16 @@ export const ADVANCED: Unit[] = [
       title: 'Ingress (and Gateway API)',
       goal: 'Publish the shop on tienda.local with an Ingress called tienda (class traefik): / to the front and /api to the API.',
       theory: {
-        what: 'An Ingress is the HTTP door of the cluster: by host and path, it sends each request to a Service.',
+        what: 'An Ingress is the cluster HTTP door: by host and path, it sends each request to a Service.',
         how: [
           'kubectl create ingress tienda --class=traefik \\',
           '  --rule="tienda.local/*=front:80" --rule="tienda.local/api*=api:3000"',
           'curl -H "Host: tienda.local" http://10.0.0.11/api/health',
         ],
-        when: 'To publish several websites through one entry point.',
+        when: 'Publishing several websites through one entry. The newer API: Gateway API (Gateway and HTTPRoute); Ingress is frozen.',
         whenNot: 'The /api rule matches /api/health but not /apiv2, which falls to the / rule.',
         problems:
-          'Testing with a host no rule names: Traefik answers "404 page not found". Send the Ingress Host header.',
+          'A host no rule names: Traefik answers "404 page not found". Send the Host header.',
       },
       example:
         'Before you look: with the Ingress created, which Service will /apiv2 go to: the API or the front?',
@@ -802,7 +802,7 @@ export const ADVANCED: Unit[] = [
         whenNot:
           'apply -f sobre la carpeta lee kustomization.yaml como un objeto y falla: con overlays, -k.',
         problems:
-          'Contar mal los ../: responde «error: the path "/home/peer/tienda/overlays/base" does not exist». Desde overlays/produccion, la base está en ../../base.',
+          'Contar mal los ../: responde «lstat /home/peer/tienda/overlays/base: no such file or directory». Desde overlays/produccion, la base está en ../../base.',
       },
       example:
         'Antes de verlo: el overlay está en overlays/produccion y pone resources: [../base]. ¿Encontrará la base?',
@@ -825,7 +825,7 @@ export const ADVANCED: Unit[] = [
         whenNot:
           'apply -f on the folder reads kustomization.yaml as an object and fails: with overlays, -k.',
         problems:
-          'Miscounting the ../: it answers "error: the path "/home/peer/tienda/overlays/base" does not exist". From overlays/produccion, the base is ../../base.',
+          'Miscounting the ../: it answers "lstat /home/peer/tienda/overlays/base: no such file or directory". From overlays/produccion, the base is ../../base.',
       },
       example:
         'Before you look: the overlay lives in overlays/produccion and says resources: [../base]. Will it find the base?',
@@ -865,17 +865,18 @@ export const ADVANCED: Unit[] = [
       title: 'Helm: usar charts',
       goal: 'Instala Redis como la release cache (bitnami/redis, architecture=standalone), súbela con ~/valores.yaml y vuelve después a la revisión 1.',
       theory: {
-        what: 'Helm instala charts, paquetes de otros con valores que cambias con --set o -f. Cada instalación es una release con revisiones.',
+        what: 'Helm instala charts (paquetes) con valores de --set o -f; cada instalación es una release con revisiones.',
         how: [
           'helm install cache bitnami/redis --set architecture=standalone',
           'helm upgrade cache bitnami/redis -f valores.yaml',
-          'helm get values cache   # lo que pusiste tú',
+          'helm get values cache   # los tuyos',
           'helm rollback cache 1',
         ],
-        when: 'Para software de otros, como Redis.',
-        whenNot: 'rollback crea otra revisión: «Rollback to 1».',
+        when: 'Software de otros, como Redis; en la CI, upgrade --install instala o sube.',
+        whenNot:
+          'Bitnami publica hoy sus charts por OCI: oci://registry-1.docker.io/bitnamicharts/redis, sin repo add.',
         problems:
-          'upgrade sin -f ni --reuse-values olvida lo anterior: tras --set auth.password, get values ya no enseña «architecture: standalone».',
+          'upgrade sin --reuse-values olvida lo anterior: tras --set auth.password, get values ya no dice «architecture: standalone».',
       },
       example:
         'Antes de verlo: instalas con architecture=standalone y subes solo con --set auth.password. ¿Qué dirá get values?',
@@ -888,17 +889,18 @@ export const ADVANCED: Unit[] = [
       title: 'Helm: using charts',
       goal: 'Install Redis as release cache (bitnami/redis, architecture=standalone), upgrade it with ~/valores.yaml and then roll back to revision 1.',
       theory: {
-        what: 'Helm installs charts, other people’s packages with values you change with --set or -f. Each install is a release with revisions.',
+        what: 'Helm installs charts (packages) with values from --set or -f; each install is a release with revisions.',
         how: [
           'helm install cache bitnami/redis --set architecture=standalone',
           'helm upgrade cache bitnami/redis -f valores.yaml',
-          'helm get values cache   # what you set',
+          'helm get values cache   # yours',
           'helm rollback cache 1',
         ],
-        when: 'For other people’s software, like Redis.',
-        whenNot: 'rollback adds a revision: "Rollback to 1".',
+        when: 'Other people’s software, like Redis; in CI, upgrade --install installs or upgrades.',
+        whenNot:
+          'Bitnami now publishes its charts over OCI: oci://registry-1.docker.io/bitnamicharts/redis, no repo add.',
         problems:
-          'upgrade without -f or --reuse-values forgets what came before: after --set auth.password, get values no longer shows "architecture: standalone".',
+          'upgrade without --reuse-values forgets what came before: after --set auth.password, get values drops "architecture: standalone".',
       },
       example:
         'Before you look: you install with architecture=standalone and upgrade only with --set auth.password. What will get values say?',
@@ -1139,9 +1141,9 @@ export const ADVANCED: Unit[] = [
     solution: [
       'kubectl config use-context produccion',
       ...TIENDA,
-      'kubectl create secret generic db --from-env-file=~/tienda/.env',
+      'kubectl create secret generic db --from-env-file ~/tienda/.env',
       GHCR_SECRET,
-      'kubectl create secret tls tienda-tls --cert=~/tienda/tls/tienda.crt --key=~/tienda/tls/tienda.key',
+      'kubectl create secret tls tienda-tls --cert ~/tienda/tls/tienda.crt --key ~/tienda/tls/tienda.key',
       applyIt(STATEFUL_DB),
       applyIt(MIGRA),
       'mkdir -p ~/tienda/overlays/produccion',

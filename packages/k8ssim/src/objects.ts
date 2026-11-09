@@ -28,9 +28,14 @@ function containers(kind: string, name: string, path: string, podSpec: JsonObjec
   const list = arr(podSpec.containers)
 
   if (list.length === 0) invalid(kind, name, `${path}.containers: Required value`)
-  ;[...arr(podSpec.initContainers), ...list].forEach((raw, i) => {
+  const inits = arr(podSpec.initContainers)
+
+  ;[...inits, ...list].forEach((raw, index) => {
     const c = obj(raw)
-    const at = `${path}.containers[${i}]`
+    const at =
+      index < inits.length
+        ? `${path}.initContainers[${index}]`
+        : `${path}.containers[${index - inits.length}]`
 
     if (str(c.name) === '') invalid(kind, name, `${at}.name: Required value`)
     if (!NAME.test(str(c.name)) || str(c.name).includes('.'))

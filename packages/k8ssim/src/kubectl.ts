@@ -16,7 +16,7 @@ import {
   mustGet,
   notFound,
   plural,
-  readHost,
+  readSource,
   refsOf,
   scopeOf,
   selected,
@@ -27,20 +27,21 @@ import { sync, wait } from './controllers.js'
 import { describe } from './describe.js'
 import { jsonpath } from './jsonpath.js'
 import type { KindInfo } from './kinds.js'
-import { mustKind, resourceName } from './kinds.js'
+import { findKind, mustKind, resourceName } from './kinds.js'
 import { kustomizeBuild } from './kustomize.js'
-import { LIMITS, withinLimits } from './limits.js'
+import { LIMITS, own, withinLimits } from './limits.js'
 import type { Json, JsonObject, K8sObject } from './model.js'
 import { k8sOf } from './model.js'
 import { comparable } from './objects.js'
 import { OPS } from './ops.js'
 import { logsOf, runtimeOf } from './runtime.js'
+import { unknownFields } from './fields.js'
 import { derived, eventsIn, eventsTable, publicJson, rowOf } from './show.js'
 import { arr, labelQuery, obj, str } from './spec.js'
 import type { Env } from './store.js'
 import { getObject, labelsOf, list, nsOf, remove } from './store.js'
 import { encode64, table } from './util.js'
-import { toJsonText, toYaml } from './yaml.js'
+import { sortedKeys, toJsonText, toYaml } from './yaml.js'
 
 type Sub = (ctx: Ctx, args: readonly string[]) => number
 
@@ -52,7 +53,7 @@ function printObjects(ctx: Ctx, objects: K8sObject[], format: string, single: bo
       ? (json[0] ?? null)
       : { apiVersion: 'v1', items: json, kind: 'List', metadata: { resourceVersion: '' } }
 
-  if (format === 'yaml') ctx.io.out(toYaml(value))
+  if (format === 'yaml') ctx.io.out(toYaml(sortedKeys(value)))
   else if (format === 'json') ctx.io.out(toJsonText(value))
   else if (format === 'name')
     for (const object of objects)
@@ -339,7 +340,7 @@ function describeCmd(ctx: Ctx, raw: readonly string[]): number {
 }
 
 const APPLY = {
-  values: ['filename', 'kustomize', 'dry-run', 'output', 'field-manager', 'selector'],
+  values: ['filename', 'kustomize', 'dry-run', 'output', 'field-manager', 'selector', 'validate'],
   flags: [
     'recursive',
     'server-side',
@@ -347,7 +348,6 @@ const APPLY = {
     'prune',
     'record',
     'save-config',
-    'validate',
     'wait',
     'all',
   ],
@@ -368,6 +368,37 @@ function documentsOf(ctx: Ctx, args: Args, verb: string): { doc: JsonObject; fil
   return manifests(ctx, args)
 }
 
+/**
+ * La validación de campos del servidor (`--validate=strict`, lo de fábrica):
+ * un campo que no existe para el tipo es un error; con `--validate=warn`, un
+ * aviso, y con `false` o `ignore` se descarta sin decir nada. En los dos
+ * últimos casos el campo se quita, como hace el servidor.
+ */
+function strict(
+  ctx: Ctx,
+  args: Args,
+  doc: JsonObject,
+  info: KindInfo,
+  file: string,
+  patching: boolean,
+): void {
+  const mode = args.one('validate') ?? 'strict'
+  const lenient = ['false', 'ignore', 'warn'].includes(mode)
+  const unknown = unknownFields(info.kind, doc, lenient)
+
+  if (unknown.length === 0) return
+  if (mode === 'warn') {
+    ctx.io.err(unknown.map((field) => `Warning: unknown field "${field}"\n`).join(''))
+
+    return
+  }
+  if (lenient) return
+  throw new Fail(
+    `Error from server (BadRequest): error when ${patching ? 'patching' : 'creating'} "${file}": ${info.kind} in version "${info.apiVersion.split('/').at(-1) ?? ''}" cannot be handled as a ${info.kind}: strict decoding error: ${unknown.map((field) => `unknown field "${field}"`).join(', ')}`,
+    1,
+  )
+}
+
 function apply(ctx: Ctx, raw: readonly string[], mode: 'apply' | 'create' | 'replace'): number {
   const args = parseArgs(raw, APPLY, `kubectl ${mode}`)
   const env = envFor(ctx, args)
@@ -375,15 +406,46 @@ function apply(ctx: Ctx, raw: readonly string[], mode: 'apply' | 'create' | 'rep
   const dry = args.one('dry-run')
   let code = 0
 
+  if (dry !== undefined && !['none', 'client', 'server'].includes(dry))
+    throw new Fail(
+      `error: Invalid dry-run value (${dry}). Must be "none", "server", or "client".`,
+      1,
+    )
   if (docs.length === 0) throw new Fail(`error: no objects passed to ${mode}`, 1)
   for (const { doc, file } of docs) {
     try {
-      if (dry !== undefined && dry !== 'none') {
-        const { info } = { info: mustKind(str(doc.kind)) }
+      const info = findKind(str(doc.kind))
+
+      // Un tipo que no existe lo explica `store` («no matches for kind…»).
+      if (info === undefined) {
+        store(env, doc, file, args.has('namespace'), mode)
+        continue
+      }
+
+      const name = str(obj(doc.metadata).name)
+      const exists =
+        getObject(
+          env.cluster,
+          info.kind,
+          info.namespaced ? str(obj(doc.metadata).namespace, env.ns) : '',
+          name,
+        ) !== undefined
+
+      if (dry === 'client') {
+        const format = args.one('output')
 
         ctx.io.out(
-          `${shown(info, str(obj(doc.metadata).name))} ${mode === 'apply' ? 'configured' : 'created'} (dry run)\n`,
+          format === 'yaml' || format === 'json'
+            ? format === 'json'
+              ? toJsonText(doc)
+              : toYaml(sortedKeys(doc))
+            : `${shown(info, name)} ${exists && mode !== 'create' ? 'configured' : 'created'} (dry run)\n`,
         )
+        continue
+      }
+      strict(ctx, args, doc, info, file, exists && mode !== 'create')
+      if (dry === 'server') {
+        ctx.io.out(`${shown(info, name)} ${exists ? 'configured' : 'created'} (server dry run)\n`)
         continue
       }
 
@@ -457,8 +519,15 @@ function diff(ctx: Ctx, raw: readonly string[]): number {
     // Se calcula sobre una copia del clúster: diff no cambia nada.
     const copy = { ...env, cluster: JSON.parse(JSON.stringify(env.cluster)) as Env['cluster'] }
     const { object } = store(copy, doc, file, args.has('namespace'))
-    const before = live === undefined ? [] : toYaml(comparable(live)).replace(/\n$/, '').split('\n')
-    const after = toYaml(comparable(object)).replace(/\n$/, '').split('\n')
+    const before =
+      live === undefined
+        ? []
+        : toYaml(sortedKeys(comparable(live)))
+            .replace(/\n$/, '')
+            .split('\n')
+    const after = toYaml(sortedKeys(comparable(object)))
+      .replace(/\n$/, '')
+      .split('\n')
     const lines = unified(before, after)
 
     if (lines.length === 0) continue
@@ -474,6 +543,54 @@ function diff(ctx: Ctx, raw: readonly string[]): number {
   return changed ? 1 : 0
 }
 
+/** Lo que se ve de una plantilla de Pod sin crear: `creationTimestamp: null`, como kubectl. */
+const nullStamp = (meta: Json): JsonObject => ({ ...obj(meta), creationTimestamp: null })
+
+/**
+ * El objeto tal como lo escribe `--dry-run=client -o yaml`: sin namespace
+ * salvo que lo pidas con `-n`, con `creationTimestamp: null` y con el
+ * `status` vacío de los tipos que lo tienen (lo que se ve al generar un YAML).
+ */
+function dryView(doc: JsonObject, explicitNs: boolean): JsonObject {
+  const copy = JSON.parse(JSON.stringify(doc)) as JsonObject
+  const meta = nullStamp(copy.metadata ?? null)
+  const spec = obj(copy.spec)
+
+  if (!explicitNs) Reflect.deleteProperty(meta, 'namespace')
+  copy.metadata = meta
+  if (obj(spec.template).spec !== undefined)
+    spec.template = {
+      ...obj(spec.template),
+      metadata: nullStamp(obj(spec.template).metadata ?? null),
+    }
+
+  const job = obj(spec.jobTemplate)
+
+  if (job.spec !== undefined) {
+    const inner = obj(job.spec)
+
+    spec.jobTemplate = {
+      ...job,
+      metadata: nullStamp(job.metadata ?? null),
+      spec: {
+        ...inner,
+        template: {
+          ...obj(inner.template),
+          metadata: nullStamp(obj(inner.template).metadata ?? null),
+        },
+      },
+    }
+  }
+
+  const kind = str(copy.kind)
+
+  if (['Service', 'Ingress'].includes(kind)) copy.status = { loadBalancer: {} }
+  else if (['Pod', 'Deployment', 'Job', 'CronJob', 'Namespace'].includes(kind)) copy.status = {}
+  if (kind === 'Namespace') copy.spec = {}
+
+  return copy
+}
+
 /** Un objeto hecho por una orden (`create deployment`…): se imprime con `--dry-run -o yaml` o se guarda. */
 function emit(ctx: Ctx, env: Env, args: Args, doc: JsonObject): number {
   const dry = args.one('dry-run')
@@ -484,9 +601,42 @@ function emit(ctx: Ctx, env: Env, args: Args, doc: JsonObject): number {
 
     if (format === undefined)
       ctx.io.out(`${shown(info, str(obj(doc.metadata).name))} created (dry run)\n`)
-    else ctx.io.out(format === 'json' ? toJsonText(doc) : toYaml(doc))
+    else {
+      const view = dryView(doc, args.has('namespace'))
+
+      ctx.io.out(format === 'json' ? toJsonText(view) : toYaml(sortedKeys(view)))
+    }
 
     return 0
+  }
+
+  const info = mustKind(str(doc.kind))
+  const name = str(obj(doc.metadata).name)
+  const ns = info.namespaced ? str(obj(doc.metadata).namespace, env.ns) : ''
+
+  // Si ya existe, cada orden `create <tipo>` lo dice a su manera (así lo escribe kubectl).
+  if (getObject(env.cluster, info.kind, ns, name) !== undefined) {
+    const taken = `${plural(info)} "${name}" already exists`
+    const service = info.kind === 'Service' && ['service', 'svc'].includes(args.rest[0] ?? '')
+    const how: Record<string, string> = {
+      Deployment: 'failed to create deployment: ',
+      Job: 'failed to create job: ',
+      CronJob: 'failed to create cronjob: ',
+      ConfigMap: 'failed to create configmap: ',
+      // Sin dos puntos: así sale en kubectl.
+      Secret: 'failed to create secret ',
+      Ingress: 'failed to create ingress: ',
+    }
+    const prefix = service
+      ? `failed to create ${str(obj(doc.spec).type, 'ClusterIP')} service: `
+      : own(how, info.kind)
+
+    throw new Fail(
+      prefix === undefined
+        ? `Error from server (AlreadyExists): ${taken}`
+        : `error: ${prefix}${taken}`,
+      1,
+    )
   }
 
   const result = store(env, doc, 'STDIN', args.has('namespace'), 'create')
@@ -518,10 +668,10 @@ function dataFrom(ctx: Ctx, args: Args): Record<string, string> {
     const path = at > 0 ? spec.slice(at + 1) : spec
     const key = at > 0 ? spec.slice(0, at) : (path.split('/').at(-1) ?? path)
 
-    data[key] = readHost(ctx, path)
+    data[key] = readSource(ctx, path)
   }
   for (const path of args.all('from-env-file'))
-    for (const line of readHost(ctx, path).split('\n')) {
+    for (const line of readSource(ctx, path).split('\n')) {
       const clean = line.trim()
       const at = clean.indexOf('=')
 
@@ -560,8 +710,9 @@ const CREATE = {
     'filename',
     'type',
     'kustomize',
+    'validate',
   ],
-  flags: ['save-config', 'validate', 'recursive'],
+  flags: ['save-config', 'recursive'],
   shorts: { o: 'output', f: 'filename', k: 'kustomize', R: 'recursive' },
 }
 
@@ -654,7 +805,8 @@ function createCmd(ctx: Ctx, raw: readonly string[]): number {
           apiVersion: 'v1',
           kind: 'Secret',
           metadata: meta(need(b), ns),
-          type: args.one('type') ?? 'Opaque',
+          // Sin --type, kubectl no lo escribe: el servidor pone Opaque.
+          ...(args.one('type') === undefined ? {} : { type: args.one('type') ?? '' }),
           data: Object.fromEntries(Object.entries(data).map(([k, v]) => [k, encode64(v)])),
         })
       }
@@ -691,8 +843,8 @@ function createCmd(ctx: Ctx, raw: readonly string[]): number {
         })
       }
       if (a === 'tls') {
-        const cert = readHost(ctx, args.one('cert') ?? '')
-        const key = readHost(ctx, args.one('key') ?? '')
+        const cert = readSource(ctx, args.one('cert') ?? '', true)
+        const key = readSource(ctx, args.one('key') ?? '', true)
 
         return emit(ctx, env, args, {
           apiVersion: 'v1',
@@ -1184,6 +1336,39 @@ function deleteCmd(ctx: Ctx, raw: readonly string[]): number {
   return code
 }
 
+/** `kubectl events` (estable desde la 1.28): los eventos por orden de llegada, con `--for` y `--types`. */
+function eventsCmd(ctx: Ctx, raw: readonly string[]): number {
+  const args = parseArgs(
+    raw,
+    { values: ['for', 'types', 'output'], flags: ['watch'], shorts: { o: 'output', w: 'watch' } },
+    'kubectl events',
+  )
+  const env = envFor(ctx, args)
+  const scope = scopeOf(env, args)
+  const target = args.one('for')
+  let wanted: string | null = null
+
+  if (target !== undefined) {
+    const [ref] = refsOf([target])
+    const name = ref?.names[0] ?? ''
+
+    if (ref === undefined || name === '')
+      throw new Fail(`error: --for must be in resource/name form`, 1)
+    wanted = `${ref.info.kind}/${name}`
+  }
+
+  const types = (args.one('types') ?? '').split(',').filter((each) => each !== '')
+  const events = eventsIn(env, scope).filter(
+    (e) =>
+      (wanted === null || e.object === wanted) && (types.length === 0 || types.includes(e.type)),
+  )
+
+  if (events.length === 0) ctx.io.err(`No events found in ${env.ns} namespace.\n`)
+  else ctx.io.out(eventsTable(env, events, scope === null))
+
+  return 0
+}
+
 function edit(): number {
   throw new Fail(
     'peer4u-sandbox: aquí no hay editor; cambia el objeto con kubectl apply -f, patch, set, scale o label',
@@ -1202,6 +1387,7 @@ const COMMANDS: Record<string, Sub> = {
   delete: deleteCmd,
   diff,
   edit,
+  events: eventsCmd,
   ...OPS,
 }
 

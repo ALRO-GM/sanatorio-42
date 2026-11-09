@@ -126,7 +126,7 @@ export const INTERMEDIATE: Unit[] = [
         when: 'En cada despliegue de una versión nueva.',
         whenNot: 'Sin anotar, CHANGE-CAUSE dice «<none>»: nadie sabrá qué trajo cada revisión.',
         problems:
-          'Anotar otra vez sin --overwrite: «already has a value (sube a 1.0.1), and --overwrite is false», y la revisión nueva hereda el motivo viejo.',
+          'Anotar otra vez sin --overwrite: «--overwrite is false but found the following declared annotation(s)», y la revisión nueva hereda el motivo viejo.',
       },
       example:
         'Antes de verlo: subes a 1.0.1 sin anotar nada. ¿Qué dirá CHANGE-CAUSE en rollout history?',
@@ -151,7 +151,7 @@ export const INTERMEDIATE: Unit[] = [
         whenNot:
           'Without an annotation, CHANGE-CAUSE says "<none>": nobody will know what each revision brought.',
         problems:
-          'Annotating again without --overwrite: "already has a value (sube a 1.0.1), and --overwrite is false", and the new revision inherits the old reason.',
+          'Annotating again without --overwrite: "--overwrite is false but found the following declared annotation(s)", and the new revision inherits the old reason.',
       },
       example:
         'Before you look: you move to 1.0.1 without annotating. What will CHANGE-CAUSE say in rollout history?',
@@ -269,9 +269,9 @@ export const INTERMEDIATE: Unit[] = [
           'kubectl apply -f api-canary.yaml   # app: api, track: canary',
           'kubectl describe svc api           # Endpoints: 3 + the canary',
         ],
-        when: 'maxUnavailable 0 without spare capacity; a canary, to try with a little real traffic.',
+        when: 'maxUnavailable 0 without spare capacity; a canary, to try with little real traffic.',
         whenNot:
-          'Recreate stops the old Pods before starting the new ones: downtime, but no mixed versions.',
+          'Recreate stops the old Pods before starting new ones: downtime, no mixed versions.',
         problems:
           'Creating the canary with create deployment api-canary: its Pods get "app=api-canary" and Endpoints keeps 3 IPs. Give it app: api.',
       },
@@ -815,7 +815,7 @@ export const INTERMEDIATE: Unit[] = [
       'kubectl set image deployment/front front=ghcr.io/peer4u/front:1.0.0',
     ],
     check: { ready: ['tienda deploy/front'] },
-    requires: [['describe', 'get']],
+    requires: [['describe', 'get', 'events']],
   },
   {
     id: 'k8s-pending',
@@ -881,7 +881,7 @@ export const INTERMEDIATE: Unit[] = [
       'kubectl set resources deployment db --requests=memory=512Mi',
     ],
     check: { ready: ['tienda deploy/db'] },
-    requires: [['describe', 'get']],
+    requires: [['describe', 'get', 'events']],
   },
   {
     id: 'k8s-exec-debug',

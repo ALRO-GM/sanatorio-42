@@ -13,7 +13,7 @@ import { own } from './limits.js'
 import type { K8sObject } from './model.js'
 import { connect, httpFrom } from './net.js'
 import type { Outcome } from './runtime.js'
-import { resolveEnv, uidIn } from './runtime.js'
+import { resolveEnv, uidIn, varsOf } from './runtime.js'
 import type { Container } from './spec.js'
 import { podSpecOf, str } from './spec.js'
 import type { Env } from './store.js'
@@ -287,6 +287,8 @@ type Ctx = {
   container: Container
   vars: Record<string, string>
   fs: Fs
+  /** Lo que llega por la entrada (`kubectl exec -i … < fichero`). */
+  stdin?: string
 }
 
 const ok = (out = ''): PodResult => ({ out, err: '', code: 0 })
@@ -524,7 +526,7 @@ function postgres(ctx: Ctx, program: string, args: string[]): PodResult {
   }
 
   const file = value('-f')
-  const text = file !== undefined ? ctx.fs.read(clean(file)) : (value('-c') ?? '')
+  const text = file !== undefined ? ctx.fs.read(clean(file)) : (value('-c') ?? ctx.stdin ?? '')
 
   if (text === null) return fail(`psql: error: ${file ?? ''}: No such file or directory`)
 
@@ -546,6 +548,10 @@ function script(ctx: Ctx, text: string): PodResult {
 
     const redirect = /^(.*?)\s*(>>?)\s*(\S+)\s*$/.exec(step.text)
     const argv = words(redirect === null ? step.text : (redirect[1] ?? ''))
+
+    // `exit N` acaba el guion con ese código (sin número, con el de la última orden).
+    if (argv[0] === 'exit') return { out, err, code: Number(argv[1] ?? code) & 255 }
+
     const result = command(ctx, argv)
 
     if (redirect !== null) {
@@ -567,10 +573,16 @@ function script(ctx: Ctx, text: string): PodResult {
 }
 
 /** Ejecuta una orden dentro de un contenedor que corre (`kubectl exec`). */
-export function execIn(env: Env, pod: K8sObject, container: Container, argv: string[]): PodResult {
-  const vars = resolveEnv(env, nsOf(pod), container).vars
+export function execIn(
+  env: Env,
+  pod: K8sObject,
+  container: Container,
+  argv: string[],
+  stdin = '',
+): PodResult {
+  const vars = varsOf(env, pod, container)
 
-  return command({ env, pod, container, vars, fs: fsOf(env, pod, container) }, argv)
+  return command({ env, pod, container, vars, fs: fsOf(env, pod, container), stdin }, argv)
 }
 
 /** ¿Sigue esperando un bucle `until …; do sleep …; done` (un init que espera a la base de datos)? */
