@@ -55,10 +55,26 @@ no añade pestañas a la navegación (`docs/interfaz.md`).
   tres piezas y tres mascotas que solo salen en las cajas. Lo comprado se
   deja solo en la primera baldosa libre; luego se mueve, se gira o se guarda
   en el almacén (`place`, `store`). La API comprueba que la baldosa esté
-  dentro de la planta y sin otra pieza, mesa ni servidor (`canPlace` de
-  `world.ts`); las mesas y los servidores se apartan de lo colocado a mano.
-  La decoración colocada sube el ánimo (hasta +0,3), y las mascotas (+0,1
-  cada una, hasta +0,2).
+  dentro de la planta y sin otra pieza, mesa, servidor ni nada movido a mano
+  (`canPlace` de `world.ts`). La decoración colocada sube el ánimo (hasta
+  +0,3), y las mascotas (+0,1 cada una, hasta +0,2).
+- **Vender** (pedido por Alberto el 2026-11-09, `sell`): cualquier pieza de
+  decoración, colocada o en el almacén, mascotas incluidas, por lo que costó
+  en la tienda. Lo que solo sale en las cajas no tiene precio de tienda: vale
+  lo que da una caja en dinero en el espacio de ahora (100 × 2^espacio,
+  `sellPrice`). El botón pide un segundo toque, porque lo de las cajas no se
+  vuelve a comprar.
+- **Nada fijo** (pedido por Alberto el 2026-11-09, `move`): además de la
+  decoración, se mueven las mesas, los armarios de servidores, el mostrador
+  de recepción y lo que se gana (cactus o planta, estantería, pizarra, panel,
+  bandera, monedas, globo, cafetera, impresora, fuente, pufs y planta grande;
+  `fixturesOf`). Cada cosa tiene una clave fija (`desk:0`, `rack:1`,
+  `whiteboard`, `beanbag-2`…) y la partida guarda su baldosa en `moved`. Lo
+  movido a mano manda (`layoutOf`): se coloca primero, y lo demás va a su
+  sitio de siempre en lo que quede libre; lo que no cabe no sale. No se puede
+  dejar encima de la decoración ni de otra cosa movida a mano; encima de algo
+  que se coloca solo, sí (eso se aparta). Lo que aún no hay en la oficina no
+  se mueve, y al volver a empezar (nueva partida+) todo vuelve a su sitio.
 - **Cajas sorpresa**: cada sesión del Pomodoro acabada de 30 minutos o más
   (`focus_sessions`, contadas por la API con `focus.longSessions`) da una
   caja. Lo que sale está decidido con semilla (`prizeOf`): casi siempre
@@ -116,10 +132,13 @@ su startup.
 - Añadir una pieza al juego: una entrada en `ITEMS` (o en `DECOR`, con un
   modelo del mismo nombre), su dibujo (abajo) y su nombre accesible en
   `comun.csv`.
-- `World.tsx`: el personal, la tienda de decoración, el editor para colocarla
-  sin ratón (lista de piezas, flechas, girar, guardar) y las cajas sorpresa.
-  En la oficina se coloca tocando una pieza y arrastrándola (o tocando otra
-  baldosa); el botón de la mano (`startup.edit`) lo enciende.
+- `World.tsx`: el personal, la tienda de decoración, el editor para recolocar
+  la oficina sin ratón (todo lo que se mueve, con flechas; la decoración
+  además se gira, se guarda o se vende) y las cajas sorpresa. En la oficina
+  se mueve cualquier cosa tocándola y arrastrándola (o tocando otra baldosa);
+  el botón de la mano (`startup.edit`, «Recolocar la oficina») lo enciende y
+  sale siempre. Lo elegido es un `Target` (`target.ts`): `d:3` para la
+  decoración, la clave para lo demás.
 
 ## La oficina en píxeles
 

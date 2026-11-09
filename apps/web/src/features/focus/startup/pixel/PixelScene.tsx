@@ -1,8 +1,10 @@
-import { canPlace, moodOf, spaceOf } from '@sanatorio/startup'
+import { moodOf, spaceOf } from '@sanatorio/startup'
 import type { StartupState } from '@sanatorio/startup'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 
+import { canPut, targetOf } from '../target'
+import type { Target } from '../target'
 import { officeOf } from './layout'
 import type { Office } from './layout'
 import { lifeOf } from './life'
@@ -25,9 +27,9 @@ const isNight = (): boolean => {
 
 /** Colocar a mano: qué pieza está elegida y qué hacer al elegir o soltar. */
 type Editing = {
-  selected: number | null
-  onSelect: (index: number | null) => void
-  onDrop: (index: number, gx: number, gy: number) => void
+  selected: Target | null
+  onSelect: (target: Target | null) => void
+  onDrop: (target: Target, gx: number, gy: number) => void
 }
 
 /**
@@ -110,12 +112,14 @@ export function PixelScene({
       (event.clientY - rect.top) / scale,
     )
   }
-  const pieceAt = (tile: [number, number] | null): number | undefined =>
-    tile === null
-      ? undefined
-      : office.pieces.find(
-          (piece) => piece.decor !== undefined && piece.gx === tile[0] && piece.gy === tile[1],
-        )?.decor
+  // Todo lo que está en una baldosa se puede elegir: decoración, mesas, muebles…
+  const pieceAt = (tile: [number, number] | null): Target | undefined => {
+    if (tile === null) return undefined
+
+    const piece = office.pieces.find((one) => one.gx === tile[0] && one.gy === tile[1])
+
+    return piece === undefined ? undefined : targetOf(piece)
+  }
 
   const pointer =
     editing === undefined || move !== null
@@ -131,7 +135,7 @@ export function PixelScene({
               event.currentTarget.setPointerCapture(event.pointerId)
             } else if (tile !== null && editing.selected !== null) {
               // Con una pieza elegida, tocar otra baldosa la lleva allí.
-              if (canPlace(state, editing.selected, tile[0], tile[1])) {
+              if (canPut(state, editing.selected, tile[0], tile[1])) {
                 editing.onDrop(editing.selected, tile[0], tile[1])
               }
             } else {
@@ -149,7 +153,7 @@ export function PixelScene({
                 : {
                     gx: tile[0],
                     gy: tile[1],
-                    ok: canPlace(state, editing.selected, tile[0], tile[1]),
+                    ok: canPut(state, editing.selected, tile[0], tile[1]),
                   },
             )
           },

@@ -13,7 +13,6 @@ import {
   canLegacy,
   candidatesOf,
   cashOf,
-  decorItem,
   focusOf,
   has,
   levelOf,
@@ -46,6 +45,8 @@ import type { ArtOf } from './pixel/ItemArt'
 import type { ModelId } from './pixel/models'
 import { PixelScene } from './pixel/PixelScene'
 import { DecorEditor, DecorShop, Staff, Surprise } from './World'
+import { putAction } from './target'
+import type { Target } from './target'
 
 /** El aspecto de quien funda la startup: un número fijo sacado de su login. */
 export const lookOf = (login: string): number => Math.floor(seeded(`${login}|look`)() * 1000)
@@ -137,7 +138,7 @@ function Game({
   const { t } = useI18n()
   const { compact } = useFormat()
   const [editing, setEditing] = useState(false)
-  const [selected, setSelected] = useState<number | null>(null)
+  const [selected, setSelected] = useState<Target | null>(null)
   const [visiting, setVisiting] = useState<string | null>(null)
   const state = parseStartup(snapshot.state)
   const act = (next: StartupAction): void => void onAct(next)
@@ -145,7 +146,6 @@ function Game({
   const hours = snapshot.earnedMinutes / 60
   const cash = cashOf(state, snapshot.earnedMinutes)
   const focus = focusOf(state)
-  const movable = state.decor.some((piece) => decorItem(piece.id)?.kind !== 'pet')
 
   return (
     <section className="su-panel" aria-label={t('startup.title')}>
@@ -165,8 +165,8 @@ function Game({
               ? {
                   selected,
                   onSelect: setSelected,
-                  onDrop: (index, gx, gy) => {
-                    act({ type: 'place', index, gx, gy, turn: state.decor[index]?.turn ?? false })
+                  onDrop: (target, gx, gy) => {
+                    act(putAction(state, target, gx, gy))
                   },
                 }
               : undefined
@@ -195,7 +195,7 @@ function Game({
             <AxisGlyph axis={focus} />
           </span>
         )}
-        {movable && visiting === null && (
+        {visiting === null && (
           <button
             type="button"
             className={`small su-edit ${editing ? 'on' : ''}`.trim()}

@@ -27,9 +27,18 @@ import {
 } from './data.js'
 import type { Axis, Item, Milestone, Role, Round } from './data.js'
 import { seatsOf, settle } from './economy.js'
-import { EMPTY_STARTUP, cycleOf, has, levelOf, seeded } from './state.js'
+import { EMPTY_STARTUP, cycleOf, has, levelOf, seeded, skillOf } from './state.js'
 import type { Hire, Placed, RoundResult, StartupState } from './state.js'
-import { canPlace, decorItem, freeSpot, spaceOf, tidyDecor } from './world.js'
+import {
+  canMove,
+  canPlace,
+  decorItem,
+  freeSpot,
+  isFixtureKey,
+  sellPrice,
+  spaceOf,
+  tidyDecor,
+} from './world.js'
 
 export type StartupAction =
   | { type: 'buy'; item: string }
@@ -45,6 +54,10 @@ export type StartupAction =
   | { type: 'place'; index: number; gx: number; gy: number; turn: boolean }
   /** Guardar la pieza `index` en el almacén. */
   | { type: 'store'; index: number }
+  /** Vender la pieza `index` de la decoración (`sellPrice`): sale de la oficina y del almacén. */
+  | { type: 'sell'; index: number }
+  /** Mover lo que no es decoración (una mesa, los servidores, la pizarra…, `fixturesOf`) a (gx, gy). */
+  | { type: 'move'; key: string; gx: number; gy: number }
   /** Abrir una caja sorpresa (una por sesión del Pomodoro de 30 minutos o más). */
   | { type: 'open' }
   /** Con el edificio terminado y el control global: volver a empezar en tu cuarto. */
@@ -60,11 +73,6 @@ export type Refusal = 'poor' | 'locked' | 'max' | 'full' | 'taken' | 'invalid'
 export type Prize = { kind: 'decor'; id: string } | { kind: 'cash'; amount: number }
 
 // --- Lo que se deduce del estado ------------------------------------------------
-
-/** Lo aprendido: la suma de los niveles de las cinco ramas. */
-export function skillOf(state: StartupState): number {
-  return AXES.reduce((sum, axis) => sum + levelOf(state, `learn-${axis}`), 0)
-}
 
 /**
  * Cuánto pesa cada modelo de negocio: lo aprendido, quien programa, los
@@ -105,22 +113,6 @@ export function nextRound(state: StartupState): Round | null {
 /** El siguiente hito, o `null` si ya se tienen todos. */
 export function nextMilestone(state: StartupState): Milestone | null {
   return MILESTONES.find((milestone) => !has(state, milestone)) ?? null
-}
-
-/**
- * La etapa, para el dibujo: 0 garaje, 1 proyecto, 2 MVP, 3 fundada, 4 con
- * inversión, 5 creciendo (serie B o más), 6 en bolsa, 7 control global.
- */
-export function stageOf(state: StartupState): number {
-  if (has(state, 'global')) return 7
-  if (state.rounds.some((round) => round.id === 'ipo')) return 6
-  if (state.rounds.some((round) => round.id === 'b')) return 5
-  if (state.rounds.some((round) => round.id === 'seed')) return 4
-  if (has(state, 'founded')) return 3
-  if (has(state, 'mvp')) return 2
-  if (has(state, 'side')) return 1
-
-  return 0
 }
 
 /** Lo que cuesta contratar a alguien de esas estrellas con la plantilla de ahora. */
@@ -418,6 +410,27 @@ export function act(
         },
       }
     }
+    case 'sell': {
+      const piece = state.decor[action.index]
+
+      if (piece === undefined) return { refused: 'invalid' }
+
+      return {
+        state: {
+          ...state,
+          cash: state.cash + sellPrice(state, piece.id),
+          decor: state.decor.filter((_, index) => index !== action.index),
+        },
+      }
+    }
+    case 'move': {
+      if (!isFixtureKey(action.key)) return { refused: 'invalid' }
+      if (!canMove(state, action.key, action.gx, action.gy)) return { refused: 'taken' }
+
+      return {
+        state: { ...state, moved: { ...state.moved, [action.key]: [action.gx, action.gy] } },
+      }
+    }
     case 'open': {
       if (boxesOf(state, sessions) === 0) return { refused: 'locked' }
 
@@ -503,6 +516,7 @@ export function parseStartup(value: unknown): StartupState {
     cash: whole(raw.cash),
     at: typeof raw.at === 'number' && Number.isFinite(raw.at) && raw.at >= 0 ? raw.at : null,
     decor: Array.isArray(raw.decor) ? raw.decor.flatMap(parsePlaced).slice(0, DECOR_MAX) : [],
+    moved: parseMoved(raw.moved),
     opened: whole(raw.opened),
     legacy: whole(raw.legacy),
   }
@@ -527,6 +541,24 @@ function parseHire(one: unknown): Hire[] {
   return [
     (ROLES as readonly unknown[]).includes(hire.role) ? { ...base, role: hire.role as Role } : base,
   ]
+}
+
+/** Lo movido a mano: solo claves que existen y baldosas de números enteros. */
+function parseMoved(value: unknown): StartupState['moved'] {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return {}
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .filter(
+        (entry): entry is [string, [number, number]] =>
+          isFixtureKey(entry[0]) &&
+          Array.isArray(entry[1]) &&
+          entry[1].length === 2 &&
+          entry[1].every((part) => Number.isInteger(part) && (part as number) >= 0),
+      )
+      .slice(0, 200)
+      .map(([key, [gx, gy]]) => [key, [gx, gy] as const]),
+  )
 }
 
 function parsePlaced(one: unknown): Placed[] {

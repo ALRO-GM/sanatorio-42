@@ -5,11 +5,12 @@ import {
   ROLES,
   ROLE_RULES,
   boxesOf,
-  canPlace,
   decorItem,
   freeSpot,
   has,
+  layoutOf,
   prizeOf,
+  sellPrice,
   seatsOf,
   spaceOf,
   staffCost,
@@ -22,6 +23,8 @@ import { Icon } from '../../../shared/ui/Icon'
 import type { ModelId } from './pixel/models'
 import { ItemArt } from './pixel/ItemArt'
 import { Card, Coin } from './parts'
+import { canPut, decorIndex, decorTarget, putAction } from './target'
+import type { Target } from './target'
 
 /**
  * Lo que convierte la oficina en un mundo: el resto de la plantilla, la
@@ -125,9 +128,11 @@ const STEPS = [
 const ARROWS = { up: 'abajo', down: 'abajo', left: 'atras', right: 'adelante' } as const
 
 /**
- * Colocar a mano, sin ratón: la lista de piezas (colocadas y guardadas) para
- * elegir una y moverla baldosa a baldosa, girarla o guardarla. Lo mismo se
- * hace tocando y arrastrando en la oficina (`PixelScene`).
+ * Colocar a mano, sin ratón: la lista de todo lo que se mueve (la decoración,
+ * colocada o guardada, y lo demás: mesas, servidores, mostrador y lo ganado)
+ * para elegir algo y moverlo baldosa a baldosa. La decoración, además, se
+ * gira, se guarda o se vende. Lo mismo se hace tocando y arrastrando en la
+ * oficina (`PixelScene`).
  */
 export function DecorEditor({
   state,
@@ -137,45 +142,69 @@ export function DecorEditor({
   onAct,
 }: {
   state: StartupState
-  selected: number | null
-  onSelect: (index: number | null) => void
+  selected: Target | null
+  onSelect: (target: Target | null) => void
   busy: boolean
   onAct: Act
 }) {
   const { t } = useI18n()
-  const piece = selected === null ? undefined : state.decor[selected]
-  const pieces = state.decor
-    .map((one, index) => ({ one, index }))
-    .filter(({ one }) => decorItem(one.id)?.kind !== 'pet')
-
-  if (pieces.length === 0) return null
-
+  const [selling, setSelling] = useState<Target | null>(null)
   const name = (id: string): string => t(`startup.decor.${id}`)
+  const where = (at: readonly [number, number]) => ({
+    x: String(at[0] + 1),
+    y: String(at[1] + 1),
+  })
+  const layout = layoutOf(state)
+  const items = [
+    ...state.decor
+      .map((one, index) => ({ one, index }))
+      .filter(({ one }) => decorItem(one.id)?.kind !== 'pet')
+      .map(({ one, index }) => ({
+        target: decorTarget(index),
+        model: one.id as ModelId,
+        turn: one.turn,
+        at: one.at,
+        label:
+          one.at === null
+            ? t('startup.piece.stored', { name: name(one.id) })
+            : t('startup.piece', { name: name(one.id), ...where(one.at) }),
+      })),
+    ...layout.map((fixture) => ({
+      target: fixture.key,
+      model: fixture.model as ModelId,
+      turn: false,
+      at: fixture.at,
+      label: t('startup.piece', {
+        name: t(`startup.fixture.${fixture.key.replace(/[:-]\d+$/, '')}`),
+        ...where(fixture.at),
+      }),
+    })),
+  ]
+  const chosen = items.find((item) => item.target === selected)
+  const index = selected === null ? null : decorIndex(selected)
+  const piece = index === null ? undefined : state.decor[index]
+  const select = (target: Target | null): void => {
+    setSelling(null)
+    onSelect(target)
+  }
 
   return (
     <div className="su-editor" role="group" aria-label={t('startup.edit')}>
       <ul className="su-pieces">
-        {pieces.map(({ one, index }) => (
-          <li key={index}>
+        {items.map((item) => (
+          <li key={item.target}>
             <button
               type="button"
-              className={`su-piece ${selected === index ? 'on' : ''} ${one.at === null ? 'stored' : ''}`.trim()}
-              aria-pressed={selected === index}
-              aria-label={
-                one.at === null
-                  ? t('startup.piece.stored', { name: name(one.id) })
-                  : t('startup.piece', {
-                      name: name(one.id),
-                      x: String(one.at[0] + 1),
-                      y: String(one.at[1] + 1),
-                    })
-              }
+              className={`su-piece ${selected === item.target ? 'on' : ''} ${item.at === null ? 'stored' : ''}`.trim()}
+              aria-pressed={selected === item.target}
+              aria-label={item.label}
+              title={item.label}
               onClick={() => {
-                onSelect(selected === index ? null : index)
+                select(selected === item.target ? null : item.target)
               }}
             >
               <ItemArt
-                art={{ kind: 'model', model: one.id as ModelId, props: { turn: one.turn } }}
+                art={{ kind: 'model', model: item.model, props: { turn: item.turn } }}
                 size={28}
               />
             </button>
@@ -183,9 +212,9 @@ export function DecorEditor({
         ))}
       </ul>
 
-      {piece !== undefined && selected !== null && (
+      {chosen !== undefined && selected !== null && (
         <div className="su-moves">
-          {piece.at === null ? (
+          {chosen.at === null && index !== null ? (
             <button
               type="button"
               className="small"
@@ -195,42 +224,34 @@ export function DecorEditor({
               onClick={() => {
                 const spot = freeSpot(state)
 
-                if (spot !== null) {
-                  void onAct({
-                    type: 'place',
-                    index: selected,
-                    gx: spot[0],
-                    gy: spot[1],
-                    turn: piece.turn,
-                  })
-                }
+                if (spot !== null) void onAct(putAction(state, selected, spot[0], spot[1]))
               }}
             >
               <Icon name="mas" size={16} />
             </button>
           ) : (
-            <>
-              {STEPS.map(([way, dx, dy]) => {
-                const at = piece.at ?? [0, 0]
-                const gx = at[0] + dx
-                const gy = at[1] + dy
+            STEPS.map(([way, dx, dy]) => {
+              const at = chosen.at ?? [0, 0]
+              const gx = at[0] + dx
+              const gy = at[1] + dy
 
-                return (
-                  <button
-                    key={way}
-                    type="button"
-                    className={`small su-step ${way}`}
-                    disabled={busy || !canPlace(state, selected, gx, gy)}
-                    aria-label={t(`startup.move.${way}`)}
-                    title={t(`startup.move.${way}`)}
-                    onClick={() =>
-                      void onAct({ type: 'place', index: selected, gx, gy, turn: piece.turn })
-                    }
-                  >
-                    <Icon name={ARROWS[way]} size={16} />
-                  </button>
-                )
-              })}
+              return (
+                <button
+                  key={way}
+                  type="button"
+                  className={`small su-step ${way}`}
+                  disabled={busy || !canPut(state, selected, gx, gy)}
+                  aria-label={t(`startup.move.${way}`)}
+                  title={t(`startup.move.${way}`)}
+                  onClick={() => void onAct(putAction(state, selected, gx, gy))}
+                >
+                  <Icon name={ARROWS[way]} size={16} />
+                </button>
+              )
+            })
+          )}
+          {index !== null && (piece?.at ?? null) !== null && piece !== undefined && (
+            <>
               <button
                 type="button"
                 className="small"
@@ -240,13 +261,7 @@ export function DecorEditor({
                 onClick={() => {
                   const at = piece.at ?? [0, 0]
 
-                  void onAct({
-                    type: 'place',
-                    index: selected,
-                    gx: at[0],
-                    gy: at[1],
-                    turn: !piece.turn,
-                  })
+                  void onAct({ type: 'place', index, gx: at[0], gy: at[1], turn: !piece.turn })
                 }}
               >
                 <Icon name="chispa" size={16} />
@@ -257,15 +272,65 @@ export function DecorEditor({
                 disabled={busy}
                 aria-label={t('startup.store')}
                 title={t('startup.store')}
-                onClick={() => void onAct({ type: 'store', index: selected })}
+                onClick={() => void onAct({ type: 'store', index })}
               >
                 <Icon name="capas" size={16} />
               </button>
             </>
           )}
+          {index !== null && piece !== undefined && (
+            <SellButton
+              price={sellPrice(state, piece.id)}
+              armed={selling === selected}
+              busy={busy}
+              onArm={() => {
+                setSelling(selected)
+              }}
+              onSell={() => {
+                void onAct({ type: 'sell', index }).then((done) => {
+                  if (done) select(null)
+                })
+              }}
+            />
+          )}
         </div>
       )}
     </div>
+  )
+}
+
+/**
+ * Vender una pieza: el primer toque dice por cuánto y el segundo la vende
+ * (lo de las cajas no se puede volver a comprar).
+ */
+function SellButton({
+  price,
+  armed,
+  busy,
+  onArm,
+  onSell,
+}: {
+  price: number
+  armed: boolean
+  busy: boolean
+  onArm: () => void
+  onSell: () => void
+}) {
+  const { t } = useI18n()
+  const label = t(armed ? 'startup.sell.confirm' : 'startup.sell', { n: String(price) })
+
+  return (
+    <button
+      type="button"
+      className={`small su-sell ${armed ? 'danger' : ''}`.trim()}
+      disabled={busy}
+      aria-label={label}
+      title={label}
+      onClick={armed ? onSell : onArm}
+    >
+      <Coin size={14} />
+      <b>{armed ? `+${String(price)}?` : `+${String(price)}`}</b>
+    </button>
   )
 }
 

@@ -36,6 +36,8 @@ la tabla de novedades del README.
   pasa al siguiente, y el panel avisa mientras no haya siguiente
   (`integrations/forty-two/secrets.ts`). Caduca cada 4 semanas: hay que poner el
   nuevo «Next secret» de la intra antes de cada relevo.
+- **Startup sin nada fijo** (2026-11-09, `docs/pomodoro-startup.md`): se
+  mueve todo (`move`, `moved`, `layoutOf`) y se vende la decoración (`sell`).
 - **Uso de los puestos ya sumado** (2026-11-09, migración 91,
   `docs/asientos.md#uso-ya-sumado`): `seat_usage` por persona, puesto y día,
   puesta al día cada hora; el mapa de calor de Clústeres lee de ahí.

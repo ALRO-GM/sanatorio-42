@@ -6,6 +6,7 @@ import { poseAt } from './life'
 import type { Bubble, Plan, Pose } from './life'
 import { MODELS } from './models'
 import type { ModelId, Props } from './models'
+import { targetOf } from '../target'
 import { WALKER_HEIGHT } from './person'
 import { Sprite, TILE } from './sprite'
 
@@ -172,7 +173,8 @@ export type Extras = {
   plans?: readonly Plan[] | undefined
   night?: boolean | undefined
   /** La pieza de decoración elegida (su número) y dónde se dejaría al soltarla. */
-  selected?: number | null | undefined
+  /** Lo elegido para moverlo (`target.ts`). */
+  selected?: string | null | undefined
   ghost?: { gx: number; gy: number; ok: boolean } | null | undefined
   /** Para la mudanza: cada pieza, una caja; y cuánto ha caído cada pieza (0 arriba, 1 en su sitio). */
   packed?: number | undefined
@@ -210,7 +212,7 @@ export function paintOffice(
   context.drawImage(floorOf(office.size, office.floor), 0, 0)
 
   if (extras.selected !== undefined && extras.selected !== null) {
-    const chosen = pieces.find((piece) => piece.decor === extras.selected)
+    const chosen = pieces.find((piece) => targetOf(piece) === extras.selected)
 
     if (chosen !== undefined) {
       const [x, y] = at(chosen.gx, chosen.gy)

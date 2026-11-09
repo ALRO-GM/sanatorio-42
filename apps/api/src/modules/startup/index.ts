@@ -82,6 +82,29 @@ const actionSchema = z.discriminatedUnion('type', [
       .min(0)
       .max(DECOR_MAX - 1),
   }),
+  z.object({
+    type: z.literal('sell'),
+    index: z
+      .number()
+      .int()
+      .min(0)
+      .max(DECOR_MAX - 1),
+  }),
+  // Mover lo que no es decoración: la clave la comprueba el motor (`isFixtureKey`).
+  z.object({
+    type: z.literal('move'),
+    key: z.string().min(1).max(40),
+    gx: z
+      .number()
+      .int()
+      .min(0)
+      .max(Math.max(...ROOM) - 1),
+    gy: z
+      .number()
+      .int()
+      .min(0)
+      .max(Math.max(...ROOM) - 1),
+  }),
   z.object({ type: z.literal('open') }),
   z.object({ type: z.literal('legacy') }),
 ])

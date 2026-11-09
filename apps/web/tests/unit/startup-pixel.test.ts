@@ -259,6 +259,7 @@ describe('la oficina de cada partida', () => {
       gy: 1,
       props: { level: 0, look: 321, axis: null, busy: true },
       seat: 0,
+      fixture: 'desk:0',
     })
     expect(office.pieces.map(({ model }) => model)).toContain('cactus')
     expect(office.hidden).toBe(0)

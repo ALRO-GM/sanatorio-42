@@ -13,9 +13,13 @@ import {
   act,
   boxesOf,
   candidatesOf,
+  canMove,
   canPlace,
   cashOf,
   desksOf,
+  layoutOf,
+  racksOf,
+  sellPrice,
   moodOf,
   parseStartup,
   prizeOf,
@@ -228,6 +232,80 @@ describe('la decoración', () => {
     })
 
     expect(act('ana', full, 0, { type: 'decor', id: 'lamp' })).toEqual({ refused: 'full' })
+  })
+})
+
+describe('recolocar toda la oficina (2026-11-09)', () => {
+  it('las mesas, los servidores y lo ganado se mueven; lo demás se aparta', () => {
+    const base = office({ levels: { 'learn-back': 3, 'learn-front': 4, space: 2, servers: 3 } })
+    const desk = desksOf(base)[0]
+
+    expect(desk).toBeDefined()
+    expect(racksOf(base)).toHaveLength(2)
+
+    // La mesa de quien fundó, a la esquina de delante a la izquierda.
+    const moved = play(base, [{ type: 'move', key: 'desk:0', gx: 0, gy: 5 }])
+
+    expect(desksOf(moved)[0]).toEqual([0, 5])
+    expect(moved.moved).toEqual({ 'desk:0': [0, 5] })
+
+    // La pizarra (se gana con el primer hito) también se mueve; los servidores, al centro.
+    const more = play(moved, [
+      { type: 'move', key: 'whiteboard', gx: 3, gy: 2 },
+      { type: 'move', key: 'rack:1', gx: 2, gy: 2 },
+    ])
+    const at = (key: string) => layoutOf(more).find((fixture) => fixture.key === key)?.at
+
+    expect(at('whiteboard')).toEqual([3, 2])
+    expect(at('rack:1')).toEqual([2, 2])
+    // Lo movido a mano no se pisa: ni con otra cosa movida ni con decoración.
+    expect(canMove(more, 'whiteboard', 2, 2)).toBe(false)
+    expect(act('ana', more, 1_000_000, { type: 'move', key: 'flag', gx: 0, gy: 5 })).toEqual({
+      refused: 'taken',
+    })
+    // Encima de algo que se coloca solo sí: eso se va a otra baldosa.
+    const flag = layoutOf(more).find((fixture) => fixture.key === 'flag')?.at ?? [0, 0]
+    const onFlag = play(more, [{ type: 'move', key: 'coffee', gx: flag[0], gy: flag[1] }])
+
+    expect(layoutOf(onFlag).find((fixture) => fixture.key === 'coffee')?.at).toEqual(flag)
+    expect(layoutOf(onFlag).find((fixture) => fixture.key === 'flag')?.at).not.toEqual(flag)
+    // Lo que no hay en la oficina, fuera de la planta o con otra clave, no.
+    expect(act('ana', more, 1_000_000, { type: 'move', key: 'globe', gx: 1, gy: 1 })).toEqual({
+      refused: 'taken',
+    })
+    expect(act('ana', more, 1_000_000, { type: 'move', key: 'desk:0', gx: 9, gy: 0 })).toEqual({
+      refused: 'taken',
+    })
+    expect(act('ana', more, 1_000_000, { type: 'move', key: 'sofa', gx: 1, gy: 1 })).toEqual({
+      refused: 'invalid',
+    })
+    // La decoración no se deja encima de lo movido a mano.
+    const withPlant = play(more, [{ type: 'decor', id: 'plant' }])
+
+    expect(canPlace(withPlant, withPlant.decor.length - 1, 3, 2)).toBe(false)
+    // Se guarda y se lee igual; al volver a empezar, todo vuelve a su sitio.
+    expect(parseStartup(JSON.parse(JSON.stringify(more))).moved).toEqual(more.moved)
+    expect(parseStartup({ ...more, moved: { nada: [1, 1], 'desk:0': [-1, 2] } }).moved).toEqual({})
+  })
+
+  it('se vende lo comprado por lo que costó, y lo de las cajas por lo que da una caja', () => {
+    const bought = play(office(), [{ type: 'decor', id: 'sofa' }])
+    const cash = bought.cash
+    const sold = play(bought, [{ type: 'sell', index: 0 }])
+
+    expect(sold.decor).toHaveLength(0)
+    expect(sold.cash - cash).toBe(400)
+    expect(sellPrice(office(), 'trophy')).toBe(100 * 2 ** 2)
+    // Lo guardado en el almacén también se vende; lo que no existe, no.
+    const stored = play(office(), [
+      { type: 'decor', id: 'lamp' },
+      { type: 'store', index: 0 },
+    ])
+
+    expect(play(stored, [{ type: 'sell', index: 0 }]).decor).toHaveLength(0)
+    expect(act('ana', stored, 1_000_000, { type: 'sell', index: 3 })).toEqual({
+      refused: 'invalid',
+    })
   })
 })
 

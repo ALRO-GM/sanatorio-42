@@ -2,15 +2,12 @@ import {
   DECOR,
   ROOM,
   decorItem,
-  desksOf,
   focusOf,
-  has,
+  layoutOf,
   levelOf,
-  racksOf,
   roomOf,
   skillOf,
   spaceOf,
-  stageOf,
 } from '@sanatorio/startup'
 import type { Axis, Role, StartupState } from '@sanatorio/startup'
 
@@ -32,6 +29,8 @@ export type Piece = {
   props: Props
   decor?: number
   seat?: number
+  /** Su clave si no es decoración y se puede mover (`fixturesOf`): `desk:0`, `rack:1`, `flag`… */
+  fixture?: string
 }
 
 /**
@@ -67,10 +66,10 @@ const MAX_WALKERS = 10
  * comprado, los hitos, la plantilla, las rondas y la decoración colocada). La
  * misma partida da siempre la misma oficina.
  *
- * - Lo fijo (mesas y servidores) y la decoración colocada a mano salen del
- *   motor (`world.ts`): es lo que la API comprueba al mover una pieza.
- * - Lo que se gana (pizarra, panel, bandera, monedas…) va solo en los bordes,
- *   en lo que quede libre (`DECOR`).
+ * - Dónde va cada cosa sale del motor (`world.ts`, `layoutOf`): la
+ *   decoración, las mesas, los servidores, el mostrador y lo que se gana
+ *   (pizarra, panel, bandera, monedas…). Todo se puede mover a mano, y es lo
+ *   que la API comprueba al moverlo; lo no movido va en su sitio de siempre.
  *
  * @param me El aspecto de quien la fundó (sale de su login).
  * @param busy Si la gente teclea.
@@ -82,13 +81,12 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
   const gear = levelOf(state, 'computer')
   const pieces: Piece[] = []
   const people: Person[] = []
-  const taken = new Set<string>()
-  const mark = (gx: number, gy: number): void => {
-    taken.add(`${String(gx)},${String(gy)}`)
-  }
+  // Dónde queda cada cosa que no es decoración (`world.ts`): lo movido a
+  // mano y, en lo que quede, lo demás en su sitio de siempre.
+  const layout = layoutOf(state)
+  const desks = layout.filter((fixture) => fixture.kind === 'desk')
 
   // Quien programa, en su mesa: primero quien fundó.
-  const desks = desksOf(state)
   const coders = [
     { axis: focus, look: me },
     ...state.team.filter((hire) => hire.role === undefined),
@@ -99,10 +97,9 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
 
     if (desk === undefined) return
 
-    const [gx, gy] = desk
+    const [gx, gy] = desk.at
 
-    mark(gx, gy)
-    people.push({ look: coder.look, axis: coder.axis, desk })
+    people.push({ look: coder.look, axis: coder.axis, desk: desk.at })
     pieces.push({
       model: 'workstation',
       gx,
@@ -114,14 +111,9 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
         busy,
       },
       seat: people.length - 1,
+      fixture: desk.key,
     })
   })
-
-  // Los servidores: un armario más cada dos niveles, todos iguales.
-  for (const [gx, gy] of racksOf(state)) {
-    mark(gx, gy)
-    pieces.push({ model: 'rack', gx, gy, props: { level: levelOf(state, 'servers') } })
-  }
 
   // La decoración colocada a mano.
   state.decor.forEach((piece, index) => {
@@ -129,58 +121,48 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
 
     const [gx, gy] = piece.at
 
-    mark(gx, gy)
     pieces.push({ model: piece.id as ModelId, gx, gy, props: { turn: piece.turn }, decor: index })
   })
 
-  const free = (spots: readonly (readonly [number, number])[]) =>
-    spots.find(
-      ([gx, gy]) =>
-        gx >= 0 && gy >= 0 && gx < size && gy < size && !taken.has(`${String(gx)},${String(gy)}`),
-    )
-  const put = (model: ModelId, props: Props, spots: readonly (readonly [number, number])[]) => {
-    const spot = free(spots)
-
-    if (spot === undefined) return undefined
-
-    mark(spot[0], spot[1])
-
-    const piece: Piece = { model, gx: spot[0], gy: spot[1], props }
-
-    pieces.push(piece)
-
-    return piece
-  }
-
-  const back = Array.from({ length: size }, (_, gx) => [gx, 0] as const)
-  const left = Array.from({ length: size }, (_, gy) => [0, gy] as const)
-  const right = Array.from({ length: size }, (_, gy) => [size - 1, gy] as const)
-  const front = Array.from({ length: size }, (_, gx) => [size - 1 - gx, size - 1] as const)
-
-  // El resto de la plantilla: recepción, en su mostrador junto a la entrada.
+  // El resto de la plantilla: recepción, en su mostrador.
   const staff = state.team.filter((hire) => hire.role !== undefined)
-  let desk = staff.find((hire) => hire.role === 'reception')
+  const counter = layout.find((fixture) => fixture.kind === 'reception')
+  const desk = counter === undefined ? undefined : staff.find((hire) => hire.role === 'reception')
 
-  if (desk !== undefined) {
-    const counter = put('reception', { look: desk.look, axis: desk.axis, role: 'reception' }, [
-      ...[...left].reverse(),
-      ...front,
-    ])
+  // Los servidores (todos iguales), el mostrador y lo ganado.
+  for (const fixture of layout) {
+    const [gx, gy] = fixture.at
 
-    if (counter !== undefined) {
-      people.push({
-        look: desk.look,
-        axis: desk.axis,
-        role: 'reception',
-        desk: [counter.gx, counter.gy],
+    if (fixture.kind === 'rack') {
+      pieces.push({
+        model: 'rack',
+        gx,
+        gy,
+        props: { level: levelOf(state, 'servers') },
+        fixture: fixture.key,
       })
-      counter.seat = people.length - 1
-    } else {
-      // Sin sitio para el mostrador, atiende de pie como los demás.
-      desk = undefined
+    } else if (fixture.kind === 'reception' && desk !== undefined) {
+      people.push({ look: desk.look, axis: desk.axis, role: 'reception', desk: fixture.at })
+      pieces.push({
+        model: 'reception',
+        gx,
+        gy,
+        props: { look: desk.look, axis: desk.axis, role: 'reception' },
+        seat: people.length - 1,
+        fixture: fixture.key,
+      })
+    } else if (fixture.kind === 'extra') {
+      pieces.push({
+        model: fixture.model as ModelId,
+        gx,
+        gy,
+        props: PROPS[fixture.model]?.(state, focus) ?? {},
+        fixture: fixture.key,
+      })
     }
   }
 
+  // Sin sitio para el mostrador, recepción atiende de pie como los demás.
   const walkers: Person[] = [
     ...staff
       .filter((hire) => hire !== desk)
@@ -198,16 +180,6 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
 
   people.push(...walkers.slice(0, MAX_WALKERS))
 
-  // Lo que se gana, en los bordes.
-  const stage = stageOf(state)
-  const skill = skillOf(state)
-
-  for (const { model, when, props, spots } of RULES) {
-    if (when({ state, space, stage, skill })) {
-      put(model, props?.({ state, focus }) ?? {}, spots({ back, left, right, front }))
-    }
-  }
-
   const shownStaff = Math.min(walkers.length, MAX_WALKERS)
 
   return {
@@ -219,62 +191,14 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
   }
 }
 
+/** Lo que cambia el dibujo de lo ganado: el nivel de la estantería, la bandera, las monedas. */
+const PROPS: Partial<Record<string, (state: StartupState, focus: Axis | null) => Props>> = {
+  bookshelf: (state) => ({ level: skillOf(state) }),
+  flag: (_, focus) => ({ axis: focus }),
+  coins: (state) => ({ level: state.rounds.length }),
+}
+
 /** La decoración que tiene dibujo (todas: lo comprueban los tests). */
 const MODELS_OF_DECOR: Record<string, true> = Object.fromEntries(
   DECOR.filter((item) => item.kind !== 'pet').map((item) => [item.id, true]),
 )
-
-type Spots = Record<'back' | 'left' | 'right' | 'front', readonly (readonly [number, number])[]>
-
-type Rule = {
-  model: ModelId
-  /** Cuándo sale. */
-  when: (game: { state: StartupState; space: number; stage: number; skill: number }) => boolean
-  props?: (game: { state: StartupState; focus: ReturnType<typeof focusOf> }) => Props
-  /** Dónde puede ir, por orden de preferencia: la primera baldosa libre. */
-  spots: (edges: Spots) => readonly (readonly [number, number])[]
-}
-
-/**
- * Lo que se va ganando, por orden: si no queda sitio, lo último no sale. Para
- * añadir algo a la oficina que no se compra, una regla aquí.
- */
-const RULES: readonly Rule[] = [
-  { model: 'cactus', when: ({ space }) => space === 0, spots: ({ left }) => left },
-  { model: 'monstera', when: ({ space }) => space > 0, spots: ({ left }) => left },
-  {
-    model: 'bookshelf',
-    when: ({ skill }) => skill > 0,
-    props: ({ state }) => ({ level: skillOf(state) }),
-    spots: ({ back }) => back.slice(1),
-  },
-  { model: 'whiteboard', when: ({ stage }) => stage >= 1, spots: ({ back }) => back },
-  { model: 'dashboard', when: ({ stage }) => stage >= 2, spots: ({ back }) => back },
-  {
-    model: 'flag',
-    when: ({ state }) => has(state, 'founded'),
-    props: ({ focus }) => ({ axis: focus }),
-    spots: ({ left }) => [...left].reverse(),
-  },
-  {
-    model: 'coins',
-    when: ({ state }) => state.rounds.length > 0,
-    props: ({ state }) => ({ level: state.rounds.length }),
-    spots: ({ front, right }) => [...front, ...[...right].reverse()],
-  },
-  {
-    model: 'globe',
-    when: ({ state }) => has(state, 'global'),
-    spots: ({ front, right }) => [...front, ...[...right].reverse()],
-  },
-  { model: 'coffee', when: ({ space }) => space >= 1, spots: ({ left }) => left },
-  { model: 'printer', when: ({ stage }) => stage >= 4, spots: ({ right }) => right.slice(1) },
-  { model: 'cooler', when: ({ space }) => space >= 2, spots: ({ left }) => left },
-  { model: 'beanbag', when: ({ space }) => space >= 2, spots: ({ right }) => right.slice(1) },
-  { model: 'beanbag', when: ({ space }) => space >= 3, spots: ({ right }) => right.slice(1) },
-  {
-    model: 'monstera',
-    when: ({ space }) => space >= 3,
-    spots: ({ right }) => [...right].reverse(),
-  },
-]

@@ -297,6 +297,16 @@
 .su-step.up svg {
   transform: rotate(180deg);
 }
+/* Vender: la moneda y lo que se cobra; al segundo toque, en rojo. */
+.su-sell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.su-sell.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
 
 /* Lo que sale de una caja sorpresa: aparece de un salto (sin él, con movimiento reducido). */
 .su-prize {

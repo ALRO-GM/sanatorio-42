@@ -3,6 +3,7 @@
  * las cuentas (`engine.ts`), el dinero (`economy.ts`) y la oficina (`world.ts`).
  */
 
+import { AXES } from './data.js'
 import type { Axis, Milestone, Role, Round } from './data.js'
 
 /**
@@ -42,6 +43,12 @@ export type StartupState = {
   at: number | null
   /** La decoración comprada o ganada. */
   decor: Placed[]
+  /**
+   * Lo que no es decoración y se ha movido a mano (mesas, servidores,
+   * mostrador y lo ganado, `fixturesOf`): su baldosa, por su clave
+   * (`desk:0`, `rack:1`, `whiteboard`…). Lo que no está aquí se coloca solo.
+   */
+  moved: Record<string, readonly [number, number]>
   /** Cajas sorpresa abiertas (se gana una por sesión de 30 minutos o más). */
   opened: number
   /** Veces que se ha terminado el edificio y vuelto a empezar (nueva partida+). */
@@ -59,6 +66,7 @@ export const EMPTY_STARTUP: StartupState = {
   cash: 0,
   at: null,
   decor: [],
+  moved: {},
   opened: 0,
   legacy: 0,
 }
@@ -67,6 +75,27 @@ export const levelOf = (state: StartupState, id: string): number => state.levels
 
 export const has = (state: StartupState, milestone: Milestone): boolean =>
   state.milestones.includes(milestone)
+
+/** Lo aprendido: la suma de los niveles de las cinco ramas. */
+export function skillOf(state: StartupState): number {
+  return AXES.reduce((sum, axis) => sum + levelOf(state, `learn-${axis}`), 0)
+}
+
+/**
+ * La etapa, para el dibujo: 0 garaje, 1 proyecto, 2 MVP, 3 fundada, 4 con
+ * inversión, 5 creciendo (serie B o más), 6 en bolsa, 7 control global.
+ */
+export function stageOf(state: StartupState): number {
+  if (has(state, 'global')) return 7
+  if (state.rounds.some((round) => round.id === 'ipo')) return 6
+  if (state.rounds.some((round) => round.id === 'b')) return 5
+  if (state.rounds.some((round) => round.id === 'seed')) return 4
+  if (has(state, 'founded')) return 3
+  if (has(state, 'mvp')) return 2
+  if (has(state, 'side')) return 1
+
+  return 0
+}
 
 // --- Azar con semilla ---------------------------------------------------------
 
