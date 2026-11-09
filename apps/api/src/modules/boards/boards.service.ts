@@ -25,9 +25,13 @@ import type { XpService } from '../profile/index.js'
 import { optionalText, parse, text } from '../../core/validation.js'
 import type { Actor } from '../../core/actor.js'
 import type { Notify } from '../../core/events.js'
+import { fixedLimits } from '../../core/limits.js'
+import type { Limits } from '../../core/limits.js'
 
 type BoardsServiceOptions = {
   boards: BoardsRepository
+  /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
+  limits?: Limits
   /** Quién ve a quién: del otro grupo no se apunta nadie (`docs/piscineros.md`). */
   audience?: Audience
   replica: ReplicaRepository
@@ -54,12 +58,13 @@ const boardSchema = z.object({
 const HOUR = 3_600_000
 const TOO_FAR = `No se puede proponer una pizarra con más de ${EVENT_HORIZON_DAYS} días de antelación`
 
-/** Pizarras futuras que puede tener propuestas una persona. */
-const MAX_UPCOMING_BOARDS = 5
+// Pizarras futuras que puede tener propuestas una persona.
+// De fábrica, 5: se regula desde el panel (`boards.upcoming` en `core/limits.ts`).
 
 export function createBoardsService(options: BoardsServiceOptions) {
   const { boards, replica, xp, attendance } = options
   const now = options.now ?? Date.now
+  const limits = options.limits ?? fixedLimits
   const notify: Notify = options.notify ?? (() => Promise.resolve())
 
   async function view(rows: readonly BoardRow[], actor: Actor): Promise<BoardView[]> {
@@ -150,7 +155,10 @@ export function createBoardsService(options: BoardsServiceOptions) {
 
       const nowIso = isoAt(now())
 
-      if ((await boards.countUpcomingBy(actor.login, nowIso)) >= MAX_UPCOMING_BOARDS) {
+      if (
+        (await boards.countUpcomingBy(actor.login, nowIso)) >=
+        (await limits.of('boards.upcoming', actor.login))
+      ) {
         throw domainError('conflict', 'Ya tienes varias pizarras propuestas')
       }
 

@@ -28,9 +28,13 @@ import type { XpService } from '../profile/index.js'
 import { id, optionalText, parse, text } from '../../core/validation.js'
 import type { Actor } from '../../core/actor.js'
 import type { Notify } from '../../core/events.js'
+import { fixedLimits } from '../../core/limits.js'
+import type { Limits } from '../../core/limits.js'
 
 type TherapyServiceOptions = {
   therapy: TherapyRepository
+  /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
+  limits?: Limits
   /** Quién ve a quién: del otro grupo no se apunta nadie (`docs/piscineros.md`). */
   audience?: Audience
   replica: ReplicaRepository
@@ -161,8 +165,8 @@ const rosterOf = (group: GroupRow): SprintRoster => ({
   members: group.members,
 })
 
-/** Grupos abiertos que puede tener una persona a la vez. */
-const MAX_OPEN_GROUPS = 3
+// Grupos abiertos que puede tener una persona a la vez.
+// De fábrica, 3: se regula desde el panel (`therapy.openGroups` en `core/limits.ts`).
 
 /** Minutos antes de la hora en que el grupo ya figura como reunido. */
 const CHECKIN_EARLY_MINUTES = 15
@@ -182,6 +186,7 @@ const MAX_SLOTS_PER_DAY = 8
 export function createTherapyService(options: TherapyServiceOptions) {
   const { therapy, replica, sync, xp } = options
   const now = options.now ?? Date.now
+  const limits = options.limits ?? fixedLimits
   const notify: Notify = options.notify ?? (() => Promise.resolve())
 
   /** `true` si ahora, en la hora del campus, el grupo está reunido. */
@@ -318,7 +323,10 @@ export function createTherapyService(options: TherapyServiceOptions) {
       await mustBeUpcoming(group.dates, actor.campusId)
       await therapy.closeFinished(actor.campusId, await todayIn(actor.campusId))
 
-      if ((await therapy.countOpenBy(actor.login)) >= MAX_OPEN_GROUPS) {
+      if (
+        (await therapy.countOpenBy(actor.login)) >=
+        (await limits.of('therapy.openGroups', actor.login))
+      ) {
         throw domainError('conflict', 'Ya tienes varios grupos abiertos. Cierra alguno antes')
       }
 

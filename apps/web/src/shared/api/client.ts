@@ -151,6 +151,16 @@ export const realApi: Api = {
   setAdminRole: (login, admin) => send('PUT', '/admin/roles', { login, admin }),
   getCourseRemote: () => getJson('/admin/course-remote'),
   setCourseRemote: (login, allowed) => send('PUT', '/admin/course-remote', { login, allowed }),
+  getActionLimits: (login) =>
+    getJson(
+      login === null
+        ? '/admin/action-limits'
+        : `/admin/action-limits?login=${encodeURIComponent(login)}`,
+    ),
+  setActionLimit: (key, value, login) =>
+    sendJson('PUT', '/admin/action-limits', { key, value, ...(login === null ? {} : { login }) }),
+  resetActionLimits: (login) =>
+    sendJson('DELETE', `/admin/action-limits/${encodeURIComponent(login)}`),
   blockUser: (login, reason, days) =>
     send('PUT', '/admin/blocks', { login, reason, ...(days === null ? {} : { days }) }),
   unblockUser: (login) => send('DELETE', `/admin/blocks/${encodeURIComponent(login)}`),

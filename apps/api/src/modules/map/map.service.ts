@@ -32,14 +32,18 @@ import type { ReplicaRepository, Syncer } from '../replica/index.js'
 import type { TherapyService } from '../therapy/index.js'
 import { domainError } from '../../core/errors.js'
 import { parse } from '../../core/validation.js'
-import { BROKEN_FOR_MS, MAX_BROKEN_PER_PERSON } from './broken-seats.js'
+import { BROKEN_FOR_MS } from './broken-seats.js'
 import type { BrokenSeats } from './broken-seats.js'
 import { clusterBounds, hostAt, isInside, parseHost } from './seat-layout.js'
 import type { SeatPosition } from './seat-layout.js'
 import { isoAt } from '../../core/time.js'
+import { fixedLimits } from '../../core/limits.js'
+import type { Limits } from '../../core/limits.js'
 
 export type MapServiceOptions = {
   replica: ReplicaRepository
+  /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
+  limits?: Limits
   /** Quién ve a quién: estudiantes y piscineros separados (`docs/piscineros.md`). */
   audience?: Audience
   sync: Syncer
@@ -79,6 +83,7 @@ export function createMapService(options: MapServiceOptions) {
   const { replica, sync, peers, therapy } = options
   const now = options.now ?? Date.now
   const audience = options.audience ?? NO_POOL
+  const limits = options.limits ?? fixedLimits
 
   /** Desde cuándo vale un aviso de puesto roto. */
   const brokenSince = (): string => isoAt(now() - BROKEN_FOR_MS)
@@ -104,11 +109,12 @@ export function createMapService(options: MapServiceOptions) {
       const name = seatHost(host)
 
       const mine = (await options.broken?.countBy(actor.login, brokenSince())) ?? 0
+      const most = await limits.of('brokenSeats.active', actor.login)
 
-      if (mine >= MAX_BROKEN_PER_PERSON) {
+      if (mine >= most) {
         throw domainError(
           'conflict',
-          `Ya tienes ${MAX_BROKEN_PER_PERSON} puestos marcados como rotos esta semana: es el máximo por persona (no hay límite por clúster)`,
+          `Ya tienes ${most} puestos marcados como rotos esta semana: es el máximo por persona (no hay límite por clúster)`,
         )
       }
 

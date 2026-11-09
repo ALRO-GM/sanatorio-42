@@ -11,8 +11,9 @@ import { toText } from '../../core/db/rows.js'
 /** Lo que dura un aviso de puesto roto. */
 export const BROKEN_FOR_MS = 7 * 24 * 3_600_000
 
-/** Avisos a la vez que puede tener una persona: lo justo para no llenar el mapa de cruces. */
-export const MAX_BROKEN_PER_PERSON = 10
+// Avisos a la vez que puede tener una persona: lo justo para no llenar el mapa
+// de cruces. De fábrica, 10; se regula desde el panel (`brokenSeats.active` en
+// `core/limits.ts`).
 
 export function createBrokenSeats(db: Db) {
   return {

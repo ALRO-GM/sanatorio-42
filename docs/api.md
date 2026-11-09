@@ -285,6 +285,8 @@ sale nadie del otro mundo.
 - POST /events/messages → `{ "id", "kind", "minutes"?, "reason"?, "body"? }`; devuelve el chat.
   `kind`: `seen` (he visto el aviso), `late` (pide `minutes`), `absent` o `text`
   (pide `body`). `reason`: `evaluation`, `other_event`, `on_my_way`, `transport`, `other`.
+  Tope por persona: 20 mensajes por minuto en total y 8 a un mismo chat (409);
+  son los de fábrica y se regulan en `/admin/action-limits` (`docs/limites.md`).
 - GET /events/alerts → `{ "alerts": [{ "event", "state" }] }`, por orden de
   inicio. `pending`: es con más gente de Sanatorio (pizarra, terapia o ayuda
   reservada; las correcciones de 42 no) y no has dicho si vas (la web no deja
@@ -442,6 +444,7 @@ cuota que de otro modo se perdería, por turnos de prioridad: ver
   `section` = `place.section`) con `proposal` y `place`; `place.version` (el
   commit desplegado) lo pone la API. 201 con el mensaje. Además de los topes del
   buzón (10 abiertos, 3 cada 10 min), 10 sugerencias cada 24 h por persona: 409.
+  Son los de fábrica: se regulan en `/admin/action-limits` (`docs/limites.md`).
 - GET /tickets/mine → lo que has mandado, con su `answer` si la tiene y
   `withdrawUntil`: hasta cuándo puedes retirarlo (15 min y sin respuesta), o `null`.
 - DELETE /tickets/:id → retira un mensaje tuyo mientras `withdrawUntil` no haya
@@ -473,6 +476,16 @@ Con el panel abierto:
 - GET /admin/course-remote → `CourseRemoteAccess` (quién puede hacer el curso de
   git fuera del clúster y el último sitio que dijo) · PUT /admin/course-remote
   `{ login, allowed }` (204).
+- GET /admin/action-limits?login= → `ActionLimits`: los topes por persona
+  regulables (`docs/limites.md`), cada uno con `key`, `unit` (`per_minute`,
+  `per_10_minutes`, `per_day`, `at_once`), `default`, `min`, `max`, `global`
+  (lo de todo el mundo o `null`), `user` (lo de `login` o `null`) y `effective`
+  (persona > todo el mundo > fábrica); y `people`: quién tiene alguno propio y
+  cuántos. · PUT /admin/action-limits `{ key, value, login? }` → `ActionLimits`
+  (sin `login`, para todo el mundo; `value: null` lo quita; fuera de
+  `min`–`max` o con una clave que no existe, 400) · DELETE
+  /admin/action-limits/:login → `ActionLimits`: quita todos los topes propios
+  de esa persona. Los cortes del plan (90 %, cupo de 42) no están aquí.
 - GET /admin/tickets · POST /admin/tickets/:id/answer `{ answer, status? }` ·
   DELETE /admin/tickets/:id (spam, bromas; 204). Responder o borrar un mensaje
   da por leído su `ticket_new` a todo quien administra. Cada mensaje trae

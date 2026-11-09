@@ -15,9 +15,9 @@ const PROPOSAL_MAX = 500
 /**
  * Sugerencias por persona en 24 horas, además del tope de todo el buzón (tres
  * cada diez minutos). Soltar la burbuja cuesta poco: sin esto, una tarde de
- * pruebas llenaría la bandeja de quien administra.
+ * pruebas llenaría la bandeja de quien administra. De fábrica, 10; se regula
+ * desde el panel (`suggestions.perDay` en `core/limits.ts`).
  */
-export const SUGGESTIONS_PER_DAY = 10
 
 /** Un texto de una línea, sin caracteres de control. */
 const line = (max: number) =>

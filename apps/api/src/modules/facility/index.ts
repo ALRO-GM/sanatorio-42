@@ -11,6 +11,7 @@ import type { AppModule } from '../../core/module.js'
 import { createFacilityService } from './facility.service.js'
 import type { FacilityService } from './facility.service.js'
 import { given } from '../../core/options.js'
+import type { Limits } from '../../core/limits.js'
 
 type FacilityDeps = {
   db: Db
@@ -19,6 +20,8 @@ type FacilityDeps = {
   markBroken?: (actor: Actor, host: string) => Promise<void>
   /** Si una cuenta de staff sigue teniendo acceso. */
   staffActive: (id: number) => Promise<boolean>
+  /** Topes regulables desde el panel (`core/limits.ts`). */
+  limits?: Limits
   now?: () => number
 }
 
@@ -29,7 +32,7 @@ export function createFacilityModule(deps: FacilityDeps): FacilityModule {
     db: deps.db,
     seatOf: deps.seatOf,
     slack: deps.slack ?? null,
-    ...given({ markBroken: deps.markBroken, now: deps.now }),
+    ...given({ markBroken: deps.markBroken, limits: deps.limits, now: deps.now }),
   })
   const report = (id: string): number => idParam(id, 'El aviso')
 

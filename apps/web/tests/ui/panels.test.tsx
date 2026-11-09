@@ -201,6 +201,79 @@ describe('ventanas y paneles', () => {
     })
   }, 30_000)
 
+  it('límites: se cambia un tope para todo el mundo y para una persona, y se vuelve a lo de fábrica', async () => {
+    await quietly(async () => {
+      const user = userEvent.setup()
+      const messages = text('admin.limits.key.messages.perMinute')
+      const doubts = text('admin.limits.key.doubts.perDay')
+      const rowOf = (label: string): HTMLElement =>
+        must(
+          screen
+            .getAllByRole('row')
+            .find((row) => row.querySelector('th[scope="row"]')?.textContent.startsWith(label)),
+          `la fila de ${label}`,
+        )
+
+      await openApp('#/gestion')
+      await unlockPanel(user)
+      await user.click(await screen.findByRole('tab', { name: text('admin.tab.limits') }, WAIT))
+      expect(
+        await screen.findByRole('heading', { name: text('admin.limits.editingEveryone') }, WAIT),
+      ).toBeTruthy()
+
+      // Para todo el mundo: fuera de los márgenes no deja guardar; dentro, sí.
+      const field = within(rowOf(messages)).getByRole('spinbutton', { name: messages })
+      const save = within(rowOf(messages)).getByRole('button', { name: text('admin.limits.save') })
+
+      await user.clear(field)
+      await user.type(field, '0')
+      expect(save).toHaveProperty('disabled', true)
+      await user.clear(field)
+      await user.type(field, '30')
+      await user.click(save)
+      await waitFor(() => {
+        expect(within(rowOf(messages)).getAllByRole('cell')[1]?.textContent).toBe('30')
+      }, WAIT)
+
+      // Una persona: lo suyo manda y «Todo por defecto» lo quita.
+      await user.type(screen.getByRole('combobox', { name: text('admin.limits.person') }), 'jdoe')
+      await user.click(screen.getByRole('button', { name: text('admin.limits.see') }))
+      expect(
+        await screen.findByRole(
+          'heading',
+          { name: text('admin.limits.editingPerson').replace('{login}', 'jdoe') },
+          WAIT,
+        ),
+      ).toBeTruthy()
+
+      const reset = screen.getByRole('button', { name: text('admin.limits.resetPerson') })
+
+      expect(reset).toHaveProperty('disabled', true)
+      await user.type(within(rowOf(doubts)).getByRole('spinbutton', { name: doubts }), '2')
+      await user.click(
+        within(rowOf(doubts)).getByRole('button', { name: text('admin.limits.save') }),
+      )
+      await waitFor(() => {
+        expect(within(rowOf(doubts)).getAllByRole('cell')[2]?.textContent).toBe('2')
+      }, WAIT)
+      expect(reset).toHaveProperty('disabled', false)
+      await user.click(reset)
+      await waitFor(() => {
+        expect(within(rowOf(doubts)).getAllByRole('cell')[2]?.textContent).toBe('—')
+      }, WAIT)
+
+      // De vuelta a todo el mundo, y lo de todo el mundo a fábrica.
+      await user.click(screen.getByRole('button', { name: text('admin.limits.everyone') }))
+      await screen.findByRole('heading', { name: text('admin.limits.editingEveryone') }, WAIT)
+      await user.click(
+        within(rowOf(messages)).getByRole('button', { name: text('admin.limits.reset') }),
+      )
+      await waitFor(() => {
+        expect(within(rowOf(messages)).getAllByRole('cell')[1]?.textContent).toBe('—')
+      }, WAIT)
+    })
+  }, 30_000)
+
   it('buzón: se abre, cambia a conversaciones y vuelve a avisos', async () => {
     await quietly(async () => {
       const user = userEvent.setup()

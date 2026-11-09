@@ -47,6 +47,8 @@ import type {
   GitCourse,
   CoursePlace,
   CourseRemoteAccess,
+  ActionLimitKey,
+  ActionLimits,
   GitGateAnswerInput,
   GitGatePeople,
   GitGateQuiz,
@@ -369,6 +371,16 @@ export type Api = {
   /** Quién puede hacer el curso de git fuera del clúster. */
   getCourseRemote: () => Promise<CourseRemoteAccess>
   setCourseRemote: (login: string, allowed: boolean) => Promise<void>
+  /** Topes por persona regulables: los de todo el mundo o, con `login`, los de esa persona. */
+  getActionLimits: (login: string | null) => Promise<ActionLimits>
+  /** Pone un tope (`value: null` lo quita), para todo el mundo o, con `login`, para esa persona. */
+  setActionLimit: (
+    key: ActionLimitKey,
+    value: number | null,
+    login: string | null,
+  ) => Promise<ActionLimits>
+  /** Devuelve a esa persona a los topes de todo el mundo. */
+  resetActionLimits: (login: string) => Promise<ActionLimits>
   /** `days: null` bloquea sin fecha de fin. */
   blockUser: (login: string, reason: string, days: number | null) => Promise<void>
   unblockUser: (login: string) => Promise<void>

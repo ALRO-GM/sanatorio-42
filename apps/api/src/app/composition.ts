@@ -90,6 +90,8 @@ import { createTherapyModule } from '../modules/therapy/index.js'
 import type { TherapyModule } from '../modules/therapy/index.js'
 import { given } from '../core/options.js'
 import { createLate } from '../core/late.js'
+import { createLimits } from '../core/limits.js'
+import type { LimitsAdmin } from '../core/limits.js'
 import { createPresence } from '../modules/presence/index.js'
 
 type CompositionConfig = {
@@ -150,6 +152,8 @@ export type Services = {
   attendance: AttendanceModule['service']
   staff: StaffModule['service']
   admin: AdminModule['service']
+  /** Topes por persona regulables desde el panel. */
+  limits: LimitsAdmin
   notices: NoticesModule['service']
   broadcasts: BroadcastsModule['service']
   countdowns: CountdownsModule['service']
@@ -264,6 +268,9 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const notify: Notify = (notice) => events.emit('notice', notice)
   // `audience`: quién ve a quién, para los módulos que enseñan gente (`docs/piscineros.md`).
   const common = { db, replica: replica.repository, audience, ...clock }
+  // Topes por persona que se regulan desde el panel (`core/limits.ts`): una
+  // sola copia para todos, para que un cambio valga al momento en todas partes.
+  const limits = createLimits({ db, ...clock })
   // La parte de juego de los cursos (`docs/cursos-logros.md`): el perfil saca de aquí sus logros.
   const courses = createCoursesModule({ db, audience, ...clock })
   const profile = createProfileModule({
@@ -306,9 +313,16 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
 
   const peers = createPeersModule({ ...common, sync: replica.sync, events, focusOf })
-  const therapy = createTherapyModule({ ...common, sync: replica.sync, xp: profile.xp, notify })
+  const therapy = createTherapyModule({
+    ...common,
+    sync: replica.sync,
+    xp: profile.xp,
+    notify,
+    limits,
+  })
   const doubts = createDoubtsModule({
     ...common,
+    limits,
     curriculum: replica.curriculum,
     xp: profile.xp,
     notify,
@@ -325,12 +339,14 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
   const boards = createBoardsModule({
     ...common,
+    limits,
     xp: profile.xp,
     attendance: attendance.service,
     events,
     notify,
   })
   const map = createMapModule({
+    limits,
     replica: replica.repository,
     audience,
     sync: replica.sync,
@@ -349,6 +365,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
 
   const help = createHelpModule({
     ...common,
+    limits,
     agenda: replica.agenda,
     xp: profile.xp,
     attendance: attendance.service,
@@ -380,6 +397,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   // ya guardado, sin pedir nada nuevo).
   const countdowns = createCountdownsModule({
     db,
+    limits,
     events: async (actor, from, to) =>
       (
         await calendar.service.between(
@@ -397,6 +415,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   // Nada de esto pide a 42.
   const agenda = createAgendaModule({
     db,
+    limits,
     audience,
     projectsOf: (login) => replica.repository.projectsOf(login, true),
     projectNames: (ids) => replica.repository.projectNames(ids),
@@ -454,6 +473,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const staff = createStaffModule({ db, ...clock })
   const facility = createFacilityModule({
     db,
+    limits,
     seatOf: presence.seatOf,
     slack: config.slack ?? null,
     markBroken: (actor, host) => map.service.reportBroken(actor, host),
@@ -472,6 +492,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
 
   const meet = createMeetModule({
     db,
+    limits,
     documents: staff.service,
     calendar: calendar.service,
     boards: boards.service,
@@ -487,6 +508,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
   const admin = createAdminModule({
     db,
+    limits,
     fixedAdmins: config.admins ?? [],
     fortyTwoRemaining: () => client.hourlyRemaining(),
     ...given({ fortyTwoSecret: config.fortyTwoSecret }),
@@ -653,6 +675,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       attendance: attendance.service,
       staff: staff.service,
       admin: admin.service,
+      limits,
       notices: notices.service,
       broadcasts: broadcasts.service,
       countdowns: countdowns.service,

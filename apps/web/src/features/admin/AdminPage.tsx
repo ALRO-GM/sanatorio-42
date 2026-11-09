@@ -16,6 +16,7 @@ import { HoursReport } from '../profile/HoursReport'
 import { BudgetCard } from './BudgetCard'
 import { QuotaCard } from './QuotaCard'
 import { CourseRemotePanel } from './CourseRemotePanel'
+import { LimitsPanel } from './LimitsPanel'
 import { SecretCard } from './SecretCard'
 import { ApiUsagePanel } from './ApiUsagePanel'
 import { BroadcastsTab } from './BroadcastsTab'
@@ -41,6 +42,7 @@ import { PersonInput } from '../../shared/ui/PersonInput'
 const TABS = [
   'consumption',
   'people',
+  'limits',
   'inbox',
   'messages',
   'usage',
@@ -100,6 +102,7 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
           <HoursReport everyone />
         </article>
       )}
+      {tab === 'limits' && <LimitsPanel />}
       {tab === 'inbox' && <InboxTab />}
       {tab === 'messages' && <MessagesTab />}
       {tab === 'usage' && <UsageTab />}

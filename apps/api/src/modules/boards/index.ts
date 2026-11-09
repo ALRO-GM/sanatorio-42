@@ -16,6 +16,7 @@ import { registerBoardsRoutes } from './boards.routes.js'
 import { createBoardsService } from './boards.service.js'
 import type { BoardsService } from './boards.service.js'
 import { given } from '../../core/options.js'
+import type { Limits } from '../../core/limits.js'
 
 type BoardsModuleDeps = {
   db: Db
@@ -26,6 +27,8 @@ type BoardsModuleDeps = {
   attendance: AttendanceService
   events: EventBus
   notify?: Notify
+  /** Topes regulables desde el panel (`core/limits.ts`). */
+  limits?: Limits
   now?: () => number
 }
 
@@ -37,7 +40,12 @@ export function createBoardsModule(deps: BoardsModuleDeps): BoardsModule {
     replica: deps.replica,
     xp: deps.xp,
     attendance: deps.attendance,
-    ...given({ audience: deps.audience, notify: deps.notify, now: deps.now }),
+    ...given({
+      audience: deps.audience,
+      notify: deps.notify,
+      limits: deps.limits,
+      now: deps.now,
+    }),
   })
 
   // La XP de impartir una pizarra se reparte cuando ya ha pasado. Se aprovecha
