@@ -702,6 +702,9 @@ export function commandsIn(src: string): string[] {
             break
           }
         }
+        // Y lo de entre comillas invertidas, la forma antigua: `date +%F`.
+        for (const inner of word.match(/`[^`]*`/g) ?? [])
+          names.push(...commandsIn(inner.slice(1, -1)))
       }
       // `sudo grep`, `xargs grep`, `time grep`: también cuenta el de detrás.
       if (

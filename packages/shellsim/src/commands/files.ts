@@ -47,7 +47,9 @@ function must(ctx: Ctx, path: string, verb: string): { path: string; node: FsNod
 
 /* ---------- ls ---------- */
 
-function lsLine(name: string, node: FsNode, humanSizes: boolean, classify: boolean): string {
+type LsRow = [string, string, string, string, string, string]
+
+function lsLine(name: string, node: FsNode, humanSizes: boolean, classify: boolean): LsRow {
   const size = node.kind === 'link' ? node.target.length : sizeOf(node)
   const shown = humanSizes ? human(size) : String(size)
   const mark = classify
@@ -62,7 +64,25 @@ function lsLine(name: string, node: FsNode, humanSizes: boolean, classify: boole
   const target = node.kind === 'link' ? ` -> ${node.target}` : ''
   const links = node.kind === 'dir' ? 2 : 1
 
-  return `${modeString(node)} ${links} ${node.owner.padEnd(8)} ${node.group.padEnd(8)} ${shown.padStart(humanSizes ? 4 : 6)} ${lsDate(node.mtime)} ${name}${mark}${target}`
+  return [
+    modeString(node),
+    String(links),
+    node.owner,
+    node.group,
+    shown,
+    `${lsDate(node.mtime)} ${name}${mark}${target}`,
+  ]
+}
+
+/** Las filas de `ls -l` en columnas, como GNU: cada una tan ancha como la más ancha. */
+function lsTable(rows: LsRow[]): string[] {
+  const width = (i: number) => Math.max(0, ...rows.map((row) => (row[i] ?? '').length))
+  const [links, owner, group, size] = [width(1), width(2), width(3), width(4)]
+
+  return rows.map(
+    ([mode, n, user, grp, shown, rest]) =>
+      `${mode} ${n.padStart(links)} ${user.padEnd(owner)} ${grp.padEnd(group)} ${shown.padStart(size)} ${rest}`,
+  )
 }
 
 const ls: CommandFn = (ctx) => {
@@ -133,9 +153,12 @@ const ls: CommandFn = (ctx) => {
     if (long) {
       const blocks = entries.reduce((sum, each) => sum + Math.ceil(sizeOf(each.node) / 4096) * 4, 0)
 
-      out.push(`total ${blocks}`)
-      for (const each of entries)
-        out.push(lsLine(each.name, each.node, flags.has('h'), flags.has('F')))
+      out.push(`total ${flags.has('h') && blocks > 0 ? human(blocks * 1024) : blocks}`)
+      out.push(
+        ...lsTable(
+          entries.map((each) => lsLine(each.name, each.node, flags.has('h'), flags.has('F'))),
+        ),
+      )
     } else if (flags.has('1') || ctx.io.tty !== true) out.push(...entries.map((each) => each.name))
     else if (entries.length > 0)
       out.push(
@@ -155,6 +178,7 @@ const ls: CommandFn = (ctx) => {
   }
 
   const files: string[] = []
+  const rows: LsRow[] = []
   const dirs: string[] = []
 
   for (const target of targets) {
@@ -176,8 +200,10 @@ const ls: CommandFn = (ctx) => {
       continue
     }
     if (found.node.kind === 'dir' && !flags.has('d')) dirs.push(target)
-    else files.push(long ? lsLine(target, found.node, flags.has('h'), flags.has('F')) : target)
+    else if (long) rows.push(lsLine(target, found.node, flags.has('h'), flags.has('F')))
+    else files.push(target)
   }
+  files.push(...lsTable(rows))
   if (files.length > 0)
     out.push(...(long || flags.has('1') || ctx.io.tty !== true ? files : [files.join('  ')]))
   dirs.forEach((dir, index) => {
@@ -247,11 +273,20 @@ const touch: CommandFn = (ctx) => {
     const found = find(ctx, file)
 
     if (found === null)
-      writeText(ctx.sh.machine(), ctx.sh.user(), ctx.sh.abs(file), '', {
-        cmd: 'touch',
-        shown: file,
-        ...opts(ctx),
-      })
+      try {
+        writeText(ctx.sh.machine(), ctx.sh.user(), ctx.sh.abs(file), '', {
+          cmd: 'touch',
+          shown: file,
+          ...opts(ctx),
+        })
+      } catch (error) {
+        // GNU: «touch: cannot touch 'f': motivo», no «touch: f: motivo».
+        const prefix = `touch: ${file}: `
+
+        if (error instanceof Fail && error.message.startsWith(prefix))
+          throw new Fail(`touch: cannot touch '${file}': ${error.message.slice(prefix.length)}`)
+        throw error
+      }
     else {
       if (!can(ctx.sh.user(), found.node, 'w') && found.node.owner !== ctx.sh.user().name)
         throw new Fail(`touch: cannot touch '${file}': ${EACCES}`)
@@ -260,6 +295,27 @@ const touch: CommandFn = (ctx) => {
   }
 
   return 0
+}
+
+/** Las fuentes y el destino de `cp`/`mv`: el último argumento, o el de `-t carpeta`. */
+function operands(
+  cmd: string,
+  rest: string[],
+  target: string | undefined,
+): { dst: string; sources: string[] } {
+  if (target !== undefined) {
+    if (rest.length === 0) throw new Fail(`${cmd}: missing file operand`)
+
+    return { dst: target, sources: rest }
+  }
+  if (rest.length < 2)
+    throw new Fail(
+      rest.length === 0
+        ? `${cmd}: missing file operand`
+        : `${cmd}: missing destination file operand after '${rest[0] ?? ''}'`,
+    )
+
+  return { dst: rest.at(-1) ?? '', sources: rest.slice(0, -1) }
 }
 
 /** Adónde va algo que se copia o se mueve: dentro de la carpeta si el destino es una. */
@@ -272,20 +328,16 @@ function destination(ctx: Ctx, src: string, dst: string): string {
 }
 
 const cp: CommandFn = (ctx) => {
-  const { flags, rest } = getopts(ctx.args, '', { recursive: 'r', archive: 'a', verbose: 'v' })
+  const { flags, values, rest } = getopts(ctx.args, 't', {
+    recursive: 'r',
+    archive: 'a',
+    verbose: 'v',
+    'target-directory': 't',
+  })
   const recursive = flags.has('r') || flags.has('R') || flags.has('a')
+  const { dst, sources } = operands('cp', rest, values.get('t'))
 
-  if (rest.length < 2)
-    throw new Fail(
-      rest.length === 0
-        ? 'cp: missing file operand'
-        : `cp: missing destination file operand after '${rest[0] ?? ''}'`,
-    )
-
-  const dst = rest.at(-1) ?? ''
-  const sources = rest.slice(0, -1)
-
-  if (sources.length > 1 && find(ctx, dst)?.node.kind !== 'dir')
+  if ((sources.length > 1 || values.has('t')) && find(ctx, dst)?.node.kind !== 'dir')
     throw new Fail(`cp: target '${dst}': Not a directory`)
 
   let code = 0
@@ -318,11 +370,24 @@ const cp: CommandFn = (ctx) => {
       continue
     }
     if (found.node.kind === 'file') {
-      writeText(machine, ctx.sh.user(), to, found.node.text, {
-        cmd: 'cp',
-        shown: dst,
-        ...opts(ctx),
-      })
+      const shown =
+        find(ctx, dst)?.node.kind === 'dir'
+          ? `${dst.replace(/\/+$/, '')}/${baseOf(ctx.sh.abs(src))}`
+          : dst
+
+      try {
+        writeText(machine, ctx.sh.user(), to, found.node.text, { cmd: 'cp', shown, ...opts(ctx) })
+      } catch (error) {
+        // GNU: «cp: cannot create regular file 'x': motivo».
+        const prefix = `cp: ${shown}: `
+
+        if (!(error instanceof Fail) || !error.message.startsWith(prefix)) throw error
+        ctx.io.err(
+          `cp: ${error.message.endsWith('Is a directory') ? 'cannot overwrite directory' : 'cannot create regular file'} '${shown}'${error.message.endsWith('Is a directory') ? ' with non-directory' : `: ${error.message.slice(prefix.length)}`}\n`,
+        )
+        code = 1
+        continue
+      }
 
       const copy = own(machine.fs, to)
 
@@ -354,20 +419,11 @@ const cp: CommandFn = (ctx) => {
 }
 
 const mv: CommandFn = (ctx) => {
-  const { flags, rest } = getopts(ctx.args)
-
-  if (rest.length < 2)
-    throw new Fail(
-      rest.length === 0
-        ? 'mv: missing file operand'
-        : `mv: missing destination file operand after '${rest[0] ?? ''}'`,
-    )
-
-  const dst = rest.at(-1) ?? ''
-  const sources = rest.slice(0, -1)
+  const { flags, values, rest } = getopts(ctx.args, 't', { 'target-directory': 't' })
+  const { dst, sources } = operands('mv', rest, values.get('t'))
   const machine = ctx.sh.machine()
 
-  if (sources.length > 1 && find(ctx, dst)?.node.kind !== 'dir')
+  if ((sources.length > 1 || values.has('t')) && find(ctx, dst)?.node.kind !== 'dir')
     throw new Fail(`mv: target '${dst}': Not a directory`)
 
   let code = 0
@@ -505,7 +561,7 @@ const ln: CommandFn = (ctx) => {
 
 /** `u+x`, `go-w`, `a=r`, `+x`, `755`: el modo nuevo. */
 function newMode(spec: string, mode: number, isDir: boolean): number {
-  if (/^[0-7]{3,4}$/.test(spec)) return parseInt(spec, 8)
+  if (/^[0-7]{1,4}$/.test(spec)) return parseInt(spec, 8)
 
   let result = mode
 
@@ -562,20 +618,50 @@ function eachPath(
     for (const path of all) {
       const node = own(machine.fs, path)
 
-      if (node !== undefined) fn(path, node, path === found.path ? target : path)
+      // Como GNU: un fichero que no se puede tocar da su error y se sigue con los demás.
+      if (node !== undefined)
+        try {
+          fn(path, node, target.replace(/\/+$/, '') + path.slice(found.path.length) || target)
+        } catch (error) {
+          if (!(error instanceof Fail)) throw error
+          ctx.io.err(`${error.message}\n`)
+          code = 1
+        }
     }
   }
 
   return code
 }
 
+/**
+ * Las opciones de `chmod`/`chown` (`-R`, `-v`, `-Rv`, `--recursive`…) y lo
+ * demás. En `chmod`, `-x` o `-w` son un modo, no una opción.
+ */
+function permArgs(args: string[], letters: RegExp): { recursive: boolean; rest: string[] } {
+  let recursive = false
+  const rest: string[] = []
+  let done = false
+
+  for (const arg of args) {
+    if (!done && arg === '--') done = true
+    else if (!done && arg === '--recursive') recursive = true
+    else if (!done && /^--(verbose|changes|silent|quiet|no-dereference|dereference)$/.test(arg))
+      continue
+    else if (!done && letters.test(arg)) recursive ||= arg.includes('R')
+    else rest.push(arg)
+  }
+
+  return { recursive, rest }
+}
+
 const chmod: CommandFn = (ctx) => {
-  const recursive = ctx.args.includes('-R')
-  const args = ctx.args.filter((arg) => arg !== '-R' && arg !== '-v' && arg !== '--recursive')
-  const [spec, ...paths] = args
+  const { recursive, rest } = permArgs(ctx.args, /^-[cfvR]+$/)
+  const [spec, ...paths] = rest
 
   if (spec === undefined || paths.length === 0)
     throw new Fail(`chmod: missing operand${spec === undefined ? '' : ` after '${spec}'`}`)
+
+  newMode(spec, 0, false) // un modo que no vale falla antes de tocar nada
 
   const user = ctx.sh.user()
 
@@ -587,29 +673,119 @@ const chmod: CommandFn = (ctx) => {
 }
 
 const chown: CommandFn = (ctx) => {
-  const recursive = ctx.args.includes('-R')
-  const [spec, ...paths] = ctx.args.filter((arg) => !arg.startsWith('-'))
+  const { recursive, rest } = permArgs(ctx.args, /^-[cfvRhHLP]+$/)
+  const [spec, ...paths] = rest
 
-  if (spec === undefined || paths.length === 0) throw new Fail(`${ctx.name}: missing operand`)
+  if (spec === undefined || paths.length === 0)
+    throw new Fail(`${ctx.name}: missing operand${spec === undefined ? '' : ` after '${spec}'`}`)
 
   const machine = ctx.sh.machine()
-  const [owner, group] = ctx.name === 'chgrp' ? [undefined, spec] : spec.split(/[:.]/)
+  // Sin `:` no hay grupo (`chown deploy f`); el tipo lo dice, que `split` no lo avisa.
+  const parts: (string | undefined)[] =
+    ctx.name === 'chgrp' ? [undefined, spec] : spec.split(/[:.]/)
+  const [owner, group] = parts
 
   if (owner !== undefined && owner !== '' && own(machine.users, owner) === undefined)
     throw new Fail(`chown: invalid user: '${spec}'`)
-  if (group !== '' && own(machine.groups, group) === undefined)
+  if (group !== undefined && group !== '' && own(machine.groups, group) === undefined)
     throw new Fail(`${ctx.name}: invalid group: '${spec}'`)
 
   const user = ctx.sh.user()
+  // Sin ser root solo se puede dar a un grupo propio lo que es tuyo (y «cambiar» el dueño a ti mismo).
+  const allowed = (node: FsNode) =>
+    user.uid === 0 ||
+    (node.owner === user.name &&
+      (owner === undefined || owner === '' || owner === user.name) &&
+      (group === undefined || group === '' || user.groups.includes(group)))
 
   return eachPath(ctx, paths, recursive, (_path, node, shown) => {
-    if (user.uid !== 0)
+    if (!allowed(node))
       throw new Fail(`${ctx.name}: changing ownership of '${shown}': Operation not permitted`)
     if (owner !== undefined && owner !== '') node.owner = owner
-    if (group !== '') node.group = group
+    if (group !== undefined && group !== '') node.group = group
     else if (spec.endsWith(':') && owner !== undefined)
       node.group = own(machine.users, owner)?.groups[0] ?? node.group
   })
+}
+
+/**
+ * `install`: copiar (o crear carpetas con `-d`) dejando de una vez el modo,
+ * el dueño y el grupo (`install -m 640 -o root -g ops runbook.md /srv/ops/`).
+ */
+const install: CommandFn = (ctx) => {
+  const { flags, values, rest } = getopts(ctx.args, 'mogt', {
+    mode: 'm',
+    owner: 'o',
+    group: 'g',
+    directory: 'd',
+    'target-directory': 't',
+  })
+  const machine = ctx.sh.machine()
+  const user = ctx.sh.user()
+  const owner = values.get('o')
+  const group = values.get('g')
+  const mode = values.get('m')
+
+  if (owner !== undefined && own(machine.users, owner) === undefined)
+    throw new Fail(`install: invalid user '${owner}'`)
+  if (group !== undefined && own(machine.groups, group) === undefined)
+    throw new Fail(`install: invalid group '${group}'`)
+  if (mode !== undefined) newMode(mode, 0, false)
+
+  const finish = (path: string, shown: string, fresh: number) => {
+    const node = own(machine.fs, path)
+
+    if (node === undefined) return
+    if (
+      (owner !== undefined && owner !== user.name) ||
+      (group !== undefined && user.uid !== 0 && !user.groups.includes(group))
+    )
+      if (user.uid !== 0)
+        throw new Fail(`install: cannot change ownership of '${shown}': Operation not permitted`)
+    node.mode = mode === undefined ? fresh : newMode(mode, fresh, node.kind === 'dir')
+    if (owner !== undefined) node.owner = owner
+    if (group !== undefined) node.group = group
+  }
+
+  if (flags.has('d')) {
+    if (rest.length === 0) throw new Fail('install: missing file operand')
+    for (const dir of rest) {
+      makeDir(machine, user, ctx.sh.abs(dir), {
+        parents: true,
+        cmd: 'install',
+        shown: dir,
+        ...opts(ctx),
+      })
+      finish(ctx.sh.abs(dir), dir, 0o755)
+    }
+
+    return 0
+  }
+
+  const { dst, sources } = operands('install', rest, values.get('t'))
+
+  if ((sources.length > 1 || values.has('t')) && find(ctx, dst)?.node.kind !== 'dir')
+    throw new Fail(`install: target '${dst}' is not a directory`)
+  for (const src of sources) {
+    const found = find(ctx, src)
+
+    if (found === null) throw new Fail(`install: cannot stat '${src}': ${ENOENT}`)
+    if (found.node.kind === 'dir') throw new Fail(`install: omitting directory '${src}'`)
+    if (!can(user, found.node, 'r'))
+      throw new Fail(`install: cannot open '${src}' for reading: ${EACCES}`)
+
+    const to = destination(ctx, src, dst)
+    const shown = to === ctx.sh.abs(dst) ? dst : `${dst.replace(/\/+$/, '')}/${baseOf(to)}`
+
+    writeText(machine, user, to, found.node.kind === 'file' ? found.node.text : '', {
+      cmd: 'install',
+      shown,
+      ...opts(ctx),
+    })
+    finish(to, shown, 0o755)
+  }
+
+  return 0
 }
 
 const stat: CommandFn = (ctx) => {
@@ -864,7 +1040,7 @@ const findCmd: CommandFn = (ctx) => {
     const n = Number(number)
 
     return (_p, node) => {
-      if (node.kind !== 'file') return false
+      // Como GNU find, también las carpetas (4096 bytes) y los enlaces cuentan por su tamaño.
 
       const units = Math.ceil(sizeOf(node) / scale)
 
@@ -1028,8 +1204,25 @@ const findCmd: CommandFn = (ctx) => {
           return ctx.sh.runArgv(argv, { ...ctx.io, tty: false }) === 0
         }
       }
-      default:
+      case '-print0':
+        acted = true
+
+        return (p) => {
+          ctx.io.out(`${shownOf.get(p) ?? p}\0`)
+
+          return true
+        }
+      default: {
+        // Un comodín sin comillas que la shell cambió por varios nombres: `-name *.log`.
+        if (arg !== undefined && !arg.startsWith('-')) {
+          const before = args[i - 3]
+
+          throw new Fail(
+            `find: paths must precede expression: \`${arg}'${before === '-name' || before === '-iname' || before === '-path' ? `\nfind: possible unquoted pattern after predicate \`${before}'?` : ''}`,
+          )
+        }
         throw new Fail(`find: unknown predicate \`${arg ?? ''}'`)
+      }
     }
   }
 
@@ -1211,7 +1404,7 @@ export function diskUsed(machine: Machine): number {
 }
 
 const df: CommandFn = (ctx) => {
-  const { flags } = getopts(ctx.args)
+  const { flags, rest } = getopts(ctx.args)
   const machine = ctx.sh.machine()
   const used = diskUsed(machine)
   const size = machine.disk
@@ -1226,16 +1419,37 @@ const df: CommandFn = (ctx) => {
       ? `${fs.padEnd(14)} ${show(s).padStart(5)} ${show(u).padStart(5)} ${show(a).padStart(5)} ${p.padStart(4)} ${at}`
       : `${fs.padEnd(14)} ${show(s).padStart(9)} ${show(u).padStart(8)} ${show(a).padStart(9)} ${p.padStart(4)} ${at}`
 
-  ctx.io.out(
-    joinLines([
-      header,
-      row('tmpfs', 400 * 1024 ** 2, 1024 ** 2, 399 * 1024 ** 2, '1%', '/run'),
-      row('/dev/sda1', size, used, avail, pct, '/'),
-      row('/dev/sda15', 105 * 1024 ** 2, 6 * 1024 ** 2, 99 * 1024 ** 2, '6%', '/boot/efi'),
-    ]),
-  )
+  const mounts = [
+    { at: '/run', line: row('tmpfs', 400 * 1024 ** 2, 1024 ** 2, 399 * 1024 ** 2, '1%', '/run') },
+    { at: '/', line: row('/dev/sda1', size, used, avail, pct, '/') },
+    {
+      at: '/boot/efi',
+      line: row('/dev/sda15', 105 * 1024 ** 2, 6 * 1024 ** 2, 99 * 1024 ** 2, '6%', '/boot/efi'),
+    },
+  ]
+  // `df -h /var/log`: solo el disco de esa ruta (el punto de montaje más largo que la contiene).
+  const lines: string[] = []
+  let code = 0
 
-  return 0
+  for (const each of rest) {
+    const path = ctx.sh.abs(each)
+
+    if (find(ctx, each) === null) {
+      ctx.io.err(`df: ${each}: ${ENOENT}\n`)
+      code = 1
+      continue
+    }
+
+    const mount = [...mounts]
+      .filter((m) => path === m.at || path.startsWith(m.at === '/' ? '/' : `${m.at}/`))
+      .sort((a, b) => b.at.length - a.at.length)[0]
+
+    if (mount !== undefined) lines.push(mount.line)
+  }
+  if (rest.length === 0) lines.push(...mounts.map((m) => m.line))
+  if (lines.length > 0) ctx.io.out(joinLines([header, ...lines]))
+
+  return code
 }
 
 /* ---------- Paquetes: tar y gzip ---------- */
@@ -1295,7 +1509,12 @@ const tar: CommandFn = (ctx) => {
 
     const files: Archive['files'] = []
     let size = 0
+    let failed = false
     const base = values.has('C') ? ctx.sh.abs(values.get('C') ?? '.') : ctx.sh.session().cwd
+
+    // Como GNU tar: las rutas absolutas se guardan sin la barra de delante, y lo avisa.
+    if (rest.some((each) => each.startsWith('/')))
+      ctx.io.err("tar: Removing leading `/' from member names\n")
 
     for (const target of rest) {
       const found = lookup(
@@ -1306,6 +1525,7 @@ const tar: CommandFn = (ctx) => {
 
       if (found === null) {
         ctx.io.err(`tar: ${target}: Cannot stat: ${ENOENT}\n`)
+        failed = true
         continue
       }
 
@@ -1316,7 +1536,8 @@ const tar: CommandFn = (ctx) => {
 
         if (node === undefined) continue
         if (node.kind === 'file' && !can(user, node, 'r')) {
-          ctx.io.err(`tar: ${path}: Cannot open: ${EACCES}\n`)
+          ctx.io.err(`tar: ${path.replace(/^\/+/, '')}: Cannot open: ${EACCES}\n`)
+          failed = true
           continue
         }
 
@@ -1339,6 +1560,11 @@ const tar: CommandFn = (ctx) => {
 
     if (node?.kind === 'file')
       node.size = text.startsWith(GZ) ? compressed(text, size) : size + 10240
+    if (failed) {
+      ctx.io.err('tar: Exiting with failure status due to previous errors\n')
+
+      return 2
+    }
 
     return 0
   }
@@ -1402,7 +1628,12 @@ function target(rest: string[], ctx: Ctx): string[] {
 }
 
 const gzip: CommandFn = (ctx) => {
-  const { flags, rest } = getopts(ctx.args, '', { decompress: 'd', keep: 'k', stdout: 'c' })
+  // `-1` … `-9`, `--fast` y `--best` solo cambian cuánto comprime.
+  const { flags, rest } = getopts(
+    ctx.args.filter((arg) => !/^-[1-9]$|^--(fast|best)$/.test(arg)),
+    '',
+    { decompress: 'd', keep: 'k', stdout: 'c', force: 'f', verbose: 'v' },
+  )
   const decompress = flags.has('d') || ctx.name === 'gunzip'
   const machine = ctx.sh.machine()
   const user = ctx.sh.user()
@@ -1475,6 +1706,7 @@ export const FILE_COMMANDS: Record<string, CommandFn> = {
   chmod,
   chown,
   chgrp: chown,
+  install,
   stat,
   cat,
   echo,

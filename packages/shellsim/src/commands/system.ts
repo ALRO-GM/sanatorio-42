@@ -32,6 +32,34 @@ function procsOf(ctx: Ctx): Proc[] {
   return machine.procs
 }
 
+/**
+ * Lo que corre mientras `ps` mira: él mismo y lo demás de su tubería (el
+ * `grep nginx` de `ps aux | grep nginx` sale en la lista, como en Linux).
+ */
+function running(ctx: Ctx): Proc[] {
+  const { cmds, index } = ctx.io.pipeline ?? { cmds: [''], index: 0 }
+  const machine = ctx.sh.machine()
+
+  return cmds.flatMap((text, at) =>
+    text === '' && at !== index
+      ? []
+      : [
+          {
+            pid: machine.nextPid + at,
+            ppid: 4242,
+            user: at === index ? ctx.sh.user().name : ctx.sh.session().user,
+            cmd: at === index ? [ctx.name, ...ctx.args].join(' ') : text.replace(/['"]/g, ''),
+            cpu: 0,
+            mem: 0,
+            rss: 0,
+            state: at === index ? 'R+' : 'S+',
+            tty: 'pts/0',
+            start: ctx.sh.world.clock + 3600,
+          } satisfies Proc,
+        ],
+  )
+}
+
 const cpuTime = (proc: Proc, clock: number): string => {
   const seconds = Math.round(((clock - proc.start + 3600) * proc.cpu) / 100)
 
@@ -39,6 +67,20 @@ const cpuTime = (proc: Proc, clock: number): string => {
 }
 
 /* ---------- ps, top ---------- */
+
+/** Anchura mínima de cada columna de `ps -o` y si va a la izquierda (como procps). */
+const PS_WIDTH: Record<string, [number, boolean]> = {
+  PID: [7, false],
+  PPID: [7, false],
+  USER: [8, true],
+  '%CPU': [4, false],
+  '%MEM': [4, false],
+  RSS: [5, false],
+  STAT: [4, true],
+  TT: [8, true],
+  ELAPSED: [11, false],
+  TIME: [8, false],
+}
 
 const PS_FIELDS: Record<string, [string, (p: Proc, clock: number) => string]> = {
   pid: ['PID', (p) => String(p.pid)],
@@ -79,9 +121,9 @@ function sortProcs(procs: Proc[], spec: string | undefined): Proc[] {
   return [...procs].sort((a, b) => {
     const x = value(a)
     const y = value(b)
-    const order = x < y ? -1 : x > y ? 1 : a.pid - b.pid
+    const order = x < y ? -1 : x > y ? 1 : 0
 
-    return desc ? -order : order
+    return (desc ? -order : order) || a.pid - b.pid
   })
 }
 
@@ -90,22 +132,36 @@ const ps: CommandFn = (ctx) => {
   const bsd = ctx.args.filter((arg) => /^[auxef]+$/.test(arg))
   const { flags, values } = getopts(
     ctx.args.filter((arg) => !bsd.includes(arg)),
-    'upoC',
-    { sort: 'S', user: 'u', format: 'o' },
+    'upoCU',
+    {
+      sort: 'S',
+      user: 'u',
+      User: 'U',
+      format: 'o',
+      pid: 'p',
+      'no-headers': 'H',
+      'no-heading': 'H',
+    },
   )
 
   for (const letter of bsd.join('')) flags.add(letter)
   const clock = ctx.sh.world.clock
-  let procs = procsOf(ctx)
+  let procs = [...procsOf(ctx), ...running(ctx)]
   const all = flags.has('a') || flags.has('e') || flags.has('A') || flags.has('x')
-  const user = values.get('u')
+  const user = values.get('u') ?? values.get('U')
+  // `-u`, `-p` y `-C` eligen procesos; sin nada que elija, ps enseña solo los de tu terminal.
+  const chosen = user !== undefined || values.has('p') || values.has('C')
 
-  if (user !== undefined && !flags.has('a')) procs = procs.filter((p) => p.user === user)
-  else if (!all) procs = procs.filter((p) => p.tty === 'pts/0' && p.user === ctx.sh.session().user)
-  if (values.has('p'))
-    procs = procs.filter((p) => (values.get('p') ?? '').split(',').includes(String(p.pid)))
-  if (values.has('C'))
-    procs = procs.filter((p) => (p.cmd.split(' ')[0] ?? '').endsWith(values.get('C') ?? ''))
+  if (!all && !chosen)
+    procs = procs.filter((p) => p.tty === 'pts/0' && p.user === ctx.sh.session().user)
+  if (!all && chosen)
+    procs = procs.filter(
+      (p) =>
+        user?.split(',').includes(p.user) === true ||
+        (values.has('p') && (values.get('p') ?? '').split(/[,\s]+/).includes(String(p.pid))) ||
+        (values.has('C') &&
+          (values.get('C') ?? '').split(',').includes(progName(p.cmd).slice(0, 15))),
+    )
   procs = sortProcs(procs, values.get('S'))
 
   const rows: string[] = []
@@ -119,37 +175,48 @@ const ps: CommandFn = (ctx) => {
       if (spec === undefined)
         throw new Fail(`error: unknown user-defined format specifier "${field ?? ''}"`)
 
-      return { header: header ?? spec[0], get: spec[1] }
+      return { header: header ?? spec[0], width: PS_WIDTH[spec[0]], get: spec[1] }
     })
-    const table = [cols.map((c) => c.header), ...procs.map((p) => cols.map((c) => c.get(p, clock)))]
-    const widths = cols.map((_c, i) => Math.max(...table.map((row) => (row[i] ?? '').length)))
+    // `pid=` deja la cabecera vacía: si todas lo están, no hay fila de cabecera.
+    const headed = cols.some((c) => c.header !== '') && !flags.has('H')
+    const body = procs.map((p) => cols.map((c) => c.get(p, clock)))
+    const table = headed ? [cols.map((c) => c.header), ...body] : body
+    const widths = cols.map((c, i) =>
+      Math.max(c.width?.[0] ?? 0, ...table.map((row) => (row[i] ?? '').length)),
+    )
 
     for (const row of table)
       rows.push(
         row
-          .map((cell, i) => (i === row.length - 1 ? cell : cell.padStart(widths[i] ?? 0)))
+          .map((cell, i) => {
+            const width = cols.at(i)?.width
+
+            if (width !== undefined && !width[1]) return cell.padStart(widths[i] ?? 0)
+
+            return i === row.length - 1 ? cell : cell.padEnd(widths[i] ?? 0)
+          })
           .join(' ')
           .trimEnd(),
       )
   } else if (flags.has('u')) {
-    rows.push('USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND')
+    if (!flags.has('H'))
+      rows.push('USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND')
     for (const p of procs)
       rows.push(
         `${p.user.padEnd(8).slice(0, 8)} ${String(p.pid).padStart(7)} ${p.cpu.toFixed(1).padStart(4)} ${p.mem.toFixed(1).padStart(4)} ${String(p.rss * 3).padStart(6)} ${String(p.rss).padStart(5)} ${p.tty.padEnd(8)} ${p.state.padEnd(4)} 09:00 ${cpuTime(p, clock).padStart(6)} ${p.cmd}`,
       )
   } else if (flags.has('f')) {
-    rows.push('UID          PID    PPID  C STIME TTY          TIME CMD')
+    if (!flags.has('H')) rows.push('UID          PID    PPID  C STIME TTY          TIME CMD')
     for (const p of procs)
       rows.push(
         `${p.user.padEnd(8).slice(0, 8)} ${String(p.pid).padStart(7)} ${String(p.ppid).padStart(7)}  ${Math.round(p.cpu)} 09:00 ${p.tty.padEnd(8)} 00:${cpuTime(p, clock).padStart(5, '0')} ${p.cmd}`,
       )
   } else {
-    rows.push('    PID TTY          TIME CMD')
+    if (!flags.has('H')) rows.push('    PID TTY          TIME CMD')
     for (const p of procs)
       rows.push(
         `${String(p.pid).padStart(7)} ${p.tty.padEnd(8)} 00:${cpuTime(p, clock).padStart(5, '0')} ${progName(p.cmd)}`,
       )
-    if (!all) rows.push(`${String(ctx.sh.machine().nextPid).padStart(7)} pts/0    00:00:00 ps`)
   }
   ctx.io.out(joinLines(rows))
 
@@ -268,6 +335,13 @@ const kill: CommandFn = (ctx) => {
   for (let i = 0; i < ctx.args.length; i++) {
     const arg = ctx.args[i] ?? ''
 
+    if ((arg === '-l' || arg === '-L') && ctx.args[i + 1] !== undefined) {
+      const spec = ctx.args[i + 1] ?? ''
+
+      ctx.io.out(`${/^\d+$/.test(spec) ? signalOf(spec) : String(SIGNALS[signalOf(spec)])}\n`)
+
+      return 0
+    }
     if (arg === '-l' || arg === '-L') {
       ctx.io.out(
         ' 1) SIGHUP\t 2) SIGINT\t 3) SIGQUIT\t 9) SIGKILL\t10) SIGUSR1\n12) SIGUSR2\t15) SIGTERM\t18) SIGCONT\t19) SIGSTOP\n',
@@ -351,6 +425,20 @@ const pgrep: CommandFn = (ctx) => {
     )
 
   return found.length > 0 ? 0 : 1
+}
+
+/** `pidof nginx`: los PID de un programa por su nombre, en una línea (el más nuevo primero). */
+const pidof: CommandFn = (ctx) => {
+  const names = ctx.args.filter((arg) => !arg.startsWith('-'))
+  const found = procsOf(ctx)
+    .filter((p) => names.some((name) => progName(p.cmd) === name || p.cmd.split(' ')[0] === name))
+    .map((p) => p.pid)
+    .sort((a, b) => b - a)
+
+  if (found.length === 0) return 1
+  ctx.io.out(`${found.join(' ')}\n`)
+
+  return 0
 }
 
 const pkill: CommandFn = (ctx) => {
@@ -740,6 +828,11 @@ const journalctl: CommandFn = (ctx) => {
 
       return false
     }
+    // `-xeu nginx`: la u va la última del grupo y se lleva el siguiente argumento.
+    if (/^-[a-zA-Z]+u$/.test(arg)) {
+      units.push(unitName(all[i + 1] ?? ''))
+      all[i + 1] = '\u0000'
+    }
 
     return arg !== '\u0000'
   })
@@ -933,6 +1026,9 @@ const useradd: CommandFn = (ctx) => {
   const name = rest[0]
   const machine = ctx.sh.machine()
 
+  // `adduser usuario grupo` (Debian y Ubuntu): mete a alguien que ya existe en un grupo.
+  if (ctx.name === 'adduser' && rest.length === 2)
+    return joinGroup(ctx, rest[0] ?? '', rest[1] ?? '')
   if (name === undefined) throw new Fail(`Usage: ${ctx.name} [options] LOGIN`, 2)
   if (!/^[a-z_][a-z0-9_-]{0,31}$/.test(name))
     throw new Fail(`${ctx.name}: invalid user name '${name}'`, 3)
@@ -976,6 +1072,64 @@ const useradd: CommandFn = (ctx) => {
     ctx.io.out(
       `info: Adding user \`${name}' ...\ninfo: Adding new group \`${primary}' (${uid}) ...\ninfo: Creating home directory \`${home}' ...\n`,
     )
+  syncUserFiles(ctx)
+
+  return 0
+}
+
+/** Mete a alguien en un grupo (`adduser u g`, `gpasswd -a u g`) sin tocar los demás. */
+function joinGroup(ctx: Ctx, name: string, group: string): number {
+  const machine = ctx.sh.machine()
+  const user = own(machine.users, name)
+  const gpasswd = ctx.name === 'gpasswd'
+
+  if (user === undefined)
+    throw new Fail(
+      gpasswd
+        ? `gpasswd: user '${name}' does not exist`
+        : `fatal: The user \`${name}' does not exist.`,
+      gpasswd ? 3 : 1,
+    )
+  if (own(machine.groups, group) === undefined)
+    throw new Fail(
+      gpasswd
+        ? `gpasswd: group '${group}' does not exist in /etc/group`
+        : `fatal: The group \`${group}' does not exist.`,
+      gpasswd ? 3 : 1,
+    )
+  if (user.groups.includes(group) && !gpasswd) {
+    ctx.io.out(`info: The user \`${name}' is already a member of \`${group}'.\n`)
+
+    return 0
+  }
+  if (!user.groups.includes(group)) user.groups = [...user.groups, group]
+  ctx.io.out(
+    gpasswd
+      ? `Adding user ${name} to group ${group}\n`
+      : `info: Adding user \`${name}' to group \`${group}' ...\n`,
+  )
+  syncUserFiles(ctx)
+
+  return 0
+}
+
+const gpasswd: CommandFn = (ctx) => {
+  needRoot(ctx, 'gpasswd: Permission denied.')
+
+  const { values, rest } = getopts(ctx.args, 'ad', { add: 'a', delete: 'd' })
+  const group = rest[0]
+
+  if (group === undefined || (!values.has('a') && !values.has('d')))
+    throw new Fail('Usage: gpasswd [option] GROUP', 2)
+  if (values.has('a')) return joinGroup(ctx, values.get('a') ?? '', group)
+
+  const name = values.get('d') ?? ''
+  const user = own(ctx.sh.machine().users, name)
+
+  if (user?.groups.slice(1).includes(group) !== true)
+    throw new Fail(`gpasswd: user '${name}' is not a member of '${group}'`, 3)
+  user.groups = user.groups.filter((each, index) => index === 0 || each !== group)
+  ctx.io.out(`Removing user ${name} from group ${group}\n`)
   syncUserFiles(ctx)
 
   return 0
@@ -1073,7 +1227,60 @@ const passwd: CommandFn = (ctx) => {
 
 /* ---------- crontab ---------- */
 
-const CRON_LINE = /^(@(reboot|yearly|annually|monthly|weekly|daily|hourly)|(\S+\s+){4}\S+)\s+\S/
+const CRON_FIELDS: { name: string; min: number; max: number; names?: string[] }[] = [
+  { name: 'minute', min: 0, max: 59 },
+  { name: 'hour', min: 0, max: 23 },
+  { name: 'day-of-month', min: 1, max: 31 },
+  {
+    name: 'month',
+    min: 1,
+    max: 12,
+    names: ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'],
+  },
+  { name: 'day-of-week', min: 0, max: 7, names: ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] },
+]
+
+/**
+ * Qué está mal en una línea de cron, como lo dice cron de Debian («bad
+ * minute», «bad hour»…), o `null` si vale: cada campo, `*`, números, rangos,
+ * listas y pasos dentro de su rango.
+ */
+function cronError(line: string): string | null {
+  if (/^@(reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)\s+\S/.test(line)) return null
+  if (line.startsWith('@')) return 'bad time specifier'
+
+  const parts = line.split(/\s+/)
+
+  for (const [i, field] of CRON_FIELDS.entries()) {
+    const spec = parts[i]
+
+    if (spec === undefined) return `bad ${field.name}`
+
+    const value = (text: string): number | null => {
+      const at = field.names?.indexOf(text.toLowerCase()) ?? -1
+
+      if (at >= 0) return at + (field.min === 1 ? 1 : 0)
+
+      return /^\d+$/.test(text) ? Number(text) : null
+    }
+    const ok = spec.split(',').every((item) => {
+      const [range = '', step] = item.split('/')
+
+      if (step !== undefined && !/^[1-9]\d*$/.test(step)) return false
+      if (range === '*') return true
+
+      const [from = '', to] = range.split('-')
+      const a = value(from)
+      const b = to === undefined ? a : value(to)
+
+      return a !== null && b !== null && a >= field.min && b <= field.max && a <= b
+    })
+
+    if (!ok) return `bad ${field.name}`
+  }
+
+  return parts.length > 5 ? null : 'bad command'
+}
 
 const crontab: CommandFn = (ctx) => {
   const { flags, values, rest } = getopts(ctx.args, 'u')
@@ -1108,17 +1315,16 @@ const crontab: CommandFn = (ctx) => {
     file === '-'
       ? ctx.io.stdin.readAll()
       : readText(machine, ctx.sh.user(), ctx.sh.abs(file), 'crontab', file)
-  const bad = linesOf(text).findIndex(
-    (line) =>
-      line.trim() !== '' &&
-      !line.trim().startsWith('#') &&
-      !/^\w+=/.test(line.trim()) &&
-      !CRON_LINE.test(line.trim()),
+  const errors = linesOf(text).map((line) =>
+    line.trim() === '' || line.trim().startsWith('#') || /^\w+\s*=/.test(line.trim())
+      ? null
+      : cronError(line.trim()),
   )
+  const bad = errors.findIndex((error) => error !== null)
 
   if (bad >= 0) {
     ctx.io.err(
-      `"${file === '-' ? '-' : file}":${bad + 1}: bad minute\nerrors in crontab file, can't install.\n`,
+      `"${file === '-' ? '-' : file}":${bad + 1}: ${errors[bad] ?? ''}\nerrors in crontab file, can't install.\n`,
     )
 
     return 1
@@ -1326,7 +1532,9 @@ const hostname: CommandFn = (ctx) => {
 }
 
 const date: CommandFn = (ctx) => {
-  const format = ctx.args.find((arg) => arg.startsWith('+'))
+  // `date -I` (o `--iso-8601`) es la fecha como `+%F`.
+  const iso = ctx.args.some((arg) => arg === '-I' || arg === '--iso-8601' || arg === '-Idate')
+  const format = iso ? '+%F' : ctx.args.find((arg) => arg.startsWith('+'))
 
   ctx.io.out(`${formatDate(ctx.sh.now(), format?.slice(1))}\n`)
 
@@ -1458,6 +1666,7 @@ export const SYSTEM_COMMANDS: Record<string, CommandFn> = {
   htop: top,
   kill,
   pgrep,
+  pidof,
   pkill,
   killall: pkill,
   systemctl,
@@ -1470,6 +1679,7 @@ export const SYSTEM_COMMANDS: Record<string, CommandFn> = {
   useradd,
   adduser: useradd,
   usermod,
+  gpasswd,
   userdel,
   groupadd,
   passwd,

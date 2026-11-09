@@ -344,7 +344,7 @@ class Expander {
     const value = this.env.get(name)
 
     if (value === undefined && this.env.nounset())
-      throw new UnboundError(`bash: ${name}: unbound variable`)
+      throw new UnboundError(`bash: ${/^\d+$/.test(name) ? `$${name}` : name}: unbound variable`)
 
     return value ?? ''
   }

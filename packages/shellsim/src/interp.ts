@@ -63,6 +63,8 @@ export class Shell implements ShellApi {
   private screenChars = 0
   depth = 0
   frames: Frame[] = [{ args: [], locals: [] }]
+  /** El texto de los guiones que se están ejecutando (para «guion.sh: line 3: …»). */
+  private texts: string[] = []
   /** Quién ejecuta de verdad (sudo lo cambia mientras dura su comando). */
   private as: string[] = []
   private lastBg = ''
@@ -415,6 +417,10 @@ export class Shell implements ShellApi {
         const stage: Io = {
           stdin: input,
           tty: last && io.tty === true,
+          pipeline: {
+            cmds: pipe.cmds.map((each) => (each.t === 'simple' ? each.line : '')),
+            index,
+          },
           out: last
             ? io.out
             : (text) => {
@@ -735,7 +741,8 @@ export class Shell implements ShellApi {
 
   /* ---------- Una orden simple ---------- */
 
-  private simple(cmd: Simple, io: Io): number {
+  private simple(cmd: Simple, outer: Io): number {
+    const io = this.located(cmd, outer)
     const env = this.expandEnv(io)
     let argv: string[]
     const assigns: [string, string][] = []
@@ -789,6 +796,28 @@ export class Shell implements ShellApi {
         if (value === undefined) drop(this.world.session.env, name)
         else this.world.session.env[name] = value
       }
+    }
+  }
+
+  /**
+   * Dentro de un guion, bash no firma sus errores como «bash:» sino con el
+   * guion y la línea: «deploy.sh: line 3: foo: command not found». Con
+   * `bash -c`, «bash: line 1: …».
+   */
+  private located(cmd: Simple, io: Io): Io {
+    const text = this.texts.at(-1)
+
+    if (text === undefined || cmd.line === '') return io
+
+    const at = text.indexOf(cmd.line)
+    const line = at < 0 ? 1 : text.slice(0, at).split('\n').length
+    const prefix = `${this.name}: line ${line}: `
+
+    return {
+      ...io,
+      err: (chunk) => {
+        io.err(chunk.startsWith('bash: ') ? prefix + chunk.slice('bash: '.length) : chunk)
+      },
     }
   }
 
@@ -932,6 +961,7 @@ export class Shell implements ShellApi {
     const savedName = this.name
 
     this.frames.push({ args, locals: [] })
+    this.texts.push(text)
     this.name = name
     // Un guion empieza sin las opciones de la shell que lo llama (ni sus variables sin exportar).
     this.world.session.vars = {}
@@ -954,6 +984,7 @@ export class Shell implements ShellApi {
       throw signal
     } finally {
       this.frames.pop()
+      this.texts.pop()
       this.name = savedName
 
       const history = this.world.session.history
@@ -1097,6 +1128,10 @@ const BASH_EVAL = 'eval'
 const BUILTINS: Record<string, Builtin> = {
   cd(sh, args, io) {
     const session = sh.session()
+
+    if (args[0] === '--') args = args.slice(1)
+    if (args.length > 1) throw new Fail('bash: cd: too many arguments')
+
     const target =
       args[0] === undefined ? (session.env.HOME ?? '/') : args[0] === '-' ? session.oldpwd : args[0]
     const path = sh.abs(target)
@@ -1109,6 +1144,43 @@ const BUILTINS: Record<string, Builtin> = {
     session.cwd = path
     session.env.PWD = path
     if (args[0] === '-') io.out(`${path}\n`)
+
+    return 0
+  },
+  pushd(sh, args, io) {
+    const session = sh.session()
+    const from = session.cwd
+
+    if (args[0] === undefined) throw new Fail('bash: pushd: no other directory')
+    try {
+      BUILTINS.cd?.(sh, args.slice(0, 1), { ...io, out: () => undefined })
+    } catch (error) {
+      if (error instanceof Fail) throw new Fail(error.message.replace('bash: cd:', 'bash: pushd:'))
+      throw error
+    }
+    session.dirs = [from, ...(session.dirs ?? [])]
+
+    return BUILTINS.dirs?.(sh, [], io) ?? 0
+  },
+  popd(sh, _args, io) {
+    const session = sh.session()
+    const [to, ...rest] = session.dirs ?? []
+
+    if (to === undefined) throw new Fail('bash: popd: directory stack empty')
+    BUILTINS.cd?.(sh, [to], { ...io, out: () => undefined })
+    session.dirs = rest
+
+    return BUILTINS.dirs?.(sh, [], io) ?? 0
+  },
+  dirs(sh, _args, io) {
+    const session = sh.session()
+    const home = session.env.HOME ?? ''
+    const short = (dir: string) =>
+      home !== '' && (dir === home || dir.startsWith(`${home}/`))
+        ? `~${dir.slice(home.length)}`
+        : dir
+
+    io.out(`${[session.cwd, ...(session.dirs ?? [])].map(short).join(' ')}\n`)
 
     return 0
   },
@@ -1480,7 +1552,18 @@ const BUILTINS: Record<string, Builtin> = {
     return sh.runArgv(rest, io, values.get('u') ?? 'root')
   },
   su(sh, args, io) {
-    const rest = args.filter((arg) => arg !== '-' && arg !== '-l')
+    // `su`, `su -`, `su - deploy`, `su -c 'orden' [usuario]`, `su -s /bin/bash www-data -c …`.
+    let command: string | undefined
+    const rest: string[] = []
+
+    for (let i = 0; i < args.length; i++) {
+      const arg = args[i] ?? ''
+
+      if (arg === '-c' || arg === '--command') command = args[++i]
+      else if (arg === '-s' || arg === '--shell') i++
+      else if (!['-', '-l', '--login', '-p', '-m'].includes(arg)) rest.push(arg)
+    }
+
     const target = rest[0] ?? 'root'
 
     if (sh.user().uid !== 0) {
@@ -1490,6 +1573,14 @@ const BUILTINS: Record<string, Builtin> = {
 
       return 1
     }
+    if (own(sh.machine().users, target) === undefined) {
+      io.err(
+        `su: user ${target} does not exist or the user entry does not contain all the required fields\n`,
+      )
+
+      return 1
+    }
+    if (command !== undefined) return sh.runRemote(sh.session().host, target, command, io)
     sh.pushSession(sh.session().host, target)
 
     return 0

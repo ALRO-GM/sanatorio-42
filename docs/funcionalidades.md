@@ -190,6 +190,7 @@ Detalle: [curso-git.md](curso-git.md).
 | Cada unidad: teoría, ejemplo que se escribe solo y prueba en una shell simulada | N | Todos | `UnitView.tsx`, `Challenge` |
 | Jefes contrarreloj por bloque y jefe final por nivel, con certificado | N | Todos | `shared/course/Certificates.tsx` |
 | Demostración | N | Todos | `ShellCourseTour.tsx` |
+| La prueba mira el resultado y acepta las otras formas buenas (`ls -l`, `gpasswd`, `sudo su -c`, crontab con `>> log`…); mensajes y códigos como bash y GNU | N | Todos | `packages/shellsim` (revisión en [revision-cursos/shell.md](revision-cursos/shell.md)) |
 
 No pide puesto en el clúster. Detalle: [curso-shell.md](curso-shell.md).
 

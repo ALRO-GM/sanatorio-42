@@ -69,15 +69,51 @@ export function inputs(ctx: Ctx, files: string[]): { name: string; text: string 
   if (files.length === 0 || (files.length === 1 && files[0] === '-'))
     return [{ name: '(standard input)', text: ctx.io.stdin.readAll() }]
 
-  const sh = ctx.sh
-
   return files.map((file) => ({
     name: file,
-    text:
-      file === '-'
-        ? ctx.io.stdin.readAll()
-        : readText(sh.machine(), sh.user(), sh.abs(file), ctx.name, file),
+    text: file === '-' ? ctx.io.stdin.readAll() : readFile(ctx, file),
   }))
+}
+
+/**
+ * Lee un fichero con el error de cada programa, como lo escribe Ubuntu:
+ * `head: cannot open 'x' for reading: …`, `sort: cannot read: x: …`,
+ * `sed: can't read x: …`, `awk: cannot open "x" (…)`; los demás, `cat: x: …`.
+ */
+function readFile(ctx: Ctx, file: string): string {
+  const sh = ctx.sh
+
+  try {
+    return readText(sh.machine(), sh.user(), sh.abs(file), ctx.name, file)
+  } catch (error) {
+    const prefix = `${ctx.name}: ${file}: `
+
+    if (!(error instanceof Fail) || !error.message.startsWith(prefix)) throw error
+
+    const reason = error.message.slice(prefix.length)
+    const dir = reason === 'Is a directory'
+    const name = ctx.name
+
+    const message =
+      name === 'head' || name === 'tail'
+        ? dir
+          ? `${name}: error reading '${file}': ${reason}`
+          : `${name}: cannot open '${file}' for reading: ${reason}`
+        : name === 'sort'
+          ? `sort: ${dir ? 'read failed' : 'cannot read'}: ${file}: ${reason}`
+          : name === 'sed'
+            ? dir
+              ? `sed: read error on ${file}: ${reason}`
+              : `sed: can't read ${file}: ${reason}`
+            : name === 'awk'
+              ? dir
+                ? `awk: read error (${reason})`
+                : `awk: cannot open "${file}" (${reason})`
+              : null
+
+    if (message === null) throw error
+    throw new Fail(message, name === 'head' || name === 'tail' ? error.code : 2)
+  }
 }
 
 /** Como `inputs`, pero un fichero que falla da su error y se sigue con los demás. */
