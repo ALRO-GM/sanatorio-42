@@ -89,7 +89,10 @@ En total: 37 unidades (13 de principiante, 14 de intermedio y 10 de avanzado), 9
   `inspect`, `images`, `history`, `system df`, `compose ps/logs/config`, `ls`,
   `cat`). Las formas equivalentes valen igual (`-d` o `--detach`, `--name=web`,
   `docker container run`, `docker.io/library/nginx:1.27`, `system prune` en
-  vez de dos `prune`); lo comprueba `apps/api/tests/unit/dockersim.test.ts`.
+  vez de dos `prune`, `--mount` o `-v`, `--env-file` o `-e`, `compose.yml` o
+  `compose.yaml`, una versión más fijada de la misma imagen como
+  `redis:7.4-alpine` por `redis:7-alpine`); lo comprueba
+  `apps/api/tests/unit/dockersim.test.ts`.
 - **Jefes**: por tiempo, con el reloj de la API.
 - **Qué se comprueba** se ve como una lista que se marca sola: contenedores
   (estado, imagen pedida, puertos y salud), imágenes, datos de `inspect`, lo
@@ -143,6 +146,8 @@ Dentro del curso, el camino se abre de uno en uno.
     `system df`, `scout cves`) y Compose (varios `-f`, override, `.env` e
     interpolación, `depends_on` con condiciones, recrear solo lo cambiado,
     `--scale`, `down -v`, `config`).
+  - `users.ts`: las cuentas de cada imagen (los uid y gid que dan `adduser` y
+    `addgroup`), de quién es cada ruta y quién puede escribir dónde.
   - `yaml.ts`: el YAML de un compose (bloques, listas y mapas en línea,
     comillas, `|` y `>`), con topes.
   - `course/`: los bloques, las unidades (castellano e inglés) y la corrección
@@ -165,6 +170,18 @@ Dentro del curso, el camino se abre de uno en uno.
   (1, 125, 126, 127, 137 con `OOMKilled`, 143); puertos ocupados; redes de
   usuario con DNS por nombre (la `bridge` de siempre, solo por IP); registro
   con login, push, pull y varias plataformas; Compose; `prune` y `system df`.
+- **Como Docker 27/28** (revisión del 2026-11-09, punto por punto en
+  [revision-cursos/docker.md](revision-cursos/docker.md)): dueños y permisos
+  dentro de la imagen (`COPY` deja root salvo `--chown`, `WORKDIR` crea la
+  carpeta del `USER` de ese momento, «Permission denied» y EACCES en `npm ci`;
+  `adduser -S` da `uid=100`); `ENTRYPOINT` en forma shell no recibe ni el
+  `CMD` ni los argumentos; `COPY ../x` no sale del contexto; un `--from` que no
+  es etapa se busca como imagen; qué imágenes traen `curl` o `wget`; un
+  programa que no existe deja el contenedor Created con 127; un puerto
+  publicado donde dentro no escucha nadie da «Connection reset by peer»;
+  `docker update`; `scout --only-severity` filtra todo y mira el registro;
+  Compose con forma larga de puertos y volúmenes, `config` como el de verdad,
+  aviso de `version:`, `--project-directory` y `COMPOSE_FILE`.
 - **No**: sesiones interactivas (`-it` avisa y sale; se usa `sh -c`), logs
   que siguen corriendo (`-f` enseña lo que hay), `docker events`, Swarm,
   contextos remotos, `docker init`, capacidades de Linux y la ejecución real

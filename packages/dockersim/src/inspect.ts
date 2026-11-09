@@ -217,8 +217,21 @@ export class TemplateError extends Error {}
 export function template(src: string, root: Json): string {
   const tokens = src.split(/(\{\{-?\s*[^}]*?\s*-?\}\})/).filter((token) => token !== '')
   let pos = 0
+  // Las variables de un `range $k, $v := …` (y `$`, la raíz).
+  const vars: Record<string, Json | undefined> = { $: root }
+
+  function variable(word: string): Json | undefined {
+    const [name = '', ...path] = word.split('.')
+
+    return at(own(vars, name) ?? null, path.join('.'))
+  }
 
   function value(expr: string, dot: Json): Json | undefined {
+    // `(index .X "y").Z`: una subexpresión entre paréntesis y un camino detrás.
+    const paren = /^\((.*)\)((?:\.\w+)*)$/s.exec(expr.trim())
+
+    if (paren !== null) return at(value(paren[1] ?? '', dot) ?? null, paren[2] ?? '')
+
     const words = expr.match(/"[^"]*"|\S+/g) ?? []
     const [fn = '', ...args] = words
     const arg = (word: string | undefined): Json | undefined =>
@@ -226,9 +239,11 @@ export function template(src: string, root: Json): string {
         ? undefined
         : word.startsWith('"')
           ? word.slice(1, -1)
-          : word === '.'
-            ? dot
-            : at(dot, word)
+          : word.startsWith('$')
+            ? variable(word)
+            : word === '.'
+              ? dot
+              : at(dot, word)
 
     if (fn === 'json') return JSON.stringify(arg(args[0]) ?? null)
     if (fn === 'index') {
@@ -261,6 +276,7 @@ export function template(src: string, root: Json): string {
       return fn === 'upper' ? text.toUpperCase() : text.toLowerCase()
     }
     if (fn.startsWith('.') && args.length === 0) return fn === '.' ? dot : at(dot, fn)
+    if (fn.startsWith('$') && args.length === 0) return variable(fn)
 
     throw new TemplateError(`template: :1: function "${fn}" not defined`)
   }
@@ -285,17 +301,25 @@ export function template(src: string, root: Json): string {
         return out
       }
       if (expr.startsWith('range ')) {
-        const list = value(expr.slice(6), dot)
+        // `range .X`, `range $v := .X` o `range $k, $v := .X` (los mapas, por orden de clave).
+        const decl = /^range\s+(?:(\$\w+)\s*(?:,\s*(\$\w+))?\s*:=\s*)?(.*)$/s.exec(expr)
+        const list = value(decl?.[3] ?? '', dot)
         const start = pos
-        const items = Array.isArray(list)
-          ? list
+        const items: [Json, Json][] = Array.isArray(list)
+          ? list.map((item, i): [Json, Json] => [i, item])
           : list !== null && typeof list === 'object'
-            ? Object.values(list)
+            ? Object.keys(list)
+                .sort()
+                .map((key): [Json, Json] => [key, list[key] ?? null])
             : []
 
         if (items.length === 0) block(dot, true)
-        for (const item of items) {
+        for (const [key, item] of items) {
           pos = start
+          if (decl?.[2] !== undefined) {
+            vars[decl[1] ?? ''] = key
+            vars[decl[2]] = item
+          } else if (decl?.[1] !== undefined) vars[decl[1]] = item
           out += block(item, true)
         }
         continue

@@ -404,7 +404,7 @@ export function startContainer(
 
   if (user !== null)
     return {
-      code: 126,
+      code: 125,
       output: '',
       error: `Error response from daemon: unable to find user ${user}: no matching entries in passwd file`,
     }
@@ -426,9 +426,13 @@ export function startContainer(
 
   const result = boot(env, container)
 
-  if (container.autoRemove && container.status === 'exited') removeContainer(env, container)
+  if (
+    container.autoRemove &&
+    (container.status === 'exited' || (container.status === 'created' && result.error))
+  )
+    removeContainer(env, container)
 
-  return { ...result, error: null }
+  return { ...result, error: result.error ?? null }
 }
 
 /** Para un contenedor: los servidores salen con 0; una app de Node sin manejar SIGTERM, con 143. */

@@ -11,7 +11,7 @@
  * `rm -rf`…) y su efecto en ficheros y tamaño. Lo demás pasa sin cambiar nada.
  */
 
-import { fromCatalog, normalizeRef } from './catalog.js'
+import { fromCatalog, knownRepo, normalizeRef, registryOf } from './catalog.js'
 import {
   commandOf,
   durationOf,
@@ -29,6 +29,7 @@ import { digestOf, hex64, short } from './hash.js'
 import { LIMITS, own } from './limits.js'
 import type { HealthSpec, Image, Layer } from './model.js'
 import { MB, setEnv } from './model.js'
+import { addAccount, canWrite, chown, setOwner, userName } from './users.js'
 
 type BuildOptions = {
   /** Carpeta del contexto en el anfitrión (ruta absoluta). */
@@ -146,37 +147,6 @@ function osOf(image: Image): 'alpine' | 'debian' | 'none' {
   return 'debian'
 }
 
-/** Un usuario que crea un `RUN` (`adduser -S app -G app`, `useradd -r -u 1001 app`). */
-function userIn(part: string): string | null {
-  // Se saltan las opciones y su valor (`-G app`, `-u 1001`): el usuario es la última palabra suelta.
-  const takes = new Set([
-    '-G',
-    '-g',
-    '-u',
-    '-s',
-    '-h',
-    '-d',
-    '-k',
-    '-c',
-    '--uid',
-    '--gid',
-    '--home',
-    '--shell',
-    '--ingroup',
-  ])
-  const words = part.split(/\s+/).slice(1)
-  const loose: string[] = []
-
-  for (let i = 0; i < words.length; i++) {
-    const word = words[i] ?? ''
-
-    if (takes.has(word)) i++
-    else if (!word.startsWith('-')) loose.push(word)
-  }
-
-  return loose.at(-1) ?? null
-}
-
 type RunEffect = { size: number; lines: string[]; code: number }
 
 /** Lo que hace un `RUN` sobre la etapa. */
@@ -197,6 +167,11 @@ function runStep(
     ...stage.args,
   }
   const fail = (code: number, ...lines: string[]): RunEffect => ({ size: 0, lines, code })
+  // Con `USER` delante, el RUN corre como ese usuario: no escribe donde no es suyo.
+  const user = image.config.user
+  const root = userName(image, user) === 'root'
+  const made: string[] = []
+  const denied = (path: string): boolean => !canWrite(image, user, path)
   let size = 0
   let aptLists = false
 
@@ -244,12 +219,23 @@ function runStep(
             'npm error 401 Unauthorized - GET https://npm.pkg.github.com/@peer4u%2fui - authentication token not provided',
           )
 
+        if (denied(clean('node_modules', wd)))
+          return fail(
+            243,
+            'npm error code EACCES',
+            'npm error syscall mkdir',
+            `npm error path ${clean('node_modules', wd)}`,
+            'npm error errno -13',
+            `npm error Error: EACCES: permission denied, mkdir '${clean('node_modules', wd)}'`,
+          )
+
         const prod = /--omit[= ]dev|--only[= ]prod|--production/.test(part)
         const bytes = Math.round((prod ? 38.2 : 186.4) * MB)
         const path = clean('node_modules/.package-lock.json', wd)
 
         image.files[path] = `{"dev": ${prod ? 'false' : 'true'}}\n`
         image.sizes[path] = bytes
+        made.push(clean('node_modules', wd), path)
         size += bytes
         continue
       }
@@ -260,8 +246,21 @@ function runStep(
         )
           return fail(127, '> build', '> vite build', '', 'sh: vite: not found')
 
+        if (denied(clean('dist', wd)))
+          return fail(
+            1,
+            '> build',
+            '> vite build',
+            '',
+            `error during build:`,
+            `Error: EACCES: permission denied, mkdir '${clean('dist', wd)}'`,
+          )
+
         const html =
           own(image.files, clean('index.html', wd)) ?? '<!doctype html><div id="app"></div>\n'
+
+        made.push(clean('dist', wd), clean('dist/index.html', wd), clean('dist/assets', wd))
+        made.push(clean('dist/assets/index.js', wd))
 
         image.files[clean('dist/index.html', wd)] = html
         image.files[clean('dist/assets/index.js', wd)] = 'console.log("peer4u")\n'
@@ -284,6 +283,7 @@ function runStep(
 
       const pkgs = words.slice(2).filter((word) => !word.startsWith('-'))
 
+      if (sub === 'add') image.packages = [...new Set([...(image.packages ?? []), ...pkgs])]
       size += Math.round(pkgs.length * 2.5 * MB + (part.includes('--no-cache') ? 0 : 2.4 * MB))
       continue
     }
@@ -298,6 +298,7 @@ function runStep(
         const pkgs = words.slice(2).filter((word) => !word.startsWith('-'))
 
         if (!aptLists) return fail(100, `E: Unable to locate package ${pkgs[0] ?? ''}`)
+        image.packages = [...new Set([...(image.packages ?? []), ...pkgs])]
         size += Math.round(pkgs.length * 30 * MB)
       }
       continue
@@ -307,10 +308,17 @@ function runStep(
       size += Math.round(45 * MB)
       continue
     }
-    if (['adduser', 'useradd'].includes(cmd)) {
-      const user = userIn(part)
-
-      if (user !== null && !image.users.includes(user)) image.users.push(user)
+    if (['adduser', 'useradd', 'addgroup', 'groupadd'].includes(cmd)) {
+      // busybox (alpine) solo trae adduser y addgroup; useradd y groupadd son de debian.
+      if (os === 'alpine' && (cmd === 'useradd' || cmd === 'groupadd'))
+        return fail(127, `/bin/sh: ${cmd}: not found`)
+      if (!root) return fail(1, `${cmd}: permission denied (are you root?)`)
+      addAccount(image, part, os === 'alpine')
+      continue
+    }
+    if (cmd === 'chown') {
+      if (!root) return fail(1, `chown: ${words.at(-1) ?? ''}: Operation not permitted`)
+      chown(image, words, wd)
       continue
     }
     if (cmd === 'rm') {
@@ -329,17 +337,35 @@ function runStep(
       const [left = '', right = ''] = part.split(/>>?/)
       const text = left.replace(/^echo\s+/, '').replace(/^["']|["']$/g, '')
 
-      image.files[clean(right.trim(), wd)] = `${substitute(text, vars)}\n`
+      const target = clean(right.trim(), wd)
+
+      if (denied(target)) return fail(2, `/bin/sh: can't create ${right.trim()}: Permission denied`)
+      image.files[target] = `${substitute(text, vars)}\n`
+      made.push(target)
       continue
     }
     if (cmd === 'touch' || cmd === 'mkdir') {
-      for (const target of words.slice(1).filter((word) => !word.startsWith('-')))
-        image.files[clean(cmd === 'touch' ? target : `${target}/.keep`, wd)] = ''
+      for (const target of words.slice(1).filter((word) => !word.startsWith('-'))) {
+        const path = clean(target, wd)
+
+        if (denied(path))
+          return fail(
+            1,
+            cmd === 'touch'
+              ? `touch: ${target}: Permission denied`
+              : `mkdir: can't create directory '${target}': Permission denied`,
+          )
+        image.files[cmd === 'touch' ? path : `${path}/.keep`] = ''
+        made.push(path)
+        if (cmd === 'mkdir') made.push(`${path}/.keep`)
+      }
       continue
     }
     if (cmd === 'exit' && sub !== '0') return fail(Number(sub) || 1)
     if (cmd === 'false') return fail(1)
   }
+
+  setOwner(image, made, user)
 
   return { size, lines: [], code: 0 }
 }
@@ -404,6 +430,44 @@ function scratchImage(): Image {
     cves: { critical: 0, high: 0, medium: 0 },
     platforms: ['linux/amd64', 'linux/arm64'],
   }
+}
+
+/** El nombre completo que escribe BuildKit (`docker.io/library/nginx:1.27`). */
+function fullName(ref: string): string {
+  const name = normalizeRef(ref)
+
+  if (registryOf(name) !== 'docker.io') return name
+
+  return name.includes('/') ? `docker.io/${name}` : `docker.io/library/${name}`
+}
+
+/**
+ * El error de BuildKit cuando un `FROM` o un `COPY --from` nombra una imagen
+ * que no hay: un `--from` que no es ninguna etapa se busca como imagen
+ * (`buidl` es `docker.io/library/buidl:latest`). Si el repositorio existe pero
+ * no esa etiqueta, «not found»; si ni existe, «pull access denied».
+ */
+function missingImage(env: Env, ref: string): BuildError {
+  const name = normalizeRef(ref)
+  const full = fullName(name)
+  const repo = name.replace(/@.*$/, '').replace(/:[^:/]+$/, '')
+  const exists =
+    knownRepo(repo) ||
+    Object.keys(env.state.registry.tags).some((tag) => tag.startsWith(`${repo}:`))
+
+  return new BuildError(
+    [
+      ` => ERROR [internal] load metadata for ${full}`,
+      '------',
+      ` > [internal] load metadata for ${full}:`,
+      '------',
+    ],
+    `failed to solve: ${ref}: failed to resolve source metadata for ${full}: ${
+      exists
+        ? `${full}: not found`
+        : 'pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed'
+    }`,
+  )
 }
 
 function baseImage(env: Env, ref: string): Image | null {
@@ -570,18 +634,13 @@ function construct(
         const prior = at >= 0 && at < index ? stages[at] : undefined
         const found = prior?.image ?? baseImage(env, ref)
 
-        if (found === null)
-          throw new BuildError(
-            [` => ERROR [internal] load metadata for docker.io/library/${normalizeRef(ref)}`],
-            `failed to solve: ${normalizeRef(ref)}: failed to resolve source metadata for docker.io/library/${normalizeRef(ref)}: docker.io/library/${normalizeRef(ref)}: not found`,
-          )
+        if (found === null) throw missingImage(env, ref)
 
         const image = cloneImage(found)
 
         image.created = env.world.clock
         stage = { name: names[index] ?? '', image, args: {}, key: `from:${found.id}` }
-        if (prior === undefined)
-          say(` => [internal] load metadata for docker.io/library/${normalizeRef(ref)}`)
+        if (prior === undefined) say(` => [internal] load metadata for ${fullName(ref)}`)
         say(`${tag(false)}${prior === undefined ? `@${short(found.id)}` : ''}`)
         continue
       }
@@ -626,10 +685,18 @@ function construct(
           image.config.user = rest
           layer = { size: 0, createdBy: `USER ${rest}` }
           break
-        case 'WORKDIR':
-          image.config.workdir = clean(rest, image.config.workdir)
+        case 'WORKDIR': {
+          const dir = clean(rest, image.config.workdir)
+          const existed =
+            image.owners?.[dir] !== undefined ||
+            Object.keys(image.files).some((file) => file.startsWith(`${dir}/`))
+
+          // BuildKit crea la carpeta con el USER de ese momento (si ya estaba, no la toca).
+          if (!existed) (image.owners ??= {})[dir] = userName(image, image.config.user)
+          image.config.workdir = dir
           layer = { size: 0, createdBy: `WORKDIR ${image.config.workdir}` }
           break
+        }
         case 'CMD':
           image.config.cmd = commandOf(rest)
           layer = { size: 0, createdBy: historyOf('CMD', rest) }
@@ -654,6 +721,7 @@ function construct(
             say(' => [internal] load build context')
             say(` => => transferring context: ${human(contextSize)}`)
           }
+          if (copied.unknownFrom) throw missingImage(env, each.flags.from ?? '')
           if (copied.missing !== null)
             throw new BuildError(
               [` => ERROR ${tag(false).slice(4)}`],
@@ -668,6 +736,14 @@ function construct(
                 `failed to solve: unable to convert uid/gid chown string to host mapping: can't find uid for user ${owner}: no such user: ${owner}`,
               )
           }
+          // COPY deja lo copiado de root (aunque haya USER), salvo con --chown; también las
+          // carpetas que crea.
+          setOwner(
+            image,
+            copied.files.map((file) => file.path),
+            each.flags.chown ?? 'root',
+            clean((execForm(rest) ?? rest.split(/\s+/)).at(-1) ?? '.', image.config.workdir),
+          )
           contentKey = hex64(
             copied.files.map((file) => `${file.path}:${file.text}:${file.size}`).join('\n'),
           )
@@ -744,12 +820,17 @@ function construct(
   say(' => exporting to image')
   say(' => => exporting layers')
   say(` => => writing image ${image.id}`)
-  for (const tag of opts.tags) say(` => => naming to docker.io/library/${tag}`)
+  for (const tag of opts.tags) say(` => => naming to ${fullName(tag)}`)
 
   return image
 }
 
-type Copied = { files: { path: string; text: string; size: number }[]; missing: string | null }
+type Copied = {
+  files: { path: string; text: string; size: number }[]
+  missing: string | null
+  /** El `--from` no es ninguna etapa ni una imagen que exista. */
+  unknownFrom?: boolean
+}
 
 /** Lo que copia un `COPY`/`ADD`: del contexto o de otra etapa (`--from`). */
 function copy(
@@ -774,7 +855,7 @@ function copy(
     const at = names.indexOf(from)
     const other = at >= 0 ? stages[at]?.image : (baseImage(env, from) ?? undefined)
 
-    if (other === undefined) return { files: [], missing: from }
+    if (other === undefined) return { files: [], missing: from, unknownFrom: true }
     pool = Object.entries(other.files).map(([path, text]) => ({
       rel: path.replace(/^\/+/, ''),
       text,
@@ -785,10 +866,9 @@ function copy(
   const many = sources.length > 1 || sources.some((src) => /[*?]/.test(src))
 
   for (const src of sources) {
-    const rel = (from === undefined ? src : clean(src, '/'))
-      .replace(/^\/+/, '')
-      .replace(/^\.\/?/, '')
-      .replace(/\/+$/, '')
+    // Como BuildKit: la ruta se resuelve dentro del contexto y no sale de él (`../api/x` es
+    // `/api/x` del contexto; si ahí no está, «not found»).
+    const rel = clean(src, '/').replace(/^\/+/, '')
     const re = globRegex(rel)
     const direct = pool.filter((file) =>
       rel === '' ? true : file.rel === rel || re.test(file.rel),

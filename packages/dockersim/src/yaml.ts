@@ -288,10 +288,15 @@ function needsQuotes(text: string): boolean {
   )
 }
 
+/** Un escalar que `stringifyYaml` escribe tal cual, sin comillas (un número, `true`). */
+export const bare = (text: string): string => `\u0001${text}`
+
 const quoted = (text: string): string =>
-  needsQuotes(text)
-    ? `"${text.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`
-    : text
+  text.startsWith('\u0001')
+    ? text.slice(1)
+    : needsQuotes(text)
+      ? `"${text.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`
+      : text
 
 /** Escribe un valor como YAML en bloque (lo que enseña `docker compose config`). */
 export function stringifyYaml(value: Yaml, indent = 0): string {

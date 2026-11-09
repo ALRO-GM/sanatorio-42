@@ -8,7 +8,7 @@ import { Fail, lookup, makeDir, writeText } from '@sanatorio/shellsim'
 import type { CommandFn, Ctx } from '@sanatorio/shellsim'
 
 import { build } from './build.js'
-import { normalizeRef, registryOf, repoDigest, validRef } from './catalog.js'
+import { fromCatalog, normalizeRef, registryOf, repoDigest, validRef } from './catalog.js'
 import { compose } from './compose.js'
 import { durationOf } from './dockerfile.js'
 import {
@@ -125,7 +125,10 @@ function restartOf(text: string | undefined): RestartPolicy {
   const name = (text ?? 'no').split(':')[0] ?? 'no'
 
   if (!['no', 'always', 'unless-stopped', 'on-failure'].includes(name))
-    throw new Fail(`docker: invalid restart policy '${text ?? ''}'`, 125)
+    throw new Fail(
+      `docker: Error response from daemon: invalid restart policy: unknown policy '${name}'; use one of 'no', 'always', 'on-failure', or 'unless-stopped'`,
+      125,
+    )
 
   return name as RestartPolicy
 }
@@ -145,7 +148,7 @@ function createFrom(
   if (ref === undefined)
     throw new Fail(
       `"${usage}" requires at least 1 argument.\nSee '${usage} --help'.\n\nUsage:  ${usage} [OPTIONS] IMAGE [COMMAND] [ARG...]`,
-      125,
+      1,
     )
 
   const cwd = ctx.sh.session().cwd
@@ -184,7 +187,8 @@ function createFrom(
 
   const network = opts.one('network') ?? opts.one('net')
   const io = ioOf(ctx)
-  const image = ensureImage(env, ref, io.out, io.err)
+  // Como el cliente de Docker: lo de descargar la imagen sale por stderr (stdout es del contenedor).
+  const image = ensureImage(env, ref, io.err, io.err)
   const mounts = opts.all('mount').map((spec) => mountOf(spec, cwd))
 
   // Como en Docker: -v crea la carpeta que falta, pero --mount no; falla.
@@ -408,6 +412,48 @@ const rename: Sub = (_ctx, env, args) => {
       `Error response from daemon: Conflict. The container name "/${to}" is already in use`,
     )
   c.name = safeKey(to, 'nombre de contenedor')
+
+  return 0
+}
+
+/** `docker update`: cambia reinicio y límites de un contenedor sin recrearlo. */
+const update: Sub = (ctx, env, args) => {
+  const opts = parseOpts(
+    args,
+    {
+      restart: { value: true },
+      memory: { short: 'm', value: true },
+      'memory-swap': { value: true },
+      'memory-reservation': { value: true },
+      cpus: { value: true },
+    },
+    'docker update',
+  )
+
+  if (opts.rest.length === 0)
+    throw new Fail(
+      `"docker update" requires at least 1 argument.\nSee 'docker update --help'.\n\nUsage:  docker update [OPTIONS] CONTAINER [CONTAINER...]`,
+    )
+
+  const restart = opts.one('restart')
+  const memory = opts.has('memory') ? bytesOf(opts.one('memory') ?? '') : undefined
+  const cpus = opts.has('cpus') ? Number(opts.one('cpus') ?? '') : undefined
+
+  if (restart !== undefined && !['no', 'always', 'unless-stopped', 'on-failure'].includes(restart))
+    throw new Fail(`invalid restart policy format: ${restart}`)
+  if (memory !== undefined && memory < 6 * MB)
+    throw new Fail('Error response from daemon: Minimum memory limit allowed is 6MB.')
+  if (cpus !== undefined && (!Number.isFinite(cpus) || cpus < 0))
+    throw new Fail(`invalid argument "${opts.one('cpus') ?? ''}" for "--cpus" flag`)
+
+  for (const name of opts.rest) {
+    const c = mustContainer(env, name)
+
+    if (restart !== undefined) c.restart = restart as RestartPolicy
+    if (memory !== undefined) c.memory = memory
+    if (cpus !== undefined) c.cpus = cpus
+    ctx.io.out(`${name}\n`)
+  }
 
   return 0
 }
@@ -748,6 +794,7 @@ const exec: Sub = (ctx, env, args) => {
     env: opts.all('env'),
     ...(opts.has('user') ? { user: opts.one('user') ?? 'root' } : {}),
     ...(opts.has('workdir') ? { workdir: opts.one('workdir') ?? '/' } : {}),
+    ...(opts.has('interactive') ? { stdin: ctx.io.stdin.readAll() } : {}),
   })
 
   ctx.io.out(result.out)
@@ -1144,6 +1191,7 @@ const BUILD_SPEC: OptSpec = {
   'cache-from': { value: true },
   'cache-to': { value: true },
   builder: { value: true },
+  output: { short: 'o', value: true },
 }
 
 const buildCmd =
@@ -1160,18 +1208,30 @@ const buildCmd =
     const cwd = ctx.sh.session().cwd
     const context = cleanHost(dir, cwd)
     const tags = opts.all('tag').map((each) => normalizeRef(each))
-    const platforms = (opts.one('platform') ?? 'linux/amd64').split(',').map((each) => each.trim())
+    // --platform se puede repetir o separar con comas.
+    const asked = opts
+      .all('platform')
+      .flatMap((each) => each.split(','))
+      .map((each) => each.trim())
+      .filter(Boolean)
+    const platforms = asked.length === 0 ? ['linux/amd64'] : [...new Set(asked)]
+    // `--push` es lo mismo que `--output type=registry` (o `type=image,push=true`).
+    const pushing =
+      opts.has('push') ||
+      opts
+        .all('output')
+        .some((spec) => /(^|,)type=registry(,|$)/.test(spec) || /(^|,)push=true(,|$)/.test(spec))
 
     if (lookup(ctx.sh.machine(), ctx.sh.user(), context)?.node.kind !== 'dir')
       throw new Fail(`ERROR: unable to prepare context: path "${dir}" not found`)
     for (const each of tags)
       if (!validRef(each))
         throw new Fail(`ERROR: invalid tag "${each}": repository name must be lowercase`)
-    if (platforms.length > 1 && !opts.has('push'))
+    if (platforms.length > 1 && !pushing)
       throw new Fail(
         'ERROR: docker exporter does not currently support exporting manifest lists\n(con varias plataformas hay que publicar a la vez: --push)',
       )
-    if (opts.has('push'))
+    if (pushing)
       for (const each of tags)
         if (!env.state.logins.includes(registryOf(each)))
           throw new Fail(`ERROR: failed to push ${each}: unauthorized: unauthenticated`)
@@ -1218,7 +1278,7 @@ const buildCmd =
     env.state.images[image.id] = image
     for (const each of tags) env.state.tags[safeKey(each, 'etiqueta')] = image.id
     // Las imágenes que se quedan sin etiqueta y sin contenedor son las «colgantes» (<none>).
-    if (opts.has('push')) for (const each of tags) push(env, each, ctx.io.out)
+    if (pushing) for (const each of tags) push(env, each, ctx.io.out)
     if (opts.has('quiet')) ctx.io.out(`${image.id}\n`)
 
     return 0
@@ -1683,25 +1743,43 @@ const scout: Sub = (ctx, env, args) => {
   if (!['cves', 'quickview'].includes(verb) || ref === undefined)
     throw new Fail('Usage:  docker scout cves IMAGE | docker scout quickview IMAGE')
 
-  const image =
-    findImage(env, ref) ?? (normalizeRef(ref).startsWith('local://') ? undefined : undefined)
+  // Como `image://` (lo de siempre): la imagen local y, si no está, la del registro.
+  const name = normalizeRef(ref.replace(/^(image|registry|local):\/\//, ''))
+  const local = ref.startsWith('registry://') ? undefined : findImage(env, name)
+  const remoteId = own(env.state.registry.tags, name)
+  const remote =
+    ref.startsWith('local://') || local !== undefined
+      ? undefined
+      : (fromCatalog(name) ??
+        (remoteId !== undefined && env.state.logins.includes(registryOf(name))
+          ? own(env.state.registry.images, remoteId)
+          : undefined))
+  const image = local ?? remote
 
   if (image === undefined)
-    throw new Fail(`ERROR: image "${ref}" not found locally: build or pull it first`)
+    throw new Fail(
+      `ERROR Image not found: ${ref.startsWith('local://') ? 'image not found locally' : `failed to get image: ${name}: not found`}`,
+    )
 
-  const { critical, high, medium } = image.cves
-  const only = opts.one('only-severity')?.split(',') ?? ['critical', 'high', 'medium', 'low']
-  const counted =
-    (only.includes('critical') ? critical : 0) +
-    (only.includes('high') ? high : 0) +
-    (only.includes('medium') ? medium : 0)
+  // --only-severity filtra todo: el recuento, el resumen y el código de --exit-code.
+  const only = (opts.one('only-severity') ?? 'critical,high,medium,low').split(',')
+  const counts = {
+    critical: only.includes('critical') ? image.cves.critical : 0,
+    high: only.includes('high') ? image.cves.high : 0,
+    medium: only.includes('medium') ? image.cves.medium : 0,
+  }
+  const counted = counts.critical + counts.high + counts.medium
+  const packages = Math.ceil(counted / 6)
 
   ctx.io.out(
-    `    i  SBOM of image already cached, ${120 + image.layers.length * 9} packages indexed\n` +
-      `    ${counted > 0 ? 'x' : 'v'}  ${counted > 0 ? `Detected ${critical + high + medium} vulnerabilities` : 'No vulnerable packages detected'}\n\n` +
-      `  Target     │  ${normalizeRef(ref)}\n    digest   │  ${short(image.id)}\n  Base image │  ${image.base}\n  Vulnerabilities │  ${critical}C   ${high}H   ${medium}M   0L\n` +
-      (critical > 0
-        ? `\n  Fix: rebuild on a newer base image (FROM node:22-alpine has 0C 0H)\n`
+    `    ✓ ${local === undefined ? 'Pulled' : 'SBOM of image already cached'}, ${120 + image.layers.length * 9} packages indexed\n` +
+      `    ${counted > 0 ? `✗ Detected ${packages} vulnerable package${packages === 1 ? '' : 's'} with a total of ${counted} vulnerabilit${counted === 1 ? 'y' : 'ies'}` : '✓ No vulnerable package detected'}\n\n` +
+      `## Overview\n\n` +
+      `                    │  Analyzed Image\n` +
+      `────────────────────┼──────────────────────────────\n` +
+      `  Target            │  ${name}\n    digest          │  ${short(image.id)}\n    platform        │  linux/amd64\n    vulnerabilities │  ${counts.critical}C   ${counts.high}H   ${counts.medium}M   0L\n  Base image        │  ${image.base}\n` +
+      (counts.critical > 0
+        ? `\n## Recommended fixes\n\n  Rebuild on a newer base image: node:22-alpine has 0C 0H\n`
         : ''),
   )
 
@@ -1721,6 +1799,7 @@ const CONTAINER: Record<string, Sub> = {
   kill,
   rm,
   rename,
+  update,
   logs,
   exec,
   inspect: inspect('container'),
@@ -1758,6 +1837,7 @@ const TOP: Record<string, Sub> = {
   kill,
   rm,
   rename,
+  update,
   ps,
   logs,
   exec,

@@ -288,6 +288,303 @@ describe('Docker simulado: formas equivalentes', () => {
   })
 })
 
+describe('Docker simulado: como Docker 27/28 de verdad (revisión de 2026-11)', () => {
+  it('COPY --from y FROM con una imagen que no hay: el error de BuildKit', () => {
+    const stage = sh(
+      'cd ~/web',
+      DOCKERFILE(
+        'FROM alpine:3.20 AS build\nRUN echo hola > /x\nFROM alpine:3.20\nCOPY --from=buidl /x /x',
+      ),
+      'docker build -t x .',
+    )
+
+    expect(stage.code).toBe(1)
+    expect(stage.out).toContain('ERROR [internal] load metadata for docker.io/library/buidl:latest')
+    expect(stage.out).toContain(
+      'ERROR: failed to solve: buidl: failed to resolve source metadata for docker.io/library/buidl:latest: pull access denied, repository does not exist or may require authorization',
+    )
+    expect(sh('cd ~/web', DOCKERFILE('FROM nginx:9.99\n'), 'docker build -t x .').out).toContain(
+      'docker.io/library/nginx:9.99: not found',
+    )
+  })
+
+  it('COPY no sale del contexto: ../ se resuelve dentro de él', () => {
+    expect(
+      sh(
+        'cd ~/web',
+        DOCKERFILE('FROM nginx:1.27-alpine\nCOPY ../front/index.html /usr/share/nginx/html/'),
+        'docker build -t x .',
+      ).out,
+    ).toContain('"/front/index.html": not found')
+    expect(
+      sh(
+        'cd ~/web',
+        DOCKERFILE('FROM nginx:1.27-alpine\nCOPY ../index.html /usr/share/nginx/html/'),
+        'docker build -t x .',
+      ).code,
+    ).toBe(0)
+  })
+
+  it('ENTRYPOINT en forma shell no recibe ni el CMD ni lo de docker run; sh -c tiene $0, $1 y $?', () => {
+    const shell = [
+      'mkdir ~/s',
+      'cd ~/s',
+      DOCKERFILE('FROM alpine:3.20\nENTRYPOINT echo hola\nCMD ["equipo"]'),
+      'docker build -t s .',
+    ]
+
+    expect(sh(...shell, 'docker run --rm s').out).toBe('hola')
+    expect(sh(...shell, 'docker run --rm s otro').out).toBe('hola')
+    expect(
+      sh('docker pull alpine:3.20', "docker run --rm alpine:3.20 sh -c 'echo $0 $1' a b").out,
+    ).toBe('a b')
+    expect(
+      sh('docker pull alpine:3.20', "docker run --rm alpine:3.20 sh -c 'false; echo $?'").out,
+    ).toBe('1')
+  })
+
+  it('USER: quien no es root no escribe en lo de root, y el uid es el de alpine', () => {
+    const image = [
+      'cd ~/api',
+      DOCKERFILE(
+        'FROM node:22-alpine\nRUN addgroup -S app && adduser -S app -G app\nWORKDIR /app\nCOPY package*.json ./\nCOPY --chown=app:app server.js ./\nUSER app\nCMD ["node", "server.js"]',
+      ),
+      'docker build -t yo .',
+    ]
+
+    expect(sh(...image, "docker run --rm yo sh -c 'echo x > /app/f'").out).toBe(
+      "sh: can't create /app/f: Permission denied",
+    )
+    expect(sh(...image, 'docker run --rm yo touch /app/package.json').out).toBe(
+      'touch: /app/package.json: Permission denied',
+    )
+    expect(
+      sh(...image, "docker run --rm yo sh -c 'echo // >> /app/server.js && echo bien'").out,
+    ).toBe('bien')
+    expect(sh(...image, "docker run --rm yo sh -c 'echo x > /tmp/f && cat /tmp/f'").out).toBe('x')
+    expect(sh(...image, 'docker run --rm yo id').out).toBe(
+      'uid=100(app) gid=101(app) groups=101(app),101(app)',
+    )
+    expect(sh(...image, 'docker run --rm -u 0 yo touch /app/f').code).toBe(0)
+    // npm ci como node en un /app de root: EACCES, como en Docker.
+    expect(
+      sh(
+        'cd ~/api',
+        DOCKERFILE(
+          'FROM node:22-alpine\nWORKDIR /app\nCOPY package*.json ./\nUSER node\nRUN npm ci --omit=dev',
+        ),
+        'docker build -t x .',
+      ).out,
+    ).toContain("EACCES: permission denied, mkdir '/app/node_modules'")
+    // Con USER antes de WORKDIR, BuildKit crea la carpeta de ese usuario.
+    expect(
+      sh(
+        'cd ~/api',
+        DOCKERFILE(
+          'FROM node:22-alpine\nUSER node\nWORKDIR /home/node/app\nCOPY --chown=node:node package*.json ./\nRUN npm ci --omit=dev',
+        ),
+        'docker build -t x .',
+      ).code,
+    ).toBe(0)
+    expect(
+      sh('cd ~/api', DOCKERFILE('FROM node:22-alpine\nRUN useradd -r app'), 'docker build -t x .')
+        .out,
+    ).toContain('useradd: not found')
+  })
+
+  it('scout: --only-severity filtra todo y mira el registro si no está en local', () => {
+    const critical = sh('docker scout cves --only-severity critical --exit-code node:18')
+
+    expect(critical.code).toBe(2)
+    expect(critical.out).toContain('a total of 4 vulnerabilities')
+    expect(critical.out).toContain('4C   0H   0M   0L')
+    expect(sh('docker scout cves node:18').out).toContain('a total of 153 vulnerabilities')
+    expect(sh('docker scout cves --exit-code --only-severity critical node:22-alpine').code).toBe(0)
+  })
+
+  it('curl a un puerto publicado donde no escucha nadie dentro: «Connection reset by peer»', () => {
+    const wrong = sh('docker run -d --name w -p 8080:8080 nginx:1.27-alpine', 'curl localhost:8080')
+
+    expect(wrong).toMatchObject({
+      code: 56,
+      out: 'curl: (56) Recv failure: Connection reset by peer',
+    })
+    expect(
+      sh('docker run -d --name w -p 8080:8080 nginx:1.27-alpine', 'curl -s localhost:8080'),
+    ).toMatchObject({ code: 56, out: '' })
+    expect(
+      sh(
+        'docker run -d --name db -e POSTGRES_PASSWORD=x -p 5432:5432 postgres:16',
+        'curl localhost:5432',
+      ).out,
+    ).toBe('curl: (52) Empty reply from server')
+    expect(sh('curl localhost:8080').code).toBe(7)
+  })
+
+  it('por nombre se llega con la IP de la red creada, y el contenedor sin programa queda Created', () => {
+    expect(
+      sh(
+        'docker network create n1',
+        'docker run -d --name a1 alpine:3.20 sleep infinity',
+        'docker run -d --name a2 alpine:3.20 sleep infinity',
+        'docker network connect n1 a1',
+        'docker network connect n1 a2',
+        'docker exec a1 ping -c 1 a2',
+      ).out,
+    ).toContain('PING a2 (172.18.0.')
+
+    const missing = sh('docker run --name x alpine:3.20 nada')
+
+    expect(missing.code).toBe(127)
+    expect(missing.out).toContain(
+      'OCI runtime create failed: runc create failed: unable to start container process: exec: "nada": executable file not found in $PATH',
+    )
+    expect(run(missing.world, "docker ps -a --format '{{.Status}}'").output).toEqual(['Created'])
+  })
+
+  it('curl no viene en node:22-alpine (wget sí): el healthcheck con curl no pasa', () => {
+    expect(sh('docker run --rm node:22-alpine curl -s localhost').code).toBe(127)
+    expect(
+      sh(
+        "docker run -d --name a --health-cmd 'curl -f http://localhost/ || exit 1' node:22-alpine sleep infinity",
+        "docker inspect -f '{{.State.Health.Status}}' a",
+      ).out,
+    ).toBe('unhealthy')
+    expect(
+      sh(
+        "docker run -d --name a --health-cmd 'wget -qO- http://localhost/ || exit 1' nginx:1.27-alpine",
+        "docker inspect -f '{{.State.Health.Status}}' a",
+      ).out,
+    ).toBe('healthy')
+  })
+
+  it('compose config: rutas absolutas y forma larga; version, obsoleto; forma larga al escribir', () => {
+    const files = [
+      'mkdir ~/c',
+      'cd ~/c',
+      `cat > compose.yaml <<'EOF'\nversion: "3.8"\nservices:\n  web:\n    image: nginx:1.27-alpine\n    ports:\n      - target: 80\n        published: 8080\n    volumes:\n      - ./html:/usr/share/nginx/html:ro\nEOF`,
+    ]
+    const config = sh(...files, 'docker compose config')
+
+    expect(config.out).toContain('source: /home/peer/c/html')
+    expect(config.out).toContain('read_only: true')
+    expect(config.out).toContain('published: "8080"')
+    expect(config.out).toContain('the attribute `version` is obsolete')
+    expect(sh(...files, 'docker compose up -d', 'curl -s localhost:8080').code).toBe(0)
+  })
+})
+
+describe('Docker simulado: más formas equivalentes (revisión de 2026-11)', () => {
+  it('cada unidad acepta otras formas válidas de llegar al mismo estado', () => {
+    const cases: [string, string[]][] = [
+      ['docker-hello', ['docker run --rm hello-world']],
+      [
+        'docker-exec',
+        [
+          "echo 'Peer4U en mantenimiento' | docker exec -i web tee /usr/share/nginx/html/index.html",
+        ],
+      ],
+      [
+        'docker-exec',
+        [
+          `docker exec web sh -c 'printf "Peer4U en mantenimiento\\n" > /usr/share/nginx/html/index.html'`,
+        ],
+      ],
+      [
+        'docker-inspect',
+        [`docker inspect -f '{{(index .NetworkSettings.Networks "bridge").IPAddress}}' web`],
+      ],
+      ['docker-inspect', ["docker inspect -f '{{.NetworkSettings.IPAddress}}' web"]],
+      [
+        'docker-limits',
+        [
+          'docker run -d --name api -p 3000:3000 api:2.0',
+          'docker update --restart unless-stopped --memory 256m --memory-swap 256m --cpus 0.5 api',
+        ],
+      ],
+      [
+        'docker-ci-tags',
+        [
+          'docker tag api:dev ghcr.io/peer4u/api:1.5.0',
+          'docker tag api:dev ghcr.io/peer4u/api:$(git log -1 --format=%h)',
+          'docker login ghcr.io -u peer --password-stdin < ~/.ghcr-token',
+          'docker push --all-tags ghcr.io/peer4u/api',
+        ],
+      ],
+      [
+        'docker-buildx',
+        [
+          'docker buildx build --push --platform=linux/amd64 --platform=linux/arm64 -t ghcr.io/peer4u/api:1.5.0 .',
+        ],
+      ],
+      [
+        'docker-buildx',
+        [
+          'docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/peer4u/api:1.5.0 --output type=registry .',
+        ],
+      ],
+      [
+        'docker-compose-first',
+        [
+          `cat > ~/web/compose.yaml <<'EOF'\nservices:\n  web:\n    image: nginx:1.27-alpine\n    ports:\n      - "8080:80"\nEOF`,
+          'docker compose --project-directory ~/web up -d',
+        ],
+      ],
+      [
+        'docker-compose-prod',
+        [
+          `cat > compose.prod.yaml <<'EOF'\nservices:\n  api:\n    restart: unless-stopped\n    ports:\n      - "8080:3000"\n  db:\n    restart: unless-stopped\nEOF`,
+          'COMPOSE_FILE=compose.yaml:compose.prod.yaml docker compose up -d',
+        ],
+      ],
+      [
+        'docker-backup',
+        [
+          'docker cp web:/etc/nginx/conf.d/default.conf ~/copias/',
+          'cd ~/copias',
+          `docker run --rm -v pgdata:/datos -v "$PWD":/backup alpine:3.20 sh -c 'cd /datos && tar czf /backup/pgdata.tgz .'`,
+        ],
+      ],
+      [
+        'docker-nonroot',
+        [
+          DOCKERFILE(
+            'FROM node:22-alpine\nWORKDIR /app\nCOPY --chown=node:node package*.json ./\nRUN npm ci --omit=dev\nCOPY --chown=node:node . .\nUSER node\nCMD ["node", "server.js"]',
+          ),
+          'docker build -t api:2.0 .',
+        ],
+      ],
+    ]
+
+    for (const [id, entries] of cases)
+      expect(checkAttempt(unit(id), entries).misses, `${id}: ${entries.join(' ; ')}`).toEqual([])
+  })
+
+  it('una versión más fijada de la misma imagen vale; latest por una fija, no', () => {
+    const boss = unit('docker-boss-oncall')
+    const fixed = (ref: string) => [
+      'docker start cache',
+      'docker rm -f old-web web',
+      `docker run -d --name web -p 8080:80 ${ref}`,
+    ]
+
+    expect(checkAttempt(boss, fixed('nginx:1.27.2'), 10).done).toBe(true)
+    expect(checkAttempt(boss, fixed('nginx:latest'), 10).done).toBe(false)
+  })
+
+  it('el compose del jefe vale con compose.yml y docker-compose.yml', () => {
+    const boss = unit('docker-boss-compose')
+
+    for (const name of ['compose.yml', 'docker-compose.yml']) {
+      const entries = boss.solution.map((entry) =>
+        entry.replace("cat > compose.yaml <<'EOF'", `cat > ${name} <<'EOF'`),
+      )
+
+      expect(checkAttempt(boss, entries, 10).misses, name).toEqual([])
+    }
+  })
+})
+
 describe('Docker simulado: topes y pureza', () => {
   it('lo que se pasa de los topes falla y deja el mundo como estaba', () => {
     let world = startOf(START)

@@ -35,7 +35,7 @@ import { drop, LIMITS, own, safeKey } from './limits.js'
 import type { Container, HealthSpec, Mount, RestartPolicy } from './model.js'
 import { healthOf } from './runtime.js'
 import { execIn } from './shell.js'
-import { parseDotenv, parseYaml, stringifyYaml, YamlError } from './yaml.js'
+import { bare, parseDotenv, parseYaml, stringifyYaml, YamlError } from './yaml.js'
 import type { Yaml } from './yaml.js'
 
 type Service = {
@@ -146,6 +146,47 @@ function merge(base: Yaml, extra: Yaml, key = ''): Yaml {
   return extra
 }
 
+/**
+ * Los volúmenes de un servicio en forma corta (`origen:destino[:ro]`), también
+ * si se escribieron en la larga (`type`, `source`, `target`, `read_only`).
+ */
+function volumesOf(value: Yaml | undefined): string[] {
+  if (!Array.isArray(value)) return listOf(value)
+
+  return value
+    .map((item) => {
+      if (!isMap(item)) return typeof item === 'string' ? item : ''
+
+      const source = typeof item.source === 'string' ? item.source : ''
+      const target = typeof item.target === 'string' ? item.target : ''
+      const ro = item.read_only === 'true' ? ':ro' : ''
+
+      if (target === '') return ''
+
+      return source === '' ? target : `${source}:${target}${ro}`
+    })
+    .filter(Boolean)
+}
+
+/** Los puertos en forma corta (`[ip:]publicado:destino`), también desde la larga. */
+function portsOf(value: Yaml | undefined): string[] {
+  if (!Array.isArray(value)) return listOf(value)
+
+  return value
+    .map((item) => {
+      if (!isMap(item)) return typeof item === 'string' ? item : ''
+
+      const target = typeof item.target === 'string' ? item.target : ''
+      const published = typeof item.published === 'string' ? item.published : ''
+      const ip = typeof item.host_ip === 'string' ? `${item.host_ip}:` : ''
+
+      if (target === '') return ''
+
+      return published === '' ? target : `${ip}${published}:${target}`
+    })
+    .filter(Boolean)
+}
+
 const listOf = (value: Yaml | undefined): string[] =>
   value === undefined || value === null
     ? []
@@ -223,9 +264,37 @@ const SERVICE_KEYS = new Set([
   'hostname',
   'platform',
   'pull_policy',
+  // Válidas en Compose aunque el simulador no las modele: se aceptan sin efecto.
+  'cap_add',
+  'cap_drop',
+  'security_opt',
+  'extra_hosts',
+  'logging',
+  'ulimits',
+  'tmpfs',
+  'stop_signal',
+  'shm_size',
+  'mem_reservation',
+  'privileged',
+  'dns',
+  'sysctls',
+  'configs',
+  'group_add',
+  'links',
+  'network_mode',
+  'pid',
+  'ipc',
+  'expose',
+  'annotations',
+  'domainname',
+  'devices',
+  'extends',
+  'post_start',
+  'attach',
+  'scale',
 ])
 
-type Loaded = { project: Project; warnings: string[] }
+type Loaded = { project: Project; warnings: string[]; notes: string[] }
 
 /** Lee el proyecto: ficheros, `.env`, variables y validación. */
 function load(
@@ -234,10 +303,17 @@ function load(
   files: string[],
   name: string | undefined,
   envFile: string | undefined,
+  projectDir?: string,
 ): Loaded {
-  const cwd = ctx.sh.session().cwd
-  let paths = files.map((file) => cleanHost(file, cwd))
+  const cwd =
+    projectDir === undefined ? ctx.sh.session().cwd : cleanHost(projectDir, ctx.sh.session().cwd)
+  // Sin -f, COMPOSE_FILE (separados por «:») hace lo mismo.
+  const fromEnv = (ctx.sh.session().env.COMPOSE_FILE ?? '').split(':').filter(Boolean)
+  let paths = (files.length > 0 ? files : fromEnv).map((file) => cleanHost(file, cwd))
 
+  const fromEnvName = ctx.sh.session().env.COMPOSE_PROJECT_NAME
+
+  if (fromEnvName !== undefined && fromEnvName !== '') name ??= fromEnvName
   if (paths.length === 0) {
     const main = DEFAULT_FILES.map((file) => `${cwd}/${file}`).find(
       (path) => readHost(env, path) !== null,
@@ -260,6 +336,7 @@ function load(
 
   const vars = { ...(dotenv === null ? {} : parseDotenv(dotenv)), ...ctx.sh.session().env }
   const warnings: string[] = []
+  const notes: string[] = []
   let merged: Yaml = {}
 
   for (const path of paths) {
@@ -279,6 +356,11 @@ function load(
     for (const key of Object.keys(parsed))
       if (!TOP_KEYS.has(key) && !key.startsWith('x-'))
         throw new Fail(`validating ${path}: additional properties '${key}' not allowed`)
+    // Compose v2 ya no usa `version:`: lo ignora y avisa.
+    if (Object.hasOwn(parsed, 'version'))
+      notes.push(
+        `${path}: the attribute \`version\` is obsolete, it will be ignored, please remove it to avoid potential confusion`,
+      )
     merged = merge(merged, parsed)
   }
   merged = walk(merged, (text) =>
@@ -313,7 +395,7 @@ function load(
   const list: Service[] = Object.entries(services).map(([svc, raw]) => {
     if (!isMap(raw)) throw new Fail(`services.${svc} must be a mapping`)
     for (const key of Object.keys(raw))
-      if (!SERVICE_KEYS.has(key))
+      if (!SERVICE_KEYS.has(key) && !key.startsWith('x-'))
         throw new Fail(
           `validating compose.yaml: services.${svc} additional properties '${key}' not allowed`,
         )
@@ -358,7 +440,7 @@ function load(
           `service "${svc}" depends on undefined service "${dep}": invalid compose project`,
         )
 
-    const vols = listOf(raw.volumes)
+    const vols = volumesOf(raw.volumes)
 
     for (const spec of vols) {
       const source = spec.split(':')[0] ?? ''
@@ -397,7 +479,7 @@ function load(
 
     const service: Service = {
       name: svc,
-      ports: listOf(raw.ports).map(String),
+      ports: portsOf(raw.ports),
       environment,
       volumes: vols,
       networks: listOf(raw.networks),
@@ -441,6 +523,7 @@ function load(
   return {
     project: { name: projectName, dir, services: list, volumes, networks, secrets, merged: root },
     warnings,
+    notes,
   }
 }
 
@@ -931,6 +1014,41 @@ function logsCompose(ctx: Ctx, env: Env, project: Project, args: string[]): numb
   return 0
 }
 
+/** Un volumen de servicio como lo escribe `docker compose config` (forma larga). */
+function volumeYaml(spec: string, dir: string): Yaml {
+  const mount = volumeOf(spec, dir)
+  const ro = mount.readOnly ? { read_only: bare('true') } : {}
+
+  if (mount.type === 'bind')
+    return {
+      type: 'bind',
+      source: mount.source,
+      target: mount.target,
+      ...ro,
+      bind: { create_host_path: bare('true') },
+    }
+  if (mount.source.startsWith('anon-'))
+    return { type: 'volume', target: mount.target, ...ro, volume: {} }
+
+  return { type: 'volume', source: mount.source, target: mount.target, ...ro, volume: {} }
+}
+
+/** Un puerto como lo escribe `docker compose config`: `published` entre comillas, `target` no. */
+function portYaml(spec: string): Yaml {
+  const parts = spec.replace(/\/(tcp|udp)$/, '').split(':')
+  const target = parts.at(-1) ?? ''
+  const published = parts.length >= 2 ? parts.at(-2) : undefined
+  const ip = parts.length >= 3 ? parts.slice(0, -2).join(':') : undefined
+
+  return {
+    mode: 'ingress',
+    ...(ip === undefined ? {} : { host_ip: ip }),
+    target: bare(target),
+    ...(published === undefined ? {} : { published: published }),
+    protocol: spec.endsWith('/udp') ? 'udp' : 'tcp',
+  }
+}
+
 function config(ctx: Ctx, project: Project, args: string[]): number {
   const opts = parseOpts(
     args,
@@ -961,6 +1079,21 @@ function config(ctx: Ctx, project: Project, args: string[]): number {
     Reflect.deleteProperty(raw, 'env_file')
     if (service.build !== undefined)
       raw.build = { context: service.build.context, dockerfile: service.build.dockerfile }
+    // Como Compose: volúmenes, puertos y depends_on en la forma larga, con rutas absolutas.
+    if (service.volumes.length > 0)
+      raw.volumes = service.volumes.map((spec) => volumeYaml(spec, project.dir))
+    if (service.ports.length > 0) raw.ports = service.ports.map(portYaml)
+    if (Object.keys(service.dependsOn).length > 0)
+      raw.depends_on = Object.fromEntries(
+        Object.entries(service.dependsOn).map(([dep, condition]) => [
+          dep,
+          { condition, required: bare('true') },
+        ]),
+      )
+    if (service.restart !== 'no') raw.restart = service.restart
+    raw.networks = Object.fromEntries(
+      (service.networks.length === 0 ? ['default'] : service.networks).map((net) => [net, null]),
+    )
     ;(out.services as Record<string, Yaml>)[service.name] = Object.fromEntries(
       Object.entries(raw).sort(([a], [b]) => (a < b ? -1 : 1)),
     )
@@ -969,7 +1102,15 @@ function config(ctx: Ctx, project: Project, args: string[]): number {
     out.volumes = Object.fromEntries(
       project.volumes.map((each) => [each, { name: networkName(project, each) }]),
     )
-  if (project.merged.networks !== undefined) out.networks = project.merged.networks ?? null
+  out.networks = Object.fromEntries(
+    [
+      ...new Set([
+        ...project.services.flatMap((each) =>
+          each.networks.length === 0 ? ['default'] : each.networks,
+        ),
+      ]),
+    ].map((net) => [net, { name: networkName(project, net) }]),
+  )
   ctx.io.out(stringifyYaml(out))
 
   return 0
@@ -1144,16 +1285,18 @@ export function compose(ctx: Ctx, env: Env, args: string[]): number {
     return 0
   }
 
-  const { project, warnings } = load(
+  const { project, warnings, notes } = load(
     ctx,
     env,
     opts.all('file'),
     opts.one('project-name'),
     opts.one('env-file'),
+    opts.one('project-directory'),
   )
 
   for (const name of warnings)
     ctx.io.err(`WARN[0000] The "${name}" variable is not set. Defaulting to a blank string.\n`)
+  for (const note of notes) ctx.io.err(`WARN[0000] ${note}\n`)
 
   switch (verb) {
     case 'up':

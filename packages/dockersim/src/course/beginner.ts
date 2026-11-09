@@ -42,7 +42,7 @@ export const BEGINNER: Unit[] = [
       },
       example:
         'Antes de verlo: hello-world escribe su saludo y acaba. ¿Saldrá en docker ps, en docker ps -a o en ninguno?',
-      objectives: { 'probe:ran': 'Un contenedor de hello-world ha terminado bien' },
+      objectives: { output: 'Has visto el saludo de un contenedor de hello-world' },
     },
     en: {
       title: 'Your first container',
@@ -63,17 +63,12 @@ export const BEGINNER: Unit[] = [
       },
       example:
         'Before you look: hello-world prints its greeting and exits. Will it show in docker ps, in docker ps -a or in neither?',
-      objectives: { 'probe:ran': 'A hello-world container finished successfully' },
+      objectives: { output: 'You saw the greeting of a hello-world container' },
     },
     example: ['docker run hello-world', 'docker ps', 'docker ps -a', 'docker images'],
     solution: ['docker run hello-world'],
-    check: {
-      probes: {
-        ran: [
-          "docker ps -a --filter ancestor=hello-world --filter exited=0 --format '{{.Image}}' | head -n 1",
-        ],
-      },
-    },
+    // Lo que escribe el contenedor (con o sin --rm, docker run o docker container run).
+    check: { output: true },
   },
   {
     id: 'docker-detached',
@@ -465,7 +460,9 @@ export const BEGINNER: Unit[] = [
       "docker inspect -f '{{.HostConfig.RestartPolicy.Name}}' web",
       'docker port web',
     ],
-    solution: ["docker inspect -f '{{.NetworkSettings.IPAddress}}' web"],
+    // `{{.NetworkSettings.IPAddress}}` también vale en Docker 27/28 (y da lo mismo en la red de
+    // siempre), pero está obsoleto: va vacío en otras redes y Docker 29 lo quita.
+    solution: ["docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' web"],
     check: { output: true },
     requires: [['inspect']],
   },
@@ -680,10 +677,10 @@ export const BEGINNER: Unit[] = [
         whenNot:
           'Cambiar index.html no cambia la imagen ya construida: hay que volver a hacer docker build.',
         problems:
-          'Copiar algo de fuera del contexto: con COPY ../index.html el build acaba en «ERROR: failed to solve» y «not found». Pon el fichero dentro de la carpeta que construyes.',
+          'Copiar algo de fuera del contexto: COPY ../front/index.html no sale de ~/web, busca /front/index.html dentro y falla con «not found». Pon el fichero en la carpeta que construyes.',
       },
       example:
-        'Antes de verlo: el Dockerfile copia ../index.html, de fuera de ~/web. ¿Se construirá la imagen?',
+        'Antes de verlo: el Dockerfile de ~/web copia ../front/index.html, de fuera de la carpeta. ¿Se construirá la imagen?',
       objectives: {},
     },
     en: {
@@ -703,15 +700,15 @@ export const BEGINNER: Unit[] = [
         whenNot:
           'Changing index.html does not change the image already built: run docker build again.',
         problems:
-          'Copying something outside the context: with COPY ../index.html the build ends in "ERROR: failed to solve" and "not found". Put the file inside the folder you build.',
+          'Copying something outside the context: COPY ../front/index.html does not leave ~/web, looks for /front/index.html inside and fails with "not found". Put the file in the folder you build.',
       },
       example:
-        'Before you look: the Dockerfile copies ../index.html, from outside ~/web. Will the image build?',
+        'Before you look: the Dockerfile in ~/web copies ../front/index.html, from outside the folder. Will the image build?',
       objectives: {},
     },
     example: [
       'cd ~/web',
-      "cat > Dockerfile <<'EOF'\nFROM nginx:1.27-alpine\nCOPY ../index.html /usr/share/nginx/html/\nEOF",
+      "cat > Dockerfile <<'EOF'\nFROM nginx:1.27-alpine\nCOPY ../front/index.html /usr/share/nginx/html/\nEOF",
       'docker build -t prueba:0 .',
       WEB_DOCKERFILE,
       'docker build -t prueba:1 .',
@@ -821,7 +818,7 @@ export const BEGINNER: Unit[] = [
         ],
         when: 'ENTRYPOINT para imágenes que se usan como una herramienta; solo CMD para servicios que a veces arrancas con otra orden.',
         whenNot:
-          'Escríbelos en forma exec, con corchetes: en forma shell (CMD echo hola) Docker pone /bin/sh -c delante.',
+          'Escríbelos en forma exec, con corchetes: en forma shell (ENTRYPOINT echo hola) Docker pone /bin/sh -c delante y no le llega ni el CMD ni lo de docker run.',
         problems:
           'Con solo CMD, lo que escribes sustituye al programa entero: docker run --rm alpine:3.20 peer4u falla con «exec: "peer4u": executable file not found in $PATH».',
       },
@@ -845,7 +842,7 @@ export const BEGINNER: Unit[] = [
         ],
         when: 'ENTRYPOINT for images used like a tool; only CMD for services you sometimes start with another command.',
         whenNot:
-          'Write them in exec form, with brackets: in shell form (CMD echo hola) Docker puts /bin/sh -c in front.',
+          'Write them in exec form, with brackets: in shell form (ENTRYPOINT echo hola) Docker puts /bin/sh -c in front and neither the CMD nor the docker run arguments reach it.',
         problems:
           'With only CMD, what you type replaces the whole program: docker run --rm alpine:3.20 peer4u fails with "exec: "peer4u": executable file not found in $PATH".',
       },
@@ -1045,7 +1042,7 @@ export const BEGINNER: Unit[] = [
       'cd ~/api',
       API_CACHED,
       'docker build -t peer4u/api:1.0 .',
-      "docker run -d --name api -p 3000:3000 -e DATABASE_URL=postgres://postgres:secreto@$(docker inspect -f '{{.NetworkSettings.IPAddress}}' db):5432/postgres peer4u/api:1.0",
+      "docker run -d --name api -p 3000:3000 -e DATABASE_URL=postgres://postgres:secreto@$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' db):5432/postgres peer4u/api:1.0",
       'docker container prune -f',
     ],
     check: {

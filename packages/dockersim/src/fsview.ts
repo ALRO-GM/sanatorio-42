@@ -156,7 +156,7 @@ export function writeFile(env: Env, container: Container, path: string, text: st
   const mount = mountAt(container, path)
 
   if (mount?.readOnly === true || (mount === undefined && container.readOnly))
-    throw new Fail(`can't create '${path}': Read-only file system`)
+    throw new Fail('Read-only file system')
   if (mount?.type === 'bind') {
     writeHost(env, clean(`${mount.source}${rel(path, mount.target)}`), text)
 

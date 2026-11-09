@@ -34,11 +34,25 @@ export const git: CommandFn = (ctx) => {
   const [verb, ...args] = ctx.args
 
   if (verb === 'rev-parse' && args.includes('HEAD')) {
-    ctx.io.out(`${args.includes('--short') ? sha.slice(0, 7) : sha}\n`)
+    // `--short` son 7 cifras; `--short=N`, N (como mucho las 40).
+    const short = args.find((arg) => arg === '--short' || arg.startsWith('--short='))
+    const digits = short === undefined ? 40 : Number(short.split('=')[1] ?? 7) || 7
+
+    ctx.io.out(`${sha.slice(0, Math.min(Math.max(digits, 4), 40))}\n`)
 
     return 0
   }
   if (verb === 'log') {
+    // `--format=%h`, `--pretty=format:%h` o `--pretty=%H`: solo el hash; si no, como `--oneline`.
+    const format = args
+      .find((arg) => /^--(format|pretty)=/.test(arg))
+      ?.replace(/^--(format|pretty)=(format:|tformat:)?/, '')
+
+    if (format !== undefined && /^%[hH]$/.test(format)) {
+      ctx.io.out(`${format === '%h' ? sha.slice(0, 7) : sha}\n`)
+
+      return 0
+    }
     ctx.io.out(`${sha.slice(0, 7)} (HEAD -> main) Último commit\n`)
 
     return 0
