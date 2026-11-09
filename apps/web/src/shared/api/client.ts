@@ -108,6 +108,8 @@ export const realApi: Api = {
 
   getCampuses: () => getJson('/campuses'),
   getProfile: () => getJson('/me/profile'),
+  getUnlocks: () => getJson('/me/unlocks'),
+  markUnlocksSeen: (ids) => send('POST', '/me/unlocks/seen', { ids }),
   getEventAlerts: () => getJson('/events/alerts'),
   ackEventAlert: (id) => send('POST', '/events/alerts/ack', { id }),
   getEventThread: (id, after) =>

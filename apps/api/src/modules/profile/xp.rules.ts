@@ -8,6 +8,8 @@
  * Los textos no están aquí: el front los traduce a partir de cada `id`.
  */
 
+import type { CourseAchievementId } from '@sanatorio/contracts'
+
 /** Motivos por los que se gana XP. Es lo que se guarda en `xp_events.kind`. */
 export const XP_KIND = {
   /** Cada media hora que se te ve en tu puesto de una terapia de grupo. */
@@ -26,6 +28,8 @@ export const XP_KIND = {
   BOARD_HOST: 'board_host',
   /** Marca sin puntos: se puso de guardia por primera vez. */
   FIRST_DUTY: 'first_duty',
+  /** Un logro de los cursos (`ref` = su id): una vez cada uno, lo que diga `COURSE_XP`. */
+  COURSE_ACHIEVEMENT: 'course_achievement',
 } as const
 
 export type XpKind = (typeof XP_KIND)[keyof typeof XP_KIND]
@@ -40,6 +44,41 @@ export const XP_AMOUNT: Record<XpKind, number> = {
   guide_proposal: 15,
   guide_review: 5,
   first_duty: 0,
+  // Lo que da el logro más pequeño (el primer punto): lo demás, en `COURSE_XP`.
+  course_achievement: 10,
+}
+
+/**
+ * La XP de cada logro de los cursos (`docs/cursos-logros.md`), una sola vez.
+ * Más cuanto más cuesta: el primer punto es un saludo; un certificado, un
+ * nivel entero; terminar los cuatro, el curso de todos. Los cuatro cursos
+ * enteros suman 885 XP (nivel 6): mucho, pero menos que ayudar, que es para lo
+ * que está la web. No cuenta para la clasificación de quién ayuda más
+ * (`HELP_KINDS`), y como cada logro se cobra una vez, no hay forma de repetirla.
+ */
+export const COURSE_XP: Record<CourseAchievementId, number> = {
+  shell_first: 10,
+  shell_beginner: 25,
+  shell_intermediate: 40,
+  shell_advanced: 60,
+  shell_bosses: 50,
+  git_first: 10,
+  git_group: 40,
+  git_boss: 60,
+  git_bosses: 50,
+  docker_first: 10,
+  docker_beginner: 25,
+  docker_intermediate: 40,
+  docker_advanced: 60,
+  docker_bosses: 50,
+  k8s_first: 10,
+  k8s_beginner: 25,
+  k8s_intermediate: 40,
+  k8s_advanced: 60,
+  k8s_bosses: 50,
+  courses_explorer: 20,
+  courses_all: 100,
+  courses_order: 50,
 }
 
 /**

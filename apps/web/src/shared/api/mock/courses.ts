@@ -126,8 +126,49 @@ export function mockCourseAchievements(seed: number | null = null) {
     const [mine, goal] = MINE[id]
     const progress = seed === null ? mine : (seed * (id.length + 3)) % (goal + 1)
 
-    return { id, goal, progress: Math.min(progress, goal), unlocked: progress >= goal }
+    return {
+      id,
+      goal,
+      progress: Math.min(progress, goal),
+      unlocked: progress >= goal,
+      xp: mockCourseXp(id),
+    }
   })
+}
+
+/**
+ * La XP de cada logro, como `COURSE_XP` de la API (`xp.rules.ts`), sacada del
+ * final de su id: el primer punto da poco; un certificado, más cuanto más
+ * alto; terminar los cuatro, lo que más.
+ */
+export function mockCourseXp(id: CourseAchievementId): number {
+  const bySuffix: Record<string, number> = {
+    first: 10,
+    beginner: 25,
+    intermediate: 40,
+    advanced: 60,
+    bosses: 50,
+    group: 40,
+    boss: 60,
+    explorer: 20,
+    all: 100,
+    order: 50,
+  }
+
+  return bySuffix[id.slice(id.lastIndexOf('_') + 1)] ?? 0
+}
+
+/**
+ * Da por conseguido un logro de quien mira, como si acabara de superar lo que
+ * pide. `false` si ya lo tenía.
+ */
+export function unlockMockAchievement(id: CourseAchievementId): boolean {
+  const [progress, goal] = MINE[id]
+
+  if (progress >= goal) return false
+  MINE[id] = [goal, goal]
+
+  return true
 }
 
 export const coursesMock: Pick<Api, 'getCourseRanking'> = {

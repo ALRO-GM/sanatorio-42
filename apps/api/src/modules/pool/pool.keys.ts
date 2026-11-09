@@ -28,6 +28,9 @@ export const POOL_BASE: readonly string[] = [
   '/me/export',
   '/me/anonymize',
   '/me/profile',
+  // La celebración de lo desbloqueado sale en cualquier pantalla, como el nivel del perfil.
+  '/me/unlocks',
+  '/me/unlocks/seen',
   '/me/projects',
   '/usage',
   '/usage/clicks',

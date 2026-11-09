@@ -173,6 +173,7 @@ import type {
   Pulse,
   RequesterTag,
   SettingsInput,
+  Unlocks,
   StaffAccountCreated,
   StaffAccounts,
   StaffComparison,
@@ -310,6 +311,10 @@ export type Api = {
   // --- Campus, preferencias y estado de la réplica
   getCampuses: () => Promise<CampusSummary[]>
   getProfile: () => Promise<Profile>
+  /** Lo desbloqueado que aún no se ha celebrado en pantalla (y cobra la XP de los cursos). */
+  getUnlocks: () => Promise<Unlocks>
+  /** Ya se ha celebrado: no vuelve a salir en ningún dispositivo. */
+  markUnlocksSeen: (ids: string[]) => Promise<void>
 
   // --- Avisos, chat y asistencia de un evento
   /** Tus avisos de evento, por orden de inicio: los que piden respuesta, los que se te pasaron y los demás. */

@@ -153,6 +153,44 @@ export function createXpRepository(db: Db) {
       return toNumber(result.rows[0]?.total)
     },
 
+    /** Las referencias de lo que alguien ya ha cobrado por un motivo. */
+    async refs(login: string, kind: string): Promise<Set<string>> {
+      const result = await db.execute({
+        sql: 'SELECT ref FROM xp_events WHERE login = ? AND kind = ?',
+        args: [login, kind],
+      })
+
+      return new Set(result.rows.map((row) => toText(row.ref)))
+    },
+
+    /**
+     * Lo desbloqueado que ya se ha celebrado (`unlock_announcements`); `''` es
+     * la marca de que ya se hizo la primera cuenta.
+     */
+    async announced(login: string): Promise<Set<string>> {
+      const result = await db.execute({
+        sql: 'SELECT unlock FROM unlock_announcements WHERE login = ?',
+        args: [login],
+      })
+
+      return new Set(result.rows.map((row) => toText(row.unlock)))
+    },
+
+    /** Apunta como celebrado lo que se pasa. Repetirlo no hace nada. */
+    async announce(login: string, unlocks: readonly string[]): Promise<void> {
+      if (unlocks.length === 0) return
+
+      const at = nowIso()
+
+      await db.batch(
+        unlocks.map((unlock) => ({
+          sql: `INSERT OR IGNORE INTO unlock_announcements (login, unlock, announced_at)
+                VALUES (?, ?, ?)`,
+          args: [login, unlock, at],
+        })),
+      )
+    },
+
     /** Reacciones recibidas, por tipo. */
     async reactionsReceived(to: string): Promise<Map<string, number>> {
       const result = await db.execute({

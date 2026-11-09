@@ -144,6 +144,7 @@ describe('migraciones', () => {
       'tour_speeds',
       'turn_players',
       'turn_rooms',
+      'unlock_announcements',
       'usage_click_cells',
       'usage_click_elements',
       'usage_counts',
