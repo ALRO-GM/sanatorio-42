@@ -6,11 +6,69 @@ hace la web está en el [README](../README.md); cómo está montada, en
 [architecture.md](architecture.md); el contrato HTTP, en [api.md](api.md). Aquí
 va lo que no está en el código.
 
-Última puesta al día: 2026-10-24.
+Última puesta al día: 2026-11-09.
 
 **Al retomar con el contexto vacío, lo primero es
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
 que hacer, en orden. Este documento es el porqué; aquel, el qué.
+
+## Estado a 2026-11-09 (desplegado, esquema 89)
+
+Lo hecho desde el 2026-10-27, con su documento. El detalle fecha a fecha está en
+la tabla de novedades del README.
+
+**Web y servidor**
+
+- Dominio **peer4u.app** (Cloudflare, `www.` y el dominio viejo redirigen);
+  portada pública por idioma para buscadores (`docs/seo.md`); la máquina sirve
+  también otras webs desde `/opt/caddy-sitios` (WebAR, `docs/deploy-oracle.md`).
+- Memoria: la red de asientos de campus grandes se calcula de una en una y
+  Amigos por tandas de fondo (`docs/rendimiento.md`).
+- **Instalable como app** (2026-11-08): manifiesto con iconos PNG y maskable,
+  `apple-touch-icon`, y botón de instalar en la cabecera solo si el navegador
+  lo permite (`shared/install.ts`, `app/InstallButton.tsx`).
+- **Cargas lentas con progreso** (2026-11-08, regla fija en `AGENTS.md` y
+  `docs/interfaz.md`): `shared/ui/Refreshing.tsx` (fases y avance); las lecturas
+  GET esperan 15, 30 y 60 s antes de rendirse y un tiempo agotado dice «tarda»,
+  no «sin conexión» (`shared/api/http.ts`).
+- **Secreto de 42 con relevo** (2026-11-08): `FORTY_TWO_NEXT_SECRET` y
+  `FORTY_TWO_SECRET_EXPIRES` en `infra/.env`; el día de caducidad (o ante un 401)
+  pasa al siguiente, y el panel avisa mientras no haya siguiente
+  (`integrations/forty-two/secrets.ts`). Caduca cada 4 semanas: hay que poner el
+  nuevo «Next secret» de la intra antes de cada relevo.
+- **Límites configurables** (2026-11-09, migración 89, `docs/limites.md`):
+  pestaña Límites del panel; 13 topes por persona con valor de fábrica, cambio
+  para todos o por persona (persona > todos > fábrica). Los topes del plan
+  (90 %/95 % de Oracle, cuota de 42), los de seguridad, los de XP contra trampas
+  y los que protegen la CPU no se tocan desde ahí.
+
+**Piscina y datos**
+
+- Pestaña **Abandono** (`docs/abandono.md`): probabilidad por horas en los
+  puestos, ajustes en vivo, últimas 10 piscinas copiadas de fondo y comparables;
+  eje por día de piscina 1–26 con los exámenes (5, 12, 19, 26) resaltados.
+- Avance de la piscina por semanas y comparando piscinas; vista sin límites de
+  piscinero con la red de toda la piscina (`docs/piscineros.md`).
+- Exámenes en vivo con la nota que sube con cada ejercicio; amistades = red de
+  asientos (`docs/asientos.md`); álbum de cromos de correcciones.
+
+**Cursos (Aprender)**
+
+- Cuatro cursos simulados en el navegador, sin recursos por persona en el
+  servidor: shell, git, **Docker** (`packages/dockersim`, migración 87,
+  `docs/curso-docker.md`) y **Kubernetes** (`packages/k8ssim`, migración 88,
+  `docs/curso-kubernetes.md`). Orden sugerido shell → git → Docker → Kubernetes,
+  sin bloquear (`shared/course/CourseOrderHint`).
+- Git fuera del clúster (migración 86): quien administra da permiso y la persona
+  dice desde dónde juega (en 42, teletrabajo, fuera); vale 8 h.
+- Explicaciones con la plantilla (`docs/plantilla-explicacion.md`) y revisión a
+  fondo contra las herramientas reales, nivel a nivel, con alternativas válidas
+  aceptadas (`docs/revision-cursos/*.md`). Git responde en inglés como el real.
+- **Juego de los cursos** (`docs/cursos-logros.md`): clasificaciones por curso en
+  Clasificaciones y 22 logros con título y banner.
+- Preguntas: investigación (`docs/referencia/preguntas-investigacion.md`),
+  plantilla con variantes (`docs/plantilla-preguntas.md`) y el agente
+  `.claude/agents/didacta.md` para escribir preguntas y explicaciones.
 
 ## Estado a 2026-10-25 (desplegado, esquema 74)
 
@@ -471,10 +529,11 @@ Estado a 2026-10-23, tras el hallazgo M6/M7 de `revision-2026-10/seguridad-api.m
 ## Pendiente de confirmar o de hacer
 
 El plan con sus casillas está en [tareas-tras-compactar.md](tareas-tras-compactar.md).
-En resumen: queda desplegar. Alberto dio por buenos los valores propuestos de
-los códigos y de los límites (2026-10-11); el tope de la app de 42 sigue vacío
-hasta que lo mire en la intra. Sigue pendiente rotar
-el secreto de la app de 42, que se llegó a ver en una conversación.
+Pendiente a 2026-11-09: rotar los dos secretos de 42 (se pegaron en una
+conversación) escribiéndolos directamente en el `infra/.env` del servidor;
+contrastar los mensajes de git y Kubernetes con herramientas reales; ajustar los
+tiempos de los jefes de Docker y Kubernetes con partidas reales; sacar a
+`shared/course` lo común de las pestañas de los cursos (duplicados cerca del 1 %).
 
 ## Cosas que conviene saber
 
