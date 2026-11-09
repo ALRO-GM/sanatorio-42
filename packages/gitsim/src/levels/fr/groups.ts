@@ -19,7 +19,7 @@ export const GROUPS_FR: Readonly<Record<string, MissionText>> = {
       'git push origin {login}',
       'git switch main et git pull (récupère ce que les autres ont poussé)',
       'git merge --no-ff {login} (un commit de merge, même si une avance rapide était possible)',
-      'git push. S’il est refusé parce que quelqu’un a poussé avant toi : git pull, puis de nouveau git push',
+      'git push. S’il est refusé parce que quelqu’un a poussé avant toi : git pull --no-rebase, puis de nouveau git push',
     ],
   },
   group2: {
@@ -30,9 +30,9 @@ export const GROUPS_FR: Readonly<Record<string, MissionText>> = {
       'git switch -c {login}',
       'echo "- {login}" >> equipo.txt, git add equipo.txt et git commit -m "Je m’inscris"',
       'git push origin {login} et gh pr merge {login} : la pull request est en conflit avec main',
-      'git pull origin main : conflit dans equipo.txt (regarde-le avec cat equipo.txt)',
+      'git pull --no-rebase origin main : conflit dans equipo.txt (regarde-le avec cat equipo.txt)',
       'Laisse equipo.txt avec toutes les lignes et sans les marqueurs (echo "…" > equipo.txt et echo "…" >> equipo.txt), git add equipo.txt et git commit',
-      'git push origin {login} et de nouveau gh pr merge {login} (si le conflit revient, recommence à partir de git pull origin main)',
+      'git push origin {login} et de nouveau gh pr merge {login} (si le conflit revient, recommence à partir de git pull --no-rebase origin main)',
     ],
   },
   group3: {
@@ -41,12 +41,12 @@ export const GROUPS_FR: Readonly<Record<string, MissionText>> = {
       'main contient la version 1.0 et develop prépare la suivante. Chaque personne fait les trois choses de Gitflow : une fonctionnalité qui entre dans develop, une correction urgente qui part de main et une release qui part de develop. Chaque correction et chaque release finissent dans main avec leur tag et reviennent dans develop.',
     tasks: [
       'Fonctionnalité : git switch develop, git switch -c feature/{login}, echo "hecho" > {login}.txt, git add et git commit',
-      'git switch develop, git pull, git merge --no-ff feature/{login} et git push origin develop',
-      'Hotfix : git switch main, git pull, git switch -c hotfix/1.0.{n}, echo "arreglado" > arreglo-{login}.txt, git add et git commit',
-      'git switch main, git merge --no-ff hotfix/1.0.{n}, git tag v1.0.{n} ; git switch develop, git pull et git merge --no-ff hotfix/1.0.{n}',
+      'git switch develop, git pull --no-rebase, git merge --no-ff feature/{login} et git push origin develop',
+      'Hotfix : git switch main, git pull --no-rebase, git switch -c hotfix/1.0.{n}, echo "arreglado" > arreglo-{login}.txt, git add et git commit',
+      'git switch main, git merge --no-ff hotfix/1.0.{n}, git tag v1.0.{n} ; git switch develop, git pull --no-rebase et git merge --no-ff hotfix/1.0.{n}',
       'Release : git switch -c release/1.{n} (depuis develop, avec ta fonctionnalité), echo "notas" > notas-1.{n}.txt, git add et git commit',
-      'git switch main, git pull, git merge --no-ff release/1.{n}, git tag v1.{n} ; git switch develop, git pull et git merge --no-ff release/1.{n}',
-      'git push origin main, git push origin develop et git push --tags (si c’est refusé, git pull sur cette branche et recommence)',
+      'git switch main, git pull --no-rebase, git merge --no-ff release/1.{n}, git tag v1.{n} ; git switch develop, git pull --no-rebase et git merge --no-ff release/1.{n}',
+      'git push origin main, git push origin develop et git push --tags (si c’est refusé, git pull --no-rebase sur cette branche et recommence)',
     ],
   },
   boss: {

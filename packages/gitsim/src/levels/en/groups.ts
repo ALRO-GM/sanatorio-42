@@ -19,7 +19,7 @@ export const GROUPS_EN: Readonly<Record<string, MissionText>> = {
       'git push origin {login}',
       'git switch main and git pull (brings in what the others have pushed)',
       'git merge --no-ff {login} (a merge commit, even if it could move forward without one)',
-      'git push. If it is rejected because someone pushed first: git pull and git push again',
+      'git push. If it is rejected because someone pushed first: git pull --no-rebase and git push again',
     ],
   },
   group2: {
@@ -30,9 +30,9 @@ export const GROUPS_EN: Readonly<Record<string, MissionText>> = {
       'git switch -c {login}',
       'echo "- {login}" >> equipo.txt, git add equipo.txt and git commit -m "Count me in"',
       'git push origin {login} and gh pr merge {login}: the pull request clashes with main',
-      'git pull origin main: conflict in equipo.txt (look at it with cat equipo.txt)',
+      'git pull --no-rebase origin main: conflict in equipo.txt (look at it with cat equipo.txt)',
       'Leave equipo.txt with every line and without the markers (echo "…" > equipo.txt and echo "…" >> equipo.txt), git add equipo.txt and git commit',
-      'git push origin {login} and gh pr merge {login} again (if it clashes again, repeat from git pull origin main)',
+      'git push origin {login} and gh pr merge {login} again (if it clashes again, repeat from git pull --no-rebase origin main)',
     ],
   },
   group3: {
@@ -41,12 +41,12 @@ export const GROUPS_EN: Readonly<Record<string, MissionText>> = {
       'main holds version 1.0 and develop is preparing the next one. Each of you does the three Gitflow things: a feature that goes into develop, an urgent fix that comes out of main and a release that comes out of develop. Every fix and every release ends up in main with its tag and goes back to develop.',
     tasks: [
       'Feature: git switch develop, git switch -c feature/{login}, echo "hecho" > {login}.txt, git add and git commit',
-      'git switch develop, git pull, git merge --no-ff feature/{login} and git push origin develop',
-      'Hotfix: git switch main, git pull, git switch -c hotfix/1.0.{n}, echo "arreglado" > arreglo-{login}.txt, git add and git commit',
-      'git switch main, git merge --no-ff hotfix/1.0.{n}, git tag v1.0.{n}; git switch develop, git pull and git merge --no-ff hotfix/1.0.{n}',
+      'git switch develop, git pull --no-rebase, git merge --no-ff feature/{login} and git push origin develop',
+      'Hotfix: git switch main, git pull --no-rebase, git switch -c hotfix/1.0.{n}, echo "arreglado" > arreglo-{login}.txt, git add and git commit',
+      'git switch main, git merge --no-ff hotfix/1.0.{n}, git tag v1.0.{n}; git switch develop, git pull --no-rebase and git merge --no-ff hotfix/1.0.{n}',
       'Release: git switch -c release/1.{n} (from develop, with your feature), echo "notas" > notas-1.{n}.txt, git add and git commit',
-      'git switch main, git pull, git merge --no-ff release/1.{n}, git tag v1.{n}; git switch develop, git pull and git merge --no-ff release/1.{n}',
-      'git push origin main, git push origin develop and git push --tags (if you are rejected, git pull on that branch and try again)',
+      'git switch main, git pull --no-rebase, git merge --no-ff release/1.{n}, git tag v1.{n}; git switch develop, git pull --no-rebase and git merge --no-ff release/1.{n}',
+      'git push origin main, git push origin develop and git push --tags (if you are rejected, git pull --no-rebase on that branch and try again)',
     ],
   },
   boss: {

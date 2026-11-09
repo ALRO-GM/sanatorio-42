@@ -143,9 +143,14 @@ const GROUP_1: GroupMission = {
     'git push origin {login}',
     'git switch main y git pull (trae lo que haya subido el resto)',
     'git merge --no-ff {login} (un commit de merge, aunque pudiera avanzar sin él)',
-    'git push. Si lo rechazan porque alguien subió antes: git pull y otra vez git push',
+    'git push. Si lo rechazan porque alguien subió antes: git pull --no-rebase y otra vez git push',
   ],
-  hints: ['git switch -c rama', 'git push origin rama', 'git pull', 'git merge --no-ff rama'],
+  hints: [
+    'git switch -c rama',
+    'git push origin rama',
+    'git pull --no-rebase',
+    'git merge --no-ff rama',
+  ],
   check(remote, players) {
     const main = historyOf(remote, 'main')
     const files = filesAt(remote, remote.branches.main)
@@ -191,11 +196,16 @@ const GROUP_2: GroupMission = {
     'git switch -c {login}',
     'echo "- {login}" >> equipo.txt, git add equipo.txt y git commit -m "Me apunto"',
     'git push origin {login} y gh pr merge {login}: el pull request choca con main',
-    'git pull origin main: conflicto en equipo.txt (míralo con cat equipo.txt)',
+    'git pull --no-rebase origin main: conflicto en equipo.txt (míralo con cat equipo.txt)',
     'Deja equipo.txt con todas las líneas, sin las marcas (echo "…" > equipo.txt y echo "…" >> equipo.txt), git add equipo.txt y git commit',
-    'git push origin {login} y otra vez gh pr merge {login} (si vuelve a chocar, repite desde git pull origin main)',
+    'git push origin {login} y otra vez gh pr merge {login} (si vuelve a chocar, repite desde git pull --no-rebase origin main)',
   ],
-  hints: ['git switch -c rama', 'gh pr merge rama', 'git pull origin main', 'cat equipo.txt'],
+  hints: [
+    'git switch -c rama',
+    'gh pr merge rama',
+    'git pull --no-rebase origin main',
+    'cat equipo.txt',
+  ],
   check(remote, players) {
     const main = historyOf(remote, 'main')
     const list = (filesAt(remote, remote.branches.main)['equipo.txt'] ?? '').split('\n')
@@ -240,19 +250,19 @@ const GROUP_3: GroupMission = {
   locked: [],
   tasks: [
     'Funcionalidad: git switch develop, git switch -c feature/{login}, echo "hecho" > {login}.txt, git add y git commit',
-    'git switch develop, git pull, git merge --no-ff feature/{login} y git push origin develop',
-    'Hotfix: git switch main, git pull, git switch -c hotfix/1.0.{n}, echo "arreglado" > arreglo-{login}.txt, git add y git commit',
-    'git switch main, git merge --no-ff hotfix/1.0.{n}, git tag v1.0.{n}; git switch develop, git pull y git merge --no-ff hotfix/1.0.{n}',
+    'git switch develop, git pull --no-rebase, git merge --no-ff feature/{login} y git push origin develop',
+    'Hotfix: git switch main, git pull --no-rebase, git switch -c hotfix/1.0.{n}, echo "arreglado" > arreglo-{login}.txt, git add y git commit',
+    'git switch main, git merge --no-ff hotfix/1.0.{n}, git tag v1.0.{n}; git switch develop, git pull --no-rebase y git merge --no-ff hotfix/1.0.{n}',
     'Versión: git switch -c release/1.{n} (desde develop, con tu funcionalidad), echo "notas" > notas-1.{n}.txt, git add y git commit',
-    'git switch main, git pull, git merge --no-ff release/1.{n}, git tag v1.{n}; git switch develop, git pull y git merge --no-ff release/1.{n}',
-    'git push origin main, git push origin develop y git push --tags (si te rechazan, git pull en esa rama y otra vez)',
+    'git switch main, git pull --no-rebase, git merge --no-ff release/1.{n}, git tag v1.{n}; git switch develop, git pull --no-rebase y git merge --no-ff release/1.{n}',
+    'git push origin main, git push origin develop y git push --tags (si te rechazan, git pull --no-rebase en esa rama y otra vez)',
   ],
   hints: [
     'git switch -c feature/rama',
     'git merge --no-ff rama',
     'git tag v1.0.1',
     'git push --tags',
-    'git pull',
+    'git pull --no-rebase',
   ],
   check(remote, players) {
     const develop = historyOf(remote, 'develop')

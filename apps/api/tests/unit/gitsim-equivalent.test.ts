@@ -29,10 +29,20 @@ const ok = (world: World, ...lines: string[]): World => {
 }
 
 /** Otras formas de resolver cada punto, todas con tres estrellas. */
+/** Un commit con su cambio (como en git, sin cambio no hay commit). */
+const C = (name: string): string[] => [
+  `echo ${name} > ${name}.txt`,
+  `git add ${name}.txt`,
+  `git commit -m ${name}`,
+]
+
+/** Otras formas de resolver cada punto, todas con tres estrellas. */
 const VARIANTS: Record<string, string[][]> = {
   'w0-commit': [
-    ['git commit --message "uno"', 'git commit -m"dos"'],
-    ['git commit --message=uno', 'git status', 'git log --oneline', 'git commit --allow-empty'],
+    ['git commit --message "Añade el Makefile"'],
+    ['git commit -m"Makefile"'],
+    ['git status', 'git log --oneline', 'git commit'],
+    ['git commit -am Makefile'],
   ],
   'w0-add': [
     ['echo "int main(void)" > hola.c', 'git add .', 'git commit -m x'],
@@ -41,7 +51,7 @@ const VARIANTS: Record<string, string[][]> = {
     ['echo "int main(void)" > hola.c', 'git add *', 'git commit -m x'],
     ['echo "int main(void)" > hola.c', 'git add *.c', 'git commit -m x'],
     ['echo "int main(void)" > hola.c', 'git add ./hola.c', 'git commit -m x'],
-    ['echo "int main(void)" > hola.c', 'git commit -m x hola.c'],
+    ['echo "int main(void)" > hola.c', 'git add -v hola.c', 'git commit -m x'],
     ['touch hola.c', 'echo "int main(void)" >> hola.c', 'git add hola.c', 'git commit -m x'],
   ],
   'w0-status': [
@@ -50,6 +60,7 @@ const VARIANTS: Record<string, string[][]> = {
     ['git add -A', 'git reset HEAD main.c', 'git commit -m x'],
     ['git add *', 'git reset main.c', 'git commit -m x'],
     ['git add --all', 'git reset -- main.c', 'git diff --staged', 'git commit -m x'],
+    ['git status -s', 'git add libft.h', 'git commit -m x'],
   ],
   'w0-world': [
     [
@@ -75,22 +86,32 @@ const VARIANTS: Record<string, string[][]> = {
     ],
   ],
   'w1-branch': [
-    ['git checkout -b feature', 'git commit'],
-    ['git switch --create feature', 'git commit -m x'],
-    ['git branch feature', 'git checkout feature', 'git commit'],
-    ['git branch feature', 'git status', 'git switch feature', 'git commit'],
+    ['git checkout -b feature', ...C('x')],
+    ['git switch --create feature', 'echo x > x', 'git add -A', 'git commit -m x'],
+    ['git branch feature', 'git checkout feature', ...C('x')],
+    [
+      'git branch feature',
+      'git status',
+      'git switch feature',
+      'echo x > x',
+      'git add .',
+      'git commit',
+    ],
+    // El fichero nuevo, sin commit, viaja contigo al cambiar de rama.
+    ['echo x > x', 'git switch -c feature', 'git add x', 'git commit -m x'],
   ],
   'w1-head': [
-    ['git checkout main', 'git commit'],
-    ['git switch -', 'git commit'],
-    ['git checkout -', 'git commit'],
+    ['git checkout main', ...C('x')],
+    ['git switch -', ...C('x')],
+    ['git checkout -', ...C('x')],
+    ['echo x > x', 'git switch main', 'git add x', 'git commit -m x'],
   ],
   'w1-ff': [['git merge --ff-only feature'], ['git merge feature -m nada']],
   'w1-merge': [['git merge --no-ff feature'], ['git merge -m "Une feature" feature']],
   'w1-delete': [
     [
       'git checkout -b fix',
-      'git commit',
+      ...C('x'),
       'git checkout main',
       'git merge fix',
       'git branch --delete fix',
@@ -98,61 +119,82 @@ const VARIANTS: Record<string, string[][]> = {
     [
       'git branch fix',
       'git switch fix',
-      'git commit',
+      ...C('x'),
       'git switch -',
       'git merge fix',
       'git branch -D fix',
+    ],
+    [
+      'git switch -c fix',
+      ...C('x'),
+      'git switch main',
+      'git merge --ff-only fix',
+      'git branch -d fix',
     ],
   ],
   'w1-world': [
     [
       'git checkout -b a',
-      'git commit',
+      ...C('a1'),
       'git checkout main',
       'git checkout -b b',
-      'git commit',
+      ...C('b1'),
       'git checkout main',
       'git merge a',
       'git merge b',
     ],
     [
       'git switch -c a',
-      'git commit',
+      ...C('a1'),
       'git switch -c b main',
-      'git commit',
+      ...C('b1'),
       'git switch main',
       'git merge a',
       'git merge b',
     ],
   ],
   'w2-clone': [
-    ['git clone git@github.com:equipo/repo.git', 'git commit', 'git push origin main'],
-    ['git clone', 'git commit -m x', 'git push -u origin main'],
-    ['git clone', 'git commit -m x', 'git push origin HEAD'],
+    ['git clone git@github.com:equipo/repo.git', ...C('x'), 'git push origin main'],
+    ['git clone', ...C('x'), 'git push -u origin main'],
+    ['git clone', ...C('x'), 'git push origin HEAD'],
   ],
   'w2-fetch': [
     ['git pull'],
     ['git fetch origin', 'git merge origin/main'],
     ['git fetch', 'git rebase origin/main'],
     ['git pull --ff-only'],
+    ['git fetch', 'git merge'],
   ],
   'w2-pull': [
     ['git fetch', 'git merge origin/main', 'git push'],
-    ['git pull origin main', 'git push origin main'],
+    ['git pull --no-rebase origin main', 'git push origin main'],
+    ['git config pull.rebase false', 'git pull', 'git push'],
+    ['git pull --no-ff', 'git push'],
   ],
   'w2-branch': [
-    ['git checkout -b login', 'git commit', 'git commit', 'git push -u origin login'],
-    ['git switch -c login', 'git commit', 'git commit', 'git push --set-upstream origin login'],
-    ['git switch -c login', 'git commit', 'git commit', 'git push origin HEAD'],
+    ['git checkout -b login', ...C('a'), ...C('b'), 'git push -u origin login'],
+    ['git switch -c login', ...C('a'), ...C('b'), 'git push --set-upstream origin login'],
+    ['git switch -c login', ...C('a'), ...C('b'), 'git push origin HEAD'],
+    ['git switch -c login', ...C('a'), ...C('b'), 'git push origin login'],
+    [
+      'git config push.autoSetupRemote true',
+      'git switch -c login',
+      ...C('a'),
+      ...C('b'),
+      'git push',
+    ],
   ],
   'w2-world': [
     ['git pull -r', 'git push'],
     ['git fetch', 'git rebase origin/main', 'git push'],
     ['git pull --rebase origin main', 'git push origin main'],
+    ['git config pull.rebase true', 'git pull', 'git push'],
+    ['git fetch', 'git rebase', 'git push'],
   ],
   'w3-relative': [
     ['git checkout HEAD^^'],
     ['git switch --detach HEAD~2'],
+    ['git switch -d main~2'],
     ['git checkout main~2'],
     ['git checkout @~2'],
     ['git checkout HEAD~1~1'],
@@ -165,12 +207,15 @@ const VARIANTS: Record<string, string[][]> = {
     ['git rebase main bugfix', 'git switch main', 'git merge bugfix'],
     ['git checkout bugfix', 'git rebase main', 'git checkout main', 'git merge --ff-only bugfix'],
     ['git rebase main bugfix', 'git checkout -', 'git merge bugfix'],
+    ['git switch bugfix', 'git rebase main', 'git switch main', 'git rebase bugfix'],
   ],
   'w4-reset': [
     ['git reset --hard HEAD^^'],
     ['git reset --hard c1'],
     ['git reset --hard main~2'],
     ['git reset HEAD~2'],
+    ['git reset --mixed HEAD~2'],
+    ['git reset --soft HEAD~2'],
   ],
   'w4-revert': [
     ['git revert --no-edit HEAD', 'git push origin main'],
@@ -180,7 +225,8 @@ const VARIANTS: Record<string, string[][]> = {
     [
       'git stash push',
       'git checkout fix',
-      'git commit',
+      'echo x > f.c',
+      'git commit -am x',
       'git checkout main',
       'git stash pop',
       'git add .',
@@ -189,10 +235,20 @@ const VARIANTS: Record<string, string[][]> = {
     [
       'git stash save "a medias"',
       'git switch fix',
-      'git commit',
+      ...C('arreglo'),
       'git switch -',
       'git stash apply',
       'git commit -a -m sigo',
+    ],
+    // Sin stash: un commit provisional que luego se deshace con reset --soft.
+    [
+      'git commit -am wip',
+      'git switch fix',
+      'echo x > f.c',
+      'git commit -am x',
+      'git switch main',
+      'git reset --soft HEAD~1',
+      'git commit -m sigo',
     ],
   ],
   'w4-conflict': [
@@ -202,16 +258,19 @@ const VARIANTS: Record<string, string[][]> = {
   ],
   'w4-world': [
     ['git reset HEAD~3', 'git add -A', 'git commit -m x'],
+    ['git reset --mixed HEAD~3', 'git add .', 'git commit -m x'],
     ['git reset --soft HEAD^^^', 'git commit --message junto'],
   ],
   'w5-github-flow': [
-    ['git pull', 'git checkout -b api', 'git commit', 'git commit', 'git push -u origin api'],
+    ['git pull', 'git checkout -b api', ...C('a'), ...C('b'), 'git push -u origin api'],
+    ['git pull origin main', 'git switch -c api', ...C('a'), ...C('b'), 'git push origin HEAD'],
     [
-      'git pull origin main',
+      'git fetch',
+      'git merge --ff-only origin/main',
       'git switch -c api',
-      'git commit',
-      'git commit',
-      'git push origin HEAD',
+      ...C('a'),
+      ...C('b'),
+      'git push origin api',
     ],
   ],
   'w5-tag': [
@@ -221,35 +280,55 @@ const VARIANTS: Record<string, string[][]> = {
   'w5-release': [
     [
       'git checkout -b release/1.0',
-      'git commit',
+      ...C('v1'),
       'git checkout main',
       'git merge --no-ff release/1.0',
       'git checkout develop',
       'git merge --no-ff release/1.0',
       'git tag v1.0 main',
     ],
+    [
+      'git switch -c release/1.0',
+      ...C('v1'),
+      'git switch main',
+      'git merge --no-ff -m "Versión 1.0" release/1.0',
+      'git tag -a v1.0 -m "1.0"',
+      'git switch develop',
+      'git merge --no-ff release/1.0',
+    ],
   ],
   'w5-hotfix': [
     [
       'git checkout -b hotfix',
-      'git commit -am arreglo',
+      ...C('arreglo'),
       'git checkout main',
       'git merge --no-ff hotfix',
       'git tag v1.0.1',
       'git checkout develop',
-      'git merge --no-ff hotfix',
+      'git merge hotfix',
     ],
   ],
   'w5-world': [
     [
       'git checkout -b mini',
-      'git commit',
+      ...C('x'),
       'git fetch',
       'git rebase origin/main',
       'git checkout main',
       'git merge mini',
       'git push',
       'git branch -d mini',
+    ],
+    [
+      'git switch -c mini',
+      ...C('x'),
+      'git switch main',
+      'git pull --ff-only',
+      'git rebase main mini',
+      'git switch main',
+      'git merge --ff-only mini',
+      'git push origin main',
+      'git branch --delete mini',
     ],
   ],
 }
@@ -309,9 +388,10 @@ describe('curso de git: formas equivalentes', () => {
 
     if (level === undefined) throw new Error('falta w1-branch')
     expect(tally(level, ['git branch feature', 'git switch feature']).commands).toBe(1)
-    expect(tally(level, ['git branch feature', 'git commit', 'git switch feature']).commands).toBe(
-      3,
-    )
+    expect(
+      tally(level, ['git branch feature', 'git commit --allow-empty', 'git switch feature'])
+        .commands,
+    ).toBe(3)
     expect(tally(level, ['git switch main', 'git switch main']).commands).toBe(0)
     expect(tally(level, ['git branch a', 'git branch b', 'git switch a']).commands).toBe(3)
   })
@@ -328,6 +408,61 @@ describe('curso de git: formas equivalentes', () => {
       expect(goals.two, each.id).toBeGreaterThan(goals.three)
     }
   })
+})
+
+describe('curso de git: lo que no vale, y por qué (git haría lo mismo)', () => {
+  /** Punto, intento y por qué no llega (lo que haría git de verdad). */
+  const REJECTED: [string, string[], string][] = [
+    [
+      'w0-add',
+      ['echo "int main(void)" > hola.c', 'git commit -m x hola.c'],
+      'git commit f solo vale con ficheros que git ya sigue: «pathspec did not match»',
+    ],
+    [
+      'w2-pull',
+      ['git pull', 'git push'],
+      'con las ramas separadas, pull a secas pide elegir cómo unir',
+    ],
+    [
+      'w2-world',
+      ['git pull --no-rebase', 'git push'],
+      'deja un commit de merge: el reto pide historia en línea',
+    ],
+    ['w3-relative', ['git switch HEAD~2'], 'git switch a un commit pide --detach'],
+    ['w1-ff', ['git merge --no-ff feature'], 'crea un commit de merge: el reto pide avance rápido'],
+    [
+      'w5-release',
+      [
+        'git switch -c release/1.0',
+        ...C('v1'),
+        'git switch main',
+        'git merge --no-ff release/1.0',
+        'git tag v1.0',
+        'git switch develop',
+        'git merge release/1.0',
+      ],
+      'en develop avanza rápido y no queda el merge de la release (Gitflow pide --no-ff)',
+    ],
+    [
+      'w4-revert',
+      ['git reset --hard HEAD~1', 'git push --force'],
+      'reescribe origin: el reto pide deshacer sin forzar',
+    ],
+    [
+      'w4-stash',
+      ['git switch fix', 'echo x > f.c', 'git commit -am x'],
+      'git switch fix se niega: tus cambios en f.c chocan con los de fix',
+    ],
+  ]
+
+  for (const [id, lines, why] of REJECTED) {
+    it(`${id}: ${why}`, () => {
+      const level = levelOf(id)
+
+      if (level === undefined) throw new Error(`falta ${id}`)
+      expect(checkAttempt(level, lines).done).toBe(false)
+    })
+  }
 })
 
 describe('git simulado: más formas de decir lo mismo', () => {

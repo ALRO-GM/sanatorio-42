@@ -22,6 +22,18 @@ export type Commit = {
 
 export type Head = { kind: 'branch'; name: string } | { kind: 'detached'; id: string }
 
+/**
+ * Una entrada del stash: el commit sobre el que se guardó (`base`), el índice y
+ * los ficheros seguidos tal como estaban, y los no seguidos si se pidió `-u`.
+ */
+export type StashEntry = {
+  index: Files
+  work: Files
+  base?: string
+  message?: string
+  untracked?: Files
+}
+
 export type Repo = {
   commits: Record<string, Commit>
   branches: Record<string, string>
@@ -33,14 +45,22 @@ export type Repo = {
   index: Files
   /** El directorio de trabajo. */
   work: Files
-  stash: { index: Files; work: Files }[]
-  /** Un merge con conflictos a medias: con qué se estaba uniendo. */
-  merging: { theirs: string; conflicts: string[] } | null
+  stash: StashEntry[]
+  /**
+   * Un merge con conflictos a medias: con qué se estaba uniendo, los ficheros
+   * que aún no se han marcado como resueltos (`git add`) y el mensaje que
+   * llevará el commit de merge.
+   */
+  merging: { theirs: string; conflicts: string[]; message?: string } | null
   /** Prefijo de los ids de esta persona y el siguiente número. */
   prefix: string
   next: number
   /** La rama en la que estabas antes de cambiar (para `git switch -`). */
   previous?: string
+  /** La rama de origin que sigue cada rama local (`main` → `origin/main`). */
+  upstream?: Record<string, string>
+  /** Lo que se ha puesto con `git config` (`pull.rebase`, `pull.ff`…). */
+  config?: Record<string, string>
 }
 
 /** El remoto común (`origin`): solo commits, ramas y tags. */

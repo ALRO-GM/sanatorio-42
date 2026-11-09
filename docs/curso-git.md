@@ -60,11 +60,13 @@ cierto número de conceptos hay una **prueba de grupo**.
 
 Con el modelo común (`docs/plantilla-cursos.md`, `estimateOfLevel` en
 `packages/gitsim/src/levels/estimate.ts`), cada mundo con las pruebas de grupo
-que lo cierran (20 min cada una), a 2026-10-25: mundo 0 ~27 min, mundo 1
-~57 min, mundo 2 ~37 min, mundo 3 ~24 min, mundo 4 ~51 min y mundo 5 ~1 h
-30 min (con la tercera prueba de grupo y el jefe). **Todo el curso: ~4 h
-46 min.** Es un cálculo de partida: el tiempo activo real de quien supera cada
-punto se guarda (`course_times`) para ajustarlo.
+que lo cierran (20 min cada una), a 2026-11-09: mundo 0 ~26 min, mundo 1
+~1 h 7 min, mundo 2 ~44 min, mundo 3 ~24 min, mundo 4 ~52 min y mundo 5 ~1 h
+40 min (con la tercera prueba de grupo y el jefe). **Todo el curso: ~5 h
+13 min** (más que antes: desde el 2026-11-09 cada commit de las soluciones
+lleva su fichero, `echo` y `git add`, como en git). Es un cálculo de partida:
+el tiempo activo real de quien supera cada punto se guarda (`course_times`)
+para ajustarlo.
 
 ## Estrellas: cuántos comandos
 
@@ -81,28 +83,117 @@ tendrías tres estrellas: empieza de nuevo para mejorar».
   sino lo que cambia. Cuenta lo que mueve commits, ramas, HEAD, tags, stash u
   origin. No cuentan mirar (`status`, `log`, `diff`, `show`), preparar ficheros
   (`echo`, `rm`, `git add`, `git restore`, `git reset HEAD f`), `git fetch`
-  (no toca tus ramas: `fetch` + `merge` = `pull`), lo que falla ni lo que
-  repite algo hecho. Crear una rama y cambiarse a ella cuenta uno
+  (no toca tus ramas: `fetch` + `merge` = `pull`), `git config`, lo que falla
+  ni lo que repite algo hecho. Crear una rama y cambiarse a ella cuenta uno
   (`switch -c` = `checkout -b` = `branch x` + `switch x`).
 - **Umbrales** (`starGoals` en `levels/build.ts`): tres estrellas con tantos
   comandos como la solución del punto (contados igual), dos hasta la mitad más
   uno (`⌈1,5 × n⌉ + 1`), una con más. La web los enseña y la API puntúa con la
   misma función, sobre las líneas que vuelve a ejecutar.
 - **Formas equivalentes**: el motor acepta `git add .` / `-A` / `--all` / `*`
-  / patrones (`*.c`) / carpetas / fichero a fichero / `-u`; `commit -m`,
-  `--message`, `--message=…`, `-m"…"`, `-am`, `-a -m`, `--all`, `commit f`;
+  / patrones (`*.c`) / carpetas / fichero a fichero / `-u` / `-v`;
+  `commit -m`, `--message`, `--message=…`, `-m"…"`, `-am`, `-a -m`, `--all`,
+  `commit f` (solo f, si git ya lo sigue), `commit --allow-empty`;
   `switch -c` / `--create` / `checkout -b` / `switch -c x origin/x` /
   `--track`; `switch` / `checkout` de rama, `switch -` / `checkout -`;
-  `switch --detach` / `checkout ref`; `restore f` / `checkout -- f` /
-  `checkout f`; `restore --staged f` / `reset HEAD f` / `reset f` /
-  `reset -- f`; `rebase main feature` = `switch feature` + `rebase main`;
-  `pull -r` / `--rebase`; `push -u` / `--set-upstream` / `push origin HEAD` /
-  `local:remota`; `branch -d` / `--delete`, `-D` / `-d --force`, `branch -m`;
-  `tag -a … -m`, `tag -d`; `stash push` / `save`, `pop` / `apply`, `drop`;
-  `merge --ff-only`, `--continue`; `revert --no-edit`, `cherry-pick -x`;
-  `HEAD~2` / `HEAD^^` / `@~2` / `main~2` / el id. El test
+  `switch --detach` / `switch -d` / `checkout ref`; `restore f` /
+  `checkout -- f` / `checkout f`; `restore --staged f` / `reset HEAD f` /
+  `reset f` / `reset -- f`; `reset --soft` / `--mixed` / `--hard`;
+  `rebase main feature` = `switch feature` + `rebase main`; `git rebase` y
+  `git merge` a secas (contra la rama que sigues); `pull --rebase` / `-r` /
+  `fetch` + `rebase origin/main` / `git config pull.rebase true`;
+  `pull --no-rebase` / `--no-ff` / `fetch` + `merge origin/main` /
+  `git config pull.rebase false`; `pull --ff-only`; `push -u` /
+  `--set-upstream` / `push origin HEAD` / `local:remota` / `git config
+  push.autoSetupRemote true`; `push origin v1.0` (un tag); `branch -d` /
+  `--delete`, `-D` / `-d --force`, `branch -m`, `branch -u`; `tag -a … -m`,
+  `tag -d`; `stash push` / `save` / `-u`, `pop` / `apply`, `drop`; un commit
+  provisional deshecho con `reset --soft` en vez de stash; `merge --ff-only`,
+  `--continue`; `revert --no-edit`, `cherry-pick -x`; `HEAD~2` / `HEAD^^` /
+  `@~2` / `main~2` / el id. El test
   `apps/api/tests/unit/gitsim-equivalent.test.ts` resuelve cada punto con
-  varias de estas variantes y exige tres estrellas en todas.
+  varias de estas variantes y exige tres estrellas en todas; también comprueba
+  lo que no vale y por qué (lo mismo que haría git).
+
+## Habla y se porta como git (2026-11-09)
+
+Pedido por Alberto: que cada curso simule cómo funciona de verdad. El motor
+(`packages/gitsim/src/run.ts`, `view.ts`, `refs.ts`, `text.ts`):
+
+- **Contesta como git 2.4x, en inglés**, igual que los simuladores de shell y
+  Docker contestan como bash y Docker: lo que se ve en el curso es lo que se
+  verá en el clúster («nothing to commit, working tree clean», «Switched to
+  branch 'main'», « ! [rejected] main -> main (fetch first)»). Resume lo que
+  git escribe: sin hashes largos ni fechas y sin las líneas de ayuda «(use "git
+  add" …)», como con `advice.statusHints` apagado. Lo que es del simulador y no
+  de git (topes, lo que no está, la seguridad) va en castellano con el prefijo
+  `peer4u-sandbox:`. La teoría y el Repaso citan los mensajes tal cual, en los
+  tres idiomas; la ayuda de la terminal (`git.term.hint`) avisa de que contesta
+  en inglés.
+- **Un commit sin nada preparado se niega** («nothing to commit», «no changes
+  added to commit», «nothing added to commit but untracked files present»);
+  `--allow-empty` sigue valiendo. Por eso los puntos se montan y se resuelven
+  con commits de verdad (`levels/save.ts`: un fichero, `git add` y `git
+  commit`), y `w0-commit` empieza con el Makefile ya preparado.
+- **Cambiar de rama se lleva los cambios** sin commit (`M  f.c`) salvo que
+  choquen con los de la otra rama: entonces se niega («Your local changes to
+  the following files would be overwritten by checkout»). Igual con un fichero
+  sin seguir que la otra rama trae. Merge, cherry-pick y revert dejan tus
+  cambios donde no tocan y se niegan donde sí; rebase pide la carpeta limpia.
+  `w4-stash` monta fix con otro f.c, así que el stash sigue haciendo falta.
+- **`git switch` solo va a ramas** (a un commit pide `--detach`); `checkout`
+  sí separa HEAD, con su aviso, y al volver de un HEAD separado con commits
+  sueltos git avisa de que se quedan atrás.
+- **Ramas que siguen a origin**: `clone` deja main siguiendo a origin/main,
+  `switch x` crea x siguiendo a origin/x, `push -u` y `branch -u` la ponen.
+  `git status` dice si vas por delante, por detrás o separada. `git push` a
+  secas sin upstream se niega y dice cómo (`--set-upstream`), salvo con
+  `push.autoSetupRemote`.
+- **`git pull` con las ramas separadas pide elegir** (desde git 2.33):
+  `--rebase`, `--no-rebase`, `--ff-only` o `git config pull.rebase true|false`
+  / `pull.ff only`. Si puede avanzar rápido, avanza sin preguntar.
+- **push rechazado** dice por qué: «fetch first» (origin tiene lo que no has
+  traído) o «non-fast-forward» (lo has traído y no lo has unido); la rama
+  protegida contesta como GitHub (GH006). `--force-with-lease` se niega si
+  origin se ha movido desde tu último fetch.
+- **fetch** enseña qué rama se movió (`c1..c3  main -> origin/main`), no borra
+  las ramas de origin que ya no están salvo con `--prune`, y trae los tags.
+- **`git log rama`**, `a..b`, `^a`, `-n 3` y `--all` (con origin/… y tags);
+  sin `--oneline`, el formato largo. `git diff` y `git show` dan el diff
+  unificado; `status -s` / `-sb`, la forma corta.
+- **Conflictos**: `git add` marca el fichero como resuelto (git no mira las
+  marcas; las misiones sí); sin add, «Committing is not possible because you
+  have unmerged files». `commit -a` también resuelve. Los mensajes de merge
+  son los de git: «Merge branch 'x'» (y « into y» fuera de main), «Merge
+  remote-tracking branch 'origin/main'», «Merge branch 'main' of …» en un pull;
+  los de revert, `Revert "…"`.
+- **rebase** salta los commits cuyo cambio ya está en la otra rama («dropping
+  … -- patch contents already upstream»).
+
+### Lo que el simulador hace distinto, a sabiendas
+
+- Los ids son `c1`, `c2'`… y no hashes: dos caminos que llegan a lo mismo
+  dan lo mismo (así se comparan los objetivos). El orden de `git log` sale de
+  esos ids.
+- `git commit` sin `-m` no abre editor: pone un mensaje («Commit c3»). Igual
+  `tag -a` sin `-m` y `merge --continue`.
+- Un rebase, cherry-pick o revert que choca no se queda a medias: falla con un
+  mensaje `peer4u-sandbox:` y no cambia nada (no hay `--continue` ni
+  `--abort`). Los conflictos se enseñan con merge, que sí se queda a medias.
+  El rebase interactivo tampoco está (para juntar commits, `reset --soft`).
+- Un `pull` que falla (ramas separadas sin elegir) no deja hecho el fetch: en
+  git sí se queda. Un push con varias ramas en el que una se rechaza no sube
+  ninguna.
+- Un tag anotado se guarda como uno ligero; `git stash pop` con conflicto
+  deja las marcas en el fichero, pero sin «both modified» en el índice.
+- `git clone` no necesita dirección (clona el origin del reto) y no hay
+  `origin/HEAD`. `gh pr merge rama` abre y acepta el pull request de una vez.
+- `ls` lista también lo que hay dentro de carpetas (`src/a.c`); `mkdir` y `cd`
+  no hacen falta.
+
+La revisión punto por punto (qué dice cada uno, qué se ha comprobado y qué
+alternativas valen o no) está en
+[revision-cursos/git.md](revision-cursos/git.md).
 
 ## Protección de la terminal
 
@@ -182,10 +273,10 @@ tendrías tres estrellas: empieza de nuevo para mejorar».
   commit de merge en origin aunque la rama esté protegida, y se niega si hay
   conflictos.
   - Grupo 1: cada cual su rama con su fichero, la sube y la une en main con
-    `merge --no-ff`; quien llega tarde tiene que traer main (pull) para subir.
+    `merge --no-ff`; quien llega tarde tiene que traer main (`git pull --no-rebase`: las ramas ya se han separado) para subir.
   - Grupo 2: main protegida; cada cual se apunta en `equipo.txt` desde su rama.
     Cuando ya habéis clonado, la «compañera» cambia ese final en main, así que
-    a todo el mundo le choca el pull request: cada cual trae main, resuelve y vuelve.
+    a todo el mundo le choca el pull request: cada cual trae main (`git pull --no-rebase origin main`), resuelve y vuelve.
   - Grupo 3: Gitflow entero para cada cual: su funcionalidad en develop, su
     hotfix `1.0.{n}` desde main y su versión `1.{n}` desde develop, con tags
     en main y unidas de vuelta en develop.

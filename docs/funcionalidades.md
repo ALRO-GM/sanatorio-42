@@ -173,7 +173,7 @@ valoraciones.
 | Funcionalidad | Modo | Quién | Dónde |
 | --- | --- | --- | --- |
 | Camino con forma de ramas: mundos en capítulos plegables, puntos que se abren en orden, estrellas | N | Todos | `features/gitcourse/GitCourseTab.tsx` |
-| Cada punto: animación de la estructura, teoría y reto en una terminal con git simulado | N | Todos; solo cuenta sentado en un puesto del clúster, o fuera con permiso del panel diciendo dónde estás (en 42, teletrabajo, fuera de 42) | `LevelView.tsx`, `GitGraph.tsx`, `PlacePicker.tsx` |
+| Cada punto: animación de la estructura, teoría y reto en una terminal con git simulado que contesta y se porta como git 2.4x (mensajes en inglés) | N | Todos; solo cuenta sentado en un puesto del clúster, o fuera con permiso del panel diciendo dónde estás (en 42, teletrabajo, fuera de 42) | `LevelView.tsx`, `GitGraph.tsx`, `PlacePicker.tsx` |
 | Test previo a cada prueba de grupo: entero o una hora de espera | N | Sentado en un puesto | `GateView.tsx` |
 | Quién de tu campus espera esa prueba | N | Todos | `GatePeople` |
 | Salas de la prueba de grupo: crear, entrar, empezar, órdenes en un origin común | N | Tras el test `[gitcourse.groups]` | `GroupRoom.tsx` |

@@ -45,7 +45,9 @@ describe('curso de git: prueba de grupo', () => {
     const input = screen.getByRole('textbox', { name: text('course.term.input') })
 
     await user.type(input, `git switch -c ${ME.login}{Enter}`)
-    expect(await screen.findByText(new RegExp(`Ahora en la nueva rama ${ME.login}`))).toBeTruthy()
+    expect(
+      await screen.findByText(new RegExp(`Switched to a new branch '${ME.login}'`)),
+    ).toBeTruthy()
     expect(screen.getByText(new RegExp(`origin/${ME.login} tiene un commit`))).toBeTruthy()
 
     // Salir vuelve a la lista.

@@ -2,7 +2,11 @@
  * Mundos 2 a 5: remotos, reescribir la historia, deshacer y flujos de trabajo.
  */
 
+import { save } from './save.js'
 import type { Level } from './types.js'
+
+/** Lo primero que sube la compañera a origin. */
+const INIT = [...save('init', 'README.md'), 'git push']
 
 export const WORLD_2: Level[] = [
   {
@@ -16,17 +20,17 @@ export const WORLD_2: Level[] = [
       how: [
         'git clone',
         'git commit -m "mi parte"',
-        'git push                    # «Subido main a origin»',
+        'git push                    # «main -> main»',
       ],
       when: 'clone, una vez al empezar; push, cuando tu trabajo está listo.',
       whenNot: 'No subas a una rama compartida algo que no compila.',
       looks: 'Aparece origin/main: dónde estaba main en origin la última vez que hablaste con él.',
       problems:
-        'Olvidar el push: git log --oneline --all sigue con «(origin/main) init» y tu commit solo está aquí.',
+        "Olvidar el push: git status dice «Your branch is ahead of 'origin/main' by 1 commit.» y tu commit solo está aquí.",
     },
     start: [],
-    remote: { setup: ['git commit -m "init"', 'git push'], cloned: false },
-    solution: ['git clone', 'git commit -m "mi parte"', 'git push'],
+    remote: { setup: INIT, cloned: false },
+    solution: ['git clone', ...save('mi parte'), 'git push'],
     check: { remote: ['main'] },
   },
   {
@@ -37,18 +41,15 @@ export const WORLD_2: Level[] = [
     goal: 'Tu compañera ha subido dos commits: tráelos con fetch y lleva main hasta origin/main.',
     theory: {
       what: 'git fetch baja lo nuevo de origin y mueve origin/main, sin tocar tus ramas.',
-      how: ['git fetch                   # «Bajados 2 commits de origin»', 'git merge origin/main'],
+      how: ['git fetch                   # «main -> origin/main»', 'git merge origin/main'],
       when: 'Para ver qué han subido los demás antes de mezclarlo con lo tuyo.',
       whenNot: 'clone se hace una vez; fetch, cada vez que quieras lo nuevo.',
       looks: 'origin/main avanza; main se queda quieta hasta que la unes.',
       problems:
-        'Creer que fetch ya une: git log --oneline sigue con «init» arriba. Falta git merge origin/main.',
+        "Creer que fetch ya une: git status dice «Your branch is behind 'origin/main' by 2 commits». Falta git merge origin/main.",
     },
     start: [],
-    remote: {
-      setup: ['git commit -m "init"', 'git push'],
-      after: ['git commit -m "o1"', 'git commit -m "o2"', 'git push'],
-    },
+    remote: { setup: INIT, after: [...save('o1'), ...save('o2'), 'git push'] },
     solution: ['git fetch', 'git merge origin/main'],
   },
   {
@@ -56,26 +57,24 @@ export const WORLD_2: Level[] = [
     world: 2,
     kind: 'step',
     title: 'pull: fetch y merge',
-    goal: 'Tú y tu compañera habéis hecho un commit a la vez: trae lo suyo con pull y sube el resultado.',
+    goal: 'Tú y tu compañera habéis hecho un commit a la vez: trae lo suyo con pull, uniéndolo con un merge, y sube el resultado.',
     theory: {
-      what: 'git pull es fetch más merge de golpe. Si los dos habéis avanzado, crea un commit de merge.',
+      what: 'git pull es fetch más unir. Si los dos habéis avanzado, dile cómo: --no-rebase une con un commit de merge.',
       how: [
-        'git push                    # rechazado: origin va por delante',
-        'git pull                    # baja lo suyo y lo une',
+        'git push                    # rechazado: «fetch first»',
+        'git pull --no-rebase        # baja lo suyo y lo une',
         'git push',
       ],
       when: 'Antes de empezar a trabajar y antes de subir.',
-      whenNot: 'Si quieres mirar antes de unir, usa git fetch: pull une sin preguntar.',
+      whenNot:
+        'Si quieres mirar antes de unir, usa git fetch. Para no repetir --no-rebase: git config pull.rebase false, una vez.',
       looks: 'Un commit de merge que une tu main con origin/main.',
       problems:
-        'Subir sin traer: git push responde «rechazado: origin/main tiene commits que tú no tienes. Haz git pull primero».',
+        'git pull a secas, con las dos ramas avanzadas, se niega: «fatal: Need to specify how to reconcile divergent branches.». Elige: --no-rebase (merge) o --rebase.',
     },
-    start: ['git commit -m "lo mío"'],
-    remote: {
-      setup: ['git commit -m "init"', 'git push'],
-      after: ['git commit -m "lo suyo"', 'git push'],
-    },
-    solution: ['git pull', 'git push'],
+    start: save('lo mío'),
+    remote: { setup: INIT, after: [...save('lo suyo'), 'git push'] },
+    solution: ['git pull --no-rebase', 'git push'],
     check: { remote: ['main'] },
   },
   {
@@ -85,25 +84,25 @@ export const WORLD_2: Level[] = [
     title: 'Subir tu rama',
     goal: 'main está protegida en origin: crea la rama login, haz dos commits y súbela a origin.',
     theory: {
-      what: 'git push origin rama sube cualquier rama. En los equipos, main suele estar protegida: se entra con un pull request.',
+      what: 'git push origin rama sube cualquier rama; con -u, además, la deja seguida y luego basta git push. En los equipos, main suele estar protegida.',
       how: [
         'git switch -c login',
         'git commit -m "formulario"',
-        'git push origin login       # «Subido login a origin»',
+        'git push -u origin login    # «[new branch] login -> login»',
       ],
       when: 'En equipo: tu rama en origin es tu copia de seguridad y lo que el resto revisa.',
       whenNot: 'Sin protecciones, git push sube main directamente, sin revisión.',
       looks: 'Aparece origin/login junto a tu login.',
       problems:
-        'Subir commits de main: «main está protegida en origin: sube tu rama y únela con un pull request».',
+        'git push a secas en una rama nueva se niega: «fatal: The current branch login has no upstream branch.». Di adónde: git push -u origin login.',
     },
     start: [],
-    remote: { setup: ['git commit -m "init"', 'git push'], locked: ['main'] },
+    remote: { setup: INIT, locked: ['main'] },
     solution: [
       'git switch -c login',
-      'git commit -m "formulario"',
-      'git commit -m "validación"',
-      'git push origin login',
+      ...save('formulario'),
+      ...save('validación'),
+      'git push -u origin login',
     ],
     check: { remote: ['login'], branches: ['login'] },
   },
@@ -117,20 +116,17 @@ export const WORLD_2: Level[] = [
       what: 'git pull --rebase trae lo de origin y pone tus commits encima: la historia queda en línea.',
       how: [
         'git push                    # rechazado',
-        'git pull --rebase           # «Rebase hecho»',
+        'git pull --rebase           # «Successfully rebased»',
         'git push',
       ],
       when: 'Con commits que aún no has subido.',
       whenNot: 'Con commits ya subidos, no: el rebase cambia sus ids.',
       looks: 'Tu commit se va y aparece una copia (con comilla) encima de lo suyo.',
       problems:
-        'git pull a secas responde «Merge hecho» y deja un commit de merge que el reto no quiere.',
+        'git pull --no-rebase deja un commit de merge que el reto no quiere, y git pull a secas se niega («Need to specify how to reconcile divergent branches»).',
     },
-    start: ['git commit -m "lo mío"'],
-    remote: {
-      setup: ['git commit -m "init"', 'git push'],
-      after: ['git commit -m "lo suyo"', 'git push'],
-    },
+    start: save('lo mío'),
+    remote: { setup: INIT, after: [...save('lo suyo'), 'git push'] },
     solution: ['git pull --rebase', 'git push'],
     check: { remote: ['main'] },
   },
@@ -146,17 +142,18 @@ export const WORLD_3: Level[] = [
     theory: {
       what: 'HEAD~2 es «dos commits antes de HEAD»; main^, el padre de main. Llegas a un commit sin copiar su id.',
       how: [
-        'git checkout HEAD~2         # «HEAD separado en c1»',
-        'git checkout main^',
+        'git checkout HEAD~2         # «HEAD is now at c1 uno»',
+        'git switch --detach main^   # lo mismo, con switch',
         'git switch main             # vuelves a la rama',
       ],
       when: 'Para mirar el código de hace unos commits.',
-      whenNot: 'HEAD~1 y main~1 solo coinciden si estás en main.',
+      whenNot:
+        'git switch sin --detach solo va a ramas: git switch HEAD~2 responde «fatal: a branch is expected».',
       looks: 'HEAD apunta a un commit, no a una rama (HEAD separado).',
       problems:
-        'Commits con HEAD separado: el curso avisa, «lo que hagas aquí no está en ninguna rama». Crea una rama antes.',
+        'Hacer commits con HEAD separado y volver a main: git avisa «you are leaving 1 commit behind». Antes de hacerlos, crea una rama: git switch -c nueva.',
     },
-    start: ['git commit -m "uno"', 'git commit -m "dos"', 'git commit -m "tres"'],
+    start: [...save('uno'), ...save('dos'), ...save('tres')],
     solution: ['git checkout HEAD~2'],
   },
   {
@@ -175,9 +172,9 @@ export const WORLD_3: Level[] = [
       whenNot: 'Si ya lo subiste, no: el resto tiene el viejo.',
       looks: 'El último círculo se cambia por una copia (con comilla).',
       problems:
-        'Hacer otro commit: git log --oneline enseña los dos, «aregla el parsr» y «Arregla el parser».',
+        'Hacer otro commit: sin cambios git dice «nothing to commit»; con cambios, git log --oneline enseña los dos, «aregla el parsr» y «Arregla el parser».',
     },
-    start: ['git commit -m "base"', 'git commit -m "aregla el parsr"'],
+    start: [...save('base'), ...save('aregla el parsr', 'parser.c')],
     solution: ['git commit --amend -m "Arregla el parser"'],
   },
   {
@@ -222,20 +219,20 @@ export const WORLD_3: Level[] = [
     goal: 'Pon los commits de feature encima de main, sin commit de merge.',
     theory: {
       what: 'git rebase copia los commits de tu rama encima de otra: la historia queda en línea.',
-      how: ['git switch feature', 'git rebase main             # «Rebase hecho»'],
+      how: ['git switch feature', 'git rebase main             # «Successfully rebased»'],
       when: 'Para poner al día tu rama antes de unirla, si solo la usas tú.',
       whenNot:
         'En ramas compartidas, no: sus commits cambian de id y al resto se le rompe la historia.',
       looks: 'Los círculos de feature se van y aparecen copias (con comilla) encima de main.',
       problems:
-        'Desde main, git rebase main dice «Avance rápido hasta c3» y feature no se mueve. Cámbiate a feature.',
+        'Desde main, git rebase main dice «Current branch main is up to date.» y feature no se mueve. Cámbiate a feature.',
     },
     start: [
       'git switch -c feature',
-      'git commit -m "f1"',
-      'git commit -m "f2"',
+      ...save('f1'),
+      ...save('f2'),
       'git switch main',
-      'git commit -m "m1"',
+      ...save('m1'),
     ],
     solution: ['git switch feature', 'git rebase main'],
   },
@@ -251,21 +248,15 @@ export const WORLD_3: Level[] = [
         'git switch bugfix',
         'git rebase main',
         'git switch main',
-        'git merge bugfix            # avance rápido',
+        'git merge bugfix            # «Fast-forward»',
       ],
       when: 'En equipos que prefieren una historia lineal, como muchos proyectos de código abierto.',
       whenNot: 'Si el equipo quiere ver dónde se unió cada rama, mejor un merge normal.',
       looks: 'Una sola línea de círculos, con la copia de bugfix al final.',
       problems:
-        'Unir sin rebase antes: git merge bugfix responde «Merge hecho: c4» y deja un commit de merge.',
+        "Unir sin rebase antes: git merge bugfix dice «Merge made by the 'ort' strategy.» y deja un commit de merge.",
     },
-    start: [
-      'git switch -c bugfix',
-      'git commit -m "b1"',
-      'git switch main',
-      'git commit -m "m1"',
-      'git commit -m "m2"',
-    ],
+    start: ['git switch -c bugfix', ...save('b1'), 'git switch main', ...save('m1'), ...save('m2')],
     solution: ['git switch bugfix', 'git rebase main', 'git switch main', 'git merge bugfix'],
   },
 ]
@@ -278,17 +269,18 @@ export const WORLD_4: Level[] = [
     title: 'Volver atrás: reset',
     goal: 'Los dos últimos commits sobran (no se han subido): lleva main dos commits atrás.',
     theory: {
-      what: 'git reset lleva la rama a otro commit. --soft deja los cambios preparados; sin opción, sin preparar; --hard los borra.',
+      what: 'git reset lleva la rama a otro commit. --soft deja los cambios preparados; sin opción (--mixed), sin preparar; --hard los borra.',
       how: [
-        'git reset HEAD~2            # los cambios siguen',
+        'git reset HEAD~2            # los cambios siguen en tu carpeta',
         'git reset --hard HEAD~2     # y los borra',
       ],
       when: 'Para deshacer commits que solo tienes tú.',
       whenNot: 'Con commits ya subidos, no: el push sale rechazado.',
       looks: 'main retrocede; los círculos de delante quedan sin rama.',
-      problems: '--hard dice «cambios descartados»: no vuelven. Si dudas, sin opción.',
+      problems:
+        '--hard dice «HEAD is now at c1 bien» y lo de mal y peor desaparece de tu carpeta: no vuelve. Si dudas, sin opción.',
     },
-    start: ['git commit -m "bien"', 'git commit -m "mal"', 'git commit -m "peor"'],
+    start: [...save('bien'), ...save('mal'), ...save('peor')],
     solution: ['git reset --hard HEAD~2'],
   },
   {
@@ -299,22 +291,19 @@ export const WORLD_4: Level[] = [
     goal: 'Alguien subió secreto.txt a origin: deshazlo con un commit nuevo y súbelo (sin forzar).',
     theory: {
       what: 'git revert crea un commit que hace lo contrario de otro. No reescribe la historia.',
-      how: ['git revert HEAD', 'git push                    # sin forzar'],
+      how: [
+        'git revert HEAD             # «Revert "ups"»',
+        'git push                    # sin forzar',
+      ],
       when: 'Para deshacer algo que ya está en origin.',
       whenNot: 'Si subiste una clave, revert no basta: sigue en la historia. Cámbiala.',
       looks: 'Un círculo nuevo al final; el malo sigue ahí.',
       problems:
-        'reset en lo ya subido: git push responde «rechazado: origin/main tiene commits que tú no tienes».',
+        'reset en lo ya subido: git push responde «! [rejected] main -> main (non-fast-forward)».',
     },
     start: [],
     remote: {
-      setup: [
-        'git commit -m "init"',
-        'echo 1234 > secreto.txt',
-        'git add secreto.txt',
-        'git commit -m "ups"',
-        'git push',
-      ],
+      setup: [...INIT.slice(0, -1), ...save('ups', 'secreto.txt'), 'git push'],
     },
     solution: ['git revert HEAD', 'git push'],
     check: { remote: ['main'], files: { main: ['secreto.txt'] } },
@@ -324,27 +313,32 @@ export const WORLD_4: Level[] = [
     world: 4,
     kind: 'step',
     title: 'Aparcar cambios: stash',
-    goal: 'Estás a medias en main y te piden un arreglo: aparca tus cambios, haz un commit en fix, vuelve y haz commit con lo que tenías.',
+    goal: 'Estás a medias con f.c en main y te piden arreglarlo en fix, donde f.c es distinto: aparca tus cambios, arregla f.c en fix con un commit, vuelve y haz commit con lo que tenías.',
     theory: {
       what: 'git stash aparca tus cambios sin commit y deja la carpeta limpia; git stash pop los devuelve.',
       how: ['git stash', 'git switch fix', 'git switch main', 'git stash pop'],
       when: 'Para cambiar de rama un momento sin un commit a medias.',
-      whenNot: 'No es un almacén: lo que dura va en un commit.',
+      whenNot:
+        'Si el fichero es igual en las dos ramas, git switch se lleva tus cambios contigo. Y el stash no es un almacén: lo que dura va en un commit.',
       looks: 'Nada en el árbol: el stash no es una rama.',
       problems:
-        'Sin aparcar, git switch responde «tienes cambios sin guardar: haz commit o stash antes de cambiar de rama».',
+        'Sin aparcar, git switch fix se niega: «error: Your local changes to the following files would be overwritten by checkout: f.c».',
     },
     start: [
       'echo base > f.c',
       'git add f.c',
       'git commit -m "base"',
-      'git branch fix',
+      'git switch -c fix',
+      'echo "base con aviso" > f.c',
+      'git commit -am "Avisa del fallo"',
+      'git switch main',
       'echo "a medias" > f.c',
     ],
     solution: [
       'git stash',
       'git switch fix',
-      'git commit -m "arreglo"',
+      'echo "base arreglada" > f.c',
+      'git commit -am "arreglo"',
       'git switch main',
       'git stash pop',
       'git commit -am "sigo"',
@@ -358,9 +352,9 @@ export const WORLD_4: Level[] = [
     title: 'Conflictos',
     goal: 'Une rama en main; el conflicto en f.c se resuelve dejando la línea «los dos».',
     theory: {
-      what: 'Si dos ramas cambian la misma línea, git marca el fichero con <<<<<<< y >>>>>>> y espera.',
+      what: 'Si dos ramas cambian la misma línea, git marca el fichero con <<<<<<< y >>>>>>> y espera. git add marca el fichero como resuelto.',
       how: [
-        'git merge rama              # «CONFLICTO en f.c»',
+        'git merge rama              # «CONFLICT (content): Merge conflict in f.c»',
         'echo "los dos" > f.c',
         'git add f.c',
         'git commit -m "Une rama"',
@@ -368,7 +362,8 @@ export const WORLD_4: Level[] = [
       when: 'Llega con un merge; tú decides qué queda.',
       whenNot: 'Si no es buen momento, git merge --abort lo deja como antes.',
       looks: 'Un commit de merge normal al terminar.',
-      problems: 'Commit sin add: «quedan conflictos sin resolver: f.c». Haz git add f.c antes.',
+      problems:
+        'Commit sin add: «error: Committing is not possible because you have unmerged files.». Y git add no mira las marcas: quítalas antes de añadir.',
     },
     start: [
       'echo base > f.c',
@@ -396,10 +391,11 @@ export const WORLD_4: Level[] = [
       when: 'Antes de subir una rama con commits de «prueba», «otra prueba», «ahora sí».',
       whenNot: 'Si ya están en origin, no los juntes: el push saldría rechazado.',
       looks: 'Tres círculos se cambian por uno.',
-      problems: 'Con --hard sale «cambios descartados» y ls dice «(vacío)».',
+      problems:
+        'Con --hard sale «HEAD is now at c1 base» y ls ya no enseña a.c, b.c ni c.c: se han perdido.',
     },
     start: [
-      'git commit -m "base"',
+      ...save('base', 'README.md'),
       'echo a > a.c',
       'git add a.c',
       'git commit -m "prueba"',
@@ -424,25 +420,25 @@ export const WORLD_5: Level[] = [
     goal: 'main está protegida: trae lo último, saca la rama api desde main, haz dos commits y súbela para el pull request.',
     theory: {
       what: 'GitHub flow: main siempre funciona; cada cambio va en una rama corta que se revisa en un pull request.',
-      how: ['git pull', 'git switch -c api', 'git commit -m "rutas"', 'git push origin api'],
+      how: ['git pull', 'git switch -c api', 'git commit -m "rutas"', 'git push -u origin api'],
       when: 'Equipos pequeños que despliegan a menudo.',
       whenNot: 'Con varias versiones vivas (1.x y 2.x), encaja mejor Gitflow.',
       looks: 'Ramas cortas que salen de main y vuelven.',
       problems:
-        'Subir commits de main: «main está protegida en origin: sube tu rama y únela con un pull request».',
+        'Subir main: «remote: error: GH006: Protected branch update failed for refs/heads/main.». Sube tu rama y únela con un pull request.',
     },
     start: [],
     remote: {
-      setup: ['git commit -m "init"', 'git push'],
-      after: ['git commit -m "lo último"', 'git push'],
+      setup: INIT,
+      after: [...save('lo último'), 'git push'],
       locked: ['main'],
     },
     solution: [
       'git pull',
       'git switch -c api',
-      'git commit -m "rutas"',
-      'git commit -m "tests"',
-      'git push origin api',
+      ...save('rutas'),
+      ...save('tests'),
+      'git push -u origin api',
     ],
     check: { remote: ['api'], branches: ['main', 'api'] },
   },
@@ -459,13 +455,13 @@ export const WORLD_5: Level[] = [
         'git tag v0.9 HEAD~1         # en el anterior',
         'git log --oneline           # «tag: v1.0»',
       ],
-      when: 'Al entregar o publicar una versión.',
+      when: 'Al entregar o publicar una versión. Para publicarla, git push origin v1.0 (o --tags).',
       whenNot: 'Para algo que avanza con cada commit, una rama.',
       looks: 'Una etiqueta pegada a un círculo para siempre.',
       problems:
-        'Repetir nombre: «ya existe el tag v1.0». Un tag publicado no se mueve: saca otra versión.',
+        "Repetir nombre: «fatal: tag 'v1.0' already exists». Un tag publicado no se mueve: saca otra versión.",
     },
-    start: ['git commit -m "casi"', 'git commit -m "listo"'],
+    start: [...save('casi'), ...save('listo')],
     solution: ['git tag v1.0', 'git tag v0.9 HEAD~1'],
     check: { tags: true },
   },
@@ -486,18 +482,12 @@ export const WORLD_5: Level[] = [
       when: 'Software con versiones numeradas y fechas de entrega.',
       whenNot: 'Para webs que se despliegan cada día, mejor GitHub flow.',
       looks: 'Dos ramas largas y una release entre ellas.',
-      problems:
-        'Sin --no-ff sale «Avance rápido (fast-forward) hasta c4» y no queda commit de merge.',
+      problems: 'Sin --no-ff sale «Fast-forward» y no queda commit de merge.',
     },
-    start: [
-      'git commit -m "init"',
-      'git switch -c develop',
-      'git commit -m "d1"',
-      'git commit -m "d2"',
-    ],
+    start: [...save('init', 'README.md'), 'git switch -c develop', ...save('d1'), ...save('d2')],
     solution: [
       'git switch -c release/1.0',
-      'git commit -m "versión 1.0"',
+      ...save('versión 1.0'),
       'git switch main',
       'git merge --no-ff release/1.0',
       'git tag v1.0',
@@ -519,7 +509,7 @@ export const WORLD_5: Level[] = [
         'git switch main',
         'git merge --no-ff hotfix',
         'git switch develop',
-        'git merge hotfix',
+        'git merge --no-ff hotfix',
       ],
       when: 'Para un fallo grave publicado que no puede esperar.',
       whenNot: 'Si el fallo no está publicado, arréglalo en develop.',
@@ -527,20 +517,20 @@ export const WORLD_5: Level[] = [
       problems: 'Olvidar develop: allí git log --oneline no tiene «arreglo» y el fallo vuelve.',
     },
     start: [
-      'git commit -m "init"',
+      ...save('init', 'README.md'),
       'git tag v1.0',
       'git switch -c develop',
-      'git commit -m "a medias"',
+      ...save('a medias'),
       'git switch main',
     ],
     solution: [
       'git switch -c hotfix',
-      'git commit -m "arreglo"',
+      ...save('arreglo'),
       'git switch main',
       'git merge --no-ff hotfix',
       'git tag v1.0.1',
       'git switch develop',
-      'git merge hotfix',
+      'git merge --no-ff hotfix',
     ],
     check: { branches: ['main', 'develop'], tags: true, head: false },
   },
@@ -563,16 +553,13 @@ export const WORLD_5: Level[] = [
       whenNot: 'Sin tests automáticos, no: cada unión puede romper main.',
       looks: 'Una sola línea en main, sin merges.',
       problems:
-        'Unir sin traer antes: git push responde «rechazado: origin/main tiene commits que tú no tienes».',
+        'Unir sin traer antes: git push responde «! [rejected] main -> main (fetch first)».',
     },
     start: [],
-    remote: {
-      setup: ['git commit -m "init"', 'git push'],
-      after: ['git commit -m "lo suyo"', 'git push'],
-    },
+    remote: { setup: INIT, after: [...save('lo suyo'), 'git push'] },
     solution: [
       'git switch -c mini',
-      'git commit -m "pequeño cambio"',
+      ...save('pequeño cambio'),
       'git switch main',
       'git pull',
       'git switch mini',

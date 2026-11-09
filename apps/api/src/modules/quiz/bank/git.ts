@@ -32,7 +32,7 @@ export const GIT: readonly Concept[] = [
         ],
       },
       {
-        // Predicción (motor: tras el commit, «Cambios sin preparar: b.txt»)
+        // Predicción (motor: tras el commit, «Changes not staged for commit: modified: b.txt»)
         ask: [
           'Cambias `a.txt` y `b.txt`, haces `git add a.txt` y un commit. ¿Qué dice después `git status`?',
           'Con `a.txt` y `b.txt` cambiados, tras `git add a.txt` y un commit, `git status` dice…',
@@ -72,7 +72,7 @@ export const GIT: readonly Concept[] = [
         ],
       },
       {
-        // Predicción (motor: «Preparado para el commit: main.c»)
+        // Predicción (motor: «Changes to be committed: modified: main.c»)
         ask: [
           'Cambias `main.c` y haces `git add main.c`, sin commit. ¿Cómo sale `main.c` en `git status`?',
           'Tras `git add main.c` y antes del commit, `git status` enseña `main.c` como…',
@@ -117,7 +117,7 @@ export const GIT: readonly Concept[] = [
         ],
       },
       {
-        // Predicción (motor: «Rama login creada en c0», el commit de main)
+        // Predicción (motor: login apunta a c0, el commit de main)
         ask: [
           'Estás en `main` y creas la rama `login` sin hacer commits. ¿A qué commit apunta `login`?',
           'Recién creada desde `main`, sin commits nuevos, la rama `login` apunta…',
@@ -239,7 +239,7 @@ export const GIT: readonly Concept[] = [
         ],
       },
       {
-        // Predicción (motor: «Avance rápido (fast-forward) hasta c2», sin commit nuevo)
+        // Predicción (motor: «Updating c1..c2 · Fast-forward», sin commit nuevo)
         ask: [
           '`feature` lleva 2 commits y `main` no ha avanzado. ¿Cuántos commits de merge crea `git merge feature` en `main`?',
           '¿Cuántos commits de merge crea `git merge feature` si `main` no se ha movido desde que salió `feature`?',
@@ -271,7 +271,7 @@ export const GIT: readonly Concept[] = [
         right: ['Un commit con dos padres', 'Un commit que une las dos historias'],
       },
       {
-        // Predicción: las dos ramas han avanzado (motor: «Merge hecho: c7»)
+        // Predicción: las dos ramas han avanzado (motor: «Merge made by the 'ort' strategy.»)
         ask: [
           '`main` y `feature` tienen un commit nuevo cada una. Tras `git merge feature`, ¿cuántos padres tiene el commit nuevo?',
           'Si las dos ramas han avanzado, ¿cuántos padres tiene el commit que crea `git merge`?',
@@ -414,7 +414,7 @@ export const GIT: readonly Concept[] = [
         ],
       },
       {
-        // Predicción (motor: «rechazado: origin/main tiene commits que tú no tienes»)
+        // Predicción (motor: « ! [rejected] main -> main (fetch first)»)
         ask: [
           'Tu `main` y el de origin han avanzado cada uno por su lado. ¿Qué pasa con `git push`?',
           'Si origin tiene un commit que tú no tienes y tú uno que origin no tiene, `git push`…',
@@ -494,7 +494,7 @@ export const GIT: readonly Concept[] = [
         ],
       },
       {
-        // Predicción (motor: «Rebase hecho: c5 copiados encima de main», y sale c5')
+        // Predicción (motor: «Successfully rebased and updated refs/heads/feature.», y sale c5')
         ask: [
           'En `feature` tienes 2 commits y `main` ha avanzado. Tras `git rebase main`, ¿qué pasa con los ids de tus commits?',
           'Tras `git rebase main` en `feature`, los ids de tus 2 commits…',
@@ -611,7 +611,7 @@ export const GIT: readonly Concept[] = [
         ],
       },
       {
-        // Predicción (motor: git checkout HEAD~2 desde c3 → «HEAD separado en c1»)
+        // Predicción (motor: git checkout HEAD~2 desde c3 → «HEAD is now at c1»)
         ask: [
           'Tu rama tiene 4 commits en línea, de c0 a c3, y HEAD está en c3. ¿Qué commit es `HEAD~2`?',
           'Con 4 commits en línea, de c0 a c3, y HEAD en c3, `HEAD~2` es…',
@@ -706,7 +706,7 @@ export const GIT: readonly Concept[] = [
         ],
       },
       {
-        // Predicción (motor: «Nada que guardar: el trabajo está limpio»)
+        // Predicción (motor: «nothing to commit, working tree clean»)
         ask: [
           'Tienes `main.c` cambiado sin commit y haces `git stash`. ¿Qué dice después `git status`?',
           'Justo después de `git stash`, con `main.c` cambiado, `git status` dice…',

@@ -39,7 +39,7 @@ const SCRIPTS: Record<string, (login: string, n: number) => Step[]> = {
     step(`git switch -c ${login}`, `echo hola > ${login}.txt`, `git add ${login}.txt`),
     step('git commit -m "Mi fichero"', `git push origin ${login}`),
     step('git switch main', 'git pull', `git merge --no-ff ${login}`),
-    step('git pull', 'git push'),
+    step('git pull --no-rebase', 'git push'),
   ],
   group2: (login) => [
     step(`git switch -c ${login}`, `echo "- ${login}" >> equipo.txt`, 'git add equipo.txt'),
@@ -47,7 +47,7 @@ const SCRIPTS: Record<string, (login: string, n: number) => Step[]> = {
     step(`gh pr merge ${login}`),
     {
       lines: [
-        'git pull origin main',
+        'git pull --no-rebase origin main',
         '#resolver equipo.txt',
         `git push origin ${login}`,
         `gh pr merge ${login}`,
@@ -61,11 +61,11 @@ const SCRIPTS: Record<string, (login: string, n: number) => Step[]> = {
     step(`git add ${login}.txt`, 'git commit -m "Mi funcionalidad"'),
     step(
       'git switch develop',
-      'git pull',
+      'git pull --no-rebase',
       `git merge --no-ff feature/${login}`,
       'git push origin develop',
     ),
-    step('git switch main', 'git pull', `git switch -c hotfix/1.0.${n}`),
+    step('git switch main', 'git pull --no-rebase', `git switch -c hotfix/1.0.${n}`),
     step(
       `echo arreglado > arreglo-${login}.txt`,
       `git add arreglo-${login}.txt`,
@@ -73,14 +73,14 @@ const SCRIPTS: Record<string, (login: string, n: number) => Step[]> = {
     ),
     step(
       'git switch main',
-      'git pull',
+      'git pull --no-rebase',
       `git merge --no-ff hotfix/1.0.${n}`,
       `git tag v1.0.${n}`,
       'git push origin main',
     ),
     step(
       'git switch develop',
-      'git pull',
+      'git pull --no-rebase',
       `git merge --no-ff hotfix/1.0.${n}`,
       'git push origin develop',
     ),
@@ -92,13 +92,13 @@ const SCRIPTS: Record<string, (login: string, n: number) => Step[]> = {
     step(
       'git commit -m "Versión"',
       'git switch main',
-      'git pull',
+      'git pull --no-rebase',
       `git merge --no-ff release/1.${n}`,
     ),
-    step(`git tag v1.${n}`, 'git pull', 'git push origin main', 'git push --tags'),
+    step(`git tag v1.${n}`, 'git pull --no-rebase', 'git push origin main', 'git push --tags'),
     step(
       'git switch develop',
-      'git pull',
+      'git pull --no-rebase',
       `git merge --no-ff release/1.${n}`,
       'git push origin develop',
     ),

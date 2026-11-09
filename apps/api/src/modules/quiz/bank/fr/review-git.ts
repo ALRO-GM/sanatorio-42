@@ -45,7 +45,7 @@ export const REVIEW_GIT_FR: Readonly<Record<string, ReviewEntry>> = {
     definition:
       "Si les deux branches ont avancé, git combine leurs changements depuis l'ancêtre commun dans un commit à deux parents.",
     example:
-      'git switch main && git merge feature → « Merge feature », avec pour parents main et feature.',
+      "git switch main && git merge feature → « Merge branch 'feature' », avec pour parents main et feature.",
   },
   'git-branch-delete': {
     title: 'Supprimer des branches',
@@ -56,7 +56,7 @@ export const REVIEW_GIT_FR: Readonly<Record<string, ReviewEntry>> = {
   'git-fetch': {
     title: 'fetch et pull',
     definition:
-      "fetch télécharge les nouveautés du dépôt distant et déplace origin/branche, sans toucher à tes branches. pull, c'est fetch plus merge (ou plus rebase avec --rebase).",
+      "fetch télécharge les nouveautés du dépôt distant et déplace origin/branche, sans toucher à tes branches. pull, c'est fetch plus la jonction : merge avec --no-rebase, rebase avec --rebase ; si les branches ont divergé et que tu ne le dis pas, git refuse et te demande de choisir.",
     example: 'git fetch && git log --oneline --all; puis git merge origin/main.',
   },
   'git-tracking': {
