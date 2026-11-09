@@ -28,7 +28,7 @@ Kustomize que se conocen, no con una ejecución real. Lo dudoso está en
 | Crear lo que ya existe daba siempre el error de `create -f` | Cada orden lo dice como kubectl: `error: failed to create job: jobs.batch "hola" already exists`, `failed to create secret secrets "s" already exists`, y `Error from server (AlreadyExists): namespaces "tienda" already exists` |
 | `annotate` sin `--overwrite` decía lo mismo que `label` | `error: --overwrite is false but found the following declared annotation(s): …` |
 | Una imagen que no existe en Docker Hub decía `not found` | Repositorio desconocido: `pull access denied, repository does not exist or may require authorization`; etiqueta que no existe en un repositorio que sí: `docker.io/library/nginx:1.99: not found` (con la referencia entera, como containerd) |
-| `--from-env-file=~/x` funcionaba | kubectl no expande `~` (lo hace la shell, al principio de una palabra): `error: error reading ~/x: no such file or directory`. Los exámenes usan `--from-env-file ~/tienda/.env` |
+| `--from-env-file=~/x` funcionaba | kubectl no expande `~`, y bash (5.2, sin modo POSIX) solo lo hace al principio de una palabra o tras el `=` de una con forma de asignación (`a=~/b` sí; `--from-env-file=~/x` no, porque `--from-env-file` no es un nombre de variable; comprobado el 2026-11-09): `error: error reading ~/x: no such file or directory`. Los exámenes usan `--from-env-file ~/tienda/.env` |
 | Kustomize ponía `replicas` también al Service del mismo nombre, perdía la sangría de un parche en línea (`patch: \|-`), no leía `kustomize create --resources a` (con espacio) y escribía en el orden de los ficheros | `replicas` solo a Deployments, StatefulSets y ReplicaSets; parches JSON 6902 y estratégicos en línea; las dos formas de la opción; orden «legacy» (Services antes que Deployments). Un `../base` que no existe da el error de Kustomize 5 (`accumulating resources … lstat …: no such file or directory`) |
 | `helm install … oci://registry-1.docker.io/bitnamicharts/redis` no valía | Los charts de Bitnami por OCI son los mismos que `bitnami/redis`; `helm upgrade --install` dice `Release "cache" does not exist. Installing it now.` |
 | No existían `kubectl events`, `kubectl set selector` ni `kubectl set serviceaccount` (salían en la ayuda) | Existen, con `--for` y `--types` en `events` |
@@ -104,8 +104,6 @@ que se han probado y valen. «Cambio» es lo que se tocó en la unidad.
 - **Un contenedor que se reinicia relee sus variables solo desde su segundo
   reinicio** (en el primero, que va enseguida, no hay hueco); el resultado a
   los diez minutos de la corrección es el mismo.
-- **`--validate` sin valor** necesita `=`: kubectl acepta `--validate` solo
-  (vale `strict`); aquí pide argumento.
 - **Generación de los Services**: el motor pone `metadata.generation` también
   a los Services; el servidor no lo hace. No cambia ninguna comprobación.
 - **`creationTimestamp: null`** en `--dry-run=client -o yaml` es lo de
@@ -116,12 +114,13 @@ que se han probado y valen. «Cambio» es lo que se tocó en la unidad.
 - **El tiempo** va a saltos de 5 s por orden: los tiempos exactos (`AGE`,
   `1 (2s ago)`) son aproximados.
 
-## Lo que hace falta en otros paquetes
+## Lo que hacía falta en otros paquetes (hecho el 2026-11-09)
 
-- `@sanatorio/dockersim` (`parseYaml`): los textos en bloque (`|`, `|-`,
-  `>`) pierden la sangría relativa de cada línea. Aquí se esquiva pasando el
-  bloque a una línea entre comillas antes de leerlo (`unfoldBlocks` en
-  `packages/k8ssim/src/yaml.ts`); arreglado allí, ese rodeo sobra.
-- `@sanatorio/shellsim`: `echo a=~/b` debería dar `a=/home/peer/b` (bash, sin
-  modo POSIX, expande `~` tras el `=` de una palabra con forma de
-  asignación); `sed` ignora en silencio la orden `r fichero`.
+- `@sanatorio/dockersim` (`parseYaml`) lee los textos en bloque como YAML 1.2
+  (sangría relativa, `>`, `-`/`+`, sangría en la cabecera), así que el rodeo
+  `unfoldBlocks` de `packages/k8ssim/src/yaml.ts` se ha quitado: un parche de
+  Kustomize en línea (`patch: |-`) o un `default.conf` en un ConfigMap se leen
+  con el lector común.
+- `@sanatorio/shellsim`: `echo a=~/b` da `a=/home/peer/b` (y `--opt=~/x`
+  sigue sin expandirse, como en bash); `sed` entiende `r`, `R` y `w`.
+- `--validate` a secas vale `strict`, como en kubectl (antes pedía valor).

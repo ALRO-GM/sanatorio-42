@@ -29,6 +29,11 @@ export type FlagSpec = {
 const GLOBAL_VALUES = ['namespace', 'context', 'kubeconfig', 'request-timeout']
 const GLOBAL_FLAGS = ['all-namespaces', 'help']
 const GLOBAL_SHORTS: Record<string, string> = { n: 'namespace', A: 'all-namespaces', h: 'help' }
+/**
+ * Opciones con valor que también van solas (el `NoOptDefVal` de kubectl): el
+ * valor, solo con `=`; sin él, el de aquí. `--validate` a secas es `strict`.
+ */
+const BARE: Readonly<Record<string, string>> = { validate: 'strict' }
 
 export function parseArgs(args: readonly string[], spec: FlagSpec, usage: string): Args {
   const values = new Set([...spec.values, ...GLOBAL_VALUES])
@@ -57,7 +62,10 @@ export function parseArgs(args: readonly string[], spec: FlagSpec, usage: string
     if (arg.startsWith('--') && arg.length > 2) {
       const [name = '', value] = arg.slice(2).split(/=(.*)/s)
 
-      if (values.has(name)) {
+      const bare = Object.hasOwn(BARE, name) ? BARE[name] : undefined
+
+      if (values.has(name) && bare !== undefined) add(name, value ?? bare)
+      else if (values.has(name)) {
         if (value === undefined && i + 1 >= args.length)
           throw new Fail(`error: flag needs an argument: --${name}`, 1)
         add(name, value ?? args[++i] ?? '')

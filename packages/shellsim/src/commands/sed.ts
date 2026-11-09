@@ -2,8 +2,10 @@
  * `sed`, lo que se usa para cambiar configuraciones y limpiar texto:
  * `s/viejo/nuevo/g` (con `&`, `\1`, `i`, `p` y cualquier separador),
  * direcciones (`3`, `$`, `/patrón/`, `1,5`, `/a/,/b/`, `!`), `d`, `p`, `q`,
- * `=`, `a`, `i`, `c`, `y`, y las opciones `-n`, `-i` (también `-i.bak`),
- * `-E` y `-e`. Las expresiones regulares son las del motor lineal.
+ * `=`, `a`, `i`, `c`, `y`, `r`/`R` (meter un fichero, o una línea suya,
+ * detrás), `w` (y la marca `w` de `s`: escribir en un fichero), y las opciones
+ * `-n`, `-i` (también `-i.bak`), `-E` y `-e`. Las expresiones regulares son
+ * las del motor lineal.
  */
 
 import { can, Fail, lookup, parentOf, writeText } from '../fs.js'
@@ -28,6 +30,8 @@ type SedCmd = {
   nth?: number
   text?: string
   map?: [string, string]
+  /** El fichero de `r`, `R`, `w` o de `s///w`. */
+  file?: string
   /** Para los rangos: si estamos dentro. */
   inside?: boolean
 }
@@ -70,6 +74,22 @@ class SedParser {
       this.pos++
     }
     throw this.error(`unterminated \`s' command`)
+  }
+
+  /** El nombre de fichero de `r`/`R`/`w`: el resto de la línea (`;` incluido, como GNU). */
+  private filename(): string {
+    while (this.src[this.pos] === ' ' || this.src[this.pos] === '\t') this.pos++
+
+    const end = this.src.indexOf('\n', this.pos)
+    const name = this.src.slice(this.pos, end < 0 ? this.src.length : end)
+
+    if (name === '')
+      throw new Fail(
+        `sed: -e expression #1, char ${this.pos}: missing filename in r/R/w/W commands`,
+      )
+    this.pos += name.length
+
+    return name
   }
 
   private compile(source: string, icase = false): Regex {
@@ -153,6 +173,10 @@ class SedParser {
         const nth = /\d+/.exec(flags)?.[0]
 
         if (nth !== undefined) cmd.nth = Number(nth)
+        if (this.src[this.pos] === 'w') {
+          this.pos++
+          cmd.file = this.filename()
+        }
       } else if (op === 'y') {
         const delim = this.src[this.pos++] ?? '/'
         const a = this.until(delim)
@@ -170,7 +194,8 @@ class SedParser {
         if (end >= 0) text = text.slice(0, end)
         this.pos += this.src.slice(this.pos).indexOf(text) + text.length
         cmd.text = text
-      } else if (!['d', 'p', 'q', '=', 'n', 'N'].includes(op))
+      } else if (op === 'r' || op === 'R' || op === 'w') cmd.file = this.filename()
+      else if (!['d', 'p', 'q', '=', 'n', 'N'].includes(op))
         throw this.error(`unknown command: \`${op}'`)
       cmds.push(cmd)
     }
@@ -284,6 +309,55 @@ const sed: CommandFn = (ctx) => {
 
   const cmds = new SedParser(scripts.join('\n'), ere).parse()
   const budget = ctx.sh.budget
+  const machine = ctx.sh.machine()
+  const user = ctx.sh.user()
+  const opts = { now: ctx.sh.now(), umask: ctx.sh.session().umask }
+  const STD = new Set(['/dev/stdout', '/dev/stderr'])
+
+  // Como GNU sed, los ficheros de `w` se abren (y se vacían) antes de leer nada.
+  for (const file of new Set(
+    cmds.flatMap((cmd) => (cmd.op === 'r' || cmd.op === 'R' ? [] : (cmd.file ?? []))),
+  )) {
+    if (STD.has(file)) continue
+    try {
+      writeText(machine, user, ctx.sh.abs(file), '', { cmd: 'sed', shown: file, ...opts })
+    } catch (error) {
+      if (!(error instanceof Fail)) throw error
+      throw new Fail(`sed: couldn't open file ${file}: ${error.message.replace(/^.*: /, '')}`, 4)
+    }
+  }
+
+  /** Lo que mete `r`: si no se puede leer, nada (GNU sed calla); una carpeta, error. */
+  const slurp = (file: string): string | null => {
+    if (file === '/dev/stdin') return ctx.io.stdin.readAll()
+
+    let found: ReturnType<typeof lookup> = null
+
+    try {
+      found = lookup(machine, user, ctx.sh.abs(file))
+    } catch (error) {
+      if (!(error instanceof Fail)) throw error
+    }
+    if (found === null) return null
+    if (found.node.kind === 'dir') throw new Fail(`sed: read error on ${file}: Is a directory`, 4)
+    if (found.node.kind !== 'file' || !can(user, found.node, 'r')) return null
+
+    return found.node.text
+  }
+  /** Por dónde va `R` en cada fichero (una línea por vez, hasta que se acaba). */
+  const readLines = new Map<string, string[]>()
+
+  const write = (file: string, line: string, out: string[]): void => {
+    if (file === '/dev/stdout') out.push(line)
+    else if (file === '/dev/stderr') ctx.io.err(`${line}\n`)
+    else
+      writeText(machine, user, ctx.sh.abs(file), `${line}\n`, {
+        append: true,
+        cmd: 'sed',
+        shown: file,
+        ...opts,
+      })
+  }
 
   const process = (text: string): string => {
     const lines = linesOf(text)
@@ -326,6 +400,7 @@ const sed: CommandFn = (ctx) => {
 
           line = result.text
           if (result.done && cmd.print === true) out.push(line)
+          if (result.done && cmd.file !== undefined) write(cmd.file, line, out)
         } else if (cmd.op === 'd') {
           deleted = true
           break
@@ -339,6 +414,23 @@ const sed: CommandFn = (ctx) => {
             .map((c) => (a.includes(c) ? (b[a.indexOf(c)] ?? c) : c))
             .join('')
         } else if (cmd.op === 'a') after.push(cmd.text ?? '')
+        else if (cmd.op === 'r') {
+          const text = slurp(cmd.file ?? '')
+
+          if (text !== null && text !== '') after.push(...linesOf(text))
+        } else if (cmd.op === 'R') {
+          const file = cmd.file ?? ''
+          let rest = readLines.get(file)
+
+          if (rest === undefined) {
+            rest = linesOf(slurp(file) ?? '')
+            readLines.set(file, rest)
+          }
+
+          const next = rest.shift()
+
+          if (next !== undefined) after.push(next)
+        } else if (cmd.op === 'w') write(cmd.file ?? '', line, out)
         else if (cmd.op === 'i') before.push(cmd.text ?? '')
         else if (cmd.op === 'c') {
           before.push(cmd.text ?? '')
@@ -357,9 +449,6 @@ const sed: CommandFn = (ctx) => {
   if (inPlace !== null) {
     if (files.length === 0) throw new Fail('sed: no input files')
 
-    const machine = ctx.sh.machine()
-    const user = ctx.sh.user()
-
     for (const file of files) {
       const [input] = inputs(ctx, [file])
       const path = ctx.sh.abs(file)
@@ -368,7 +457,6 @@ const sed: CommandFn = (ctx) => {
       if (lookup(machine, user, path) === null)
         throw new Fail(`sed: can't read ${file}: No such file or directory`, 2)
 
-      const opts = { now: ctx.sh.now(), umask: ctx.sh.session().umask }
       const dir = lookup(machine, user, parentOf(path))
 
       // sed -i escribe un fichero temporal al lado y lo cambia por el original:
@@ -406,7 +494,7 @@ const sed: CommandFn = (ctx) => {
       if (!(error instanceof Fail)) throw error
       // El mensaje ya viene como el de GNU sed («sed: can't read x: …», de `inputs`).
       ctx.io.err(`${error.message}\n`)
-      code = 2
+      code = error.code === 4 ? 4 : 2
     }
   }
 

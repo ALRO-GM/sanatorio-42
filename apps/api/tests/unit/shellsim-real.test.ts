@@ -321,3 +321,72 @@ describe('cada unidad acepta las otras formas buenas', () => {
     ).toBe(true)
   })
 })
+
+describe('tilde como bash sin modo POSIX (comprobado con bash 5.2)', () => {
+  it('tras el `=` de una palabra con forma de asignación y tras sus `:`', () => {
+    expect(sh('ls', 'echo a=~/b a+=~/c PATH=x:~/bin:~').out).toBe(
+      'a=/home/peer/b a+=/home/peer/c PATH=x:/home/peer/bin:/home/peer',
+    )
+    expect(sh('ls', 'X=a:~/b:~', 'echo $X').out).toBe('a:/home/peer/b:/home/peer')
+    expect(sh('ls', 'export Y=$HOME:~/bin', 'echo $Y').out).toBe('/home/peer:/home/peer/bin')
+    expect(sh('ls', 'echo ~root/x a=~root ~nadie').out).toBe('/root/x a=/root ~nadie')
+  })
+
+  it('no con comillas, ni en medio de otra palabra, ni tras un `=` que no sigue a un nombre', () => {
+    expect(
+      sh(
+        'ls',
+        'echo "a=~/b" a="~/b" a=\\~/b x~/b a:~/c a=x=~/b 1a=~/b --from-env-file=~/x -f=~ a=b~/c',
+      ).out,
+    ).toBe('a=~/b a=~/b a=~/b x~/b a:~/c a=x=~/b 1a=~/b --from-env-file=~/x -f=~ a=b~/c')
+    // En una asignación de verdad, solo tras el primer `=` y los `:`.
+    expect(sh('ls', 'Z=a=~/z', 'echo $Z').out).toBe('a=~/z')
+  })
+})
+
+describe('sed r, R y w como GNU sed 4.9', () => {
+  const FILES = "printf 'uno\\ndos\\ntres\\n' > f; printf 'E1\\nE2\\n' > x"
+
+  it('`r` mete el fichero tras la línea, en el orden de `a`, también con `d` y `-n`', () => {
+    expect(sh('ls', FILES, "sed '/dos/r x' f").out).toBe('uno\ndos\nE1\nE2\ntres')
+    expect(sh('ls', FILES, "sed '$r x' f").out).toBe('uno\ndos\ntres\nE1\nE2')
+    expect(sh('ls', FILES, "sed -e '1r x' -e '1a hola' f").out).toBe('uno\nE1\nE2\nhola\ndos\ntres')
+    expect(sh('ls', FILES, "sed -e '1r x' -e 1d f").out).toBe('E1\nE2\ndos\ntres')
+    expect(sh('ls', FILES, "sed -n '1r x' f").out).toBe('E1\nE2')
+    expect(sh('ls', FILES, "sed '1rx' f").out).toBe('uno\nE1\nE2\ndos\ntres')
+    expect(sh('ls', FILES, "sed -i '1r x' f", 'cat f').out).toBe('uno\nE1\nE2\ndos\ntres')
+  })
+
+  it('`r` de lo que no se puede leer no mete nada; el nombre llega hasta el final de la línea', () => {
+    expect(sh('ls', FILES, "sed '2r nada' f")).toMatchObject({ out: 'uno\ndos\ntres', code: 0 })
+    // `x; p` es el nombre entero: no existe y `p` no se ejecuta.
+    expect(sh('ls', FILES, "sed '1r x; p' f").out).toBe('uno\ndos\ntres')
+    expect(sh('ls', FILES, 'sed r f')).toMatchObject({
+      out: 'sed: -e expression #1, char 1: missing filename in r/R/w/W commands',
+      code: 1,
+    })
+    expect(sh('ls', FILES, "sed '1r /tmp' f")).toMatchObject({
+      out: 'sed: read error on /tmp: Is a directory',
+      code: 4,
+    })
+  })
+
+  it('`R` mete una línea del fichero en cada vuelta', () => {
+    expect(sh('ls', FILES, "sed 'R x' f").out).toBe('uno\nE1\ndos\nE2\ntres')
+  })
+
+  it('`w` y `s///w` escriben lo elegido; el fichero se crea aunque no se escriba nada', () => {
+    expect(sh('ls', FILES, "sed -n '/o/w out' f", 'cat out').out).toBe('uno\ndos')
+    expect(sh('ls', FILES, "sed 's/o/0/w cambios' f", 'cat cambios').out).toBe('un0\nd0s')
+    expect(sh('ls', FILES, "sed -n '/zzz/w vacio' f", 'wc -c vacio').out).toBe('0 vacio')
+    expect(sh('ls', FILES, "sed -n '1w /dev/stdout' f").out).toBe('uno')
+    expect(sh('ls', FILES, "sed 'w /nada/out' f")).toMatchObject({
+      out: "sed: couldn't open file /nada/out: No such file or directory",
+      code: 4,
+    })
+    expect(sh('ls', FILES, 'touch ro; chmod 444 ro', "sed 'w ro' f")).toMatchObject({
+      out: "sed: couldn't open file ro: Permission denied",
+      code: 4,
+    })
+  })
+})

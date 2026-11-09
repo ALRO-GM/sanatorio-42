@@ -38,6 +38,8 @@ rechazos buenos: la forma no hace lo que pide la unidad).
 | `sed -i` | Solo miraba el permiso del fichero | Necesita poder escribir en la carpeta («couldn't open temporary file … Permission denied», código 4); `\U`, `\L`, `\u`, `\l`, `\E` en el reemplazo |
 | `df -h /ruta` | Siempre todos los discos | Solo el de esa ruta |
 | `scp` | `scp x ~/restore/` sin la carpeta creaba un fichero `restore`; sin comodines remotos | Con la barra, la carpeta tiene que existir; `scp 'db1:/ruta/*.gz' .` lo expande la otra máquina |
+| Tilde en `a=~/b` (2026-11-09, tras la revisión) | Solo al principio de la palabra (`echo a=~/b` → `a=~/b`; `X=a:~/b` no la expandía) | Como bash 5.2 sin modo POSIX: tras el primer `=` de una palabra con forma de asignación (`a=~/b`, `a+=~/b`, `PATH=x:~/bin` de `export`) y tras cada `:`; también `~usuario`, `~+` y `~-`. No con comillas, ni en `x~/b`, ni en `--opt=~/x` (`--opt` no es un nombre: por eso `kubectl --from-env-file=~/x` recibe `~/x`) |
+| `sed r`, `R`, `w` (2026-11-09) | `r fichero` se ignoraba en silencio; `w` no existía | Como GNU sed 4.9: `r` mete el fichero tras la línea (en el orden de `a`, también con `d` o `-n`; si no se puede leer, nada; una carpeta, «read error on … Is a directory» y 4), `R` una línea por vuelta, `w` y `s///w` escriben lo elegido (el fichero se crea al empezar; «couldn't open file …» y 4); el nombre llega hasta el final de la línea (`;` incluido); sin nombre, «missing filename in r/R/w/W commands» |
 | Órdenes que faltaban | — | `pushd`/`popd`/`dirs`, `su -c`, `gpasswd -a/-d`, `adduser usuario grupo`, `install`, `pidof`, `mv -t`/`cp -t`, `gzip -1…-9`, `xargs -0/-r`, `date -I`, `cd` con demasiados argumentos, `kill -l 9` |
 
 ## Cambios en la corrección (`course/build.ts`)
@@ -137,6 +139,10 @@ Ninguna unidad cambia de id, de solución ni de progresión.
 - **`kill -l`** enseña solo las señales del curso, no las 64.
 - **El mensaje de `scp`** cuando falta la carpeta de destino es aproximado: el
   de OpenSSH cambia según la versión y el modo (SFTP o el antiguo).
+- **`sed` con varios ficheros** los trata por separado (`sed -n '$=' a b`
+  cuenta cada uno); GNU sed los lee como uno solo salvo con `-s` o `-i`. Y
+  `r` de un fichero sin salto final añade el salto (GNU pega la línea
+  siguiente detrás).
 - **`stat`** tiene un formato corto (sin `Blocks`, `Device` ni `Access:` de
   fecha).
 - **Comparación de ficheros**: el contenido tiene que ser igual, espacios

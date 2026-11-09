@@ -9,9 +9,6 @@ En producción hasta 7a69796. Si la CI falla: `gh run view --job <id> --log-fail
 Hecho y desplegado: límites configurables (pestaña Límites, `docs/limites.md`) y
 revisión a fondo de los cuatro cursos (`docs/revision-cursos/*.md`).
 Pendientes menores que dejaron los agentes:
-- dockersim `parseYaml` pierde la sangría relativa en `|`, `|-`, `>`; k8ssim lo
-  rodea con `unfoldBlocks` (quitarlo al arreglarlo).
-- shellsim: `echo a=~/b` debería expandir `~`; `sed` ignora `r fichero`.
 - Comprobar los mensajes de git y Kubernetes contra herramientas reales (los
   agentes no pudieron ejecutarlas).
 

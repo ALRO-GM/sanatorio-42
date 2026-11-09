@@ -21,6 +21,8 @@ export type ExpandEnv = {
   positional: () => string[]
   special: (name: string) => string | undefined
   home: () => string
+  /** La casa de un usuario de la máquina (`~root`), si existe. */
+  homeOf: (user: string) => string | undefined
   /** Ejecuta `$(…)` y devuelve lo que escribió. */
   substitute: (src: string) => string
   /** Las rutas que encajan con un patrón (ya con `\` delante de lo que va entre comillas). */
@@ -223,20 +225,30 @@ class Expander {
   constructor(
     private readonly env: ExpandEnv,
     private readonly raw: string,
+    /** El valor de una asignación de verdad (`X=…`): tilde al principio y tras cada `:`. */
+    private readonly assignment = false,
   ) {}
 
   run(): Seg[] {
     const raw = this.raw
+    // Como bash sin modo POSIX, una palabra con forma de asignación (`a=~/b`,
+    // `PATH=$PATH:~/bin` de `export`) expande la tilde tras su primer `=` y
+    // tras cada `:`; `--opt=~/x` no, porque `--opt` no es un nombre.
+    const named = this.assignment ? 0 : (/^[A-Za-z_][A-Za-z0-9_]*\+?=/.exec(raw)?.[0].length ?? -1)
     let i = 0
 
-    if (raw === '~' || raw.startsWith('~/')) {
-      this.push(this.env.home(), true, false)
-      i = 1
+    if (named > 0) {
+      this.push(raw.slice(0, named), false, false)
+      i = named
     }
+    i = this.tilde(i, named >= 0)
     while (i < raw.length) {
       const c = raw[i] ?? ''
 
-      if (c === "'") {
+      if (c === ':' && named >= 0 && i >= named) {
+        this.push(c, false, false)
+        i = this.tilde(i + 1, true)
+      } else if (c === "'") {
         const end = raw.indexOf("'", i + 1)
 
         this.push(raw.slice(i + 1, end), true, false)
@@ -253,6 +265,39 @@ class Expander {
     }
 
     return this.segs
+  }
+
+  /**
+   * Una tilde en `start`: `~` (tu casa), `~usuario`, `~+` (`$PWD`) y `~-`
+   * (`$OLDPWD`), hasta la primera `/` (o `:` en una asignación). Si lleva algo
+   * entre comillas o no es nada de eso, se queda tal cual. Devuelve por dónde
+   * seguir.
+   */
+  private tilde(start: number, assignment: boolean): number {
+    const raw = this.raw
+
+    if (raw[start] !== '~') return start
+
+    let end = start + 1
+
+    while (end < raw.length && raw[end] !== '/' && !(assignment && raw[end] === ':')) end++
+
+    const name = raw.slice(start + 1, end)
+    const home =
+      name === ''
+        ? this.env.home()
+        : name === '+'
+          ? this.env.special('PWD')
+          : name === '-'
+            ? this.env.special('OLDPWD')
+            : /^[a-z_][a-z0-9_-]*$/.test(name)
+              ? this.env.homeOf(name)
+              : undefined
+
+    if (home === undefined || home === '') return start
+    this.push(home, true, false)
+
+    return end
   }
 
   fieldsOfAt(): string[] | null {
@@ -444,17 +489,18 @@ const fieldsText = (fields: string[]): string => fields.join(' ')
 /**
  * Expande una palabra en crudo a sus campos. `split: false` para las
  * asignaciones (`x=$y` no se divide); `glob: false` para lo que no busca
- * ficheros (el lado derecho de `case`, `[[`).
+ * ficheros (el lado derecho de `case`, `[[`); `assignment` para el valor de
+ * una asignación (la tilde vale también tras cada `:`).
  */
 export function expandWord(
   raw: string,
   env: ExpandEnv,
-  opts: { split: boolean; glob: boolean } = { split: true, glob: true },
+  opts: { split: boolean; glob: boolean; assignment?: boolean } = { split: true, glob: true },
 ): string[] {
   const out: string[] = []
 
   for (const variant of braces(raw)) {
-    const expander = new Expander(env, variant)
+    const expander = new Expander(env, variant, opts.assignment)
     const segs = expander.run()
     const at = expander.fieldsOfAt()
 

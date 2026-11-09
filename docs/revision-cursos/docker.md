@@ -92,6 +92,12 @@ motor) · ≈ cierto con un matiz que se apunta abajo.
 - `ls -a` dentro enseña `.` y `..`, `ls -A` los ocultos, `ls -l` el dueño y
   `ls -d` la carpeta; `whoami` con un uid sin nombre falla como en busybox.
 - `psql` solo existe en las imágenes de postgres (o si se instala el cliente).
+- Los textos en bloque del YAML (`|`, `|-`, `|+`, `>`, `>-`, con sangría en
+  la cabecera como `|2`) siguen YAML 1.2 (2026-11-09): guardan la sangría
+  relativa de cada línea, `>` junta solo las líneas normales, el final se
+  recorta o se guarda según `-`/`+`, y dentro del bloque `#` es texto. Antes
+  se perdía la sangría (un `sh -c` con un `if` dentro de `command:` llegaba
+  aplanado). Comprobado contra el paquete `yaml` (YAML 1.2).
 - Compose acepta claves `x-*` en servicios y las válidas que no modela
   (`cap_drop`, `security_opt`, `logging`, `tmpfs`, `extra_hosts`…), en vez de
   rechazarlas como desconocidas.

@@ -127,12 +127,13 @@ guarda (`course_times`) para ajustarlo.
     redirecciones, heredocs, comillas, `if`, `for`, `while`, `case`,
     funciones, `[[ ]]`, `(( ))`); si la orden está a medias, la terminal pide
     el resto con `>`.
-  - `expand.ts`: llaves, tilde, variables (`${x:-y}`, `${#x}`, `${x%.log}`…),
+  - `expand.ts`: llaves, tilde (también tras el `=` y los `:` de una
+    asignación, como bash), variables (`${x:-y}`, `${#x}`, `${x%.log}`…),
     `$(…)`, aritmética, división en palabras y comodines.
   - `interp.ts`: el intérprete y las órdenes de la shell (`cd`, `export`,
     `read`, `set -euo pipefail`, `source`, `sudo`, `exit`…).
   - `commands/`: unos 110 programas (y unas 40 órdenes de la shell en `interp.ts`) con las opciones que se usan
-    (`ls -lah`, `grep -rniEvc`, `sed -i`, `awk` con vectores y `END`, `find
+    (`ls -lah`, `grep -rniEvc`, `sed -i` y `r`/`w`, `awk` con vectores y `END`, `find
     -exec`, `tar -czf`, `ps aux --sort`, `systemctl`, `journalctl -u -p
     --since`, `crontab`, `apt`, `curl`, `ssh`, `scp`, `rsync`, `jq`…) y
     errores como los de GNU.

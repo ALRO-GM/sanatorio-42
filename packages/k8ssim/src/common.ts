@@ -49,8 +49,10 @@ export const scopeOf = (env: Env, args: Args): string | null =>
 
 /**
  * La ruta absoluta de un fichero de `dev1`. Sin cambiar `~`: quien lo expande
- * es la shell, y solo al principio de una palabra. En `--from-env-file=~/x`
- * kubectl recibe `~/x` tal cual y no lo encuentra, como en la herramienta real.
+ * es la shell, al principio de una palabra o tras el `=` de una con forma de
+ * asignación (`a=~/x`). `--from-env-file` no es un nombre de variable, así
+ * que en `--from-env-file=~/x` kubectl recibe `~/x` tal cual y no lo
+ * encuentra, como con bash y kubectl de verdad.
  */
 const home = (ctx: Ctx, path: string): string =>
   // `./` delante: para kubectl, `~/x` es una carpeta que se llama `~` (la shell no la cambió).

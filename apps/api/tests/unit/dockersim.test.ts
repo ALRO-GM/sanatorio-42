@@ -7,7 +7,15 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { checkAttempt, LIMITS, registryImages, run, startOf, UNITS } from '@sanatorio/dockersim'
+import {
+  checkAttempt,
+  LIMITS,
+  parseYaml,
+  registryImages,
+  run,
+  startOf,
+  UNITS,
+} from '@sanatorio/dockersim'
 import type { World } from '@sanatorio/dockersim'
 import { describe, expect, it } from 'vitest'
 
@@ -582,6 +590,60 @@ describe('Docker simulado: más formas equivalentes (revisión de 2026-11)', () 
 
       expect(checkAttempt(boss, entries, 10).misses, name).toEqual([])
     }
+  })
+})
+
+describe('Docker simulado: textos en bloque de YAML 1.2', () => {
+  // Lo esperado es lo que da un lector de YAML 1.2 de verdad (el paquete `yaml`).
+  it('`|` guarda la sangría relativa y los saltos; `-` y `+` deciden el final', () => {
+    expect(parseYaml('a: |\n  uno\n    dos\n  tres\n')).toEqual({ a: 'uno\n  dos\ntres\n' })
+    expect(parseYaml('a: |-\n  uno\n    dos\n')).toEqual({ a: 'uno\n  dos' })
+    expect(parseYaml('a: |+\n  uno\n\n\nb: x\n')).toEqual({ a: 'uno\n\n\n', b: 'x' })
+    expect(parseYaml('a: |\n\n  x\n\n\nb: y\n')).toEqual({ a: '\nx\n', b: 'y' })
+    expect(parseYaml('a: |\nb: y\n')).toEqual({ a: '', b: 'y' })
+  })
+
+  it('`>` junta las líneas normales y deja como están las que van más adentro', () => {
+    expect(parseYaml('a: >\n  uno\n  dos\n\n  tres\n    sangrado\n  cuatro\n')).toEqual({
+      a: 'uno dos\ntres\n  sangrado\ncuatro\n',
+    })
+    expect(parseYaml('a: >-\n  uno\n  dos\n')).toEqual({ a: 'uno dos' })
+  })
+
+  it('la sangría pedida en la cabecera, en listas y dentro de `- clave: |`', () => {
+    expect(parseYaml('a: |2\n    cuatro\n  dos\n')).toEqual({ a: '  cuatro\ndos\n' })
+    expect(parseYaml('a: |-2\n    x\n')).toEqual({ a: '  x' })
+    expect(parseYaml('a:\n  - |\n    x\n      y\n  - z\n')).toEqual({ a: ['x\n  y\n', 'z'] })
+    expect(parseYaml('k:\n  - c: |\n      l1\n       l2\n    d: e\n')).toEqual({
+      k: [{ c: 'l1\n l2\n', d: 'e' }],
+    })
+  })
+
+  it('dentro del bloque, `#` es texto; en la cabecera, comentario', () => {
+    expect(parseYaml('a: | # nota\n  # no es comentario\n  x\n')).toEqual({
+      a: '# no es comentario\nx\n',
+    })
+  })
+
+  it('un compose con un script en bloque lo guarda con su sangría', () => {
+    const out = sh(
+      `cat > compose.yaml <<'EOF'
+services:
+  web:
+    image: alpine:3.20
+    command:
+      - sh
+      - -c
+      - |
+        if true; then
+          echo dentro
+        fi
+EOF`,
+      'docker compose config',
+    )
+
+    expect(out.code).toBe(0)
+    expect(out.out).toContain('if true; then\\n  echo dentro\\nfi')
   })
 })
 
