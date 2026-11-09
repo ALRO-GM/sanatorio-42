@@ -6,17 +6,14 @@ En producción hasta 7a69796. Si la CI falla: `gh run view --job <id> --log-fail
 
 ## Cola del 2026-11-09 (push y despliegue autorizados)
 
-Cinco agentes en worktrees desde bbdc904; al acabar cada uno: unir con
-`git merge --no-ff`, `npm run textos -- --write`, `npm run check`, push y desplegar
-(agrupar si acaban juntos, por el cupo de GitHub).
-
-1. **Límites configurables por admin** (migración 89): inventario de límites por
-   usuario, valor por defecto, cambio global o por persona; fuera el tope del 90 %
-   de la máquina (comprobar que corta solo).
-2. **Cursos: arreglar diferencias con la herramienta real y revisión a fondo** por
-   nivel (lo dicho es cierto, es la forma buena de trabajar, se aceptan las
-   alternativas válidas). Un agente por curso: shell (dueño de shellsim), git,
-   Docker, Kubernetes. Tablas de revisión en los docs de cada curso.
+Hecho y desplegado: límites configurables (pestaña Límites, `docs/limites.md`) y
+revisión a fondo de los cuatro cursos (`docs/revision-cursos/*.md`).
+Pendientes menores que dejaron los agentes:
+- dockersim `parseYaml` pierde la sangría relativa en `|`, `|-`, `>`; k8ssim lo
+  rodea con `unfoldBlocks` (quitarlo al arreglarlo).
+- shellsim: `echo a=~/b` debería expandir `~`; `sed` ignora `r fichero`.
+- Comprobar los mensajes de git y Kubernetes contra herramientas reales (los
+  agentes no pudieron ejecutarlas).
 
 ## Cola del 2026-11-08 (push y despliegue autorizados)
 
