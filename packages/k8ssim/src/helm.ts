@@ -312,13 +312,29 @@ function userValues(ctx: Ctx, args: Args): JsonObject {
   return values
 }
 
+/**
+ * Bitnami publica sus charts como artefactos OCI en Docker Hub
+ * (`oci://registry-1.docker.io/bitnamicharts/redis`), que no necesitan
+ * `helm repo add`; es la forma que recomienda desde 2023. Aquí son los mismos
+ * charts que `bitnami/…`.
+ */
+const OCI = 'oci://registry-1.docker.io/bitnamicharts/'
+
 function chartOf(env: Env, ref: string): Chart {
   const chart = own(CHARTS, ref)
   const repo = ref.split('/')[0] ?? ''
 
+  if (ref.startsWith(OCI)) {
+    const found = own(CHARTS, `bitnami/${ref.slice(OCI.length).replace(/:.*$/, '')}`)
+
+    if (found === undefined)
+      throw new Fail(`Error: INSTALLATION FAILED: ${ref.replace('oci://', '')}: not found`, 1)
+
+    return found
+  }
   if (ref.startsWith('oci://'))
     throw new Fail(
-      `Error: este simulador no descarga charts de internet: usa bitnami/redis o bitnami/postgresql`,
+      `Error: este simulador no descarga charts de internet: usa bitnami/redis, bitnami/postgresql o ${OCI}redis`,
       1,
     )
   if (!ref.includes('/')) throw new Fail(`Error: INSTALLATION FAILED: repo ${ref} not found`, 1)
@@ -521,6 +537,13 @@ export const helm: CommandFn = (ctx) => {
 
       const chart = chartOf(env, ref)
       const before = last(name)
+
+      if (ref.startsWith(OCI))
+        ctx.io.err(
+          `Pulled: ${ref.replace('oci://', '')}:${chart.version}\nDigest: sha256:${suffix(`oci:${chart.name}`, 64).replace(/./g, (c) => (c.charCodeAt(0) % 16).toString(16))}\n`,
+        )
+      if (what === 'upgrade' && before === undefined && args.has('install'))
+        ctx.io.out(`Release "${name}" does not exist. Installing it now.\n`)
 
       if (what === 'install' && before !== undefined)
         throw new Fail('Error: INSTALLATION FAILED: cannot re-use a name that is still in use', 1)

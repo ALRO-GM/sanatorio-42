@@ -90,6 +90,67 @@ function typed(value: Yaml, key: string, free: boolean): Json {
   return out
 }
 
+/**
+ * Los textos en bloque (`|`, `|-`, `>`) pasados a una línea entre comillas,
+ * con su sangría relativa. El lector del curso de Docker quita la sangría de
+ * cada línea del bloque, y aquí importa: un parche de Kustomize en línea
+ * (`patch: |-` con `- op: replace` y `path:` debajo) o un fichero de
+ * configuración dentro de un ConfigMap son YAML o texto con sangría.
+ */
+function unfoldBlocks(source: string): string {
+  const lines = source.split('\n')
+  const out: string[] = []
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? ''
+    const head = /^(\s*)(- )?([^\s#][^#]*?):\s+([|>])([-+]?)\s*(#.*)?$/.exec(line)
+
+    if (head === null) {
+      out.push(line)
+      continue
+    }
+
+    // El bloque es lo que va más adentro que la clave (las líneas en blanco, dentro).
+    const column = (head[1] ?? '').length + (head[2] ?? '').length
+    const body: string[] = []
+
+    while (i + 1 < lines.length) {
+      const next = lines[i + 1] ?? ''
+
+      if (next.trim() !== '' && next.length - next.trimStart().length <= column) break
+      body.push(next)
+      i++
+    }
+    while (body.length > 0 && (body.at(-1) ?? '').trim() === '') body.pop()
+
+    const indents = body
+      .filter((each) => each.trim() !== '')
+      .map((each) => each.length - each.trimStart().length)
+    const base = indents.length === 0 ? 0 : Math.min(...indents)
+    const kept = body.map((each) => each.slice(base))
+    const joined = head[4] === '|' ? kept.join('\n') : kept.map((each) => each.trim()).join(' ')
+    const text = head[5] === '-' || joined === '' ? joined : `${joined}\n`
+    const quoted = text
+      .replace(/\\/g, '\\\\')
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, '\\n')
+      .replace(/\t/g, '\\t')
+
+    out.push(`${head[1] ?? ''}${head[2] ?? ''}${head[3] ?? ''}: "${quoted}"`)
+  }
+
+  return out.join('\n')
+}
+
+/**
+ * Un valor leído de un parche JSON 6902 (`value: 4` en `/spec/replicas`), con
+ * el tipo que le toca por el campo al que va.
+ */
+export const retype = (value: Json, field: string): Json =>
+  typeof value === 'number' || typeof value === 'boolean'
+    ? value
+    : typed(value as Yaml, field, false)
+
 /** Lee un YAML de uno o varios documentos; los vacíos no cuentan. */
 export function parseDocs(source: string, file: string): JsonObject[] {
   const docs = source.split(/^---[ \t]*(?:#.*)?$/m)
@@ -105,7 +166,7 @@ export function parseDocs(source: string, file: string): JsonObject[] {
     let value: Yaml
 
     try {
-      value = parseYaml(doc)
+      value = parseYaml(unfoldBlocks(doc))
     } catch (error) {
       if (error instanceof YamlError)
         throw new ShellError(
@@ -142,7 +203,14 @@ function needsQuotes(text: string): boolean {
     text === '' ||
     /^[\s\-?:,[\]{}#&*!|>'"%@`]/.test(text) ||
     /: |\s#|\s$/.test(text) ||
-    /^(true|false|yes|no|null|~|-?\d[\d._:eE+-]*)$/i.test(text)
+    // Lo que YAML leería como booleano, nulo o número (como lo resuelve go-yaml):
+    // «1.0» y «3000» van entre comillas; una IP como 10.43.0.112, no.
+    /^(y|n|yes|no|on|off|true|false|null|~)$/i.test(text) ||
+    /^[-+]?(0b[01_]+|0x[\da-f_]+|0o?[0-7_]+|[\d_]+)$/i.test(text) ||
+    /^[-+]?(\.\d+|\d+(\.\d*)?)([eE][-+]?\d+)?$/.test(text) ||
+    /^[-+]?\.(inf|nan)$/i.test(text) ||
+    // Una fecha se lee como fecha: kubectl la escribe entre comillas.
+    /^\d{4}-\d\d-\d\d([Tt ][\d:.]+([Zz]|[+-][\d:]+)?)?$/.test(text)
   )
 }
 
@@ -192,6 +260,22 @@ export function toYaml(value: Json, indent = 0): string {
       return `${pad}${scalar(key)}: ${toYaml(item, indent + 2)}`
     })
     .join('')
+}
+
+/**
+ * Las claves en orden alfabético, como salen de `kubectl -o yaml` y de
+ * `kubectl diff`: kubectl pasa el objeto a JSON y de ahí a un mapa de Go, que
+ * se escribe ordenado.
+ */
+export function sortedKeys(value: Json): Json {
+  if (Array.isArray(value)) return value.map(sortedKeys)
+  if (value === null || typeof value !== 'object') return value
+
+  return Object.fromEntries(
+    Object.keys(value)
+      .sort()
+      .map((key) => [key, sortedKeys(value[key] ?? null)]),
+  )
 }
 
 /** Como `JSON.stringify` con cuatro espacios (lo que escribe `kubectl -o json`). */

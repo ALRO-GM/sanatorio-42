@@ -27,6 +27,8 @@ const PRIVATE = new Set([
   'initLogs',
   'initFailures',
   'unschedulable',
+  'vars',
+  'previousLogs',
 ])
 
 const TIMES = new Set(['lastScaleTime', 'startTime', 'completionTime', 'startedAt'])

@@ -37,7 +37,7 @@ import type { Env } from './store.js'
 import { getObject, list, nsOf, ownedBy } from './store.js'
 import { isoAt, mi, table } from './util.js'
 import { saveKubeconfig } from './world.js'
-import { toYaml } from './yaml.js'
+import { sortedKeys, toYaml } from './yaml.js'
 
 type Sub = (ctx: Ctx, args: readonly string[]) => number
 
@@ -121,11 +121,54 @@ function setCmd(ctx: Ctx, raw: readonly string[]): number {
   const env = envFor(ctx, args)
   const words = args.rest.filter((word) => !word.includes('='))
   const pairs = args.rest.filter((word) => word.includes('=') || /^[A-Za-z_][\w]*-$/.test(word))
+
+  // `set serviceaccount deploy/api api`: el último nombre suelto es la cuenta.
+  if (what === 'serviceaccount' || what === 'sa') {
+    const account = words.at(-1) ?? ''
+    const target = one(env, { ...args, rest: words.slice(0, -1) }, `set ${what}`)
+
+    if (account === '' || words.length < 2)
+      throw new Fail(
+        `error: serviceaccount is required\nSee 'kubectl set serviceaccount -h' for help and examples`,
+        1,
+      )
+    obj(templateOf(target.object).spec).serviceAccountName = account
+    save(ctx, env, target.object)
+    ctx.io.out(`${shown(target.info, target.object.metadata.name)} serviceaccount updated\n`)
+
+    return 0
+  }
+
   const { info, object } = one(
     env,
     { ...args, rest: words.filter((word) => !word.endsWith('-')) },
     `set ${what}`,
   )
+
+  // `set selector svc/api app=api`: cambia el selector entero (solo tiene sentido en un Service).
+  if (what === 'selector') {
+    if (pairs.length === 0)
+      throw new Fail(
+        `error: one selector is required\nSee 'kubectl set selector -h' for help and examples`,
+        1,
+      )
+    if (info.kind !== 'Service')
+      throw new Fail(
+        `The ${info.kind} "${object.metadata.name}" is invalid: spec.selector: Invalid value: ${JSON.stringify(Object.fromEntries(pairs.map((pair) => pair.split('='))))}: field is immutable`,
+        1,
+      )
+    object.spec = {
+      ...object.spec,
+      selector: Object.fromEntries(
+        pairs.map((pair) => [pair.split('=')[0] ?? '', pair.split('=').slice(1).join('=')]),
+      ),
+    }
+    save(ctx, env, object)
+    ctx.io.out(`${shown(info, object.metadata.name)} selector updated\n`)
+
+    return 0
+  }
+
   const containers = containersOf(object)
 
   if (what === 'image') {
@@ -315,7 +358,7 @@ function rollout(ctx: Ctx, raw: readonly string[]): number {
 
         if (rs === undefined) throw new Fail(`error: unable to find the specified revision`, 1)
         ctx.io.out(
-          `${shown(info, name)} with revision #${wanted}\nPod Template:\n${toYaml(obj(rs.spec?.template)).replace(/^/gm, '  ')}`,
+          `${shown(info, name)} with revision #${wanted}\nPod Template:\n${toYaml(sortedKeys(obj(rs.spec?.template))).replace(/^/gm, '  ')}`,
         )
 
         return 0
@@ -445,9 +488,12 @@ function marks(ctx: Ctx, raw: readonly string[], kind: 'labels' | 'annotations')
       const key = change.slice(0, at)
       const value = change.slice(at + 1)
 
+      // `label` y `annotate` lo dicen distinto (así son los mensajes de kubectl).
       if (Object.hasOwn(current, key) && current[key] !== value && !args.has('overwrite'))
         throw new Fail(
-          `error: '${key}' already has a value (${current[key] ?? ''}), and --overwrite is false`,
+          kind === 'labels'
+            ? `error: '${key}' already has a value (${current[key] ?? ''}), and --overwrite is false`
+            : `error: --overwrite is false but found the following declared annotation(s): '${key}' already has a value (${current[key] ?? ''})`,
           1,
         )
       current[key] = value
@@ -663,13 +709,22 @@ function podFor(ctx: Ctx, env: Env, word: string): K8sObject {
   return pod
 }
 
-function containerFor(ctx: Ctx, pod: K8sObject, wanted: string | undefined, init = false): string {
+/**
+ * El contenedor de `-c` (o el primero). Con `logs` lo comprueba el servidor
+ * (y vale un init); con `exec` y `cp`, el kubelet al abrir la conexión.
+ */
+function containerFor(ctx: Ctx, pod: K8sObject, wanted: string | undefined, logs = false): string {
   const spec = podSpecOf(pod.spec)
-  const names = [...spec.containers, ...(init ? spec.init : [])].map((c) => c.name)
+  const names = [...spec.containers, ...(logs ? spec.init : [])].map((c) => c.name)
 
   if (wanted !== undefined) {
     if (!names.includes(wanted))
-      throw new Fail(`error: container ${wanted} is not valid for pod ${pod.metadata.name}`, 1)
+      throw new Fail(
+        logs
+          ? `Error from server (BadRequest): container ${wanted} is not valid for pod ${pod.metadata.name}`
+          : `error: unable to upgrade connection: container not found ("${wanted}")`,
+        1,
+      )
 
     return wanted
   }
@@ -753,14 +808,20 @@ function exec(ctx: Ctx, raw: readonly string[]): number {
     throw new Fail(`error: unable to upgrade connection: container not found ("${name}")`, 1)
 
   const [program = ''] = args.command
+  // Con -i, lo que llega por la entrada (`< backup.sql`) va a la orden de dentro;
+  // a una shell sola, como su guion.
+  const input = args.has('stdin') ? ctx.io.stdin.readAll() : ''
+  const shell =
+    args.command.length === 1 && ['sh', 'bash', 'ash', '/bin/sh', '/bin/bash'].includes(program)
+  const argv = shell && input.trim() !== '' ? [program, '-c', input] : args.command
 
-  if (args.command.length === 1 && ['sh', 'bash', 'ash', '/bin/sh', '/bin/bash'].includes(program))
+  if (shell && input.trim() === '')
     throw new Fail(
       `peer4u-sandbox: este simulador no abre sesiones interactivas: escribe la orden detrás, como kubectl exec -it ${target} -- sh -c 'env; ls /app'`,
       1,
     )
 
-  const result = execIn(env, pod, container, args.command)
+  const result = execIn(env, pod, container, argv, input)
 
   sync(ctx.sh.world)
   ctx.io.out(result.out)
@@ -1227,7 +1288,7 @@ function config(ctx: Ctx, raw: readonly string[]): number {
       return 0
     }
     case 'view': {
-      const text = readHost(ctx, '~/.kube/config')
+      const text = readHost(ctx, `${ctx.sh.session().env.HOME ?? '/home/peer'}/.kube/config`)
 
       ctx.io.out(
         args.has('minify')

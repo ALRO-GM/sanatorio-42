@@ -189,5 +189,24 @@ export function imageInfo(ref: string): ImageInfo | undefined {
   }
 }
 
+/** ¿Hay alguna etiqueta de ese repositorio? (si no, el registro ni lo conoce). */
+export function knownRepo(ref: string): boolean {
+  const repo = shortRef(ref).replace(/[:@][^/:@]+$/, '')
+
+  return [...Object.keys(PUBLIC), ...Object.keys(EXTRA), ...Object.keys(TEAM_IMAGES)].some(
+    (each) => each.replace(/:[^/:]+$/, '') === repo,
+  )
+}
+
+/** La referencia entera, como la escribe containerd (`api:1.0` → `docker.io/library/api:1.0`). */
+export function fullRef(ref: string): string {
+  const [first = '', ...rest] = ref.split('/')
+
+  if (rest.length > 0 && (first.includes('.') || first.includes(':') || first === 'localhost'))
+    return ref
+
+  return rest.length === 0 ? `docker.io/library/${ref}` : `docker.io/${ref}`
+}
+
 /** Las del registro del equipo (para comprobar que coinciden con lo que publica el curso de Docker). */
 export const teamImages = (): string[] => Object.keys(TEAM_IMAGES)

@@ -11,7 +11,7 @@ import type { HttpReply, World } from '@sanatorio/shellsim'
 
 import { FRONT_INDEX, imageInfo } from './images.js'
 import type { K8sObject } from './model.js'
-import { databaseUp, resolveEnv, runtimeOf } from './runtime.js'
+import { databaseUp, runtimeOf, varsOf } from './runtime.js'
 import type { Container } from './spec.js'
 import { arr, matches, num, obj, podSpecOf, str, strMap } from './spec.js'
 import type { Env } from './store.js'
@@ -292,7 +292,7 @@ export function appHttp(env: Env, pod: K8sObject, port: number, path: string): H
       if (route === '/health') {
         if (image.unhealthy) return reply(503, '{"status":"error","reason":"pending migrations"}\n')
 
-        const vars = resolveEnv(env, nsOf(pod), container).vars
+        const vars = varsOf(env, pod, container)
 
         return databaseUp(env, pod, vars) === null
           ? reply(200, '{"status":"ok","db":"up"}\n')

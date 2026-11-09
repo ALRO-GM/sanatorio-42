@@ -91,6 +91,10 @@ CoreDNS, Traefik como Ingress, metrics-server y el aprovisionador de volúmenes
 
 En total: 34 unidades (12 de principiante, 12 de intermedio y 10 de avanzado), 9 jefes y 3 jefes finales: 46 puntos.
 
+La revisión de 2026-11-09, punto por punto (si lo que dice es cierto, si es
+como se trabaja hoy y qué alternativas valen), con lo que se cambió en el
+motor y lo que se queda distinto: [revision-cursos/kubernetes.md](revision-cursos/kubernetes.md).
+
 ## Estrellas y tiempo
 
 - **Unidades**: por comandos. Cuenta cada orden que sale bien y cambia algo
@@ -111,14 +115,14 @@ En total: 34 unidades (12 de principiante, 12 de intermedio y 10 de avanzado), 9
 
 ## Tiempo estimado
 
-Con el modelo común (`docs/plantilla-cursos.md`), a 2026-11-08:
+Con el modelo común (`docs/plantilla-cursos.md`), a 2026-11-09:
 
 | Nivel | Bloques | Tiempo |
 | --- | --- | --- |
-| Principiante | 31 + 32 + 24 min, y el jefe final | ~1 h 45 min |
-| Intermedio | 29 + 24 + 35 min, y el jefe final | ~1 h 49 min |
-| Avanzado | 35 + 27 + 29 min, y el jefe final | ~1 h 58 min |
-| **Todo el curso** | | **~5 h 32 min** |
+| Principiante | 29 + 33 + 25 min, y el jefe final | ~1 h 45 min |
+| Intermedio | 29 + 24 + 34 min, y el jefe final | ~1 h 48 min |
+| Avanzado | 34 + 26 + 29 min, y el jefe final | ~1 h 56 min |
+| **Todo el curso** | | **~5 h 29 min** |
 
 ## Orden entre cursos
 
@@ -138,7 +142,8 @@ plantilla). Dentro del curso, el camino se abre de uno en uno.
   trabajen sobre lo mismo que se ve) y los `port-forward`.
   - `objects.ts`: lo que hace el servidor de la API antes de guardar
     (validación con los errores de verdad, valores por defecto, ClusterIP y
-    NodePort).
+    NodePort); `fields.ts`, los campos que conoce cada tipo para la
+    validación estricta de kubectl (`strict decoding error: unknown field`).
   - `controllers.ts`: Deployment → ReplicaSet → Pods con `maxSurge` y
     `maxUnavailable`, revisiones y `rollout undo`; StatefulSet en orden con
     sus PVC; Job; HPA (con su espera de 5 minutos para bajar); enlace de PVC
@@ -147,8 +152,12 @@ plantilla). Dentro del curso, el camino se abre de uno en uno.
     Van a pasos de unos segundos de reloj (cada orden son 5 s), así que un
     rolling update espera de verdad a que los Pods nuevos estén listos.
   - `runtime.ts`: qué hace cada contenedor con el reloj (cuándo escucha, si
-    las sondas lo dan por listo o lo matan, el `CrashLoopBackOff` con su
-    espera de 10 s a 5 min, el OOMKilled y el 137) y sus registros.
+    las sondas lo dan por listo o lo matan, el `CrashLoopBackOff` con el
+    primer reinicio enseguida y luego 10 s, 20 s… hasta 5 min, el OOMKilled y
+    el 137) y sus registros (`logs` de la instancia que corre, `--previous`
+    de la última que acabó). Las variables se resuelven al crear el
+    contenedor y se guardan: cambiar un ConfigMap o un Secret no las toca
+    hasta que el contenedor se reinicia o el Pod se recrea.
   - `net.ts`: DNS de Services (y de los Pods de un StatefulSet), endpoints,
     NetworkPolicies como tabla de permitidos, Ingress (Traefik) y lo que
     contesta cada app por HTTP; `podsh.ts`, la shell mínima de dentro de un
@@ -160,8 +169,9 @@ plantilla). Dentro del curso, el camino se abre de uno en uno.
     300 MiB). Son privadas: hace falta `imagePullSecrets`.
   - `kubectl.ts` y `ops.ts`: la CLI; `kustomize.ts` y `helm.ts`: Kustomize
     (resources, namespace, namePrefix, labels, images, replicas, patches,
-    generadores con hash) y un Helm reducido (`bitnami/redis` y
-    `bitnami/postgresql`, con releases y revisiones).
+    generadores con hash, en el orden «legacy») y un Helm reducido
+    (`bitnami/redis` y `bitnami/postgresql`, también por OCI desde
+    `oci://registry-1.docker.io/bitnamicharts/`, con releases y revisiones).
   - `course/`: los bloques, las unidades (castellano e inglés), la tienda que
     preparan (`stack.ts`) y la corrección (`checkAttempt`, `goalOf`,
     `starGoals`, `timeGoalsOf`).
@@ -181,10 +191,12 @@ plantilla). Dentro del curso, el camino se abre de uno en uno.
   ServiceAccount, PVC, PV, StorageClass, Ingress, IngressClass,
   NetworkPolicy, HPA, Event, y Gateway/HTTPRoute guardados (sin
   controlador). Sondas httpGet, tcpSocket y exec; requests y limits;
-  securityContext; initContainers; `get` (`-o wide|yaml|json|name|jsonpath|
+  securityContext; initContainers y sidecars nativos (`restartPolicy:
+  Always`); `get` (`-o wide|yaml|json|name|jsonpath|
   custom-columns`, `-l`, `-L`, `--show-labels`, `-A`, `-w` durante un
   minuto), `describe`, `logs` (`--previous`, `--tail`, `-c`), `exec`, `cp`,
-  `debug`, `port-forward`, `top`, `wait`, `rollout`, `set`, `patch`
+  `debug`, `port-forward`, `top`, `wait`, `rollout`, `set` (`image`, `env`,
+  `resources`, `selector`, `serviceaccount`), `events`, `patch`
   (estratégico, merge y JSON), `label`, `annotate`, `scale`, `autoscale`,
   `diff`, `auth can-i`, `config`, `explain` de los campos más usados.
 - **No**: instalar ni administrar el clúster (kubeadm, etcd, certificados),

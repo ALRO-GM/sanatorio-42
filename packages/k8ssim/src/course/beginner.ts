@@ -162,7 +162,7 @@ export const BEGINNER: Unit[] = [
     kind: 'unit',
     es: {
       title: 'Manifiestos YAML',
-      goal: 'Crea el Pod web (nginx:1.27) desde un manifiesto ~/pod.yaml, con la etiqueta equipo=tienda, aplicándolo con kubectl apply.',
+      goal: 'Crea el Pod web (nginx:1.27) desde un manifiesto ~/pod.yaml, con la etiqueta equipo=tienda, aplicándolo con kubectl apply -f (o create -f).',
       theory: {
         what: 'Un manifiesto YAML describe lo que quieres (apiVersion, kind, metadata y spec), no los pasos. kubectl apply -f lo crea o lo cambia hasta que coincida.',
         how: [
@@ -181,11 +181,12 @@ export const BEGINNER: Unit[] = [
         'Antes de verlo: el primer demo.yaml sangra image con un tabulador. ¿Qué dirá apply?',
       objectives: {
         'get:default pod/web {.metadata.labels.equipo}': 'El Pod web lleva equipo=tienda',
+        'probe:manifiesto': '~/pod.yaml coincide con el Pod del clúster',
       },
     },
     en: {
       title: 'YAML manifests',
-      goal: 'Create the Pod web (nginx:1.27) from a manifest ~/pod.yaml, labelled equipo=tienda, applying it with kubectl apply.',
+      goal: 'Create the Pod web (nginx:1.27) from a manifest ~/pod.yaml, labelled equipo=tienda, applying it with kubectl apply -f (or create -f).',
       theory: {
         what: 'A YAML manifest describes what you want (apiVersion, kind, metadata and spec), not the steps. kubectl apply -f creates or changes it until it matches.',
         how: [
@@ -204,6 +205,7 @@ export const BEGINNER: Unit[] = [
         'Before you look: the first demo.yaml indents image with a tab. What will apply say?',
       objectives: {
         'get:default pod/web {.metadata.labels.equipo}': 'Pod web is labelled equipo=tienda',
+        'probe:manifiesto': '~/pod.yaml matches the Pod in the cluster',
       },
     },
     example: [
@@ -217,8 +219,13 @@ export const BEGINNER: Unit[] = [
       'kubectl run web --image=nginx:1.27 --labels=run=web,equipo=tienda --dry-run=client -o yaml > ~/pod.yaml',
       'kubectl apply -f ~/pod.yaml',
     ],
-    check: { ready: ['default pod/web'], get: ['default pod/web {.metadata.labels.equipo}'] },
-    requires: [['apply']],
+    check: {
+      ready: ['default pod/web'],
+      get: ['default pod/web {.metadata.labels.equipo}'],
+      // Que el Pod salga del fichero: da igual crearlo con apply -f o con create -f.
+      probes: { manifiesto: ['kubectl diff -f ~/pod.yaml > /dev/null && echo igual'] },
+    },
+    requires: [['apply', 'create']],
   },
   {
     id: 'k8s-namespaces',
@@ -740,6 +747,7 @@ export const BEGINNER: Unit[] = [
           'kubectl get configmap api-config -o yaml   # data, con los valores',
           'kubectl set env deployment/api --from=configmap/api-config',
           'kubectl exec deploy/api -- printenv LOG_LEVEL   # info',
+          'kubectl rollout restart deployment/api   # tras cambiarlo: las variables no se releen',
         ],
         when: 'Para lo que cambia entre entornos y no es secreto: el nivel de log, la URL de otro servicio.',
         whenNot:
@@ -764,6 +772,7 @@ export const BEGINNER: Unit[] = [
           'kubectl get configmap api-config -o yaml   # data, with the values',
           'kubectl set env deployment/api --from=configmap/api-config',
           'kubectl exec deploy/api -- printenv LOG_LEVEL   # info',
+          'kubectl rollout restart deployment/api   # after a change: variables are not reread',
         ],
         when: 'For whatever changes between environments and is not secret: log level, another service’s URL.',
         whenNot:
@@ -1062,7 +1071,7 @@ services:
     },
     solution: [
       ...TIENDA,
-      'kubectl create secret generic db --from-env-file=~/tienda/.env',
+      'kubectl create secret generic db --from-env-file ~/tienda/.env',
       GHCR_SECRET,
       'kubectl create configmap api-config --from-literal=LOG_LEVEL=info',
       `cat > ~/tienda/db.yaml <<'EOF'\n${DB_YAML}EOF`,

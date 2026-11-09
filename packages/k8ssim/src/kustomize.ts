@@ -10,12 +10,12 @@
 import { Fail } from '@sanatorio/shellsim'
 import type { CommandFn, Ctx } from '@sanatorio/shellsim'
 
-import { filesIn, isDir, readHost, writeHost } from './common.js'
+import { exists, filesIn, isDir, readHost, writeHost } from './common.js'
 import { findKind } from './kinds.js'
 import type { Json, JsonObject } from './model.js'
 import { arr, obj, str, strMap } from './spec.js'
 import { encode64, suffix } from './util.js'
-import { parseDocs, toYaml } from './yaml.js'
+import { parseDocs, retype, toYaml } from './yaml.js'
 
 const FILES = ['kustomization.yaml', 'kustomization.yml', 'Kustomization']
 
@@ -91,6 +91,7 @@ function json6902(doc: JsonObject, ops: Json[]): void {
     const op = obj(raw)
     const parts = str(op.path).split('/').slice(1)
     const last = parts.pop() ?? ''
+    const value = retype(op.value ?? null, last)
     let parent: Json = doc
 
     for (const part of parts)
@@ -99,11 +100,11 @@ function json6902(doc: JsonObject, ops: Json[]): void {
       const index = last === '-' ? parent.length : Number(last)
 
       if (str(op.op) === 'remove') parent.splice(index, 1)
-      else if (str(op.op) === 'add') parent.splice(index, 0, op.value ?? null)
-      else parent[index] = op.value ?? null
+      else if (str(op.op) === 'add') parent.splice(index, 0, value)
+      else parent[index] = value
     } else if (parent !== null && typeof parent === 'object') {
       if (str(op.op) === 'remove') Reflect.deleteProperty(parent, last)
-      else parent[last] = op.value ?? null
+      else parent[last] = value
     }
   }
 }
@@ -216,6 +217,15 @@ export function kustomizeBuild(ctx: Ctx, dir: string, depth = 0): JsonObject[] {
   for (const resource of [...arr(k.resources), ...arr(k.bases)].map((each) => str(each))) {
     const path = join(dir, resource)
 
+    // Lo que no está ni como carpeta ni como fichero: el error largo de Kustomize 5.
+    if (!isDir(ctx, path) && !exists(ctx, path)) {
+      const lost = `evalsymlink failure on '${ctx.sh.abs(path)}' : lstat ${ctx.sh.abs(path)}: no such file or directory`
+
+      throw new Fail(
+        `error: accumulating resources: accumulation err='accumulating resources from '${resource}': ${lost}': must build at directory: not a valid directory: ${lost}`,
+        1,
+      )
+    }
     if (isDir(ctx, path)) docs.push(...kustomizeBuild(ctx, path, depth + 1))
     else
       docs.push(
@@ -366,13 +376,17 @@ export function kustomizeBuild(ctx: Ctx, dir: string, depth = 0): JsonObject[] {
     for (const raw of arr(k.replicas)) {
       const r = obj(raw)
 
+      // Solo lo que tiene réplicas: el Service api se llama igual que el Deployment api.
       if (
-        str(r.name) ===
+        ['Deployment', 'ReplicaSet', 'StatefulSet', 'ReplicationController'].includes(
+          str(doc.kind),
+        ) &&
+        (str(r.name) ===
           str(meta.name).slice(
             prefix.length,
             str(meta.name).length - suffixText.length || undefined,
           ) ||
-        str(r.name) === str(meta.name)
+          str(r.name) === str(meta.name))
       ) {
         const spec = obj(doc.spec)
 
@@ -382,7 +396,49 @@ export function kustomizeBuild(ctx: Ctx, dir: string, depth = 0): JsonObject[] {
     }
   }
 
-  return docs
+  return depth === 0 ? legacyOrder(docs) : docs
+}
+
+/**
+ * El orden en que Kustomize escribe lo que construye (el «legacy», el de
+ * fábrica): lo que otros necesitan antes (namespaces, cuentas, ConfigMaps,
+ * Secrets, Services) y luego las cargas; dentro de cada tipo, por nombre.
+ */
+const LEGACY = [
+  'Namespace',
+  'ResourceQuota',
+  'StorageClass',
+  'CustomResourceDefinition',
+  'ServiceAccount',
+  'PodSecurityPolicy',
+  'Role',
+  'ClusterRole',
+  'RoleBinding',
+  'ClusterRoleBinding',
+  'ConfigMap',
+  'Secret',
+  'Endpoints',
+  'Service',
+  'LimitRange',
+  'PriorityClass',
+  'PersistentVolume',
+  'PersistentVolumeClaim',
+  'Deployment',
+  'StatefulSet',
+  'CronJob',
+  'PodDisruptionBudget',
+]
+
+function legacyOrder(docs: JsonObject[]): JsonObject[] {
+  const rank = (doc: JsonObject): number => {
+    const at = LEGACY.indexOf(str(doc.kind))
+
+    return at < 0 ? LEGACY.length : at
+  }
+  const id = (doc: JsonObject): string =>
+    `${str(doc.kind)}/${str(obj(doc.metadata).namespace)}/${str(obj(doc.metadata).name)}`
+
+  return [...docs].sort((a, b) => rank(a) - rank(b) || (id(a) < id(b) ? -1 : id(a) > id(b) ? 1 : 0))
 }
 
 /** Una lista YAML de operaciones (el lector solo devuelve mapas por documento). */
@@ -412,17 +468,25 @@ export const kustomize: CommandFn = (ctx) => {
   }
   if (what === 'create') {
     const args = [sub, ...rest]
+    // `--resources a,b` o `--resources=a,b` (y lo mismo con `--namespace`).
+    const flag = (name: string): string | undefined => {
+      const at = args.findIndex((arg) => arg === `--${name}` || arg.startsWith(`--${name}=`))
+      const arg = args[at]
+
+      if (arg === undefined) return undefined
+
+      return arg.includes('=') ? arg.slice(arg.indexOf('=') + 1) : args[at + 1]
+    }
     const resources =
-      args
-        .find((arg) => arg.startsWith('--resources'))
-        ?.split('=')[1]
-        ?.split(',') ??
+      flag('resources')
+        ?.split(',')
+        .filter((each) => each !== '') ??
       (args.includes('--autodetect')
         ? filesIn(ctx, '.', false)
             .map((each) => each.split('/').at(-1) ?? each)
             .filter((each) => !FILES.includes(each))
         : [])
-    const ns = args.find((arg) => arg.startsWith('--namespace='))?.split('=')[1]
+    const ns = flag('namespace')
 
     writeHost(
       ctx,

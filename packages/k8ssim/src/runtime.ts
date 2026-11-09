@@ -9,7 +9,7 @@
  */
 
 import type { ImageInfo } from './images.js'
-import { imageInfo, wellFormed } from './images.js'
+import { fullRef, imageInfo, knownRepo, wellFormed } from './images.js'
 import { own } from './limits.js'
 import type { JsonObject, K8sObject } from './model.js'
 import { MI } from './model.js'
@@ -152,6 +152,21 @@ export function resolveEnv(
   return { vars, error: null }
 }
 
+/**
+ * Las variables con las que arrancó un contenedor. Kubernetes las resuelve al
+ * crear el contenedor: cambiar después el ConfigMap o el Secret no las toca
+ * hasta que el contenedor se reinicia o el Pod se recrea (un `rollout
+ * restart`). Los ficheros montados de un ConfigMap sí se ponen al día.
+ */
+export function varsOf(env: Env, pod: K8sObject, container: Container): Record<string, string> {
+  const saved = obj(obj(pod.status).vars)[container.name]
+
+  if (saved !== undefined && saved !== null && typeof saved === 'object' && !Array.isArray(saved))
+    return Object.fromEntries(Object.entries(saved).map(([key, value]) => [key, str(value)]))
+
+  return resolveEnv(env, nsOf(pod), container).vars
+}
+
 /** El uid con el que corre un contenedor (el de la imagen o el del `securityContext`). */
 export function uidIn(spec: PodSpec, container: Container, image: ImageInfo | undefined): number {
   return container.security.runAsUser ?? spec.security.runAsUser ?? image?.uid ?? 0
@@ -171,10 +186,17 @@ export function pullError(
 
   const image = imageInfo(ref)
 
+  const full = fullRef(ref)
+
+  // Una etiqueta que no existe en un repositorio que sí: `not found`. Un
+  // repositorio que el registro no conoce (una imagen que solo está en tu
+  // portátil): Docker Hub contesta que no hay acceso.
   if (image === undefined)
     return {
       reason: 'ErrImagePull',
-      message: `Failed to pull image "${ref}": rpc error: code = NotFound desc = failed to pull and unpack image "${ref}": failed to resolve reference "${ref}": ${ref}: not found`,
+      message: knownRepo(ref)
+        ? `Failed to pull image "${ref}": rpc error: code = NotFound desc = failed to pull and unpack image "${full}": failed to resolve reference "${full}": ${full}: not found`
+        : `Failed to pull image "${ref}": rpc error: code = Unknown desc = failed to pull and unpack image "${full}": failed to resolve reference "${full}": pull access denied, repository does not exist or may require authorization: server message: insufficient_scope: authorization failed`,
     }
   if (image.private && !canPull(env, pod))
     return {
@@ -435,11 +457,7 @@ export function databaseUp(env: Env, pod: K8sObject, vars: Record<string, string
 
   if (db === null || image?.behaviour !== 'postgres') return `connect ECONNREFUSED ${host}:${port}`
 
-  const dbVars = resolveEnv(
-    env,
-    nsOf(db),
-    podSpecOf(db.spec).containers[0] ?? emptyContainer(),
-  ).vars
+  const dbVars = varsOf(env, db, podSpecOf(db.spec).containers[0] ?? emptyContainer())
 
   if (dbVars.POSTGRES_HOST_AUTH_METHOD === 'trust') return null
   if ((url[2] ?? '') !== (dbVars.POSTGRES_PASSWORD ?? ''))
@@ -551,7 +569,14 @@ function readyAt(
   return probeOk(env, pod, container, probe)
 }
 
-const backoff = (n: number): number => Math.min(10 * 2 ** n, 300)
+/**
+ * Lo que espera el kubelet antes del reinicio número `n + 1`: el primero va
+ * enseguida (aún no hay espera apuntada) y luego 10 s, 20 s, 40 s… hasta 5 min.
+ */
+const backoff = (n: number): number => (n === 0 ? 0 : Math.min(10 * 2 ** (n - 1), 300))
+
+const backoffText = (seconds: number): string =>
+  seconds >= 60 ? `${Math.floor(seconds / 60)}m${seconds % 60}s` : `${seconds}s`
 
 /** El estado de un contenedor a la hora `now`, si arrancó en `start` con ese resultado. */
 function timeline(
@@ -597,9 +622,14 @@ function timeline(
 
     if (age < kill.at) {
       state.since = at
-      // Lo que sale enseguida no llega a estar listo (no sirve nada mientras tanto).
+      // Mientras corre, un contenedor sin sondas está listo aunque luego vaya a
+      // salir (un 1/1 Running hasta que se cae); con sondas, lo deciden ellas, y
+      // lo que no escucha nunca las pasa. Lo que muere en menos de un segundo no
+      // llega a verlo el kubelet (mira cada segundo), así que nunca sale listo.
       state.ready =
-        outcome.kind === 'serve' && readyAt(env, pod, container, age, outcome.listenAfter)
+        outcome.kind === 'serve'
+          ? readyAt(env, pod, container, age, outcome.listenAfter)
+          : age >= 1 && readyAt(env, pod, container, age, Infinity)
 
       return state
     }
@@ -630,7 +660,7 @@ function timeline(
     if (env.now < nextStart) {
       state.state = 'waiting'
       state.reason = env.now - died < 5 && kill.by === null ? exit.reason : 'CrashLoopBackOff'
-      state.message = `back-off ${backoff(n) >= 60 ? `${backoff(n) / 60}m0s` : `${backoff(n)}s`} restarting failed container=${container.name} pod=${pod.metadata.name}_${nsOf(pod)}(${pod.metadata.uid ?? ''})`
+      state.message = `back-off ${backoffText(backoff(n))} restarting failed container=${container.name} pod=${pod.metadata.name}_${nsOf(pod)}(${pod.metadata.uid ?? ''})`
       state.since = at
 
       return state
@@ -804,7 +834,87 @@ export function usageOf(env: Env, pod: K8sObject, load: number): { cpu: number; 
   )
 }
 
-/** Los registros de un contenedor (`previous`: los de la instancia anterior). */
+/** Lo que dice el kubelet de un contenedor que aún no ha arrancado. */
+function waitingText(reason: string): string {
+  if (reason === 'ErrImagePull') return "image can't be pulled"
+  if (reason === 'ImagePullBackOff') return 'trying and failing to pull image'
+
+  return reason
+}
+
+/** Lo que dejó escrito una instancia que ya acabó (si la mató una sonda, hasta el SIGTERM). */
+export function endedLogs(
+  env: Env,
+  pod: K8sObject,
+  container: Container,
+  outcome: Outcome,
+  killedBy: 'liveness' | 'startup' | null,
+): string[] {
+  if (outcome.kind === 'exit' || killedBy === null) return outcome.logs
+
+  const life = killAt(env, pod, container, outcome.listenAfter).at
+  const said = life >= outcome.listenAfter ? outcome.logs : outcome.logs.slice(0, -1)
+
+  return [...said, 'SIGTERM received, closing server']
+}
+
+/** Lo que lleva escrito la instancia que corre ahora, a sus `age` segundos. */
+function runningLogs(
+  env: Env,
+  pod: K8sObject,
+  container: Container,
+  outcome: Outcome,
+  age: number,
+): string[] {
+  const lines = outcome.logs
+
+  if (outcome.kind === 'exit')
+    return lines.slice(
+      0,
+      Math.min(lines.length, Math.ceil((lines.length * (age + 1)) / (outcome.life + 1))),
+    )
+  if (age < outcome.listenAfter) return lines.slice(0, -1)
+  if (imageInfo(container.image)?.behaviour !== 'api') return lines
+
+  const db = databaseUp(env, pod, varsOf(env, pod, container))
+
+  return [...lines, db === null ? 'db: connected' : `db: ${db}`]
+}
+
+/** Los registros de un contenedor init: los de los que acabaron, o error si aún no ha arrancado. */
+function initLogsOf(pod: K8sObject, name: string, previous: boolean): string[] | string {
+  const spec = podSpecOf(pod.spec)
+  const status = obj(pod.status)
+  const index = spec.init.findIndex((each) => each.name === name)
+  const bad = (text: string) => `Error from server (BadRequest): ${text}`
+
+  if (index < 0) return bad(`container ${name} is not valid for pod ${pod.metadata.name}`)
+  if (previous)
+    return bad(`previous terminated container "${name}" in pod "${pod.metadata.name}" not found`)
+
+  const saved = obj(status.initLogs)[name]
+
+  if (saved !== undefined) return arr(saved).map((line) => str(line))
+
+  const done = num(status.initDone)
+  const blocked = obj(status.blocked)
+
+  // El que está en marcha (un bucle `until` que espera): aún no ha escrito nada.
+  if (index === done && str(blocked.reason) === 'PodInitializing') return []
+
+  // Los que vienen detrás esperan su turno; el primero puede estar atascado en su imagen.
+  const reason = index === done ? str(blocked.reason) : ''
+
+  return bad(
+    `container "${name}" in pod "${pod.metadata.name}" is waiting to start: ${['ErrImagePull', 'ImagePullBackOff'].includes(reason) ? waitingText(reason) : 'PodInitializing'}`,
+  )
+}
+
+/**
+ * Los registros de un contenedor, como los da el kubelet: los de la instancia
+ * que corre; si está esperando a reiniciarse, los de la última que acabó; con
+ * `previous`, siempre los de la última que acabó (y error si no hay ninguna).
+ */
 export function logsOf(
   env: Env,
   pod: K8sObject,
@@ -813,38 +923,38 @@ export function logsOf(
 ): string[] | string {
   const rt = runtimeOf(env, pod)
   const container = rt.containers.find((each) => each.name === name)
-  const init = obj(obj(pod.status).initLogs)[name]
+  const bad = (text: string) => `Error from server (BadRequest): ${text}`
 
-  if (container === undefined) {
-    if (init !== undefined) return arr(init).map((line) => str(line))
+  if (container === undefined) return initLogsOf(pod, name, previous)
 
-    return `error: container ${name} is not valid for pod ${pod.metadata.name}`
-  }
-  if (container.outcome === null)
-    return `Error from server (BadRequest): container "${name}" in pod "${pod.metadata.name}" is waiting to start: ${container.reason === 'ContainerCreating' ? 'ContainerCreating' : 'trying and failing to pull image'}`
-  if (previous && container.last === null)
-    return `Error from server (BadRequest): previous terminated container "${name}" in pod "${pod.metadata.name}" not found`
+  const outcome = container.outcome
 
-  const lines = container.outcome.logs
+  if (outcome === null)
+    return bad(
+      `container "${name}" in pod "${pod.metadata.name}" is waiting to start: ${waitingText(container.reason)}`,
+    )
 
-  if (container.outcome.kind === 'serve' && previous && container.killedBy !== null)
-    return [...lines.slice(0, -1), 'SIGTERM received, closing server']
-  if (container.outcome.kind === 'serve' && !previous) {
-    const image = imageInfo(container.image)
-    const age = env.now - container.since
+  const spec = podSpecOf(pod.spec).containers.find((c) => c.name === name) ?? emptyContainer()
+  const stored = obj(obj(pod.status).previousLogs)[name]
+  // La última instancia que acabó: de este resultado o, si se arregló algo, de antes.
+  const ended =
+    container.state === 'terminated'
+      ? container.restarts > 0
+        ? outcome.logs
+        : null
+      : container.last !== null
+        ? endedLogs(env, pod, spec, outcome, container.killedBy)
+        : stored === undefined
+          ? null
+          : arr(stored).map((line) => str(line))
 
-    if (age < container.outcome.listenAfter) return lines.slice(0, -1)
-    if (image?.behaviour === 'api') {
-      const vars = resolveEnv(
-        env,
-        nsOf(pod),
-        podSpecOf(pod.spec).containers.find((c) => c.name === name) ?? emptyContainer(),
-      ).vars
-      const db = databaseUp(env, pod, vars)
+  if (previous)
+    return (
+      ended ??
+      bad(`previous terminated container "${name}" in pod "${pod.metadata.name}" not found`)
+    )
+  if (container.state === 'terminated') return outcome.logs
+  if (container.state === 'waiting') return ended ?? []
 
-      return db === null ? [...lines, 'db: connected'] : [...lines, `db: ${db}`]
-    }
-  }
-
-  return lines
+  return runningLogs(env, pod, spec, outcome, env.now - container.since)
 }

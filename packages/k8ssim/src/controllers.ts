@@ -18,6 +18,7 @@ import { waitsFor } from './podsh.js'
 import type { Outcome } from './runtime.js'
 import {
   commandOf,
+  endedLogs,
   outcomeOf,
   pullError,
   resolveEnv,
@@ -983,13 +984,26 @@ function start(env: Env, pod: K8sObject): void {
   const bases: JsonObject = {}
   const at = env.now + START_DELAY
 
+  const vars: JsonObject = {}
+
   for (const container of spec.containers) {
-    outcomes[container.name] = outcomeOf(env, pod, container, resolveEnv(env, ns, container).vars)
+    const resolved = resolveEnv(env, ns, container).vars
+
+    outcomes[container.name] = outcomeOf(env, pod, container, resolved)
     starts[container.name] = at
     bases[container.name] = 0
+    vars[container.name] = resolved
   }
 
-  const clean: JsonObject = { ...status, phase: 'Running', startedAt: at, outcomes, starts, bases }
+  const clean: JsonObject = {
+    ...status,
+    phase: 'Running',
+    startedAt: at,
+    outcomes,
+    starts,
+    bases,
+    vars,
+  }
 
   Reflect.deleteProperty(clean, 'blocked')
   setStatus(pod, clean)
@@ -1019,6 +1033,8 @@ function refresh(env: Env, pod: K8sObject): void {
   const outcomes = { ...obj(status.outcomes) }
   const starts = { ...obj(status.starts) }
   const bases = { ...obj(status.bases) }
+  const vars = { ...obj(status.vars) }
+  const previousLogs = { ...obj(status.previousLogs) }
   let changed = false
 
   for (const [index, container] of spec.containers.entries()) {
@@ -1027,15 +1043,26 @@ function refresh(env: Env, pod: K8sObject): void {
 
     if (state?.state !== 'waiting' || old === undefined || spec.restartPolicy === 'Never') continue
 
-    const fresh = outcomeOf(env, pod, container, resolveEnv(env, nsOf(pod), container).vars)
+    const resolved = resolveEnv(env, nsOf(pod), container).vars
+
+    // El reinicio que viene ya arranca con las variables de ahora.
+    if (JSON.stringify(resolved) !== JSON.stringify(vars[container.name] ?? null)) {
+      vars[container.name] = resolved
+      changed = true
+    }
+
+    const fresh = outcomeOf(env, pod, container, resolved)
 
     if (JSON.stringify(fresh) === JSON.stringify(old)) continue
+    // Lo que escribió la última instancia, para `logs --previous` tras el arreglo.
+    if (state.last !== null)
+      previousLogs[container.name] = endedLogs(env, pod, container, old, state.killedBy)
     outcomes[container.name] = fresh
     starts[container.name] = env.now
     bases[container.name] = state.restarts + 1
     changed = true
   }
-  if (changed) setStatus(pod, { ...status, outcomes, starts, bases })
+  if (changed) setStatus(pod, { ...status, outcomes, starts, bases, vars, previousLogs })
 }
 
 /** Lo que se ve del Pod en `-o yaml` (y lo que leen los `jsonpath`). */
@@ -1054,7 +1081,7 @@ function publish(env: Env, pod: K8sObject): void {
         : c.state === 'waiting'
           ? { waiting: { reason: c.reason, ...(c.message === '' ? {} : { message: c.message }) } }
           : { terminated: { reason: c.reason, exitCode: c.exitCode } },
-    ...(c.last === null
+    ...(c.last === null || (c.state === 'terminated' && c.restarts === 0)
       ? {}
       : { lastState: { terminated: { reason: c.last.reason, exitCode: c.last.exitCode } } }),
   }))

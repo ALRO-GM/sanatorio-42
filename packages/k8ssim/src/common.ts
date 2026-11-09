@@ -47,8 +47,37 @@ export function envFor(ctx: Ctx, args: Args): Env {
 export const scopeOf = (env: Env, args: Args): string | null =>
   args.has('all-namespaces') ? null : env.ns
 
+/**
+ * La ruta absoluta de un fichero de `dev1`. Sin cambiar `~`: quien lo expande
+ * es la shell, y solo al principio de una palabra. En `--from-env-file=~/x`
+ * kubectl recibe `~/x` tal cual y no lo encuentra, como en la herramienta real.
+ */
 const home = (ctx: Ctx, path: string): string =>
-  ctx.sh.abs(path.replace(/^~(?=\/|$)/, ctx.sh.session().env.HOME ?? '/home/peer'))
+  // `./` delante: para kubectl, `~/x` es una carpeta que se llama `~` (la shell no la cambió).
+  ctx.sh.abs(path.startsWith('~') ? `./${path}` : path)
+
+/**
+ * El texto de un fichero que lee kubectl por su cuenta (`--from-file`,
+ * `--from-env-file`, `--cert`): si no está, el error de `os.Stat` de Go.
+ */
+export function readSource(ctx: Ctx, path: string, open = false): string {
+  const found = lookup(ctx.sh.machine(), ctx.sh.user(), home(ctx, path))
+
+  if (found === null)
+    throw new Fail(
+      open
+        ? `error: open ${path}: no such file or directory`
+        : `error: error reading ${path}: no such file or directory`,
+      1,
+    )
+  if (found.node.kind !== 'file')
+    throw new Fail(
+      open ? `error: read ${path}: is a directory` : 'error: file sources cannot be a directory',
+      1,
+    )
+
+  return found.node.text
+}
 
 /** El texto de un fichero de `dev1`, o el error de kubectl si no está. */
 export function readHost(ctx: Ctx, path: string, cmd = 'error'): string {
@@ -59,6 +88,10 @@ export function readHost(ctx: Ctx, path: string, cmd = 'error'): string {
   if (found.node.kind !== 'file') throw new Fail(`${cmd}: read ${path}: is a directory`, 1)
 
   return found.node.text
+}
+
+export function exists(ctx: Ctx, path: string): boolean {
+  return lookup(ctx.sh.machine(), ctx.sh.user(), home(ctx, path)) !== null
 }
 
 export function isDir(ctx: Ctx, path: string): boolean {
