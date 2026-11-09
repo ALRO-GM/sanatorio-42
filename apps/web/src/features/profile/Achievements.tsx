@@ -38,6 +38,13 @@ function AchievementRows({ entries, label }: { entries: readonly Achievement[]; 
               {entry.unlocked
                 ? t(`ach.${entry.id}.d`, { goal: entry.goal })
                 : t('xp.lockedAt', { progress: entry.progress, goal: entry.goal })}
+              {/* Lo que da (los de los cursos), una sola vez. */}
+              {entry.xp !== undefined && (
+                <>
+                  {' · '}
+                  {t('unlock.xp', { xp: entry.xp })}
+                </>
+              )}
             </small>
           </span>
         </li>

@@ -28,6 +28,7 @@ import { ErrorBoundary } from '../shared/ui/ErrorBoundary'
 import { DEFAULT_THEME, useStyle } from '../shared/theme'
 import { canUseStyle } from '../themes'
 import { RecordStylePicker } from '../features/profile/RecordStylePicker'
+import { UnlockCelebration } from '../features/unlocks/UnlockCelebration'
 import { startUsage, viewing } from '../shared/layout/store'
 import { Footer } from './Footer'
 import { Header } from './Header'
@@ -253,6 +254,13 @@ export function Clinic({ me, onLogout }: ClinicProps) {
           onClose={() => {
             setWelcoming(false)
           }}
+        />
+        {/* Lo recién desbloqueado (logros de los cursos, títulos): se celebra
+            una vez. Espera a que acabe la bienvenida y el Pomodoro. */}
+        <UnlockCelebration
+          current={profile.data?.title}
+          paused={welcoming || concentrated}
+          onEquipped={() => void reloadProfile()}
         />
         <PoolOnly k="clicker">
           <EasterEgg

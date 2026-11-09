@@ -18,6 +18,8 @@ import type {
   LeaderboardPeriod,
   ReactionKind,
   TitleId,
+  Unlock,
+  Unlocks,
 } from '@sanatorio/contracts'
 import { z } from 'zod'
 
@@ -28,6 +30,7 @@ import type { Curriculum, ReplicaRepository } from '../replica/index.js'
 import { domainError } from '../../core/errors.js'
 import {
   ACHIEVEMENTS,
+  COURSE_XP,
   HELP_KINDS,
   TITLES,
   XP_AMOUNT,
@@ -97,6 +100,14 @@ const paceRefSchema = z.object({
   deadline: day,
 })
 
+/** Lo ya celebrado que manda la web: ids de títulos, pocos y cortos. */
+const unlocksSeenSchema = z.object({
+  ids: z.array(z.string().min(1).max(60)).max(50),
+})
+
+/** La marca de `unlock_announcements` que dice que ya se hizo la primera cuenta. */
+const BASELINE = ''
+
 const settingsSchema = z.object({
   campusId: id.optional(),
   lang: z.enum(['es', 'en', 'ca', 'eu', 'fr']).optional(),
@@ -151,6 +162,59 @@ export function createXpService(options: XpServiceOptions) {
   /** Los títulos de los cursos que alguien ya tiene. */
   const courseTitlesOf = async (login: string): Promise<CourseAchievementId[]> =>
     (await coursesOf(login)).filter((entry) => entry.unlocked).map((entry) => entry.id)
+  /**
+   * Los logros de los cursos de alguien, después de cobrar la XP de los
+   * conseguidos que aún no la habían dado. Así la XP llega sola, también a
+   * quien los consiguió antes de que dieran XP: basta con que se miren. Cada
+   * logro se cobra una vez (`ref` = su id); la base lo garantiza aunque lleguen
+   * dos peticiones a la vez.
+   */
+  const creditedCourses = async (login: string): Promise<CourseAchievementRow[]> => {
+    const courses = await coursesOf(login)
+    const unlocked = courses.filter((entry) => entry.unlocked)
+
+    if (unlocked.length === 0) return courses
+
+    const paid = await xp.refs(login, XP_KIND.COURSE_ACHIEVEMENT)
+
+    for (const entry of unlocked) {
+      if (!paid.has(entry.id)) {
+        await xp.award(login, XP_KIND.COURSE_ACHIEVEMENT, COURSE_XP[entry.id], entry.id)
+      }
+    }
+
+    return courses
+  }
+
+  /**
+   * Lo que alguien tiene desbloqueado que se celebra: los logros de los
+   * cursos, los títulos de nivel (menos el primero) y el de maestro, en este
+   * orden (el nivel suele subir por un logro: primero el logro).
+   */
+  const unlockedOf = async (login: string): Promise<Unlock[]> => {
+    const courses = await creditedCourses(login)
+    const [total, master] = await Promise.all([xp.total(login), masterOf(login)])
+    const level = levelFor(total).level
+
+    return [
+      ...courses
+        .filter((entry) => entry.unlocked)
+        .map((entry): Unlock => ({
+          id: entry.id,
+          kind: 'achievement',
+          xp: COURSE_XP[entry.id],
+          level: 0,
+        })),
+      ...TITLES.filter((title) => title.level > 1 && level >= title.level).map((title): Unlock => ({
+        id: title.id,
+        kind: 'level',
+        xp: 0,
+        level: title.level,
+      })),
+      ...(master > 0 ? [{ id: 'maestro', kind: 'master', xp: 0, level: 0 } satisfies Unlock] : []),
+    ]
+  }
+
   /** Un título que no es de nivel, de Code Clicker ni de maestro: puede ser de un curso. */
   const maybeCourse = (title: string | null | undefined): boolean =>
     typeof title === 'string' &&
@@ -261,14 +325,15 @@ export function createXpService(options: XpServiceOptions) {
 
     /** Expediente completo de quien pregunta. */
     async expediente(actor: Actor): Promise<Expediente> {
-      const [total, earned, received, profile, hacker, master, courses] = await Promise.all([
+      // Primero la XP de los cursos que falte por cobrar: el total ya la lleva.
+      const courses = await creditedCourses(actor.login)
+      const [total, earned, received, profile, hacker, master] = await Promise.all([
         xp.total(actor.login),
         xp.earnedByKind(actor.login),
         xp.reactionsReceived(actor.login),
         profiles.get(actor.login),
         hackerOf(actor.login),
         masterOf(actor.login),
-        coursesOf(actor.login),
       ])
       const courseTitles = courses.filter((entry) => entry.unlocked).map((entry) => entry.id)
       const level = levelFor(total)
@@ -319,7 +384,7 @@ export function createXpService(options: XpServiceOptions) {
             progress: Math.min(progress[entry.id], entry.goal),
             unlocked: progress[entry.id] >= entry.goal,
           })),
-          ...courses,
+          ...courses.map((entry) => ({ ...entry, xp: COURSE_XP[entry.id] })),
         ],
         reactions: {
           bug: received.get('bug') ?? 0,
@@ -337,8 +402,44 @@ export function createXpService(options: XpServiceOptions) {
           guide_proposal: earnedOf(XP_KIND.GUIDE_PROPOSAL),
           guide_review: earnedOf(XP_KIND.GUIDE_REVIEW),
           first_duty: earnedOf(XP_KIND.FIRST_DUTY),
+          course_achievement: earnedOf(XP_KIND.COURSE_ACHIEVEMENT),
         },
       }
+    },
+
+    /**
+     * Lo desbloqueado que aún no se ha celebrado en pantalla: logros de los
+     * cursos, títulos de nivel (el primero no: es el de todo el mundo) y el de
+     * maestro del código. Antes cobra la XP de los cursos que falte, que puede
+     * subir de nivel. La primera vez que se mira a alguien, lo que ya tenía se
+     * apunta como celebrado sin enseñarlo: nada de una lluvia de ventanas por
+     * lo conseguido antes de que existiera la celebración.
+     */
+    async unlocks(actor: Actor): Promise<Unlocks> {
+      const unlocked = await unlockedOf(actor.login)
+      const announced = await xp.announced(actor.login)
+
+      if (!announced.has(BASELINE)) {
+        await xp.announce(actor.login, [BASELINE, ...unlocked.map((entry) => entry.id)])
+
+        return { unlocks: [] }
+      }
+
+      return { unlocks: unlocked.filter((entry) => !announced.has(entry.id)) }
+    },
+
+    /**
+     * Apunta como celebrado lo que la web ya ha enseñado. Solo se guarda lo que
+     * de verdad se tiene: un id inventado no deja rastro.
+     */
+    async unlocksSeen(actor: Actor, input: unknown): Promise<void> {
+      const { ids } = parse(unlocksSeenSchema, input)
+      const unlocked = new Set((await unlockedOf(actor.login)).map((entry) => entry.id))
+
+      await xp.announce(
+        actor.login,
+        ids.filter((id) => unlocked.has(id as TitleId)),
+      )
     },
 
     /**

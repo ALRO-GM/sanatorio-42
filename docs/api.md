@@ -255,7 +255,28 @@ Detrás van los 22 logros de los cursos (`CourseAchievementId`, ver «Juego de l
 cursos»), con el mismo `{ id, progress, goal, unlocked }`. Cada uno conseguido es
 también un título (`level: 0`) que sale en `titles` y se puede elegir con
 `PUT /me/settings`; los que no se tienen no salen en `titles` y elegirlos da `403`.
+Los de los cursos llevan además `xp`: la que dan, una sola vez (`COURSE_XP` en
+`modules/profile/xp.rules.ts`). Esa XP se cobra sola al mirar el expediente (o lo
+desbloqueado): también la de los logros conseguidos antes de que dieran XP. Va
+en `xp_events` con `kind: course_achievement` y `ref` = el id del logro, y sale en
+`earned.course_achievement`; `rules.course_achievement` es lo del más pequeño (10).
+No cuenta para `GET /leaderboard`.
 Los textos de unos y otros los pone el front (`apps/web/src/shared/i18n/`).
+
+```
+GET /me/unlocks → Unlocks: { unlocks: Unlock[] }
+POST /me/unlocks/seen { ids: string[] } → 204
+```
+
+Lo desbloqueado que aún no se ha celebrado en pantalla (`docs/cursos-logros.md`):
+un `Unlock` es `{ id, kind, xp, level }`, con `id` el título (y su banner) y
+`kind` `achievement` (un logro de los cursos, con su `xp`), `level` (un título de
+nivel, del 2 en adelante, con su `level`) o `master` (el de maestro del código).
+Antes de contestar cobra la XP de los cursos que falte. La primera vez que se
+pregunta por alguien, lo que ya tenía se apunta como celebrado y no sale (nada de
+una lluvia de ventanas por lo de antes). `POST /me/unlocks/seen` apunta lo ya
+celebrado, solo lo que de verdad se tiene; 50 ids como mucho, de 1 a 60
+caracteres, o `400`. Se guarda en `unlock_announcements` (migración 90).
 
 `reactions` son las valoraciones recibidas al ayudar (ver «Guardia: ayuda
 reservada»). Ya no se dan valoraciones sueltas (la ruta `/reactions` se quitó): la XP por ayudar sale solo de una
@@ -2076,7 +2097,8 @@ pruebas de grupo), `git_boss` (el jefe final) y `git_bosses` (repasos de mundo y
 jefe final con tres estrellas); y `courses_explorer` (empezar los cuatro),
 `courses_all` (terminarlos) y `courses_order` (terminarlos en el orden sugerido,
 shell → git → Docker → Kubernetes, cada uno no antes que el anterior). Salen en
-`achievements` de `/me/profile` y de `/users/:login/profile`.
+`achievements` de `/me/profile` y de `/users/:login/profile`, con la XP que dan, y
+al conseguirlos se celebran (`GET /me/unlocks`, en «Expediente y XP»).
 
 ## Avance (`modules/stats`, Datos → Avance)
 

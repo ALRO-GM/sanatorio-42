@@ -173,6 +173,7 @@ export const profileMock: Pick<
         guide_proposal: 15,
         guide_review: 5,
         first_duty: 0,
+        course_achievement: 10,
       },
       // Reparto de ejemplo: lo que no cuadra con el total se atribuye a las terapias.
       earned: {
@@ -187,6 +188,11 @@ export const profileMock: Pick<
           times: Math.floor(Math.max(0, state.xp - 280) / 10),
         },
         first_duty: { xp: 0, times: 1 },
+        // Lo de los logros de los cursos conseguidos.
+        course_achievement: {
+          xp: courses.reduce((sum, entry) => sum + (entry.unlocked ? entry.xp : 0), 0),
+          times: courses.filter((entry) => entry.unlocked).length,
+        },
       },
     }
   },

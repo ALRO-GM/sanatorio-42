@@ -72,6 +72,7 @@ de datos.
 | Expediente | Título y banner: desplegable con el activo a la vista; cada título trae su banner, que se ve también en tu perfil público y en tu ficha | S (cerrado) | Lo tuyo, sin ocupar sitio fijo |
 | Expediente | Tu red de correcciones, logros y reacciones, clasificación | N | Es reconocimiento, no utilidad |
 | Expediente | Logros de los cursos (22, en columnas, bajo los demás logros); cada uno conseguido es un título más del desplegable, con el banner de su curso (`docs/cursos-logros.md`) | N (los títulos, S) | Dentro del bloque de logros; el título sale donde ya se elige |
+| Toda la web | Celebración de lo desbloqueado: una ventana por logro de los cursos, título de nivel o maestro nuevos, con el banner, la XP y «Lucirlo ahora»; espera a la bienvenida y al Pomodoro (`docs/cursos-logros.md`) | S | Pedida por Alberto (2026-11-09). Los títulos salen en los tres modos; sale una vez y se cierra con Escape, así que no estorba ni en el simplificado. No es sección ni bloque: aparece al conseguir algo |
 | Expediente | En tu red de correcciones: la endogamia y con quién te cruzas más | D | En la Red son del modo de datos; aquí igual (2026-11) |
 | Guardia | Preevaluaciones, franjas de hoy, reservas | S | Es la guardia |
 | Guardia | Franjas de hoy recogidas: las cuatro horas desde ahora y la hora de cada cosa que tengas más tarde (franja, reserva, corrección), con una raya donde se saltan horas vacías; «Ver el resto del día» las abre todas (`shortStarts` en `features/help/time.ts`) | S | Las 24 horas eran lo que más ocupaba la página (2026-11) |

@@ -72,6 +72,7 @@ export function createProfileModule(deps: ProfileModuleDeps): ProfileModule {
         },
       },
       { table: 'pace_refs', logins: ['login'] },
+      { table: 'unlock_announcements', logins: ['login'] },
     ],
     xp,
     profiles,

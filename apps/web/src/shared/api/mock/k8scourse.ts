@@ -7,6 +7,7 @@
 import { checkAttempt, FINALS, TIERS, UNITS } from '@sanatorio/k8ssim'
 
 import { terminalCourseMock } from './terminal-course'
+import { queueMockUnlock } from './unlocks'
 import type { Api } from '../types'
 
 const k8s = terminalCourseMock({
@@ -20,5 +21,12 @@ const k8s = terminalCourseMock({
 export const k8sCourseMock: Pick<Api, 'getK8sCourse' | 'submitK8sAttempt' | 'startK8sBoss'> = {
   getK8sCourse: k8s.get,
   startK8sBoss: k8s.start,
-  submitK8sAttempt: k8s.submit,
+  // En la demo, Kubernetes está sin logro: el primer punto superado lo da y se celebra.
+  async submitK8sAttempt(unit, input) {
+    const result = await k8s.submit(unit, input)
+
+    if (result.done) queueMockUnlock('k8s_first')
+
+    return result
+  },
 }

@@ -4,10 +4,12 @@ Pedido por Alberto el 2026-11-08: que los cuatro cursos de Aprender (shell,
 git, Docker y Kubernetes) tengan su parte de juego en Clasificaciones y logros
 que se luzcan como título del banner.
 
-No hay tabla nueva (la migración 89 quedó reservada y sin usar): todo sale de
-lo que ya guarda cada curso (`shell_progress`, `git_progress`,
-`docker_progress`, `k8s_progress`). Módulo `modules/courses` (solo lee); las
-reglas, en `courses.rules.ts`.
+Los logros no tienen tabla propia: salen de lo que ya guarda cada curso
+(`shell_progress`, `git_progress`, `docker_progress`, `k8s_progress`). Módulo
+`modules/courses` (solo lee); las reglas, en `courses.rules.ts`. Ampliado el
+2026-11-09 (también pedido por Alberto): los logros dan XP y se celebran en
+pantalla al conseguirlos (ver «XP» y «Celebración», más abajo); eso vive en
+`modules/profile` y guarda lo celebrado en `unlock_announcements` (migración 90).
 
 ## Qué cuenta
 
@@ -61,7 +63,68 @@ verde para principiante y las pruebas de grupo, dorado para avanzado y el jefe
 final de git, y el color de peligro para todos los jefes con tres estrellas. El
 icono es el de la pestaña del curso (`shared/courseTitles.ts`).
 
+## XP
+
+Cada logro de los cursos da XP una sola vez, y cuenta para el nivel
+(`COURSE_XP` en `modules/profile/xp.rules.ts`):
+
+| Logro | XP |
+| --- | --- |
+| `<curso>_first` (el primer punto) | 10 |
+| `<curso>_beginner` · `_intermediate` · `_advanced` (cada certificado) | 25 · 40 · 60 |
+| `<curso>_bosses` (todos los jefes con tres estrellas) | 50 |
+| `git_group` (las tres pruebas de grupo) · `git_boss` (el jefe final) | 40 · 60 |
+| `courses_explorer` (empezar los cuatro) | 20 |
+| `courses_all` (terminar los cuatro) | 100 |
+| `courses_order` (en el orden sugerido) | 50 |
+
+Los 22 juntos suman 885 XP: el nivel 6 entero, más que una sesión de ayuda
+suelta pero menos que lo que da ayudar a menudo, que es para lo que está la
+web. No entra en la clasificación de quién ayuda más (`HELP_KINDS`).
+
+Cómo se cobra: al mirar el expediente o lo desbloqueado, la API apunta en
+`xp_events` (`kind: course_achievement`, `ref` = el id del logro) la XP de cada
+logro conseguido que aún no la tenía. La restricción única
+`(login, kind, ref)` hace que no se cobre dos veces aunque lleguen dos
+peticiones a la vez, y como sale de lo superado, también la cobra quien ya los
+tenía antes de que dieran XP (nadie escribe a mano en la base). Si se cambia una
+cifra, lo ya cobrado se queda como estaba. En «Cómo se gana XP» sale como «+10
+XP o más por cada logro de los cursos» y en la lista de logros, cada uno con la
+suya.
+
+## Celebración
+
+Al conseguir algo que trae título y banner nuevos sale una ventana
+(`features/unlocks/UnlockCelebration.tsx`) con el banner (con un pequeño salto
+y un brillo, sin movimiento para quien lo pide menos), lo conseguido, la XP que
+da, «Lucirlo ahora» (se pone el título) y «Ahora no». Si hay varias, una detrás
+de otra, diciendo cuántas quedan. Es un `<dialog>` modal (`shared/ui/Modal`):
+el foco queda dentro, va a «Lucirlo ahora» y Escape la cierra.
+
+Qué se celebra: los logros de los cursos, los títulos de nivel (del 2 en
+adelante) y el de maestro del código. Los de Code Clicker no: ya los anuncia
+su juego al pillarte.
+
+Cuándo se mira: al abrir la web y tras cada punto superado de un curso (el
+cliente de la API avisa al recibir un intento superado; la sala de una prueba
+de grupo de git, una vez por sala: `shared/unlocks.ts`). Espera a que acaben la
+bienvenida y el Pomodoro.
+
+Cómo se sabe que es nuevo: lo guarda la API (`GET /me/unlocks`,
+`POST /me/unlocks/seen`), no el navegador, así que no se repite al recargar ni
+en otro dispositivo. La primera vez que se pregunta por alguien, todo lo que ya
+tenía se apunta como celebrado sin enseñarlo (una fila con `unlock = ''` dice
+que esa primera cuenta ya se hizo): quien ya tenía logros no recibe una lluvia
+de ventanas. Como la web pregunta nada más abrirse, lo que se consiga después
+ya sale.
+
+En la demostración: con `?logro` en la dirección sale una al abrir, y el primer
+punto superado del curso de Kubernetes (el que la persona de la demo no ha
+empezado) da su logro y su ventana.
+
 ## Dudas abiertas
 
-- Los logros no dan XP: son reconocimiento, como los títulos de Code Clicker.
-- No avisan al conseguirlos: se ven en el perfil y en el desplegable.
+- Las cifras de XP son a ojo: se ajustarán al ver cómo se usa.
+- Si la primera pregunta de alguien falla (sin conexión) y supera un punto
+  antes de la siguiente, ese primer logro entra en la primera cuenta y no se
+  celebra (la XP sí se cobra).

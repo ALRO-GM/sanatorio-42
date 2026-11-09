@@ -11,6 +11,11 @@ export type XpKind =
   | 'guide_proposal'
   | 'guide_review'
   | 'first_duty'
+  /**
+   * Un logro de los cursos, una vez cada uno. Lo que da depende del logro
+   * (`courseXp` en la API); en `rules` va lo que da el más pequeño.
+   */
+  | 'course_achievement'
 
 /** Tipos de reacción de "¿Cómo te ayudó?". */
 export type ReactionKind = 'bug' | 'code' | 'concept' | 'patient'
@@ -72,7 +77,14 @@ export type Expediente = {
   /** Proyectos que ha corregido diez veces o más: el título de maestro lleva esa cuenta. */
   master: number
   titles: { id: TitleId; level: number; unlocked: boolean }[]
-  achievements: { id: AchievementId; progress: number; goal: number; unlocked: boolean }[]
+  achievements: {
+    id: AchievementId
+    progress: number
+    goal: number
+    unlocked: boolean
+    /** La XP que da al conseguirlo, si da (los de los cursos). */
+    xp?: number
+  }[]
   /** Reacciones recibidas, por tipo. */
   reactions: Record<ReactionKind, number>
   /** Cuánto vale cada cosa, para que la web no lo tenga escrito a mano. */
@@ -99,6 +111,28 @@ export type Profile = Expediente & {
   /** Campus principal en 42, para poder volver a él desde el selector. */
   homeCampusId: number
 }
+
+/**
+ * Un título recién desbloqueado que aún no se ha celebrado en pantalla: un
+ * logro de los cursos, un título de nivel o el de maestro del código. Se
+ * enseña una vez, en cualquier dispositivo (`docs/cursos-logros.md`).
+ */
+export type Unlock = {
+  /** El título (y su banner). En los de los cursos, también el id del logro. */
+  id: TitleId
+  /** Lo que se ha conseguido: un logro, subir de nivel o ser maestro del código. */
+  kind: 'achievement' | 'level' | 'master'
+  /** La XP que ha dado (0 si no da: los de nivel salen de la XP, no la dan). */
+  xp: number
+  /** El nivel que lo da, en los de nivel; 0 en los demás. */
+  level: number
+}
+
+/** `GET /me/unlocks`: lo desbloqueado que aún no se ha celebrado, del más antiguo al más nuevo. */
+export type Unlocks = { unlocks: Unlock[] }
+
+/** Cuerpo de `POST /me/unlocks/seen`: lo que ya se ha celebrado. */
+export type UnlocksSeenInput = { ids: string[] }
 
 /** Cuerpo de `PUT /me/settings`. Solo se cambia lo que venga. */
 export type SettingsInput = {

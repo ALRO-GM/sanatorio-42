@@ -33,6 +33,22 @@ export function registerProfileRoutes(
     return reply.send(profile)
   })
 
+  /**
+   * `GET /me/unlocks` → `Unlocks`: lo desbloqueado (logros de los cursos,
+   * títulos de nivel, maestro) que aún no se ha celebrado en pantalla. Cobra
+   * antes la XP de los cursos que falte.
+   */
+  app.get('/me/unlocks', async (request, reply) => {
+    return reply.send(await xp.unlocks(await session.actor(request)))
+  })
+
+  /** `POST /me/unlocks/seen` → `{ ids }`: ya celebrados, no vuelven a salir. 204. */
+  app.post('/me/unlocks/seen', async (request, reply) => {
+    await xp.unlocksSeen(await session.actor(request), request.body)
+
+    return reply.code(204).send()
+  })
+
   /** `PUT /me/settings` → `{ campusId?, lang?, title? }`. */
   app.put('/me/settings', async (request, reply) => {
     await xp.updateSettings(await session.actor(request), request.body)

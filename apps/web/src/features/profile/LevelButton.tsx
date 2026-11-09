@@ -15,6 +15,7 @@ const RULES = [
   'guide_review',
   'board_host',
   'therapy_session',
+  'course_achievement',
 ] as const satisfies readonly XpKind[]
 
 type LevelButtonProps = Pick<Profile, 'xp' | 'rules' | 'earned'>

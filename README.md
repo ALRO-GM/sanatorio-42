@@ -41,8 +41,8 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
-| **Tamaño**      | 38 módulos de API con 270 rutas, 89 migraciones, 8 paquetes compartidos; 4 categorías con 20 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
-| **Calidad**     | 7 478 tests en 275 ficheros (6 503 de la API y 975 de la web, con 75 ficheros de pantallas; medido el 2026-11-09), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
+| **Tamaño**      | 38 módulos de API con 272 rutas, 90 migraciones, 8 paquetes compartidos; 4 categorías con 20 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
+| **Calidad**     | 7 487 tests en 278 ficheros (6 508 de la API y 979 de la web, con 76 ficheros de pantallas; medido el 2026-11-09), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
 | **Coste**       | 0 € al mes. La web y la máquina se cortan solas antes de pasar de la capa gratuita                                                                   |
@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-09 | Perfil · Cursos          | Los 22 logros de los cursos dan XP para el nivel, una vez cada uno (de 10 el primer punto a 100 terminar los cuatro; 885 en total), también a quien ya los tenía; y al conseguir un logro, un título de nivel o el de maestro sale una ventana con el banner nuevo, la XP y «Lucirlo ahora», una sola vez en cualquier dispositivo y sin ventanas por lo de antes ([docs/cursos-logros.md](docs/cursos-logros.md)) |
 | 2026-11-09 | Panel de gestión         | Pestaña Límites: los 13 topes por persona (mensajes por minuto, incidencias, sugerencias, dudas, reservas, sprints, pizarras, puestos rotos, avisos del edificio, metas, cuentas atrás) se cambian para todo el mundo o para una persona, sin tocar lo de fábrica; los cortes del plan al 90 % siguen sin regularse ([docs/limites.md](docs/limites.md)) |
 | 2026-11-09 | Curso de Kubernetes    | Revisado punto por punto contra Kubernetes 1.31–1.34, kubectl, Kustomize y Helm: las variables de un ConfigMap no cambian hasta reiniciar, `logs --previous` es la instancia anterior, el primer reinicio va enseguida, validación estricta de campos, salidas de `--dry-run` y errores como los de kubectl, `kubectl events`, sidecars nativos, charts de Bitnami por OCI; valen más formas de llegar al mismo sitio (`create -f`, `kustomize build \| kubectl apply`, `helm upgrade --install`) ([docs/revision-cursos/kubernetes.md](docs/revision-cursos/kubernetes.md)) |
 | 2026-11-09 | Curso de Docker        | Revisión punto por punto contra Docker 27/28, Compose v2 y BuildKit: el motor ya se porta como el de verdad en permisos con `USER`, `ENTRYPOINT` en forma shell, `COPY ../` y `--from`, `curl`/`wget` por imagen, puertos que cortan la conexión, `scout --only-severity` y `compose config`; acepta más formas válidas (`--project-directory`, `COMPOSE_FILE`, `docker update`, `compose.yml`, versiones más fijadas…) y corrige tres afirmaciones de la teoría ([docs/revision-cursos/docker.md](docs/revision-cursos/docker.md)) |
@@ -312,7 +313,8 @@ Decisiones que lo definen:
   con un guion y nada más que mantener. Las fronteras entre módulos las vigila el
   linter.
 - **XP que no se puede puentear.** Cada punto sale de un hecho comprobable (una
-  sesión con su código de llegada y valorada por los dos, una respuesta que resuelve),
+  sesión con su código de llegada y valorada por los dos, una respuesta que resuelve,
+  un logro de los cursos que la API ha corregido),
   una sola vez por referencia y con topes.
 - **El servidor manda en lo que importa.** Reloj de las partidas, estrellas de
   los cursos (la API vuelve a ejecutar el intento con el mismo simulador) y
@@ -364,7 +366,7 @@ Cada uno por dentro, con diagramas: [docs/componentes.md](docs/componentes.md).
 | `peers` | Peer to peer: tus proyectos, quién puede ayudarte y tu disponibilidad |
 | `pool` | Quién entra (estudiantes y piscineros), permisos de la piscina y personas ocultas |
 | `presence` | Quién tiene la web abierta y desde qué puesto |
-| `profile` | Perfil: XP, niveles, títulos, logros, reacciones y preferencias |
+| `profile` | Perfil: XP (también la de los logros de los cursos), niveles, títulos, logros, reacciones, preferencias y lo desbloqueado que falta por celebrar |
 | `quiz` | Not-games: salas de preguntas y ajedrez, banco de preguntas, repaso y quién ve qué salas |
 | `replica` | Copia local de 42 y su cuota: el único que pide a 42 en segundo plano |
 | `shellcourse` | Curso de shell con shell simulada, jefes y certificados |
