@@ -6,6 +6,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react'
 import { canPut, targetOf } from '../target'
 import type { Target } from '../target'
 import { officeOf } from './layout'
+import { DENSITY, useQuality } from './quality'
 import type { Office } from './layout'
 import { lifeOf } from './life'
 import { lengthOf, moveSize, paintMove } from './move'
@@ -60,6 +61,10 @@ export function PixelScene({
   const animated = useAnimated()
   const move = useMove(state, office, tower, frame, animated)
   const { width, height } = move === null ? sceneSize(office.size) : moveSize(move)
+  const quality = useQuality()
+  // La oficina se pinta con la calidad elegida (el lienzo, `density` veces más
+  // fino); la mudanza y el epílogo, que duran segundos, en 8 bits.
+  const density = move === null ? DENSITY[quality].scale : 1
   const canvas = useRef<HTMLCanvasElement>(null)
   const box = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(2)
@@ -92,6 +97,7 @@ export function PixelScene({
 
     if (context === null || context === undefined) return
 
+    context.setTransform(density, 0, 0, density, 0, 0)
     if (move !== null) paintMove(context, move, frame, plans)
     else
       paintOffice(context, office, frame, {
@@ -99,8 +105,9 @@ export function PixelScene({
         night: isNight(),
         selected: editing?.selected,
         ghost,
+        quality,
       })
-  }, [office, plans, frame, move, editing?.selected, ghost])
+  }, [office, plans, frame, move, editing?.selected, ghost, quality, density])
 
   /** La baldosa bajo el puntero, en la oficina. */
   const tileOf = (event: ReactPointerEvent<HTMLCanvasElement>): [number, number] | null => {
@@ -177,8 +184,8 @@ export function PixelScene({
       >
         <canvas
           ref={canvas}
-          width={width}
-          height={height}
+          width={width * density}
+          height={height * density}
           style={{ width: `${String(width * scale)}px`, height: `${String(height * scale)}px` }}
           {...pointer}
         />

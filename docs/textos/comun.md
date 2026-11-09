@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-471 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+474 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -388,6 +388,9 @@ Generado desde `apps/web/src/shared/i18n/textos/comun.csv` con
 | `startup.fixture.beanbag` | Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Nombre de algo de la oficina que se puede mover. | features/focus/startup/World | Puf | Beanbag | Puf | Pufa | Pouf |
 | `startup.piece` | Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Botón para elegir una pieza de decoración colocada. {name} es la pieza; {x} e {y}, su baldosa. | features/focus/startup/World | {name} en la baldosa {x}, {y} | {name} on tile {x}, {y} | {name} a la rajola {x}, {y} | {name} {x}, {y} lauzan | {name} sur la case {x}, {y} |
 | `startup.piece.stored` | Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Botón para elegir una pieza de decoración guardada en el almacén. {name} es la pieza. | features/focus/startup/World | {name}, en el almacén | {name}, in storage | {name}, al magatzem | {name}, biltegian | {name}, en réserve |
+| `startup.quality` | Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Grupo de botones para elegir la calidad de los dibujos en píxeles de la oficina. | features/focus/startup/StartupPanel | Calidad de los dibujos | Art quality | Qualitat dels dibuixos | Marrazkien kalitatea | Qualité des graphismes |
+| `startup.quality.8` | Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Opción de calidad: pixel art sencillo, como las consolas de 8 bits. | features/focus/startup/StartupPanel | 8 bits | 8-bit | 8 bits | 8 bit | 8 bits |
+| `startup.quality.16` | Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Opción de calidad: pixel art más fino y con más tonos, como las consolas de 16 bits. | features/focus/startup/StartupPanel | 16 bits | 16-bit | 16 bits | 16 bit | 16 bits |
 | `startup.move.up` | Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Botón: mover la pieza elegida una baldosa hacia el fondo. | features/focus/startup/World | Mover hacia el fondo | Move back | Moure cap al fons | Atzera mugitu | Déplacer vers le fond |
 | `startup.move.down` | Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Botón: mover la pieza elegida una baldosa hacia delante. | features/focus/startup/World | Mover hacia delante | Move forward | Moure cap endavant | Aurrera mugitu | Déplacer vers l’avant |
 | `startup.move.left` | Pomodoro, pestaña Startup (juego de construir una empresa con las horas de concentración). Botón: mover la pieza elegida una baldosa a la izquierda. | features/focus/startup/World | Mover a la izquierda | Move left | Moure a l’esquerra | Ezkerrera mugitu | Déplacer à gauche |

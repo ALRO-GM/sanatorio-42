@@ -154,7 +154,8 @@ pieza crece con la partida. Vive en `apps/web/src/features/focus/startup/pixel/`
 | `person.ts` | Las personas: sentadas (10 × 13 píxeles) o enteras andando (10 × 18, con su paso, de espaldas y con lo que llevan). Piel, pelo y peinado salen de `look`; la ropa, de su modelo de negocio o del uniforme de su oficio (con gorra, gorro de cocina o casco). |
 | `models/` | Un modelo por pieza (`Model`: `frames` y `draw`), reunidos en `models/index.ts`. |
 | `floor.ts` | Los suelos, uno por sitio: tablas de madera (tu cuarto), cemento pulido (coworking), parquet, moqueta, suelo técnico y mármol. |
-| `layout.ts` | Qué sale y dónde, solo a partir de la partida: lo fijo y lo colocado a mano salen del motor (`world.ts`, lo mismo que comprueba la API); lo que se gana (`RULES`) va en los bordes libres, y la recepción en su mostrador. También quién anda por la oficina (`people`). |
+| `layout.ts` | Qué sale y dónde, solo a partir de la partida: todo sale del motor (`world.ts`, `layoutOf`, lo mismo que comprueba la API), y aquí se le pone dibujo; la recepción, en su mostrador. También quién anda por la oficina (`people`). |
+| `quality.ts` | La calidad de los dibujos que elige cada cual (8 o 16 bits, en su navegador), con sus píxeles por píxel del dibujo. Ver [Calidad: 8 y 16 bits](#calidad-8-y-16-bits). |
 | `paint.ts` | Pasa los dibujos al lienzo: cada fotograma de cada modelo se dibuja una vez y se guarda. |
 | `PixelScene` / `PixelArt` / `ItemArt` | La oficina, un modelo suelto y el dibujo de cada tarjeta. |
 | `life.ts` | La vida: un plan con semilla por persona (programar, café, charlar con quien mejor le cae, descansar; limpiar, hacer la ronda, repartir, servir café, revisar servidores; las mascotas pasean) por caminos de la cuadrícula que esquivan lo que ocupa sitio. Dónde está cada cual en un fotograma es una cuenta sobre su plan (`poseAt`). Las amistades salen de los aspectos (`friendsOf`). |
@@ -207,6 +208,60 @@ enciende más ventanas; es solo el dibujo, nada de la partida.
 - Que la amistad crezca con lo que se ha charlado (ahora sale del aspecto de
   cada par) y un panel con las relaciones.
 - Paredes, ventanas y puertas en cada sitio.
+
+## Calidad: 8 y 16 bits
+
+Pedido por Alberto el 2026-11-09: poder cambiar los dibujos por otros de más
+calidad (16 bits, y más en el futuro) y que cada cual elija. Bajo la oficina,
+«Calidad de los dibujos» con dos botones, cada uno con alguien andando en esa
+calidad como muestra; se guarda en el navegador (`quality.ts`) y cambia la
+oficina, las tarjetas y las visitas a la vez. La mudanza y el epílogo, que
+duran segundos, siguen en 8 bits.
+
+![El mismo motor: arriba 8 bits; abajo 16 bits, con la persona hecha a mano en cuatro fases](img/startup-8-16-bits.png)
+
+**Cómo es tan rápido de cambiar.** Los modelos no son imágenes: se dibujan con
+código en coordenadas del mundo. El motor (`Sprite`) tiene `scale` (píxeles
+de verdad por píxel del dibujo) y `rich` (sombreado de 16 bits), y con ellos
+el mismo modelo sale a otra resolución sin tocarlo:
+
+- las caras de las cajas se rasterizan al doble de fino (bordes más suaves);
+- con `rich`, las caras laterales van en franjas de más oscuro abajo a más
+  claro arriba, el canto de delante de cada tapa lleva un brillo de un píxel,
+  y las luces amarillean y las sombras azulean (`tint`, el «hue shifting»);
+- el contorno deja de ser negro: toma el tono de lo que rodea muy oscurecido
+  («sel-out»);
+- lo escrito a mano (`grid`: caras, hojas, letreros) se agranda con Scale2x,
+  que redondea las diagonales sin colores nuevos.
+
+Así, en 16 bits sale toda la oficina desde el primer día, y cada modelo se
+puede mejorar a mano cuando se quiera: `Model.hd` es su dibujo propio en 16
+bits, con sus fotogramas, pintando píxel a píxel (`Sprite.paint`). El primero
+es quien anda (`drawWalkerHd` en `person.ts`): cuatro fases de paso en vez de
+dos, brazos que se balancean, medio píxel de rebote, brillo en el pelo y la
+ropa con luz por la izquierda. Para otra calidad (32 bits, por ejemplo), una
+entrada en `QUALITIES` y `DENSITY`: Scale2x solo se aplica al doble; con otra
+escala lo escrito a mano sale en bloques hasta que tenga su dibujo.
+
+**Referencias de estética** (buscadas el 2026-11-09; inspiración, nunca copiar
+dibujos ni recrear un juego). La startup empieza en lo cotidiano y acaba
+futurista:
+
+| Etapa | Referencia | Qué tomar |
+|---|---|---|
+| Toda la partida | Chrono Trigger (1995): la misma gramática de baldosas de una época a otra | Cada etapa cambia sobre todo la luz y los materiales: de tierras y verdes a azules, cian y acero |
+| Cuarto, coworking | Eastward (2021) | Luz cálida de ventana en el suelo, sombra de contacto al pie de los muebles, objetos que cuentan cosas |
+| Oficina | Game Dev Story (Kairosoft) | Mobiliario muy legible a tamaño pequeño, animaciones cortas |
+| Edificio | SimTower (1994), eBoy (ciudades isométricas) | Color por tipo de sala, ventanas encendidas de noche, densidad de detalle repetido |
+| Torre, control global | VA-11 Hall-A (2016), Waneella (ciudades animadas) | Fondo oscuro desaturado con pocos acentos de neón (rosa y cian) con halo de un píxel; bucles de ambiente (letreros, nubes) |
+| Técnica | Slynyrd (rampas de color, isometría), saint11 (sombreado, contornos, subpíxel) | Rampas de 4–5 tonos por material, *dithering* solo en degradados grandes, 4–6 fotogramas por persona |
+
+Paletas abiertas a probar (Lospec; confirmar la licencia con su autor antes de
+usarlas): Resurrect 64 (64 colores, cálidos y fríos), Apollo (46) y
+Endesga 32. Lo siguiente, por orden: sombra de contacto al pie de cada
+modelo, luz de ventana en el suelo en las primeras etapas, neón con halo en
+las últimas y más modelos hechos a mano (`Model.hd`), empezando por los que
+más se ven: la mesa con su persona, los servidores y la planta.
 
 ## La pantalla del Pomodoro en el móvil (2026-10-29)
 

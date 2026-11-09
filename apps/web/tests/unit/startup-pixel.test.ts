@@ -380,3 +380,43 @@ describe('el mundo vivo', () => {
     }
   })
 })
+
+describe('16 bits (2026-11-09)', () => {
+  const render = (scale: 1 | 2, frame: number, step = 1) => {
+    const sprite = new Sprite(40, 76, 20, 58, scale, scale === 2)
+    const model = MODELS.walker
+    const props = { look: 412, axis: 'front' as const, step }
+
+    if (scale === 2 && model.hd !== undefined) model.hd.draw(sprite, frame, props)
+    else model.draw(sprite, frame, props)
+
+    return sprite.outline()
+  }
+
+  it('el mismo modelo sale al doble de resolución y del mismo tamaño', () => {
+    const low = render(1, 0).bounds()
+    const high = render(2, 0).bounds()
+
+    expect(low).not.toBeNull()
+    expect(high).not.toBeNull()
+    // Lo pintado ocupa lo mismo (en píxeles del dibujo), con un píxel de margen.
+    expect(Math.abs((high?.[3] ?? 0) / 2 - (low?.[3] ?? 0))).toBeLessThanOrEqual(1)
+    expect(Math.abs((high?.[2] ?? 0) / 2 - (low?.[2] ?? 0))).toBeLessThanOrEqual(1)
+  })
+
+  it('quien anda en 16 bits tiene cuatro fases distintas; quieto, una', () => {
+    const shots = [0, 1, 2, 3].map((frame) => render(2, frame).pixels.join(','))
+
+    expect(new Set(shots).size).toBe(4)
+    expect(new Set([0, 1, 2, 3].map((frame) => render(2, frame, 0).pixels.join(','))).size).toBe(1)
+  })
+
+  it('cualquier modelo se dibuja en 16 bits sin dibujo propio', () => {
+    for (const id of Object.keys(MODELS) as (keyof typeof MODELS)[]) {
+      const sprite = new Sprite(40, 76, 20, 58, 2, true)
+
+      MODELS[id].draw(sprite, 0, {})
+      expect(sprite.outline().bounds(), id).not.toBeNull()
+    }
+  })
+})

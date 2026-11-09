@@ -1,7 +1,7 @@
 import type { Axis, Role } from '@sanatorio/startup'
 
 import { AXIS_SHADES, CARDBOARD, HAIR, METAL, PANTS, PLAIN, SHOE, SKIN, UNIFORM } from './palette'
-import { INK } from './sprite'
+import { INK, scale2x, tint } from './sprite'
 import type { Sprite } from './sprite'
 
 /** Lo que mide una persona dibujada, en píxeles: medio cuerpo (sentada) y entera (de pie). */
@@ -179,28 +179,170 @@ export function drawWalker(
 
   sprite.grid(rows, colorsOf(who, false), x, y + bob)
 
-  switch (who.carry) {
+  drawCarry(sprite, x, y + bob, who.carry)
+}
+
+// --- 16 bits ------------------------------------------------------------------
+
+/**
+ * Las piernas en 16 bits (el doble de finas), por fase del paso: quieta, un
+ * pie delante, cruzando y el otro delante (la cuarta, la segunda al revés).
+ * `p` pantalón, `q` su sombra, `k` zapato y `K` su brillo.
+ */
+const LEGS_HD: readonly (readonly string[])[] = [
+  [
+    '....pppppppppppp....',
+    '....ppppppqppppq....',
+    '....pppq....pppq....',
+    '....pppq....pppq....',
+    '....pppq....pppq....',
+    '....pppq....pppq....',
+    '....pppq....pppq....',
+    '....pppq....pppq....',
+    '...Kkkkk...Kkkkk....',
+    '...kkkkk...kkkkk....',
+  ],
+  [
+    '....pppppppppppp....',
+    '....pppqppppppqq....',
+    '...pppq.....pppq....',
+    '...pppq......pppq...',
+    '..pppq.......pppq...',
+    '..pppq........pppq..',
+    '..pppq........pppq..',
+    '.pppq..........pppq.',
+    'Kkkkk..........Kkkkk',
+    '.kkkk...........kkkk',
+  ],
+  [
+    '....pppppppppppp....',
+    '....pppqpppppppq....',
+    '.....pppq..pppq.....',
+    '.....pppq..pppq.....',
+    '.....pppq..pppq.....',
+    '.....pppq..pppq.....',
+    '.....pppq...ppq.....',
+    '.....pppq...Kkkk....',
+    '....Kkkkk...kkkk....',
+    '....kkkkk...........',
+  ],
+]
+
+/** Las celdas de la fase `phase` (0 quieta; 1 a 4, andando). */
+function legsHd(phase: number): string[][] {
+  const pick = [0, 1, 2, 1, 2][phase % 5] ?? 0
+  const rows = (LEGS_HD[pick] ?? []).map((row) => row.split(''))
+
+  // La cuarta fase es la segunda con la otra pierna levantada.
+  return phase === 4 ? rows.map((row) => [...row].reverse()) : rows
+}
+
+/**
+ * Una persona andando en 16 bits, dibujada píxel a píxel (`Sprite.paint`):
+ * el medio cuerpo de siempre agrandado con Scale2x y luego retocado (luz
+ * desde la izquierda en la ropa, brillo en el pelo, ojos más finos) y unas
+ * piernas propias con cuatro fases de paso, los brazos que se balancean y
+ * un rebote de medio píxel del 8 bits. Es el ejemplo de modelo hecho a mano
+ * para 16 bits (`Model.hd`); los demás salen del motor.
+ *
+ * @param x, y La esquina de arriba a la izquierda, en píxeles del dibujo.
+ * @param phase 0 quieta; 1 a 4, la fase del paso.
+ */
+export function drawWalkerHd(
+  sprite: Sprite,
+  x: number,
+  y: number,
+  who: Who & { phase: number; back: boolean; carry: Carry },
+): void {
+  const colors = colorsOf(who, false)
+  const body = scale2x(upperBody(who, who.back))
+
+  body.forEach((row, j) => {
+    row.forEach((cell, i) => {
+      // La luz viene de la izquierda: la mitad derecha de la ropa, en sombra.
+      if (cell === 'c' && i >= 12) row[i] = 'a'
+      // Un brillo en el pelo, arriba a la izquierda.
+      if (cell === 'h' && j >= 2 && j <= 5 && i >= 5 && i <= 9) row[i] = 'H'
+      // Los ojos, de un píxel de alto: la mitad de arriba es piel.
+      if (cell === 'e' && body[j + 1]?.[i] === 'e') row[i] = 's'
+      // Las manos se pintan aparte, para balancearlas.
+      if (cell === 's' && j >= 24 && (i <= 3 || i >= 16)) row[i] = '.'
+    })
+  })
+
+  const walking = who.phase > 0
+  // Al cruzar las piernas, el cuerpo sube un píxel de 16 bits (medio del de 8).
+  const bob = who.phase === 2 || who.phase === 4 ? -1 : 0
+  const swing = !walking ? 0 : who.phase === 1 ? 1 : who.phase === 3 ? -1 : 0
+  const px = Math.floor(x) * 2
+  const py = Math.floor(y) * 2 + bob
+  const palette: Record<string, string> = {
+    ...colors,
+    H: tint(colors.h ?? INK, 0.3),
+    K: tint(SHOE, 0.35),
+  }
+  const put = (cells: readonly (readonly string[])[], ox: number, oy: number): void => {
+    cells.forEach((row, j) => {
+      row.forEach((cell, i) => {
+        const color = palette[cell]
+        // Girada, se refleja entera en su ancho (20 píxeles de 16 bits).
+        const column = sprite.turned ? 19 - (ox + i) : ox + i
+
+        if (color !== undefined) sprite.paint(px + column, py + oy + j, color)
+      })
+    })
+  }
+
+  put(body, 0, 0)
+  put(legsHd(who.phase), 0, 26)
+  // Las manos: una adelante y la otra atrás, al revés en cada paso.
+  put(
+    [
+      ['s', 's'],
+      ['n', 'n'],
+    ],
+    2,
+    23 + swing,
+  )
+  put(
+    [
+      ['s', 's'],
+      ['n', 'n'],
+    ],
+    16,
+    23 - swing,
+  )
+
+  // Lo que lleva, como en 8 bits (el motor lo suaviza).
+  if (who.carry !== null) {
+    drawCarry(sprite, x, y, who.carry)
+  }
+}
+
+/** Lo que alguien lleva en las manos, con la esquina de la persona en (x, y). */
+function drawCarry(sprite: Sprite, x: number, y: number, carry: Carry): void {
+  switch (carry) {
     case 'box':
       sprite.grid(
         ['.bbbbbb.', 'BbbbbbbB', 'BbbBBbbB', 'BbbbbbbB'],
         { b: CARDBOARD[0], B: CARDBOARD[2] },
         x + 1,
-        y + 9 + bob,
+        y + 9,
       )
       break
     case 'tray':
-      sprite.grid(['mmmmmmmm', '.w..w...'], { m: METAL[0], w: '#ffffff' }, x + 1, y + 10 + bob)
+      sprite.grid(['mmmmmmmm', '.w..w...'], { m: METAL[0], w: '#ffffff' }, x + 1, y + 10)
       break
     case 'mop':
       sprite.grid(
         ['.m', '.m', '.m', '.m', '.m', '.m', '.m', 'yyy'],
         { m: '#a8743a', y: '#f2c95c' },
         x + 9,
-        y + 9 + bob,
+        y + 9,
       )
       break
     case 'wrench':
-      sprite.grid(['mm', '.m', '.m'], { m: METAL[1] }, x + 9, y + 11 + bob)
+      sprite.grid(['mm', '.m', '.m'], { m: METAL[1] }, x + 9, y + 11)
       break
     default:
       break

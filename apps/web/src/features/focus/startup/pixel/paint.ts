@@ -8,6 +8,8 @@ import { MODELS } from './models'
 import type { ModelId, Props } from './models'
 import { targetOf } from '../target'
 import { WALKER_HEIGHT } from './person'
+import { DENSITY } from './quality'
+import type { Quality } from './quality'
 import { Sprite, TILE } from './sprite'
 
 /**
@@ -31,22 +33,22 @@ const HEADROOM = 46
 export function toCanvas(sprite: Sprite): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
 
-  canvas.width = sprite.width
-  canvas.height = sprite.height
+  canvas.width = sprite.pw
+  canvas.height = sprite.ph
 
   const context = canvas.getContext('2d')
 
   if (context === null) return canvas
 
   // Tiras del mismo color seguidas: pocas órdenes y ningún `ImageData`.
-  for (let y = 0; y < sprite.height; y += 1) {
+  for (let y = 0; y < sprite.ph; y += 1) {
     let x = 0
 
-    while (x < sprite.width) {
+    while (x < sprite.pw) {
       const color = sprite.at(x, y)
       let end = x + 1
 
-      while (end < sprite.width && sprite.at(end, y) === color) end += 1
+      while (end < sprite.pw && sprite.at(end, y) === color) end += 1
 
       if (color !== null) {
         context.fillStyle = color
@@ -64,33 +66,55 @@ type Drawn = { canvas: HTMLCanvasElement; sprite: Sprite }
 
 const frames = new Map<string, Drawn>()
 
-/** Un modelo dibujado en un lienzo de modelo, girado si toca y con su contorno. */
-function modelSprite(model: ModelId, props: Props, frame: number): Sprite {
-  const sprite = new Sprite(WIDTH, HEIGHT, OX, OY)
+/**
+ * Un modelo dibujado en un lienzo de modelo, girado si toca y con su contorno.
+ * En 16 bits, con su dibujo propio si lo tiene (`Model.hd`); si no, el de
+ * siempre a doble resolución, que el motor ya afina (`sprite.ts`).
+ */
+function modelSprite(model: ModelId, props: Props, frame: number, quality: Quality): Sprite {
+  const { scale, rich } = DENSITY[quality]
+  const sprite = new Sprite(WIDTH, HEIGHT, OX, OY, scale, rich)
+  const found = MODELS[model]
+  const hd = quality === 16 ? found.hd : undefined
 
   sprite.turned = props.turn === true
-  MODELS[model].draw(sprite, frame % MODELS[model].frames, props)
+  if (hd === undefined) found.draw(sprite, frame % found.frames, props)
+  else hd.draw(sprite, frame % hd.frames, props)
 
   return sprite.outline()
 }
 
+/** Cuántos fotogramas tiene un modelo en una calidad. */
+const framesOf = (model: ModelId, quality: Quality): number =>
+  (quality === 16 ? MODELS[model].hd?.frames : undefined) ?? MODELS[model].frames
+
 /** Un fotograma de un modelo, dibujado la primera vez y guardado. */
-function drawn(model: ModelId, props: Props, frame: number): Drawn {
-  const { frames: count } = MODELS[model]
-  const key = `${model}|${JSON.stringify(props)}|${String(frame % count)}`
+function drawn(model: ModelId, props: Props, frame: number, quality: Quality = 8): Drawn {
+  const count = framesOf(model, quality)
+  const key = `${String(quality)}|${model}|${JSON.stringify(props)}|${String(frame % count)}`
   let found = frames.get(key)
 
   if (found === undefined) {
     // No crece sin fin: si se llena, se vuelve a dibujar lo que se vea.
     if (frames.size > 1500) frames.clear()
 
-    const sprite = modelSprite(model, props, frame)
+    const sprite = modelSprite(model, props, frame, quality)
 
     found = { canvas: toCanvas(sprite), sprite }
     frames.set(key, found)
   }
 
   return found
+}
+
+/** Copia un modelo en la escena con la esquina de su baldosa en (x, y): a su tamaño, sea cual sea la calidad. */
+function place(
+  context: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  x: number,
+  y: number,
+): void {
+  context.drawImage(canvas, x - OX, y - OY, WIDTH, HEIGHT)
 }
 
 /** Lo que mide la escena de una oficina de `size` baldosas, en píxeles. */
@@ -118,13 +142,14 @@ export function tileAt(size: number, x: number, y: number): [number, number] | n
 
 const floors = new Map<string, HTMLCanvasElement>()
 
-function floorOf(size: number, floor: Floor): HTMLCanvasElement {
-  const key = `${String(size)}|${floor}`
+function floorOf(size: number, floor: Floor, quality: Quality): HTMLCanvasElement {
+  const key = `${String(quality)}|${String(size)}|${floor}`
   let canvas = floors.get(key)
 
   if (canvas === undefined) {
     const { width, height } = sceneSize(size)
-    const sprite = new Sprite(width, height, size * TILE + 4, HEADROOM)
+    const { scale, rich } = DENSITY[quality]
+    const sprite = new Sprite(width, height, size * TILE + 4, HEADROOM, scale, rich)
 
     drawFloor(sprite, size, floor)
     canvas = toCanvas(sprite)
@@ -176,6 +201,8 @@ export type Extras = {
   /** Lo elegido para moverlo (`target.ts`). */
   selected?: string | null | undefined
   ghost?: { gx: number; gy: number; ok: boolean } | null | undefined
+  /** La calidad de los dibujos (`quality.ts`): 8 bits si no se dice. */
+  quality?: Quality | undefined
   /** Para la mudanza: cada pieza, una caja; y cuánto ha caído cada pieza (0 arriba, 1 en su sitio). */
   packed?: number | undefined
   dropped?: number | undefined
@@ -206,10 +233,11 @@ export function paintOffice(
   const pieces = office.pieces
   const packed = extras.packed ?? 0
   const dropped = extras.dropped ?? 1
+  const quality = extras.quality ?? 8
 
   context.imageSmoothingEnabled = false
   context.clearRect(0, 0, width, height)
-  context.drawImage(floorOf(office.size, office.floor), 0, 0)
+  context.drawImage(floorOf(office.size, office.floor, quality), 0, 0, width, height)
 
   if (extras.selected !== undefined && extras.selected !== null) {
     const chosen = pieces.find((piece) => targetOf(piece) === extras.selected)
@@ -240,6 +268,7 @@ export function paintOffice(
           { ...piece, model: 'crate', props: { level: 1 + (index % 3) } },
           frame,
           0,
+          quality,
         ),
       )
       return
@@ -257,6 +286,7 @@ export function paintOffice(
         { ...piece, props: cleanProps(props) },
         frame,
         Math.round((1 - fall) ** 2 * 40),
+        quality,
       ),
     )
 
@@ -292,11 +322,7 @@ export function paintOffice(
         depth: pose.gx + pose.gy + 0.5,
         tie: pose.gx,
         paint: () => {
-          context.drawImage(
-            drawn(model, props, frame).canvas,
-            Math.round(x - OX),
-            Math.round(y - OY),
-          )
+          place(context, drawn(model, props, frame, quality).canvas, Math.round(x), Math.round(y))
         },
       })
 
@@ -356,6 +382,7 @@ function paintPiece(
   piece: Piece,
   frame: number,
   lift: number,
+  quality: Quality,
 ): Drawable {
   const [x, y] = at(piece.gx, piece.gy)
 
@@ -363,7 +390,7 @@ function paintPiece(
     depth: piece.gx + piece.gy,
     tie: piece.gx,
     paint: () => {
-      context.drawImage(drawn(piece.model, piece.props, frame).canvas, x - OX, y - OY - lift)
+      place(context, drawn(piece.model, piece.props, frame, quality).canvas, x, y - lift)
     },
   }
 }
@@ -372,11 +399,13 @@ function paintPiece(
 export function boundsOf(
   model: ModelId,
   props: Props,
+  quality: Quality = 8,
 ): { x: number; y: number; width: number; height: number } {
-  let box: [number, number, number, number] = [WIDTH, HEIGHT, 0, 0]
+  const { scale } = DENSITY[quality]
+  let box: [number, number, number, number] = [WIDTH * scale, HEIGHT * scale, 0, 0]
 
-  for (let frame = 0; frame < MODELS[model].frames; frame += 1) {
-    const found = drawn(model, props, frame).sprite.bounds()
+  for (let frame = 0; frame < framesOf(model, quality); frame += 1) {
+    const found = drawn(model, props, frame, quality).sprite.bounds()
 
     if (found !== null) {
       box = [
@@ -396,18 +425,32 @@ export function boundsOf(
   }
 }
 
-/** Pinta un modelo solo, recortado, en el fotograma `frame`: el dibujo de una tarjeta. */
+/**
+ * Pinta un modelo solo, recortado, en el fotograma `frame`: el dibujo de una
+ * tarjeta. El recorte va en píxeles de verdad (`boundsOf` con la misma calidad).
+ */
 export function paintModel(
   context: CanvasRenderingContext2D,
   model: ModelId,
   props: Props,
   frame: number,
+  quality: Quality = 8,
 ): void {
-  const { x, y, width, height } = boundsOf(model, props)
+  const { x, y, width, height } = boundsOf(model, props, quality)
 
   context.imageSmoothingEnabled = false
   context.clearRect(0, 0, width, height)
-  context.drawImage(drawn(model, props, frame).canvas, x, y, width, height, 0, 0, width, height)
+  context.drawImage(
+    drawn(model, props, frame, quality).canvas,
+    x,
+    y,
+    width,
+    height,
+    0,
+    0,
+    width,
+    height,
+  )
 }
 
 /** Pinta un modelo suelto en (x, y) de un lienzo, con la esquina de su baldosa ahí: la mudanza. */
@@ -418,6 +461,7 @@ export function paintAt(
   frame: number,
   x: number,
   y: number,
+  quality: Quality = 8,
 ): void {
-  context.drawImage(drawn(model, props, frame).canvas, Math.round(x - OX), Math.round(y - OY))
+  place(context, drawn(model, props, frame, quality).canvas, Math.round(x), Math.round(y))
 }

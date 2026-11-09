@@ -13,7 +13,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [calendario](calendario.md) | 105 | 0 | 0 | 0 | 0 |
 | [clusters](clusters.md) | 82 | 0 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 0 |
-| [comun](comun.md) | 471 | 0 | 0 | 0 | 0 |
+| [comun](comun.md) | 474 | 0 | 0 | 0 | 0 |
 | [curso-docker](curso-docker.md) | 33 | 0 | 0 | 0 | 0 |
 | [curso-kubernetes](curso-kubernetes.md) | 30 | 0 | 0 | 0 | 0 |
 | [curso-shell](curso-shell.md) | 66 | 0 | 0 | 0 | 0 |

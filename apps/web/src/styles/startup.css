@@ -297,6 +297,22 @@
 .su-step.up svg {
   transform: rotate(180deg);
 }
+/* La calidad de los dibujos: dos botones, cada uno con su muestra andando. */
+.su-quality {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.su-quality button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.su-quality button.on {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+}
+
 /* Vender: la moneda y lo que se cobra; al segundo toque, en rojo. */
 .su-sell {
   display: inline-flex;

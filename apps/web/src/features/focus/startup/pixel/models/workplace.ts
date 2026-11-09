@@ -1,5 +1,12 @@
 import { DARK, METAL, NAVY, PLYWOOD, PORCELAIN, SILVER, WOOD, GLOW, LED } from '../palette'
-import { PERSON_WIDTH, PERSON_HEIGHT, WALKER_HEIGHT, drawPerson, drawWalker } from '../person'
+import {
+  PERSON_WIDTH,
+  PERSON_HEIGHT,
+  WALKER_HEIGHT,
+  drawPerson,
+  drawWalker,
+  drawWalkerHd,
+} from '../person'
 import type { Sprite } from '../sprite'
 import { posts } from './model'
 import type { Model, Props } from './model'
@@ -132,6 +139,22 @@ export const walker: Model = {
       back,
       carry,
     })
+  }, // En 16 bits, hecha a mano: cuatro fases de paso (una cada fotograma
+  // mientras anda) en vez de dos, brazos que se balancean y medio píxel de rebote.
+  hd: {
+    frames: 4,
+    draw(sprite, frame, { look = 0, axis = null, role, step = 0, back = false, carry = null }) {
+      const [x, y] = sprite.project(8, 8, 0)
+
+      drawWalkerHd(sprite, Math.round(x) - PERSON_WIDTH / 2, Math.round(y) - WALKER_HEIGHT, {
+        look,
+        axis,
+        role,
+        phase: step === 0 ? 0 : 1 + (frame % 4),
+        back,
+        carry,
+      })
+    },
   },
 }
 

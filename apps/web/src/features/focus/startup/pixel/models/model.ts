@@ -36,6 +36,12 @@ export type Model = {
    */
   frames: number
   draw: (sprite: Sprite, frame: number, props: Props) => void
+  /**
+   * Su dibujo propio en 16 bits, si lo tiene: con sus fotogramas y pintando
+   * píxel a píxel (`Sprite.paint`, el doble de fino). Sin él, en 16 bits sale
+   * `draw` a doble resolución, que el motor ya afina (`sprite.ts`).
+   */
+  hd?: { frames: number; draw: (sprite: Sprite, frame: number, props: Props) => void }
 }
 
 /** Patas o postes: cajas de `size × size` desde el suelo hasta `height`. */

@@ -43,7 +43,9 @@ import { Card, Figure, Need, Dots, coins, hm } from './parts'
 import { ItemArt } from './pixel/ItemArt'
 import type { ArtOf } from './pixel/ItemArt'
 import type { ModelId } from './pixel/models'
+import { PixelArt } from './pixel/PixelArt'
 import { PixelScene } from './pixel/PixelScene'
+import { QUALITIES, setQuality, useQuality } from './pixel/quality'
 import { DecorEditor, DecorShop, Staff, Surprise } from './World'
 import { putAction } from './target'
 import type { Target } from './target'
@@ -212,6 +214,8 @@ function Game({
         )}
       </div>
       {error}
+
+      <QualityPicker />
 
       {editing && (
         <DecorEditor
@@ -578,5 +582,39 @@ function Ranking({
         </li>
       ))}
     </ol>
+  )
+}
+
+/**
+ * La calidad de los dibujos (`pixel/quality.ts`): cada opción enseña a alguien
+ * andando con esa calidad, que es la muestra de la diferencia. Se guarda en
+ * el navegador y cambia la oficina, las tarjetas y las visitas a la vez.
+ */
+function QualityPicker() {
+  const { t } = useI18n()
+  const quality = useQuality()
+
+  return (
+    <div className="su-quality" role="group" aria-label={t('startup.quality')}>
+      {QUALITIES.map((option) => (
+        <button
+          key={option}
+          type="button"
+          className={`small ${quality === option ? 'on' : ''}`.trim()}
+          aria-pressed={quality === option}
+          onClick={() => {
+            setQuality(option)
+          }}
+        >
+          <PixelArt
+            model="walker"
+            props={{ look: 412, axis: 'front', step: 1 }}
+            size={28}
+            quality={option}
+          />
+          {t(`startup.quality.${String(option)}`)}
+        </button>
+      ))}
+    </div>
   )
 }
