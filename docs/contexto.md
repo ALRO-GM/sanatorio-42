@@ -12,7 +12,7 @@ va lo que no está en el código.
 [tareas-tras-compactar.md](tareas-tras-compactar.md)**: es la lista de lo que hay
 que hacer, en orden. Este documento es el porqué; aquel, el qué.
 
-## Estado a 2026-11-09 (desplegado, esquema 89)
+## Estado a 2026-11-09 (desplegado, esquema 90)
 
 Lo hecho desde el 2026-10-27, con su documento. El detalle fecha a fecha está en
 la tabla de novedades del README.
@@ -65,7 +65,13 @@ la tabla de novedades del README.
   fondo contra las herramientas reales, nivel a nivel, con alternativas válidas
   aceptadas (`docs/revision-cursos/*.md`). Git responde en inglés como el real.
 - **Juego de los cursos** (`docs/cursos-logros.md`): clasificaciones por curso en
-  Clasificaciones y 22 logros con título y banner.
+  Clasificaciones y 22 logros con título y banner; cada logro da XP (885 en
+  total, `COURSE_XP` en `xp.rules.ts`, se abona al leer el perfil) y al
+  desbloquear un título sale un aviso con el banner y «Lucirlo ahora», una sola
+  vez en cualquier dispositivo (migración 90 `unlock_announcements`; lo que ya
+  se tenía antes cuenta como anunciado).
+- Simuladores: YAML 1.2 en los bloques `|` y `>` (dockersim, que usa también
+  k8ssim), `~` tras `=` como bash, y `sed` con `r`, `R` y `w`.
 - Preguntas: investigación (`docs/referencia/preguntas-investigacion.md`),
   plantilla con variantes (`docs/plantilla-preguntas.md`) y el agente
   `.claude/agents/didacta.md` para escribir preguntas y explicaciones.
