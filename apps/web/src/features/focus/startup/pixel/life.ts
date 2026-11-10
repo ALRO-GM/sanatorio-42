@@ -14,7 +14,7 @@
 import { seeded } from '@sanatorio/startup'
 
 import type { Office, Person } from './layout'
-import type { Carry } from './person'
+import type { Carry } from './toon'
 
 /** Lo que se dice sin palabras, en un bocadillo: un dibujo de `pixel/bubbles.ts`. */
 export type Bubble =

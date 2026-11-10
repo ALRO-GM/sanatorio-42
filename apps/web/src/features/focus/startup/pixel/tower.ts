@@ -9,6 +9,7 @@ import { levelOf, spaceOf } from '@sanatorio/startup'
 import type { StartupState } from '@sanatorio/startup'
 
 import { DARK, GLASS, LEAF, LED, LIGHT, METAL, NAVY, SCREEN, SOIL, STONE } from './palette'
+import { DENSITY } from './paint'
 import { scatter, Sprite } from './sprite'
 import type { Shades } from './sprite'
 
@@ -47,7 +48,7 @@ export function towerSize(tower: Tower): { width: number; height: number; oy: nu
 /** El edificio en el fotograma `frame`; de noche, con más ventanas encendidas. */
 export function drawTower(tower: Tower, frame: number, night: boolean): Sprite {
   const { width, height, oy } = towerSize(tower)
-  const sprite = new Sprite(width, height, width / 2, oy)
+  const sprite = new Sprite(width, height, width / 2, oy, DENSITY)
   const depth = tower.basements * BASEMENT + 4
 
   // El terreno, con el corte que deja ver el sótano.
@@ -131,5 +132,5 @@ export function drawTower(tower: Tower, frame: number, night: boolean): Sprite {
     sprite.dot(30, 30, roof + 2.03, frame % 6 < 3 ? LED.off : LED.red)
   }
 
-  return sprite.outline()
+  return sprite.finish()
 }

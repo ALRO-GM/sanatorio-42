@@ -6,7 +6,13 @@
  */
 
 import {
+  AVATAR_KEYS,
+  AVATAR_PARTS,
   DECOR,
+  avatarFromKey,
+  avatarKey,
+  avatarOf,
+  isAvatar,
   DECOR_MAX,
   EMPTY_STARTUP,
   ROOM,
@@ -452,6 +458,95 @@ describe('las partidas de antes (migración 82)', () => {
   })
 })
 
+describe('el aspecto de cada persona (configurador)', () => {
+  const team = office({
+    team: [
+      { axis: 'back', stars: 2, look: 77 },
+      { axis: 'back', stars: 1, look: 5, role: 'kitchen' },
+    ],
+  })
+  const chosen = { ...avatarOf(1), hair: 3, hairColor: 2 }
+
+  it('quien no lo ha tocado sale de su look: siempre el mismo y del catálogo', () => {
+    for (let look = 0; look < 1000; look += 1) {
+      expect(isAvatar(avatarOf(look)), String(look)).toBe(true)
+      expect(avatarOf(look)).toEqual(avatarOf(look))
+    }
+    // Y no todo el mundo igual: cada parte reparte sus opciones.
+    for (const part of AVATAR_KEYS) {
+      const seen = new Set(Array.from({ length: 1000 }, (_, look) => avatarOf(look)[part]))
+
+      expect(seen.size, part).toBe(AVATAR_PARTS[part])
+    }
+  })
+
+  it('se guarda el de alguien de la plantilla o el tuyo (-1), gratis', () => {
+    const after = play(
+      team,
+      [
+        { type: 'avatar', index: 1, avatar: chosen },
+        { type: 'avatar', index: -1, avatar: { ...chosen, beard: 2 } },
+      ],
+      0,
+    )
+
+    expect(after.team[1]?.avatar).toEqual(chosen)
+    expect(after.team[0]?.avatar).toBeUndefined()
+    expect(after.me).toEqual({ ...chosen, beard: 2 })
+    expect(after.cash).toBe(team.cash)
+    // Sigue en la partida guardada y vuelta a leer.
+    expect(parseStartup(JSON.parse(JSON.stringify(after)))).toMatchObject({
+      me: { ...chosen, beard: 2 },
+      team: [{ look: 77 }, { look: 5, role: 'kitchen', avatar: chosen }],
+    })
+  })
+
+  it('nadie fuera de la plantilla, ni una parte fuera del catálogo', () => {
+    expect(act('ana', team, 0, { type: 'avatar', index: 2, avatar: chosen })).toEqual({
+      refused: 'invalid',
+    })
+    expect(act('ana', team, 0, { type: 'avatar', index: -2, avatar: chosen })).toEqual({
+      refused: 'invalid',
+    })
+    for (const bad of [
+      { ...chosen, hair: AVATAR_PARTS.hair },
+      { ...chosen, skin: -1 },
+      { ...chosen, eyes: 1.5 },
+      { ...chosen, top: Number.NaN },
+      Object.fromEntries(Object.entries(chosen).filter(([part]) => part !== 'shoes')),
+    ]) {
+      expect(
+        act('ana', team, 0, { type: 'avatar', index: 0, avatar: bad as typeof chosen }),
+      ).toEqual({
+        refused: 'invalid',
+      })
+    }
+  })
+
+  it('una partida con un aspecto roto lo descarta y sigue', () => {
+    const state = parseStartup({
+      ...team,
+      me: { hair: 99 },
+      team: [
+        { axis: 'back', stars: 2, look: 77, avatar: 'roto' },
+        { axis: 'back', stars: 1, look: 3, avatar: { ...chosen, extra: 1 } },
+      ],
+    })
+
+    expect(state.me).toBeUndefined()
+    expect(state.team[0]?.avatar).toBeUndefined()
+    // Lo que sobra se quita; lo que vale, se queda.
+    expect(state.team[1]?.avatar).toEqual(chosen)
+  })
+
+  it('en una cadena corta y de vuelta, igual; una cadena rara no es un aspecto', () => {
+    expect(avatarFromKey(avatarKey(chosen))).toEqual(chosen)
+    expect(avatarFromKey('')).toBeNull()
+    expect(avatarFromKey('1.2.3')).toBeNull()
+    expect(avatarFromKey('x'.repeat(10_000))).toBeNull()
+  })
+})
+
 describe('módulo startup: lo nuevo', () => {
   let db: Db
   let hidden: Set<string>
@@ -506,6 +601,10 @@ describe('módulo startup: lo nuevo', () => {
       { type: 'staff', role: 'astronauta' },
       { type: 'decor', id: '' },
       { type: 'buy', item: 'space', cash: 1e9 },
+      { type: 'avatar', index: 0, avatar: { ...avatarOf(1), hair: 99 } },
+      { type: 'avatar', index: 0, avatar: { ...avatarOf(1), extra: 1 } },
+      { type: 'avatar', index: -2, avatar: avatarOf(1) },
+      { type: 'avatar', index: 0 },
     ]) {
       const result = service.act(actor('ana'), bad)
 
@@ -516,6 +615,15 @@ describe('módulo startup: lo nuevo', () => {
         await expect(result, JSON.stringify(bad)).rejects.toMatchObject({ code: 'invalid_input' })
       }
     }
+
+    // El tuyo se guarda; el de alguien que no hay, no.
+    expect(
+      (await service.act(actor('ana'), { type: 'avatar', index: -1, avatar: avatarOf(3) })).state
+        .me,
+    ).toEqual(avatarOf(3))
+    await expect(
+      service.act(actor('ana'), { type: 'avatar', index: 4, avatar: avatarOf(3) }),
+    ).rejects.toMatchObject({ code: 'conflict' })
 
     // Sin piezas, no hay nada que mover.
     await expect(

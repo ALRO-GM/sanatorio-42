@@ -1,9 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import type { ModelId, Props } from './models'
-import { boundsOf, paintModel } from './paint'
-import { DENSITY, useQuality } from './quality'
-import type { Quality } from './quality'
+import { DENSITY, boundsOf, paintModel } from './paint'
 import { useFrame } from './useFrame'
 
 /**
@@ -15,21 +13,15 @@ export function PixelArt({
   model,
   props = {},
   size,
-  quality: fixed,
 }: {
   model: ModelId
   props?: Props
   size: number
-  /** Una calidad fija (la muestra del selector); sin ella, la elegida. */
-  quality?: Quality | undefined
 }) {
-  const chosen = useQuality()
-  const quality = fixed ?? chosen
-  const density = DENSITY[quality].scale
   // Los fotogramas ya están guardados: recortar cada vez no cuesta.
-  const bounds = boundsOf(model, props, quality)
-  // En píxeles del dibujo, como en 8 bits: a más calidad, el lienzo es más fino, no más grande.
-  const logical = { width: bounds.width / density, height: bounds.height / density }
+  const bounds = boundsOf(model, props)
+  // En píxeles del dibujo: el lienzo es `DENSITY` veces más fino, no más grande.
+  const logical = { width: bounds.width / DENSITY, height: bounds.height / DENSITY }
   const frame = useFrame()
   const canvas = useRef<HTMLCanvasElement>(null)
   const scale = Math.max(1, Math.floor((size * 2) / Math.max(logical.width, logical.height)) / 2)
@@ -37,7 +29,7 @@ export function PixelArt({
   useEffect(() => {
     const context = canvas.current?.getContext('2d')
 
-    if (context !== null && context !== undefined) paintModel(context, model, props, frame, quality)
+    if (context !== null && context !== undefined) paintModel(context, model, props, frame)
   })
 
   return (

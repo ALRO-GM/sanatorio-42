@@ -4,6 +4,7 @@
  */
 
 import { AXES } from './data.js'
+import type { Avatar } from './avatar.js'
 import type { Axis, Milestone, Role, Round } from './data.js'
 
 /**
@@ -11,7 +12,14 @@ import type { Axis, Milestone, Role, Round } from './data.js'
  * Sin `role`, programa (de su especialidad); con `role`, es del resto de la
  * oficina (recepción, limpieza…) y no cuenta para el modelo de negocio.
  */
-export type Hire = { axis: Axis; stars: number; look: number; role?: Role }
+export type Hire = {
+  axis: Axis
+  stars: number
+  look: number
+  role?: Role
+  /** Su aspecto elegido en el configurador; sin él, el que sale de `look` (`avatarOf`). */
+  avatar?: Avatar
+}
 
 /** Una ronda hecha y la suerte que tuvo (de 0,7 a 1,5). */
 export type RoundResult = { id: Round; luck: number }
@@ -53,6 +61,8 @@ export type StartupState = {
   opened: number
   /** Veces que se ha terminado el edificio y vuelto a empezar (nueva partida+). */
   legacy: number
+  /** El aspecto de quien la fundó, si lo ha elegido en el configurador; si no, sale de su login. */
+  me?: Avatar
 }
 
 export const EMPTY_STARTUP: StartupState = {

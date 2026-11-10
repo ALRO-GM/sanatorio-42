@@ -1781,7 +1781,7 @@ POST /games/rooms/:id/resign   → abandona: gana el otro bando
 GET    /me/focus  → Focus { until, startedAt, settings }
 PUT    /me/focus  → FocusSettings { focusMinutes 5–240, breakMinutes 0–60, sections, show } → Focus
 GET    /me/startup → StartupSnapshot { login, state, earnedMinutes, longSessions } (docs/pomodoro-startup.md)
-POST   /me/startup/action → { type: buy, item } | { type: milestone, milestone, name? } | { type: hire, index } | { type: reroll } | { type: round } | { type: staff, role } | { type: decor, id } | { type: place, index, gx, gy, turn } | { type: store, index } | { type: open } | { type: legacy } → StartupSnapshot; 409 si no se puede
+POST   /me/startup/action → { type: buy, item } | { type: milestone, milestone, name? } | { type: hire, index } | { type: reroll } | { type: round } | { type: staff, role } | { type: decor, id } | { type: place, index, gx, gy, turn } | { type: store, index } | { type: sell, index } | { type: move, key, gx, gy } | { type: avatar, index (-1: tú), avatar } | { type: open } | { type: legacy } → StartupSnapshot; 409 si no se puede
 GET    /startup/ranking → StartupRankRow[] { login, name, hours, valuation, stage, focus, team }
 GET    /startup/office/:login → StartupVisit { login, state }: la oficina de alguien que sale en tu ranking; 404 si no se ve o no tiene
 DELETE /me/focus  → FocusExit { reasons } (opcional) → Focus (acaba antes de tiempo; los ajustes se guardan)

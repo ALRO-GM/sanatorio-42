@@ -1,7 +1,7 @@
 import type { Axis, Role } from '@sanatorio/startup'
 
-import type { Carry } from '../person'
 import type { Shades, Sprite } from '../sprite'
+import type { Carry } from '../toon'
 
 /** Lo que cambia un mismo modelo de un sitio a otro. Cada modelo mira lo que le toca. */
 export type Props = {
@@ -9,6 +9,8 @@ export type Props = {
   level?: number
   /** Quien se sienta, si alguien: su aspecto (0-999)… */
   look?: number
+  /** …o el elegido en el configurador (`avatarKey`), que manda sobre `look`. */
+  avatar?: string | undefined
   /** …y su especialidad, o el modelo de negocio de lo que se dibuja. */
   axis?: Axis | null
   /** Si trabaja: teclea y parpadea. Si no, se queda quieto. */
@@ -37,11 +39,11 @@ export type Model = {
   frames: number
   draw: (sprite: Sprite, frame: number, props: Props) => void
   /**
-   * Su dibujo propio en 16 bits, si lo tiene: con sus fotogramas y pintando
-   * píxel a píxel (`Sprite.paint`, el doble de fino). Sin él, en 16 bits sale
-   * `draw` a doble resolución, que el motor ya afina (`sprite.ts`).
+   * Qué se ve en un fotograma, si muchos salen iguales (una mesa tiene 16 y
+   * solo cambian el tecleo y el parpadeo): los que den lo mismo comparten
+   * dibujo, que es lo que más cuesta. Sin él, cada fotograma el suyo.
    */
-  hd?: { frames: number; draw: (sprite: Sprite, frame: number, props: Props) => void }
+  same?: (frame: number, props: Props) => string
 }
 
 /** Patas o postes: cajas de `size × size` desde el suelo hasta `height`. */

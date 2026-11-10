@@ -297,20 +297,71 @@
 .su-step.up svg {
   transform: rotate(180deg);
 }
-/* La calidad de los dibujos: dos botones, cada uno con su muestra andando. */
-.su-quality {
+/* El configurador de personajes: quién, el personaje en grande y sus partes. */
+.su-avatar {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+.su-avatar-preview {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  position: sticky;
+  top: 0.5rem;
+}
+.su-avatar-parts {
+  display: grid;
+  gap: 0.4rem;
+}
+.su-avatar-part {
+  display: grid;
+  grid-template-columns: 9rem 1fr;
+  gap: 0.4rem;
+  align-items: center;
+}
+.su-avatar-part > span {
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.su-avatar-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+.su-avatar-options button.on {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+}
+.su-swatch {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.su-swatch.on {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.su-avatar-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+  justify-content: flex-end;
 }
-.su-quality button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-.su-quality button.on {
-  border-color: var(--accent);
-  outline: 2px solid var(--accent);
+@media (max-width: 640px) {
+  .su-avatar {
+    grid-template-columns: 1fr;
+  }
+  .su-avatar-preview {
+    position: static;
+  }
+  .su-avatar-part {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Vender: la moneda y lo que se cobra; al segundo toque, en rojo. */

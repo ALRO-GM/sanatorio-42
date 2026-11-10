@@ -10,6 +10,8 @@
 
 import type { StartupRankRow, StartupSnapshot, StartupVisit } from '@sanatorio/contracts'
 import {
+  AVATAR_KEYS,
+  AVATAR_PARTS,
   BOX_MINUTES,
   DECOR_MAX,
   MILESTONES,
@@ -22,7 +24,7 @@ import {
   stageOf,
   valuationOf,
 } from '@sanatorio/startup'
-import type { StartupState } from '@sanatorio/startup'
+import type { Avatar, StartupState } from '@sanatorio/startup'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
@@ -36,6 +38,22 @@ import { parse } from '../../core/validation.js'
 
 /** Filas del ranking, como mucho (más la propia, si queda fuera). */
 const RANKING_SIZE = 50
+
+/** Un aspecto del configurador: cada parte, una opción de su catálogo y ninguna de más. */
+const avatarSchema = z
+  .object(
+    Object.fromEntries(
+      AVATAR_KEYS.map((part) => [
+        part,
+        z
+          .number()
+          .int()
+          .min(0)
+          .max(AVATAR_PARTS[part] - 1),
+      ]),
+    ),
+  )
+  .strict() as unknown as z.ZodType<Avatar>
 
 const actionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('buy'), item: z.string().min(1).max(40) }),
@@ -104,6 +122,13 @@ const actionSchema = z.discriminatedUnion('type', [
       .int()
       .min(0)
       .max(Math.max(...ROOM) - 1),
+  }),
+  // El aspecto: cada parte la comprueba el motor contra el catálogo (`isAvatar`).
+  z.object({
+    type: z.literal('avatar'),
+    // -1: quien juega; si no, alguien de la plantilla.
+    index: z.number().int().min(-1).max(999),
+    avatar: avatarSchema,
   }),
   z.object({ type: z.literal('open') }),
   z.object({ type: z.literal('legacy') }),

@@ -135,7 +135,13 @@ export function paintMove(
       const sprite = drawTower(move.tower, frame, true)
       const y = height - sprite.height
 
-      context.drawImage(toCanvas(sprite), Math.round((width - sprite.width) / 2), y)
+      context.drawImage(
+        toCanvas(sprite),
+        Math.round((width - sprite.width) / 2),
+        y,
+        sprite.width,
+        sprite.height,
+      )
       // El cohete despega de la azotea.
       paintAt(context, 'rocket', {}, frame, width / 2, y + 26 - Math.max(0, t - 6) * 5)
     } else {

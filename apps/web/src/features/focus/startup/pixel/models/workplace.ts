@@ -1,13 +1,10 @@
-import { DARK, METAL, NAVY, PLYWOOD, PORCELAIN, SILVER, WOOD, GLOW, LED } from '../palette'
-import {
-  PERSON_WIDTH,
-  PERSON_HEIGHT,
-  WALKER_HEIGHT,
-  drawPerson,
-  drawWalker,
-  drawWalkerHd,
-} from '../person'
+import { avatarFromKey, avatarOf } from '@sanatorio/startup'
+
+import { DARK, METAL, NAVY, PLYWOOD, PORCELAIN, SILVER, WOOD, LED } from '../palette'
+
 import type { Sprite } from '../sprite'
+import { SEATED, STILL, WALK, toonOf } from '../toon'
+import type { ToonSpec } from '../toon'
 import { posts } from './model'
 import type { Model, Props } from './model'
 
@@ -18,34 +15,73 @@ function chair(sprite: Sprite): void {
   sprite.box(5, 1, 6.5, 6, 1.5, 12, DARK)
 }
 
-/** Quien se sienta: de frente, detrás de la mesa, con la cabeza por encima de la pantalla. */
-function seated(
-  sprite: Sprite,
-  frame: number,
-  { look = 0, axis = null, busy = false, role }: Props,
-): void {
-  const [x, y] = sprite.project(8, 4.5, 9)
-  // Que no tecleen ni parpadeen todos a la vez.
+/** El aspecto de quien se dibuja: el del configurador o, si no, el que sale de `look`. */
+const avatarIn = ({ avatar, look = 0 }: Props) =>
+  (avatar === undefined ? null : avatarFromKey(avatar)) ?? avatarOf(look)
+
+/** Una persona de pie (o sentada) con los pies en (fx, fy, fz) del mundo. */
+function stand(sprite: Sprite, spec: Omit<ToonSpec, 'k'>, fx: number, fy: number, fz = 0): void {
+  const toon = toonOf({ ...spec, k: sprite.scale / 2 })
+
+  sprite.figure(toon.pixels, toon.w, toon.h, fx, fy, fz)
+}
+
+/**
+ * Quien se sienta: de frente, detrás de la mesa, en la silla. Las piernas no
+ * se dibujan (las tapa la mesa); la cadera, a la altura del asiento.
+ */
+/** Lo que cambia de quien se sienta en un fotograma: tecleo, parpadeo y cara. Que no lo hagan todos a la vez. */
+function seatedState(frame: number, { look = 0, busy = false }: Props) {
   const own = (frame + look) % 16
 
-  drawPerson(
+  return {
+    pose: busy ? own % 2 : 0,
+    blink: own === 11,
+    expression: busy && own < 12 ? ('concentrada' as const) : ('contenta' as const),
+  }
+}
+
+/** Para `Model.same`: lo que se ve de quien se sienta y de la luz de la torre. */
+function seatedKey(frame: number, props: Props): string {
+  if (props.look === undefined) return (props.level ?? 0) >= 5 ? String(frame % 4 < 2) : ''
+
+  const { pose, blink, expression } = seatedState(frame, props)
+
+  return `${String(pose)}|${String(blink)}|${expression}|${String((props.level ?? 0) >= 5 && frame % 4 < 2)}`
+}
+
+function seated(sprite: Sprite, frame: number, props: Props): void {
+  const { pose, blink, expression } = seatedState(frame, props)
+
+  stand(
     sprite,
-    Math.round(x) - PERSON_WIDTH / 2,
-    Math.round(y) - PERSON_HEIGHT + (busy && own % 2 === 1 ? 1 : 0),
-    { look, axis, role, blink: busy && own === 11 },
+    {
+      avatar: avatarIn(props),
+      role: props.role,
+      pose: SEATED[pose],
+      blink,
+      expression,
+    },
+    8.5,
+    4.5,
+    3,
   )
 }
 
-function laptop(sprite: Sprite, x: number): void {
-  sprite.box(x, 9, 12, 4.5, 3.5, 0.8, SILVER)
-  sprite.box(x, 8.6, 12.8, 4.5, 0.6, 5, SILVER)
-  sprite.dot(x + 2.2, 9.2, 15.5, GLOW)
+function laptop(sprite: Sprite, x: number, y: number): void {
+  sprite.box(x, y, 12, 4.5, 3, 0.6, SILVER)
+  sprite.box(x, y - 0.4, 12.6, 4.5, 0.5, 4, SILVER)
+  // Su trasera mira a la sala, con la luz del logo.
+  sprite.dot(x + 2.25, y + 0.15, 14.8, '#e8f4ff')
 }
 
 function monitor(sprite: Sprite, x: number, wide = 6): void {
   sprite.box(x + wide / 2 - 0.5, 8.6, 12, 1, 1, 3, METAL)
   sprite.box(x, 8, 15, wide, 1.2, 8, NAVY)
-  sprite.dot(x + wide / 2, 9.2, 19, NAVY[0])
+  // La trasera mira a la sala: un logo redondo.
+  sprite.plane(1, 9.2, [x, x + wide], [15, 23], (u, v) =>
+    Math.hypot(u - x - wide / 2, v - 19) < 1.1 ? '#f2b48a' : null,
+  )
 }
 
 function desk(sprite: Sprite): void {
@@ -85,6 +121,7 @@ function trestle(sprite: Sprite): void {
  */
 export const workstation: Model = {
   frames: 16,
+  same: seatedKey,
   draw(sprite, frame, props) {
     const level = props.level ?? 0
 
@@ -101,60 +138,51 @@ export const workstation: Model = {
     if (level === 0) trestle(sprite)
     else desk(sprite)
 
-    if (level <= 1) laptop(sprite, 9.5)
-    if (level >= 2) monitor(sprite, level >= 4 ? 0.5 : 1.5, level >= 4 ? 7 : 6)
-    if (level >= 3) laptop(sprite, 10)
+    // Las pantallas, a la izquierda: así no tapan la cara de quien se sienta.
+    if (level <= 1) laptop(sprite, 2, 9)
+    if (level >= 2) monitor(sprite, 0.5, level >= 4 ? 7 : 6)
+    if (level >= 3) laptop(sprite, 1, 11.5)
   },
 }
 
-/** Una persona sola, de pie y parpadeando: la tarjeta de quien se puede contratar. */
+/** Una persona sola, de pie y parpadeando: la tarjeta de quien se puede contratar y el configurador. */
 export const person: Model = {
   frames: 24,
-  draw(sprite, frame, { look = 0, axis = null }) {
-    const [x, y] = sprite.project(8, 8, 0)
-
-    drawPerson(sprite, Math.round(x) - PERSON_WIDTH / 2, Math.round(y) - PERSON_HEIGHT, {
-      look,
-      axis,
-      blink: (frame + look) % 24 === 5,
-    })
+  same: (frame, { look = 0 }) => String((frame + look) % 24 === 5),
+  draw(sprite, frame, props) {
+    stand(
+      sprite,
+      { avatar: avatarIn(props), role: props.role, blink: (frame + (props.look ?? 0)) % 24 === 5 },
+      8,
+      8,
+    )
   },
 }
 
 /**
  * Alguien de pie o andando por la oficina (`pixel/life.ts`): entero, con su
  * uniforme si tiene oficio, de frente o de espaldas, con lo que lleve en las
- * manos. El paso lo decide quien lo mueve; aquí solo parpadea.
+ * manos. Si anda (`step`), las ocho fases del paso, una por fotograma.
  */
 export const walker: Model = {
-  frames: 1,
-  draw(sprite, _frame, { look = 0, axis = null, role, step = 0, back = false, carry = null }) {
-    const [x, y] = sprite.project(8, 8, 0)
+  frames: 8,
+  same: (frame, { step = 0 }) => (step === 0 ? String(frame === 5) : String(frame)),
+  draw(sprite, frame, props) {
+    const { step = 0, back = false, carry = null, role } = props
 
-    drawWalker(sprite, Math.round(x) - PERSON_WIDTH / 2, Math.round(y) - WALKER_HEIGHT, {
-      look,
-      axis,
-      role,
-      step,
-      back,
-      carry,
-    })
-  }, // En 16 bits, hecha a mano: cuatro fases de paso (una cada fotograma
-  // mientras anda) en vez de dos, brazos que se balancean y medio píxel de rebote.
-  hd: {
-    frames: 4,
-    draw(sprite, frame, { look = 0, axis = null, role, step = 0, back = false, carry = null }) {
-      const [x, y] = sprite.project(8, 8, 0)
-
-      drawWalkerHd(sprite, Math.round(x) - PERSON_WIDTH / 2, Math.round(y) - WALKER_HEIGHT, {
-        look,
-        axis,
+    stand(
+      sprite,
+      {
+        avatar: avatarIn(props),
         role,
-        phase: step === 0 ? 0 : 1 + (frame % 4),
+        pose: step === 0 ? STILL : WALK[frame % WALK.length],
         back,
         carry,
-      })
-    },
+        blink: step === 0 && frame === 5,
+      },
+      8,
+      8,
+    )
   },
 }
 
@@ -164,6 +192,8 @@ export const walker: Model = {
  */
 export const reception: Model = {
   frames: 16,
+  same: (frame, props) =>
+    `${seatedKey(frame, { ...props, busy: false })}|${String(frame % 16 < 2)}`,
   draw(sprite, frame, props) {
     if (props.look !== undefined) {
       chair(sprite)

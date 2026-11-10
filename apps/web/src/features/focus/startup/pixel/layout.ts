@@ -1,6 +1,8 @@
 import {
   DECOR,
   ROOM,
+  avatarKey,
+  avatarOf,
   decorItem,
   focusOf,
   layoutOf,
@@ -9,7 +11,7 @@ import {
   skillOf,
   spaceOf,
 } from '@sanatorio/startup'
-import type { Axis, Role, StartupState } from '@sanatorio/startup'
+import type { Avatar, Axis, Role, StartupState } from '@sanatorio/startup'
 
 import { FLOOR_OF_SPACE } from './floor'
 import type { Floor } from './floor'
@@ -39,6 +41,8 @@ export type Piece = {
  */
 export type Person = {
   look: number
+  /** Su aspecto (`avatarKey`): el del configurador o el que sale de `look`. */
+  avatar?: string
   axis: Axis | null
   role?: Role
   pet?: 'cat' | 'dog' | 'robot'
@@ -57,6 +61,10 @@ export type Office = {
   /** Gente de la plantilla que no cabe en el dibujo. */
   hidden: number
 }
+
+/** El aspecto de alguien en una cadena: el del configurador o, si no lo tocó, el de su `look`. */
+const faceOf = ({ look, avatar }: { look: number; avatar?: Avatar | undefined }): string =>
+  avatarKey(avatar ?? avatarOf(look))
 
 /** Cuánta gente del resto de la oficina y cuántas mascotas andan a la vez: más, y no se ve nada. */
 const MAX_WALKERS = 10
@@ -88,7 +96,7 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
 
   // Quien programa, en su mesa: primero quien fundó.
   const coders = [
-    { axis: focus, look: me },
+    { axis: focus, look: me, avatar: state.me },
     ...state.team.filter((hire) => hire.role === undefined),
   ]
 
@@ -99,7 +107,9 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
 
     const [gx, gy] = desk.at
 
-    people.push({ look: coder.look, axis: coder.axis, desk: desk.at })
+    const avatar = faceOf(coder)
+
+    people.push({ look: coder.look, avatar, axis: coder.axis, desk: desk.at })
     pieces.push({
       model: 'workstation',
       gx,
@@ -107,6 +117,7 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
       props: {
         level: index === 0 ? gear : Math.max(1, gear),
         look: coder.look,
+        avatar,
         axis: coder.axis,
         busy,
       },
@@ -142,12 +153,14 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
         fixture: fixture.key,
       })
     } else if (fixture.kind === 'reception' && desk !== undefined) {
-      people.push({ look: desk.look, axis: desk.axis, role: 'reception', desk: fixture.at })
+      const avatar = faceOf(desk)
+
+      people.push({ look: desk.look, avatar, axis: desk.axis, role: 'reception', desk: fixture.at })
       pieces.push({
         model: 'reception',
         gx,
         gy,
-        props: { look: desk.look, axis: desk.axis, role: 'reception' },
+        props: { look: desk.look, avatar, axis: desk.axis, role: 'reception' },
         seat: people.length - 1,
         fixture: fixture.key,
       })
@@ -168,6 +181,7 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
       .filter((hire) => hire !== desk)
       .map((hire): Person => ({
         look: hire.look,
+        avatar: faceOf(hire),
         axis: hire.axis,
         ...(hire.role === undefined ? {} : { role: hire.role }),
       })),

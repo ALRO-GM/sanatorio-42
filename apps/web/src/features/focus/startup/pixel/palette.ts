@@ -1,6 +1,6 @@
 import type { Axis, Role } from '@sanatorio/startup'
 
-import type { Color, Shades } from './sprite'
+import type { Shades } from './sprite'
 
 /**
  * La paleta de los dibujos en píxeles: la misma en claro y en oscuro (la
@@ -83,28 +83,8 @@ export const NEON = ['#ff6fd8', '#6ff7ff', '#fff27a'] as const
 export const SEA = ['#4fb3e8', '#2f86c4'] as const
 export const LIGHT = '#fff3b0'
 
-/** Pantalones y zapatos de quien camina. */
-export const PANTS = ['#3a3f5c', '#2a2e45'] as const
-export const SHOE = '#1f1b2b'
 /** Cartón de las cajas de la mudanza y de los paquetes. */
 export const CARDBOARD: Shades = ['#e2b878', '#c4955a', '#9f7442']
 
 /** La ropa de quien aún no tiene modelo de negocio. */
 export const PLAIN: Shades = ['#a7b0bd', '#7d8a99', '#5e6a78']
-
-/** Pieles y pelos de las personas: cada una con su tono de sombra. */
-export const SKIN: readonly (readonly [Color, Color])[] = [
-  ['#f5d0b5', '#dcae8d'],
-  ['#e8b48f', '#cc9670'],
-  ['#c98c62', '#a8714a'],
-  ['#9a6340', '#7d4d2f'],
-  ['#6b4128', '#54311d'],
-]
-export const HAIR: readonly Color[] = [
-  '#2b2118',
-  '#5a3a22',
-  '#a8743a',
-  '#d9b86a',
-  '#8a8f99',
-  '#c4553b',
-]

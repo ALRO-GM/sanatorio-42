@@ -191,4 +191,56 @@ describe('startup del Pomodoro', () => {
         .disabled,
     ).toBe(true)
   }, 20_000)
+
+  it('el configurador cambia tu personaje parte a parte y lo guarda', async () => {
+    render(
+      <I18nProvider>
+        <StartupPanel />
+      </I18nProvider>,
+    )
+
+    fireEvent.click(await screen.findByRole('button', { name: text('startup.avatar') }))
+
+    const editor = await screen.findByRole('group', { name: text('startup.avatar') })
+    const save = within(editor).getByRole('button', { name: text('startup.avatar.save') })
+    const undo = within(editor).getByRole('button', { name: text('startup.avatar.undo') })
+
+    // Sin cambios, nada que guardar ni deshacer.
+    expect((save as HTMLButtonElement).disabled).toBe(true)
+    expect((undo as HTMLButtonElement).disabled).toBe(true)
+
+    // Una forma (el peinado) y un color (el del pelo).
+    const hair = within(editor).getByRole('group', { name: text('startup.avatar.part.hair') })
+    const curls = within(hair).getByRole('button', { name: text('startup.avatar.hair.3') })
+
+    fireEvent.click(curls)
+    expect(curls.getAttribute('aria-pressed')).toBe('true')
+
+    const colour = within(editor).getByRole('group', {
+      name: text('startup.avatar.part.hairColor'),
+    })
+
+    fireEvent.click(
+      within(colour).getByRole('button', { name: text('startup.avatar.color', { n: '3' }) }),
+    )
+
+    // Deshacer vuelve a lo guardado: nada pendiente.
+    fireEvent.click(undo)
+    expect((save as HTMLButtonElement).disabled).toBe(true)
+    fireEvent.click(curls)
+    await waitFor(() => {
+      expect((save as HTMLButtonElement).disabled).toBe(false)
+    })
+    fireEvent.click(save)
+
+    // Guardado: lo elegido se queda y ya no hay nada pendiente.
+    await waitFor(() => {
+      expect((save as HTMLButtonElement).disabled).toBe(true)
+    })
+    expect(
+      within(within(editor).getByRole('group', { name: text('startup.avatar.part.hair') }))
+        .getByRole('button', { name: text('startup.avatar.hair.3') })
+        .getAttribute('aria-pressed'),
+    ).toBe('true')
+  })
 })

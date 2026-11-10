@@ -7,7 +7,20 @@ export type StartupAxis = 'front' | 'back' | 'data' | 'ai' | 'infra'
 export type StartupRole =
   'reception' | 'cleaning' | 'delivery' | 'kitchen' | 'security' | 'maintenance'
 
-export type StartupHire = { axis: StartupAxis; stars: number; look: number; role?: StartupRole }
+/**
+ * El aspecto elegido en el configurador: cada parte, el número de su opción
+ * (`AVATAR_PARTS` de `@sanatorio/startup`: piel, peinado, ojos, ropa…).
+ */
+export type StartupAvatar = Record<string, number>
+
+export type StartupHire = {
+  axis: StartupAxis
+  stars: number
+  look: number
+  role?: StartupRole
+  /** Sin él, su aspecto sale de `look`. */
+  avatar?: StartupAvatar
+}
 
 /** Una pieza de decoración: dónde está (`null`, guardada) y si está girada. */
 export type StartupPlaced = { id: string; at: readonly [number, number] | null; turn: boolean }
@@ -28,6 +41,8 @@ export type StartupStateDto = {
   /** Cajas sorpresa abiertas y vueltas terminadas (nueva partida+). */
   opened: number
   legacy: number
+  /** Tu aspecto, si lo has elegido; si no, sale de tu login. */
+  me?: StartupAvatar
 }
 
 /** `GET /me/startup` y `POST /me/startup/action`: la partida y los minutos ganados. */

@@ -16,8 +16,15 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { deflateSync } from 'node:zlib'
 
-import { EMPTY_STARTUP, moodOf } from '@sanatorio/startup'
-import type { StartupState } from '@sanatorio/startup'
+import {
+  AVATAR_KEYS,
+  AVATAR_PARTS,
+  EMPTY_STARTUP,
+  avatarKey,
+  avatarOf,
+  moodOf,
+} from '@sanatorio/startup'
+import type { Avatar, StartupState } from '@sanatorio/startup'
 
 import { drawBubble } from '../src/features/focus/startup/pixel/bubbles'
 import { drawFloor } from '../src/features/focus/startup/pixel/floor'
@@ -25,14 +32,12 @@ import { officeOf } from '../src/features/focus/startup/pixel/layout'
 import { lifeOf, poseAt } from '../src/features/focus/startup/pixel/life'
 import { MODELS } from '../src/features/focus/startup/pixel/models'
 import type { ModelId, Props } from '../src/features/focus/startup/pixel/models'
-import { WALKER_HEIGHT } from '../src/features/focus/startup/pixel/person'
+import { DENSITY, depthOf } from '../src/features/focus/startup/pixel/paint'
 import { Sprite, TILE } from '../src/features/focus/startup/pixel/sprite'
 import { drawTower, towerOf } from '../src/features/focus/startup/pixel/tower'
 
-/** Cada píxel, de 3 × 3 en el PNG. */
-const SCALE = 3
-const BACKGROUND = 0xe7e3ec
-/** Lo que mide el lienzo de un modelo, como en `paint.ts`. */
+const BACKGROUND: readonly [number, number, number] = [0xe7, 0xe3, 0xec]
+/** Lo que mide el lienzo de un modelo, como en `paint.ts` (en píxeles del dibujo). */
 const CELL = { width: 40, height: 76, ox: 20, oy: 58 }
 const HEADROOM = 46
 const LEVELS = [0, 1, 2, 3, 4, 5]
@@ -42,40 +47,86 @@ const SAMPLE: Props = { look: 123, axis: 'ai', busy: true }
 const out = join(import.meta.dirname, '..', '.pixel')
 
 function model(id: ModelId, props: Props, frame: number): Sprite {
-  const sprite = new Sprite(CELL.width, CELL.height, CELL.ox, CELL.oy)
+  const sprite = new Sprite(CELL.width, CELL.height, CELL.ox, CELL.oy, DENSITY)
   const { frames, draw } = MODELS[id]
 
   sprite.turned = props.turn === true
   draw(sprite, frame % frames, props)
 
-  return sprite.outline()
+  return sprite.finish()
 }
 
-/** Copia `from` encima de `to`, con su esquina en (x, y). */
-function paste(to: Sprite, from: Sprite, x: number, y: number): void {
-  for (let row = 0; row < from.height; row += 1) {
-    for (let column = 0; column < from.width; column += 1) {
-      const color = from.at(column, row)
+/** Una imagen RGBA en la que se pegan dibujos (con su transparencia, para las sombras). */
+class Picture {
+  readonly data: Uint8Array
 
-      if (color !== null) to.set(x + column, y + row, color)
+  constructor(
+    readonly width: number,
+    readonly height: number,
+  ) {
+    this.data = new Uint8Array(width * height * 3)
+    for (let i = 0; i < width * height; i += 1) this.data.set(BACKGROUND, i * 3)
+  }
+
+  /** Pega los píxeles de `from` (de verdad) con su esquina en (x, y), `zoom` veces más grandes. */
+  paste(from: Sprite, x: number, y: number, zoom = 1): void {
+    for (let row = 0; row < from.ph; row += 1) {
+      for (let column = 0; column < from.pw; column += 1) {
+        const color = from.at(column, row)
+
+        if (color === null) continue
+
+        const [rgb, alpha] = parse(color)
+
+        for (let b = 0; b < zoom; b += 1) {
+          for (let a = 0; a < zoom; a += 1)
+            this.blend(x + column * zoom + a, y + row * zoom + b, rgb, alpha)
+        }
+      }
+    }
+  }
+
+  private blend(x: number, y: number, rgb: readonly number[], alpha: number): void {
+    if (x < 0 || y < 0 || x >= this.width || y >= this.height) return
+
+    const at = (y * this.width + x) * 3
+
+    for (let c = 0; c < 3; c += 1) {
+      this.data[at + c] = Math.round((this.data[at + c] ?? 0) * (1 - alpha) + (rgb[c] ?? 0) * alpha)
     }
   }
 }
 
+/** Un color `#rrggbb` o `rgba(r, g, b, a)` en sus canales y su opacidad. */
+function parse(color: string): [number[], number] {
+  if (color.startsWith('#')) {
+    const value = parseInt(color.slice(1, 7), 16)
+
+    return [[(value >> 16) & 255, (value >> 8) & 255, value & 255], 1]
+  }
+
+  const parts = color.slice(5, -1).split(',').map(Number)
+
+  return [parts.slice(0, 3), parts[3] ?? 1]
+}
+
 /** La oficina de una partida en el fotograma `frame`, con la gente donde esté entonces. */
-function office(state: StartupState, frame: number): Sprite {
+function office(state: StartupState, frame: number): Picture {
   const room = officeOf(state, 500)
   const { size, floor, pieces, people } = room
   const poses = lifeOf(room, moodOf(state)).map((plan) => poseAt(plan, frame))
   const sx = size * TILE + 4
-  const scene = new Sprite(size * 2 * TILE + 8, size * TILE + HEADROOM + 6, sx, HEADROOM)
+  const [width, height] = [size * 2 * TILE + 8, size * TILE + HEADROOM + 6]
+  const picture = new Picture(width * DENSITY, height * DENSITY)
+  const ground = new Sprite(width, height, sx, HEADROOM, DENSITY)
   const at = (gx: number, gy: number): [number, number] => [
     sx + (gx - gy) * TILE,
     HEADROOM + ((gx + gy) * TILE) / 2,
   ]
-  const drawables: { depth: number; sprite: Sprite; gx: number; gy: number }[] = []
+  const drawables: { depth: number; tie: number; sprite: Sprite; gx: number; gy: number }[] = []
 
-  drawFloor(scene, size, floor)
+  drawFloor(ground, size, floor)
+  picture.paste(ground, 0, 0)
 
   for (const piece of pieces) {
     const pose = piece.seat === undefined ? undefined : poses[piece.seat]
@@ -83,7 +134,8 @@ function office(state: StartupState, frame: number): Sprite {
       pose !== undefined && !pose.seated ? { ...piece.props, look: undefined } : piece.props
 
     drawables.push({
-      depth: piece.gx + piece.gy,
+      depth: depthOf(piece.model, piece.gx, piece.gy),
+      tie: piece.gx,
       sprite: model(piece.model, props as Props, frame),
       gx: piece.gx,
       gy: piece.gy,
@@ -95,26 +147,25 @@ function office(state: StartupState, frame: number): Sprite {
 
     if (pose === undefined || pose.seated || pose.away) return
 
-    const props = {
-      ...person,
-      step: pose.step,
-      back: pose.back,
-      turn: pose.turn,
-      carry: pose.carry,
-    }
+    const id = person.pet ?? 'walker'
 
     drawables.push({
-      depth: pose.gx + pose.gy + 0.5,
-      sprite: model(person.pet ?? 'walker', props, frame),
+      depth: depthOf(id, pose.gx, pose.gy),
+      tie: pose.gx + 0.001,
+      sprite: model(
+        id,
+        { ...person, step: pose.step, back: pose.back, turn: pose.turn, carry: pose.carry },
+        frame,
+      ),
       gx: pose.gx,
       gy: pose.gy,
     })
   })
 
-  for (const { sprite, gx, gy } of drawables.sort((a, b) => a.depth - b.depth)) {
+  for (const { sprite, gx, gy } of drawables.sort((a, b) => a.depth - b.depth || a.tie - b.tie)) {
     const [x, y] = at(gx, gy)
 
-    paste(scene, sprite, Math.round(x - CELL.ox), Math.round(y - CELL.oy))
+    picture.paste(sprite, Math.round((x - CELL.ox) * DENSITY), Math.round((y - CELL.oy) * DENSITY))
   }
 
   people.forEach((person, index) => {
@@ -123,41 +174,42 @@ function office(state: StartupState, frame: number): Sprite {
     if (pose?.bubble === null || pose === undefined) return
 
     const [x, y] = at(pose.gx, pose.gy)
-    const head = pose.seated ? y - 16 : y + 8 - (person.pet === undefined ? WALKER_HEIGHT : 8)
+    const head = pose.seated ? y - 16 : y + 8 - (person.pet === undefined ? 20 : 8)
+    const bubble = new Sprite(12, 13, 0, 0)
 
-    drawBubble(scene, Math.round(x - 5), Math.round(head - 11), pose.bubble)
+    drawBubble(bubble, 1, 1, pose.bubble)
+    picture.paste(
+      bubble.outline(),
+      Math.round((x - 6) * DENSITY),
+      Math.round((head - 12) * DENSITY),
+      DENSITY,
+    )
   })
 
-  return scene
+  return picture
 }
 
-/** Una tabla de modelos: `cells[fila][columna]`. */
-function grid(cells: Sprite[][]): Sprite {
+/** Una tabla de dibujos: `cells[fila][columna]`. */
+function grid(cells: Sprite[][]): Picture {
   const columns = Math.max(...cells.map((row) => row.length))
-  const sheet = new Sprite(columns * (CELL.width + 2), cells.length * (CELL.height + 2), 0, 0)
+  const [w, h] = [(CELL.width + 2) * DENSITY, (CELL.height + 2) * DENSITY]
+  const sheet = new Picture(columns * w, cells.length * h)
 
   cells.forEach((row, y) => {
     row.forEach((cell, x) => {
-      paste(sheet, cell, x * (CELL.width + 2), y * (CELL.height + 2))
+      sheet.paste(cell, x * w, y * h)
     })
   })
 
   return sheet
 }
 
-function save(name: string, sprite: Sprite): void {
-  const width = sprite.width * SCALE
-  const height = sprite.height * SCALE
-  const raw = Buffer.alloc((width * 4 + 1) * height)
+function save(name: string, picture: Picture): void {
+  const { width, height } = picture
+  const raw = Buffer.alloc((width * 3 + 1) * height)
 
   for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const color = sprite.at(Math.floor(x / SCALE), Math.floor(y / SCALE))
-      const value = color === null ? BACKGROUND : parseInt(color.slice(1), 16)
-      const at = y * (width * 4 + 1) + 1 + x * 4
-
-      raw.writeUInt32BE(((value << 8) | 0xff) >>> 0, at)
-    }
+    raw.set(picture.data.subarray(y * width * 3, (y + 1) * width * 3), y * (width * 3 + 1) + 1)
   }
 
   const header = Buffer.alloc(13)
@@ -165,7 +217,7 @@ function save(name: string, sprite: Sprite): void {
   header.writeUInt32BE(width, 0)
   header.writeUInt32BE(height, 4)
   header.writeUInt8(8, 8)
-  header.writeUInt8(6, 9)
+  header.writeUInt8(2, 9)
 
   const file = join(out, `${name}.png`)
 
@@ -201,6 +253,21 @@ function crc32(data: Buffer): number {
   }
 
   return (crc ^ 0xffffffff) >>> 0
+}
+
+/**
+ * El configurador: cada parte del aspecto (una fila), con todas sus opciones
+ * sobre un mismo personaje de base.
+ */
+function people(): Picture {
+  const base: Avatar = avatarOf(412)
+  const rows = AVATAR_KEYS.map((part) =>
+    Array.from({ length: AVATAR_PARTS[part] }, (_, option) =>
+      model('person', { avatar: avatarKey({ ...base, [part]: option }) }, 1),
+    ),
+  )
+
+  return grid(rows)
 }
 
 /** Seis partidas, del garaje al control global. */
@@ -298,6 +365,7 @@ if (only !== undefined) {
   const ids = Object.keys(MODELS) as ModelId[]
 
   save('modelos', grid(ids.map((id) => LEVELS.map((level) => model(id, { ...SAMPLE, level }, 1)))))
+  save('gente', people())
 
   for (const [name, state] of Object.entries(GAMES)) {
     // Tres momentos de cada oficina: la gente se mueve.
@@ -305,6 +373,12 @@ if (only !== undefined) {
 
     const tower = towerOf(state)
 
-    if (tower !== null) save(`edificio-${name}`, drawTower(tower, 0, true))
+    if (tower !== null) {
+      const building = drawTower(tower, 0, true)
+      const picture = new Picture(building.pw, building.ph)
+
+      picture.paste(building, 0, 0)
+      save(`edificio-${name}`, picture)
+    }
   }
 }

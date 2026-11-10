@@ -5,6 +5,7 @@
  * El mismo en la web, que lo pinta, y en la API, que lo hace cumplir.
  */
 
+export * from './avatar.js'
 export * from './data.js'
 export * from './engine.js'
 export * from './economy.js'

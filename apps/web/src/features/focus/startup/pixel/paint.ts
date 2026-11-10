@@ -7,9 +7,6 @@ import type { Bubble, Plan, Pose } from './life'
 import { MODELS } from './models'
 import type { ModelId, Props } from './models'
 import { targetOf } from '../target'
-import { WALKER_HEIGHT } from './person'
-import { DENSITY } from './quality'
-import type { Quality } from './quality'
 import { Sprite, TILE } from './sprite'
 
 /**
@@ -22,6 +19,16 @@ import { Sprite, TILE } from './sprite'
 /** El lienzo de un modelo: cabe lo más alto (un armario lleno) y el contorno. */
 const WIDTH = 40
 const HEIGHT = 76
+/**
+ * Píxeles de verdad por píxel del dibujo: una sola calidad, la más fina (el
+ * estilo sin delineado necesita sus tonos y sus biseles). Si algún día hay
+ * otras, se elegirían aquí.
+ */
+export const DENSITY = 4
+
+/** Lo que mide de alto quien anda, en píxeles del dibujo (para poner encima su bocadillo). */
+const WALKER_HEIGHT = 20
+
 /** Dónde cae en ese lienzo la esquina de arriba de su baldosa. */
 const OX = WIDTH / 2
 const OY = HEIGHT - 18
@@ -66,39 +73,30 @@ type Drawn = { canvas: HTMLCanvasElement; sprite: Sprite }
 
 const frames = new Map<string, Drawn>()
 
-/**
- * Un modelo dibujado en un lienzo de modelo, girado si toca y con su contorno.
- * En 16 bits, con su dibujo propio si lo tiene (`Model.hd`); si no, el de
- * siempre a doble resolución, que el motor ya afina (`sprite.ts`).
- */
-function modelSprite(model: ModelId, props: Props, frame: number, quality: Quality): Sprite {
-  const { scale, rich } = DENSITY[quality]
-  const sprite = new Sprite(WIDTH, HEIGHT, OX, OY, scale, rich)
+/** Un modelo dibujado en un lienzo de modelo, girado si toca y con su acabado (sombras). */
+function modelSprite(model: ModelId, props: Props, frame: number): Sprite {
+  const sprite = new Sprite(WIDTH, HEIGHT, OX, OY, DENSITY)
   const found = MODELS[model]
-  const hd = quality === 16 ? found.hd : undefined
 
   sprite.turned = props.turn === true
-  if (hd === undefined) found.draw(sprite, frame % found.frames, props)
-  else hd.draw(sprite, frame % hd.frames, props)
+  found.draw(sprite, frame % found.frames, props)
 
-  return sprite.outline()
+  return sprite.finish()
 }
 
-/** Cuántos fotogramas tiene un modelo en una calidad. */
-const framesOf = (model: ModelId, quality: Quality): number =>
-  (quality === 16 ? MODELS[model].hd?.frames : undefined) ?? MODELS[model].frames
-
 /** Un fotograma de un modelo, dibujado la primera vez y guardado. */
-function drawn(model: ModelId, props: Props, frame: number, quality: Quality = 8): Drawn {
-  const count = framesOf(model, quality)
-  const key = `${String(quality)}|${model}|${JSON.stringify(props)}|${String(frame % count)}`
+function drawn(model: ModelId, props: Props, frame: number): Drawn {
+  const { frames: count, same } = MODELS[model]
+  // Los fotogramas que se ven igual comparten dibujo (`Model.same`).
+  const shown = same === undefined ? String(frame % count) : same(frame % count, props)
+  const key = `${model}|${JSON.stringify(props)}|${shown}`
   let found = frames.get(key)
 
   if (found === undefined) {
     // No crece sin fin: si se llena, se vuelve a dibujar lo que se vea.
     if (frames.size > 1500) frames.clear()
 
-    const sprite = modelSprite(model, props, frame, quality)
+    const sprite = modelSprite(model, props, frame)
 
     found = { canvas: toCanvas(sprite), sprite }
     frames.set(key, found)
@@ -142,14 +140,13 @@ export function tileAt(size: number, x: number, y: number): [number, number] | n
 
 const floors = new Map<string, HTMLCanvasElement>()
 
-function floorOf(size: number, floor: Floor, quality: Quality): HTMLCanvasElement {
-  const key = `${String(quality)}|${String(size)}|${floor}`
+function floorOf(size: number, floor: Floor): HTMLCanvasElement {
+  const key = `${String(size)}|${floor}`
   let canvas = floors.get(key)
 
   if (canvas === undefined) {
     const { width, height } = sceneSize(size)
-    const { scale, rich } = DENSITY[quality]
-    const sprite = new Sprite(width, height, size * TILE + 4, HEADROOM, scale, rich)
+    const sprite = new Sprite(width, height, size * TILE + 4, HEADROOM, DENSITY)
 
     drawFloor(sprite, size, floor)
     canvas = toCanvas(sprite)
@@ -201,8 +198,6 @@ export type Extras = {
   /** Lo elegido para moverlo (`target.ts`). */
   selected?: string | null | undefined
   ghost?: { gx: number; gy: number; ok: boolean } | null | undefined
-  /** La calidad de los dibujos (`quality.ts`): 8 bits si no se dice. */
-  quality?: Quality | undefined
   /** Para la mudanza: cada pieza, una caja; y cuánto ha caído cada pieza (0 arriba, 1 en su sitio). */
   packed?: number | undefined
   dropped?: number | undefined
@@ -253,11 +248,10 @@ export function paintOffice(
   const pieces = office.pieces
   const packed = extras.packed ?? 0
   const dropped = extras.dropped ?? 1
-  const quality = extras.quality ?? 8
 
   context.imageSmoothingEnabled = false
   context.clearRect(0, 0, width, height)
-  context.drawImage(floorOf(office.size, office.floor, quality), 0, 0, width, height)
+  context.drawImage(floorOf(office.size, office.floor), 0, 0, width, height)
 
   if (extras.selected !== undefined && extras.selected !== null) {
     const chosen = pieces.find((piece) => targetOf(piece) === extras.selected)
@@ -288,7 +282,6 @@ export function paintOffice(
           { ...piece, model: 'crate', props: { level: 1 + (index % 3) } },
           frame,
           0,
-          quality,
         ),
       )
       return
@@ -306,7 +299,6 @@ export function paintOffice(
         { ...piece, props: cleanProps(props) },
         frame,
         Math.round((1 - fall) ** 2 * 40),
-        quality,
       ),
     )
 
@@ -330,6 +322,7 @@ export function paintOffice(
           ? { step: pose.step, turn: pose.turn }
           : cleanProps({
               look: person.look,
+              avatar: person.avatar,
               axis: person.axis,
               role: person.role,
               step: pose.step,
@@ -342,7 +335,7 @@ export function paintOffice(
         depth: depthOf(model, pose.gx, pose.gy),
         tie: pose.gx + 0.001,
         paint: () => {
-          place(context, drawn(model, props, frame, quality).canvas, Math.round(x), Math.round(y))
+          place(context, drawn(model, props, frame).canvas, Math.round(x), Math.round(y))
         },
       })
 
@@ -402,7 +395,6 @@ function paintPiece(
   piece: Piece,
   frame: number,
   lift: number,
-  quality: Quality,
 ): Drawable {
   const [x, y] = at(piece.gx, piece.gy)
 
@@ -410,7 +402,7 @@ function paintPiece(
     depth: depthOf(piece.model, piece.gx, piece.gy),
     tie: piece.gx,
     paint: () => {
-      place(context, drawn(piece.model, piece.props, frame, quality).canvas, x, y - lift)
+      place(context, drawn(piece.model, piece.props, frame).canvas, x, y - lift)
     },
   }
 }
@@ -419,13 +411,11 @@ function paintPiece(
 export function boundsOf(
   model: ModelId,
   props: Props,
-  quality: Quality = 8,
 ): { x: number; y: number; width: number; height: number } {
-  const { scale } = DENSITY[quality]
-  let box: [number, number, number, number] = [WIDTH * scale, HEIGHT * scale, 0, 0]
+  let box: [number, number, number, number] = [WIDTH * DENSITY, HEIGHT * DENSITY, 0, 0]
 
-  for (let frame = 0; frame < framesOf(model, quality); frame += 1) {
-    const found = drawn(model, props, frame, quality).sprite.bounds()
+  for (let frame = 0; frame < MODELS[model].frames; frame += 1) {
+    const found = drawn(model, props, frame).sprite.bounds()
 
     if (found !== null) {
       box = [
@@ -454,23 +444,12 @@ export function paintModel(
   model: ModelId,
   props: Props,
   frame: number,
-  quality: Quality = 8,
 ): void {
-  const { x, y, width, height } = boundsOf(model, props, quality)
+  const { x, y, width, height } = boundsOf(model, props)
 
   context.imageSmoothingEnabled = false
   context.clearRect(0, 0, width, height)
-  context.drawImage(
-    drawn(model, props, frame, quality).canvas,
-    x,
-    y,
-    width,
-    height,
-    0,
-    0,
-    width,
-    height,
-  )
+  context.drawImage(drawn(model, props, frame).canvas, x, y, width, height, 0, 0, width, height)
 }
 
 /** Pinta un modelo suelto en (x, y) de un lienzo, con la esquina de su baldosa ahí: la mudanza. */
@@ -481,7 +460,6 @@ export function paintAt(
   frame: number,
   x: number,
   y: number,
-  quality: Quality = 8,
 ): void {
-  place(context, drawn(model, props, frame, quality).canvas, Math.round(x), Math.round(y))
+  place(context, drawn(model, props, frame).canvas, Math.round(x), Math.round(y))
 }

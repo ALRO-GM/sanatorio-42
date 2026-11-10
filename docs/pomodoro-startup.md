@@ -149,14 +149,13 @@ pieza crece con la partida. Vive en `apps/web/src/features/focus/startup/pixel/`
 
 | Pieza | Qué hace |
 |---|---|
-| `sprite.ts` | El motor: cajas y caras en coordenadas del mundo (baldosa de 16 × 16, `z` hacia arriba), proyección 2:1 (cada baldosa, 32 × 16 píxeles), píxeles a mano (`grid`) y contorno. Sin navegador. |
+| `sprite.ts` | El motor: volúmenes en coordenadas del mundo (baldosa de 16 × 16, `z` hacia arriba) con profundidad por píxel, cantos biselados, luz suave con nueve tonos por material y sin delineado (`finish`: sombra entre piezas y sombra de contacto en el suelo). Cajas, cajas redondeadas, elipsoides, cilindros, planos pintados y figuras de pie. Proyección 2:1 (cada baldosa, 32 × 16 píxeles del dibujo, `DENSITY` veces más fina). Sin navegador. Ver [Estilo y personajes](#estilo-y-personajes). |
 | `palette.ts` | La paleta. Cada caja lleva tres tonos: arriba el claro, a la izquierda el medio y a la derecha el oscuro (la luz viene de arriba a la izquierda). |
-| `person.ts` | Las personas: sentadas (10 × 13 píxeles) o enteras andando (10 × 18, con su paso, de espaldas y con lo que llevan). Piel, pelo y peinado salen de `look`; la ropa, de su modelo de negocio o del uniforme de su oficio (con gorra, gorro de cocina o casco). |
+| `toon.ts` | Las personas: chibis de cabeza grande con aire de película de animación, de frente o de espaldas, quietas, andando (ocho fases) o sentadas tecleando, con su expresión, el uniforme de su oficio (gorra, gorro de cocina o casco) y lo que llevan en las manos. Cada parte sale de su aspecto (`Avatar`, el configurador) o, si no lo han tocado, de `look`. |
 | `models/` | Un modelo por pieza (`Model`: `frames` y `draw`), reunidos en `models/index.ts`. |
 | `floor.ts` | Los suelos, uno por sitio: tablas de madera (tu cuarto), cemento pulido (coworking), parquet, moqueta, suelo técnico y mármol. |
 | `layout.ts` | Qué sale y dónde, solo a partir de la partida: todo sale del motor (`world.ts`, `layoutOf`, lo mismo que comprueba la API), y aquí se le pone dibujo; la recepción, en su mostrador. También quién anda por la oficina (`people`). |
-| `quality.ts` | La calidad de los dibujos que elige cada cual (8 o 16 bits, en su navegador), con sus píxeles por píxel del dibujo. Ver [Calidad: 8 y 16 bits](#calidad-8-y-16-bits). |
-| `paint.ts` | Pasa los dibujos al lienzo: cada fotograma de cada modelo se dibuja una vez y se guarda. Pinta de atrás adelante por la suma de la esquina de atrás de cada baldosa (`depthOf`), también para quien anda a medio camino, así nadie se pinta encima de lo que tiene delante; lo plano (alfombras) va antes que todo. |
+| `paint.ts` | Pasa los dibujos al lienzo (`DENSITY`: cuatro píxeles de verdad por píxel del dibujo): cada fotograma de cada modelo se dibuja una vez y se guarda. Pinta de atrás adelante por la suma de la esquina de atrás de cada baldosa (`depthOf`), también para quien anda a medio camino, así nadie se pinta encima de lo que tiene delante; lo plano (alfombras) va antes que todo. |
 | `PixelScene` / `PixelArt` / `ItemArt` | La oficina, un modelo suelto y el dibujo de cada tarjeta. |
 | `life.ts` | La vida: un plan con semilla por persona (programar, café, charlar con quien mejor le cae, descansar; limpiar, hacer la ronda, repartir, servir café, revisar servidores; las mascotas pasean) por caminos de la cuadrícula que esquivan lo que ocupa sitio. Dónde está cada cual en un fotograma es una cuenta sobre su plan (`poseAt`). Las amistades salen de los aspectos (`friendsOf`). |
 | `bubbles.ts` | Los bocadillos sin palabras: café, charla, corazón, idea, música, sueño, paquete, brillo, escudo, llave y cara contenta. |
@@ -209,39 +208,69 @@ enciende más ventanas; es solo el dibujo, nada de la partida.
   cada par) y un panel con las relaciones.
 - Paredes, ventanas y puertas en cada sitio.
 
-## Calidad: 8 y 16 bits
+## Estilo y personajes
 
-Pedido por Alberto el 2026-11-09: poder cambiar los dibujos por otros de más
-calidad (16 bits, y más en el futuro) y que cada cual elija. Bajo la oficina,
-«Calidad de los dibujos» con dos botones, cada uno con alguien andando en esa
-calidad como muestra; se guarda en el navegador (`quality.ts`) y cambia la
-oficina, las tarjetas y las visitas a la vez. La mudanza y el epílogo, que
-duran segundos, siguen en 8 bits.
+Elegido con Alberto el 2026-11-10, tras probar muestras (isométrico cálido,
+chibi japonés, RPG de consola, futurista…): **isométrica**, entorno cálido de
+madera, verde agua, cobre y lino con **cantos biselados** (redondeados pero
+sin hincharse), **sin delineado oscuro** y personas **chibi con aire de
+película de animación**. Una sola calidad, la más fina: las versiones a menos
+resolución (8 y 16 bits) de este estilo perdían las caras y no convencieron;
+el selector de calidad del 2026-11-09 se retiró
+([histórico](historico-retiradas.md#pomodoro-y-startup)).
 
-![El mismo motor: arriba 8 bits; abajo 16 bits, con la persona hecha a mano en cuatro fases](img/startup-8-16-bits.png)
+![La oficina con el estilo nuevo: personas chibi en sus mesas y andando, muebles biselados y sombras de contacto](img/startup-estilo.png)
 
-**Cómo es tan rápido de cambiar.** Los modelos no son imágenes: se dibujan con
-código en coordenadas del mundo. El motor (`Sprite`) tiene `scale` (píxeles
-de verdad por píxel del dibujo) y `rich` (sombreado de 16 bits), y con ellos
-el mismo modelo sale a otra resolución sin tocarlo:
+**El motor** (`sprite.ts`) guarda en cada píxel a qué distancia está lo
+pintado: lo de delante tapa lo de detrás se dibuje en el orden que se
+dibuje, y una persona sentada queda de verdad detrás de su mesa. Cada material
+pasa de tres tonos a nueve (los tres de siempre, una sombra más honda hacia el
+violeta y una luz hacia el amarillo), y el tono sale de hacia dónde mira la
+superficie: las caras planas conservan sus colores y los biseles llevan los de
+en medio. Sin contorno, lo que separa unas cosas de otras es `finish`: un poco
+de sombra donde algo queda pegado detrás de otra pieza y una sombra de
+contacto violeta, suave y transparente, en el suelo bajo lo que lo toca.
+Girado, el modelo sale reflejado con la luz también reflejada, para que siga
+viniendo de arriba a la izquierda. Los modelos de antes se dibujan igual: sus
+cajas salen biseladas y con sus tonos, sin tocarlos; lo escrito a mano
+(`grid`) se agranda con Scale2x dos veces.
 
-- las caras de las cajas se rasterizan al doble de fino (bordes más suaves);
-- con `rich`, las caras laterales van en franjas de más oscuro abajo a más
-  claro arriba, el canto de delante de cada tapa lleva un brillo de un píxel,
-  y las luces amarillean y las sombras azulean (`tint`, el «hue shifting»);
-- el contorno deja de ser negro: toma el tono de lo que rodea muy oscurecido
-  («sel-out»);
-- lo escrito a mano (`grid`: caras, hojas, letreros) se agranda con Scale2x,
-  que redondea las diagonales sin colores nuevos.
+**Las personas** (`toon.ts`) se pintan en un lienzo propio (32 × 40 unidades,
+media baldosa de ancho) y el motor las pone de pie en el mundo
+(`Sprite.figure`), cada fila un poco más cerca cuanto más alta. Ojos
+almendrados con iris en degradado, pupila y dos brillos, párpado con dos
+pestañas, cejas que actúan (alegría, concentración), nariz de botón, boca
+ancha y mofletes. Quien teclea pone cara de concentración; quien anda, ocho
+fases de paso con los brazos al revés.
 
-Así, en 16 bits sale toda la oficina desde el primer día, y cada modelo se
-puede mejorar a mano cuando se quiera: `Model.hd` es su dibujo propio en 16
-bits, con sus fotogramas, pintando píxel a píxel (`Sprite.paint`). El primero
-es quien anda (`drawWalkerHd` en `person.ts`): cuatro fases de paso en vez de
-dos, brazos que se balancean, medio píxel de rebote, brillo en el pelo y la
-ropa con luz por la izquierda. Para otra calidad (32 bits, por ejemplo), una
-entrada en `QUALITIES` y `DENSITY`: Scale2x solo se aplica al doble; con otra
-escala lo escrito a mano sale en bloques hasta que tenga su dibujo.
+**El configurador** («Personajes», el botón de la persona junto al de
+recolocar): eliges a alguien (tú o alguien de la plantilla), cambias cada
+parte mirándolo en grande y lo guardas (`{ type: 'avatar', index, avatar }`,
+`-1` eres tú; gratis). Las partes y cuántas opciones tiene cada una están en
+`packages/startup/src/avatar.ts` (`AVATAR_PARTS`), que la API usa para
+validar; cómo se dibuja cada una, en `toon.ts`:
+
+| Parte | Opciones |
+|---|---|
+| Piel | 8 tonos |
+| Peinado | media melena, corto, tupé, rizos, trenza, coleta, moño, melena larga, rapado |
+| Color del pelo | 10 (castaños, negro, pelirrojo, rubio, canoso y de fantasía) |
+| Ojos | almendrados, redondos, alegres, serenos; 6 colores |
+| Cejas | gruesas, finas, arqueadas |
+| Pecas, gafas, barba | con o sin; gafas redondas o cuadradas; barba corta, bigote o perilla |
+| Arriba | jersey, camisa, sudadera, camiseta, chaqueta; 12 colores |
+| Abajo | vaqueros, pantalón, falda, pantalón corto; 10 colores |
+| Calzado | zapatillas, botas, zapatos; 6 colores |
+
+Quien no lo ha tocado sale de su `look` (`avatarOf`): el mismo en cada
+recarga y para quien visita la oficina, sin gafas ni barba casi nunca. Con
+oficio, el uniforme manda sobre la ropa de arriba. Añadir una opción: subir su
+número en `AVATAR_PARTS` (al final, sin mover las de antes) y dibujarla en
+`toon.ts`; los tests comprueban que cada opción cambie el dibujo.
+
+**Ver los dibujos sin abrir la web**: `npm run pixel -w @sanatorio/web` deja en
+`apps/web/.pixel/` todos los modelos, las oficinas de ejemplo y `gente.png`
+(cada parte del configurador con todas sus opciones).
 
 **Referencias de estética** (buscadas el 2026-11-09; inspiración, nunca copiar
 dibujos ni recrear un juego). La startup empieza en lo cotidiano y acaba
@@ -258,10 +287,10 @@ futurista:
 
 Paletas abiertas a probar (Lospec; confirmar la licencia con su autor antes de
 usarlas): Resurrect 64 (64 colores, cálidos y fríos), Apollo (46) y
-Endesga 32. Lo siguiente, por orden: sombra de contacto al pie de cada
-modelo, luz de ventana en el suelo en las primeras etapas, neón con halo en
-las últimas y más modelos hechos a mano (`Model.hd`), empezando por los que
-más se ven: la mesa con su persona, los servidores y la planta.
+Endesga 32. Lo siguiente, por orden: rehacer con formas redondas los modelos
+que aún llevan píxeles a mano (plantas, mascotas, bandera, letreros), paredes
+con ventana y su luz en el suelo en las primeras etapas, y neón con halo en
+las últimas.
 
 ## La pantalla del Pomodoro en el móvil (2026-10-29)
 

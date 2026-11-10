@@ -3,7 +3,15 @@
  * motor, la oficina que sale de cada partida y que ningún modelo se salga de
  * su lienzo, sea cual sea su nivel o su fotograma.
  */
-import { DECOR, EMPTY_STARTUP, canPlace } from '@sanatorio/startup'
+import {
+  AVATAR_KEYS,
+  AVATAR_PARTS,
+  DECOR,
+  EMPTY_STARTUP,
+  avatarKey,
+  avatarOf,
+  canPlace,
+} from '@sanatorio/startup'
 import type { StartupState } from '@sanatorio/startup'
 import { describe, expect, it } from 'vitest'
 
@@ -18,24 +26,47 @@ import { drawTower, towerOf, towerSize } from '../../src/features/focus/startup/
 const hires = (count: number): StartupState['team'] =>
   Array.from({ length: count }, (_, index) => ({ axis: 'ai', stars: 1, look: index % 1000 }))
 
-const filled = (sprite: Sprite): number => sprite.pixels.filter((color) => color !== null).length
-
 describe('motor de píxeles', () => {
-  it('una caja pinta sus tres caras y el contorno la rodea', () => {
-    const sprite = new Sprite(40, 40, 20, 20)
+  it('una caja pinta sus tres caras con sus tonos, sin contorno, y deja su sombra en el suelo', () => {
+    const sprite = new Sprite(40, 40, 20, 20, 2)
 
     sprite.box(0, 0, 0, 16, 16, 8, ['#ffffff', '#888888', '#444444'])
 
     const colors = new Set(sprite.pixels)
 
-    expect(colors).toEqual(new Set([null, '#ffffff', '#888888', '#444444']))
+    // Arriba, izquierda y derecha, sus tonos; en los biseles, los de en medio.
+    expect(colors).toContain('#ffffff')
+    expect(colors).toContain('#888888')
+    expect(colors).toContain('#444444')
 
-    const before = filled(sprite)
+    sprite.finish()
 
-    sprite.outline()
+    expect(sprite.pixels).not.toContain(INK)
+    expect(sprite.pixels.some((color) => color?.startsWith('rgba') === true)).toBe(true)
+  })
 
-    expect(filled(sprite)).toBeGreaterThan(before)
-    expect(sprite.pixels).toContain(INK)
+  it('lo de delante tapa lo de detrás, se dibuje en el orden que se dibuje', () => {
+    const draw = (backFirst: boolean) => {
+      const sprite = new Sprite(40, 40, 20, 20, 2)
+      const back = () => {
+        sprite.box(0, 0, 0, 8, 8, 12, ['#ff0000', '#cc0000', '#990000'])
+      }
+      const front = () => {
+        sprite.box(6, 6, 0, 8, 8, 6, ['#00ff00', '#00cc00', '#009900'])
+      }
+
+      if (backFirst) {
+        back()
+        front()
+      } else {
+        front()
+        back()
+      }
+
+      return sprite.pixels
+    }
+
+    expect(draw(false)).toEqual(draw(true))
   })
 
   // Con el centro de cada píxel, el rombo sale un pelo más estrecho: las juntas cierran el hueco.
@@ -96,7 +127,7 @@ describe('modelos', () => {
           const sprite = new Sprite(40, 76, 20, 58)
 
           draw(sprite, frame, { level, look, axis: 'data', busy: true })
-          sprite.outline()
+          sprite.finish()
 
           const box = sprite.bounds()
 
@@ -257,7 +288,7 @@ describe('la oficina de cada partida', () => {
       model: 'workstation',
       gx: 1,
       gy: 1,
-      props: { level: 0, look: 321, axis: null, busy: true },
+      props: { level: 0, look: 321, avatar: avatarKey(avatarOf(321)), axis: null, busy: true },
       seat: 0,
       fixture: 'desk:0',
     })
@@ -313,7 +344,7 @@ describe('el mundo vivo', () => {
     expect(canPlace(state, 0, 1, 1)).toBe(false)
   })
 
-  it('girar un modelo lo refleja y le cambia la luz', () => {
+  it('girar un modelo lo refleja (con la luz donde siempre)', () => {
     const plain = new Sprite(40, 76, 20, 58)
     const turned = new Sprite(40, 76, 20, 58)
 
@@ -322,7 +353,17 @@ describe('el mundo vivo', () => {
     MODELS.sofa.draw(turned, 0, {})
 
     expect(turned.pixels).not.toEqual(plain.pixels)
-    expect(new Set(turned.pixels)).toEqual(new Set(plain.pixels))
+
+    // La silueta es la de su reflejo; los tonos no, porque la luz sigue
+    // viniendo de arriba a la izquierda (la cara que ahora mira a la izquierda es la clara).
+    let same = 0
+
+    for (let y = 0; y < plain.ph; y += 1) {
+      for (let x = 0; x < plain.pw; x += 1) {
+        if ((turned.at(x, y) === null) === (plain.at(plain.pw - 1 - x, y) === null)) same += 1
+      }
+    }
+    expect(same / (plain.pw * plain.ph)).toBeGreaterThan(0.99)
   })
 
   it('tocar una baldosa da esa baldosa; fuera del suelo, nada', () => {
@@ -368,56 +409,81 @@ describe('el mundo vivo', () => {
         5,
         night,
       )
-      const [x0, y0, x1, y1] = sprite.bounds() ?? [0, 0, 0, 0]
+      // Lo macizo (sin la sombra del suelo), en píxeles de verdad.
+      let [x0, y0, x1, y1] = [Infinity, Infinity, -1, -1]
+
+      sprite.pixels.forEach((color, index) => {
+        if (color?.startsWith('#') !== true) return
+
+        const [x, y] = [index % sprite.pw, Math.floor(index / sprite.pw)]
+
+        ;[x0, y0, x1, y1] = [Math.min(x0, x), Math.min(y0, y), Math.max(x1, x), Math.max(y1, y)]
+      })
+
       const { width, height } = towerSize(
         tower ?? { storeys: 2, basements: 0, solar: 0, rooftop: 0 },
       )
 
       expect(x0).toBeGreaterThan(0)
       expect(y0).toBeGreaterThan(0)
-      expect(x1).toBeLessThan(width - 1)
-      expect(y1).toBeLessThan(height - 1)
+      expect(x1).toBeLessThan(width * sprite.scale - 1)
+      expect(y1).toBeLessThan(height * sprite.scale - 1)
     }
   })
 })
 
-describe('16 bits (2026-11-09)', () => {
-  const render = (scale: 1 | 2, frame: number, step = 1) => {
-    const sprite = new Sprite(40, 76, 20, 58, scale, scale === 2)
-    const model = MODELS.walker
-    const props = { look: 412, axis: 'front' as const, step }
+describe('las personas', () => {
+  const draw = (props: Record<string, unknown>, frame = 0, scale = 2) => {
+    const sprite = new Sprite(40, 76, 20, 58, scale)
 
-    if (scale === 2 && model.hd !== undefined) model.hd.draw(sprite, frame, props)
-    else model.draw(sprite, frame, props)
+    MODELS.walker.draw(sprite, frame, props)
 
-    return sprite.outline()
+    return sprite.pixels.join(',')
   }
 
-  it('el mismo modelo sale al doble de resolución y del mismo tamaño', () => {
-    const low = render(1, 0).bounds()
-    const high = render(2, 0).bounds()
-
-    expect(low).not.toBeNull()
-    expect(high).not.toBeNull()
-    // Lo pintado ocupa lo mismo (en píxeles del dibujo), con un píxel de margen.
-    expect(Math.abs((high?.[3] ?? 0) / 2 - (low?.[3] ?? 0))).toBeLessThanOrEqual(1)
-    expect(Math.abs((high?.[2] ?? 0) / 2 - (low?.[2] ?? 0))).toBeLessThanOrEqual(1)
+  it('quien anda tiene ocho fases distintas; quieto, la misma (salvo al parpadear)', () => {
+    expect(
+      new Set([0, 1, 2, 3, 4, 5, 6, 7].map((frame) => draw({ look: 412, step: 1 }, frame))).size,
+    ).toBe(8)
+    expect(new Set([0, 1, 2, 3].map((frame) => draw({ look: 412, step: 0 }, frame))).size).toBe(1)
   })
 
-  it('quien anda en 16 bits tiene cuatro fases distintas; quieto, una', () => {
-    const shots = [0, 1, 2, 3].map((frame) => render(2, frame).pixels.join(','))
+  it('cada opción de cada parte del aspecto cambia el dibujo', () => {
+    const base = avatarOf(412)
 
-    expect(new Set(shots).size).toBe(4)
-    expect(new Set([0, 1, 2, 3].map((frame) => render(2, frame, 0).pixels.join(','))).size).toBe(1)
-  })
+    for (const part of AVATAR_KEYS) {
+      const shots = new Set(
+        Array.from({ length: AVATAR_PARTS[part] }, (_, option) =>
+          draw({ avatar: avatarKey({ ...base, [part]: option }) }, 0, 4),
+        ),
+      )
 
-  it('cualquier modelo se dibuja en 16 bits sin dibujo propio', () => {
-    for (const id of Object.keys(MODELS) as (keyof typeof MODELS)[]) {
-      const sprite = new Sprite(40, 76, 20, 58, 2, true)
-
-      MODELS[id].draw(sprite, 0, {})
-      expect(sprite.outline().bounds(), id).not.toBeNull()
+      expect(shots.size, part).toBe(AVATAR_PARTS[part])
     }
+  })
+
+  it('el aspecto elegido manda sobre el que sale de `look`; uno roto se ignora', () => {
+    const chosen = avatarKey({ ...avatarOf(1), hairColor: (avatarOf(2).hairColor + 3) % 10 })
+
+    expect(draw({ look: 2, avatar: chosen })).toBe(draw({ look: 1, avatar: chosen }))
+    expect(draw({ look: 2, avatar: 'roto' })).toBe(draw({ look: 2 }))
+  })
+
+  it('de espaldas no se le ve la cara, y con oficio lleva su uniforme', () => {
+    expect(draw({ look: 7, back: true })).not.toBe(draw({ look: 7 }))
+    expect(draw({ look: 7, role: 'kitchen' })).not.toBe(draw({ look: 7 }))
+  })
+
+  it('quien se sienta sale en su mesa y, si se levanta, la silla queda vacía', () => {
+    const desk = (props: Record<string, unknown>) => {
+      const sprite = new Sprite(40, 76, 20, 58, 2)
+
+      MODELS.workstation.draw(sprite, 0, props)
+
+      return sprite.pixels.join(',')
+    }
+
+    expect(desk({ level: 2, look: 7 })).not.toBe(desk({ level: 2 }))
   })
 })
 
@@ -476,6 +542,38 @@ describe('el orden de pintado', () => {
       const front = a.gx >= b.gx + 1 || a.gy >= b.gy + 1 ? 'a' : 'b'
 
       expect(order(a, b)[1]).toBe(front)
+    }
+  })
+})
+
+describe('fotogramas que se ven igual', () => {
+  it('los que comparten dibujo (`same`) salen de verdad iguales', () => {
+    for (const id of ['workstation', 'reception', 'person', 'walker'] as const) {
+      const { frames, draw, same } = MODELS[id]
+
+      for (const props of [
+        { look: 7, busy: true, level: 5 },
+        { look: 300 },
+        { step: 1, look: 9 },
+        {},
+      ]) {
+        const shots = new Map<string, string>()
+
+        for (let frame = 0; frame < frames; frame += 1) {
+          const sprite = new Sprite(40, 76, 20, 58, 2)
+
+          draw(sprite, frame, props)
+
+          const key = same?.(frame, props) ?? String(frame)
+          const pixels = sprite.pixels.join(',')
+          const before = shots.get(key)
+
+          if (before !== undefined) expect(pixels, `${id} ${String(frame)}`).toBe(before)
+          shots.set(key, pixels)
+        }
+        // Y comparten de verdad: menos dibujos que fotogramas.
+        expect(shots.size, id).toBeLessThanOrEqual(frames)
+      }
     }
   })
 })

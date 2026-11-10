@@ -6,12 +6,11 @@ import type { PointerEvent as ReactPointerEvent } from 'react'
 import { canPut, targetOf } from '../target'
 import type { Target } from '../target'
 import { officeOf } from './layout'
-import { DENSITY, useQuality } from './quality'
 import type { Office } from './layout'
 import { lifeOf } from './life'
 import { lengthOf, moveSize, paintMove } from './move'
 import type { Move } from './move'
-import { paintOffice, sceneSize, tileAt, toCanvas } from './paint'
+import { DENSITY, paintOffice, sceneSize, tileAt, toCanvas } from './paint'
 import { drawTower, towerOf, towerSize } from './tower'
 import type { Tower } from './tower'
 import { useAnimated, useFrame } from './useFrame'
@@ -61,10 +60,8 @@ export function PixelScene({
   const animated = useAnimated()
   const move = useMove(state, office, tower, frame, animated)
   const { width, height } = move === null ? sceneSize(office.size) : moveSize(move)
-  const quality = useQuality()
-  // La oficina se pinta con la calidad elegida (el lienzo, `density` veces más
-  // fino); la mudanza y el epílogo, que duran segundos, en 8 bits.
-  const density = move === null ? DENSITY[quality].scale : 1
+  // El lienzo, `DENSITY` veces más fino que los píxeles del dibujo.
+  const density = DENSITY
   const canvas = useRef<HTMLCanvasElement>(null)
   const box = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(2)
@@ -105,9 +102,8 @@ export function PixelScene({
         night: isNight(),
         selected: editing?.selected,
         ghost,
-        quality,
       })
-  }, [office, plans, frame, move, editing?.selected, ghost, quality, density])
+  }, [office, plans, frame, move, editing?.selected, ghost, density])
 
   /** La baldosa bajo el puntero, en la oficina. */
   const tileOf = (event: ReactPointerEvent<HTMLCanvasElement>): [number, number] | null => {
@@ -269,8 +265,8 @@ function TowerView({ tower, frame }: { tower: Tower; frame: number }) {
     <canvas
       ref={canvas}
       className="su-tower"
-      width={size.width}
-      height={size.height}
+      width={size.width * DENSITY}
+      height={size.height * DENSITY}
       style={{ width: `${String(size.width * 2)}px` }}
       aria-hidden="true"
     />

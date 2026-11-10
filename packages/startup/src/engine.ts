@@ -25,6 +25,8 @@ import {
   ROUND_RULES,
   SPACES,
 } from './data.js'
+import { parseAvatar } from './avatar.js'
+import type { Avatar } from './avatar.js'
 import type { Axis, Item, Milestone, Role, Round } from './data.js'
 import { seatsOf, settle } from './economy.js'
 import { EMPTY_STARTUP, cycleOf, has, levelOf, seeded, skillOf } from './state.js'
@@ -58,6 +60,8 @@ export type StartupAction =
   | { type: 'sell'; index: number }
   /** Mover lo que no es decoración (una mesa, los servidores, la pizarra…, `fixturesOf`) a (gx, gy). */
   | { type: 'move'; key: string; gx: number; gy: number }
+  /** Cambiar el aspecto de la persona `index` de la plantilla, o el tuyo con -1 (el configurador); gratis. */
+  | { type: 'avatar'; index: number; avatar: Avatar }
   /** Abrir una caja sorpresa (una por sesión del Pomodoro de 30 minutos o más). */
   | { type: 'open' }
   /** Con el edificio terminado y el control global: volver a empezar en tu cuarto. */
@@ -423,6 +427,22 @@ export function act(
         },
       }
     }
+    case 'avatar': {
+      const avatar = parseAvatar(action.avatar)
+
+      if (avatar === undefined) return { refused: 'invalid' }
+      if (action.index === -1) return { state: { ...state, me: avatar } }
+      if (state.team[action.index] === undefined) return { refused: 'invalid' }
+
+      return {
+        state: {
+          ...state,
+          team: state.team.map((hire, index) =>
+            index === action.index ? { ...hire, avatar } : hire,
+          ),
+        },
+      }
+    }
     case 'move': {
       if (!isFixtureKey(action.key)) return { refused: 'invalid' }
       if (!canMove(state, action.key, action.gx, action.gy)) return { refused: 'taken' }
@@ -521,7 +541,9 @@ export function parseStartup(value: unknown): StartupState {
     legacy: whole(raw.legacy),
   }
 
-  return { ...state, decor: tidyDecor(state) }
+  const me = parseAvatar(raw.me)
+
+  return { ...state, decor: tidyDecor(state), ...(me === undefined ? {} : { me }) }
 }
 
 function parseHire(one: unknown): Hire[] {
@@ -538,9 +560,12 @@ function parseHire(one: unknown): Hire[] {
     look: typeof hire.look === 'number' && Number.isFinite(hire.look) ? hire.look : 0,
   }
 
-  return [
-    (ROLES as readonly unknown[]).includes(hire.role) ? { ...base, role: hire.role as Role } : base,
-  ]
+  const avatar = parseAvatar(hire.avatar)
+  const withRole = (ROLES as readonly unknown[]).includes(hire.role)
+    ? { ...base, role: hire.role as Role }
+    : base
+
+  return [avatar === undefined ? withRole : { ...withRole, avatar }]
 }
 
 /** Lo movido a mano: solo claves que existen y baldosas de números enteros. */
