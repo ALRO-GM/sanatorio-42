@@ -602,10 +602,13 @@ function drawToon({
     ? paper.pixels.map((color, index) => {
         if (color === null) return null
 
-        // De la cabeza (arriba) a la cintura, cada vez menos.
+        // De la cabeza (arriba) a la cintura, cada vez menos; y más del lado
+        // del monitor, que está a la izquierda de quien se sienta (girada la
+        // mesa, la figura se refleja y el lado con ella).
         const fade = Math.max(0, 1 - (Math.floor(index / paper.w) / paper.h) * 1.4)
+        const side = 0.45 + 0.55 * (1 - (index % paper.w) / paper.w)
 
-        return mix(color, SCREEN_LIGHT, 0.42 * fade)
+        return mix(color, SCREEN_LIGHT, 0.6 * fade * side)
       })
     : paper.pixels
 

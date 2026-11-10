@@ -197,6 +197,21 @@ type Emitter = {
 
 const SCREEN_BLUE = '150, 190, 255'
 
+/** Dónde se sienta quien trabaja en una mesa (`models/workplace.ts`, `seated`). */
+const SEAT: readonly [number, number] = [8.5, 4.5]
+/** A qué altura queda su cara. */
+const FACE = 15
+
+/** La dirección (de largo 1) de un punto a otro del suelo. */
+function toward(
+  [x0, y0]: readonly [number, number],
+  [x1, y1]: readonly [number, number],
+): readonly [number, number] {
+  const length = Math.hypot(x1 - x0, y1 - y0)
+
+  return [(x1 - x0) / length, (y1 - y0) / length]
+}
+
 const EMITTERS: Partial<Record<ModelId, Emitter>> = {
   lamp: {
     cone: true,
@@ -210,7 +225,9 @@ const EMITTERS: Partial<Record<ModelId, Emitter>> = {
   workstation: {
     color: SCREEN_BLUE,
     at: [4, 7.8, 19],
-    facing: [0, -1],
+    // Hacia la cara de quien se sienta (en 8,5 y 4,5; `seated`), no recto:
+    // el monitor está a su izquierda para no taparle la cara.
+    facing: toward([4, 7.8], SEAT),
     width: 6,
     height: 8,
     reach: 20,
@@ -312,12 +329,8 @@ function sourcesOf(pieces: readonly Piece[]): Source[] {
     const laptop = piece.model === 'workstation' && (piece.props.level ?? 0) <= 1
     const [x, y, z] = laptop ? ([4.25, 8.9, 14.8] as const) : found.at
     const [lx, ly] = turned ? [y, x] : [x, y]
-    const facing =
-      found.facing === null
-        ? null
-        : turned
-          ? ([found.facing[1], found.facing[0]] as const)
-          : found.facing
+    const aim = laptop ? toward([x, y], SEAT) : found.facing
+    const facing = aim === null ? null : turned ? ([aim[1], aim[0]] as const) : aim
 
     return [
       {
@@ -594,7 +607,9 @@ export function airLights(
     if (source.behind === true) {
       // El brillo del monitor encendido: alrededor de la pantalla, azul y
       // fuerte; el monitor lo tapa por el centro y quien se sienta, por detrás.
-      const [cx, cy] = point(x, y, z)
+      const [fx, fy] = source.facing ?? [0, -1]
+      // Algo adelantado hacia quien mira la pantalla: ahí es donde da.
+      const [cx, cy] = point(x + fx * 2.5, y + fy * 2.5, z - 1.5)
       const glow = airLight(
         [cx - 14, cy - 14, cx + 14, cy + 14],
         depth,
@@ -608,6 +623,23 @@ export function airLights(
       )
 
       out.push(glow === null ? null : { ...glow, before: true })
+
+      // Y la luz que le da en la cara a quien se sienta, encima de todo lo
+      // de su mesa: un brillo suave del lado del monitor.
+      const [sx, sy] = source.piece.props.turn === true ? [SEAT[1], SEAT[0]] : SEAT
+      const [hx, hy] = point(
+        source.piece.gx * TILE + sx - fx * 1.5,
+        source.piece.gy * TILE + sy - fy * 1.5,
+        FACE,
+      )
+
+      if (source.piece.props.look !== undefined) {
+        out.push(
+          airLight([hx - 8, hy - 8, hx + 8, hy + 8], depth, size, point, density, (context) => {
+            halo(context, [hx, hy], 7, source.color, Math.min(0.6, power * 1.1))
+          }),
+        )
+      }
     } else if (source.cone === true) {
       const [cx, cy] = point(x, y, 0)
       const [bx, by] = point(x, y, z)

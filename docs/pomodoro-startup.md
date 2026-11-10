@@ -339,8 +339,11 @@ día (de 9 a 18), atardecer (de 18 a 21) y noche. Con ella cambian:
   las mesas miran hacia quien se sienta, de espaldas a la sala. Se ven
   encendidas por un brillo azul alrededor del monitor, que se pinta antes
   que la mesa (`behind`) para que el monitor y quien se sienta lo tapen por
-  el centro. Su luz tiñe de azul la cara de quien está delante (`glow`,
-  `toon.ts`), y la trasera del monitor queda a oscuras (pedido el mismo día). Los servidores alumbran un poco con sus LED; el neón, el acuario y
+  el centro. La luz apunta a la cara de quien se sienta (`SEAT`, `toward`), no
+  recto: el monitor está a su izquierda para no taparle la cara. Le tiñe de
+  azul la cara, más del lado del monitor (`glow`, `toon.ts`), con un brillo
+  suave encima (`FACE`), y la trasera del monitor queda a oscuras (pedido el
+  mismo día). Los servidores alumbran un poco con sus LED; el neón, el acuario y
   la máquina, a su color. Casi no se nota de día y del todo de noche. La
   guirnalda se enciende al caer la tarde.
 
