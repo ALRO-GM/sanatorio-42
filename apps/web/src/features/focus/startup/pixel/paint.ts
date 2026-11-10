@@ -2,7 +2,7 @@ import { BUBBLE_HEIGHT, BUBBLE_WIDTH, drawBubble } from './bubbles'
 import { drawFloor } from './floor'
 import type { Floor } from './floor'
 import type { Office, Piece } from './layout'
-import { lampHalos, lampPools, lightInAir, lightOnFloor, tint } from './light'
+import { emitted, lightInAir, lightOnFloor, tint } from './light'
 import type { Daylight } from './light'
 import { poseAt } from './life'
 import type { Bubble, Plan, Pose } from './life'
@@ -85,8 +85,42 @@ export function toCanvas(sprite: Sprite): HTMLCanvasElement {
   return canvas
 }
 
+/**
+ * La sombra de un dibujo (sus píxeles a medio transparentar, `Sprite.finish`)
+ * como una máscara opaca: lo que hace sombra no se aclara con las luces.
+ */
+function shadeOf(sprite: Sprite): HTMLCanvasElement | null {
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')
+  let any = false
+
+  canvas.width = sprite.pw
+  canvas.height = sprite.ph
+  if (context === null) return null
+  for (let y = 0; y < sprite.ph; y += 1) {
+    for (let x = 0; x < sprite.pw; x += 1) {
+      const color = sprite.at(x, y)
+
+      if (color?.startsWith('rgba') !== true) continue
+
+      const alpha = Number(color.slice(color.lastIndexOf(',') + 1, -1))
+
+      context.fillStyle = `rgba(0, 0, 0, ${Math.min(1, alpha * 4).toFixed(2)})`
+      context.fillRect(x, y, 1, 1)
+      any = true
+    }
+  }
+
+  return any ? canvas : null
+}
+
 /** Un fotograma dibujado: su lienzo y su recorte (lo pintado, en píxeles de verdad), guardado para no recorrerlo otra vez. */
-type Drawn = { canvas: HTMLCanvasElement; bounds: [number, number, number, number] | null }
+type Drawn = {
+  canvas: HTMLCanvasElement
+  bounds: [number, number, number, number] | null
+  /** Solo su sombra en el suelo, opaca: dónde no llega la luz (`paintOffice`). */
+  shade: HTMLCanvasElement | null
+}
 
 const frames = new Map<string, Drawn>()
 
@@ -115,7 +149,7 @@ function drawn(model: ModelId, props: Props, frame: number): Drawn {
 
     const sprite = modelSprite(model, props, frame)
 
-    found = { canvas: toCanvas(sprite), bounds: sprite.bounds() }
+    found = { canvas: toCanvas(sprite), bounds: sprite.bounds(), shade: shadeOf(sprite) }
     frames.set(key, found)
   }
 
@@ -246,7 +280,7 @@ export function byDepth(a: Drawable, b: Drawable): number {
 /**
  * Pinta la oficina en el fotograma `frame`: el suelo con la luz de las
  * ventanas y las lámparas, lo colocado y quien anda por ella, de atrás
- * adelante; luego el tono de la hora, los haces de luz y los halos, y los
+ * adelante; luego el tono de la hora, los haces de luz y lo que emite luz, y los
  * bocadillos por encima de todo, para que se lean.
  */
 export function paintOffice(
@@ -274,7 +308,20 @@ export function paintOffice(
   const point = (x: number, y: number, z = 0) => scenePoint(office.size, x, y, z)
 
   context.drawImage(floorOf(office.size, office.floor, light), 0, 0, width, height)
-  lightOnFloor(context, office.size, light, frame, point, DENSITY)
+
+  // Las sombras de lo que se pinta, en su propia capa y por orden (lo de
+  // delante borra lo de detrás): ahí no llega la luz.
+  const shadows = layer('shadows', context)
+  const put: Put = (found, x, y) => {
+    place(context, found.canvas, x, y)
+    if (shadows === null) return
+    shadows.globalCompositeOperation = 'destination-out'
+    place(shadows, found.canvas, x, y)
+    if (found.shade !== null) {
+      shadows.globalCompositeOperation = 'source-over'
+      place(shadows, found.shade, x, y)
+    }
+  }
 
   if (extras.selected !== undefined && extras.selected !== null) {
     const chosen = pieces.find((piece) => targetOf(piece) === extras.selected)
@@ -300,7 +347,7 @@ export function paintOffice(
     if (packed > share) {
       items.push(
         paintPiece(
-          context,
+          put,
           at,
           { ...piece, model: 'crate', props: { level: 1 + (index % 3) } },
           frame,
@@ -317,7 +364,7 @@ export function paintOffice(
 
     items.push(
       paintPiece(
-        context,
+        put,
         at,
         { ...piece, props: cleanProps(props) },
         frame,
@@ -358,7 +405,7 @@ export function paintOffice(
         depth: depthOf(model, pose.gx, pose.gy),
         tie: pose.gx + 0.001,
         paint: () => {
-          place(context, drawn(model, props, frame).canvas, Math.round(x), Math.round(y))
+          put(drawn(model, props, frame), Math.round(x), Math.round(y))
         },
       })
 
@@ -395,9 +442,26 @@ export function paintOffice(
 
   // La hora tiñe la sala; encima, la luz que entra y la de las lámparas.
   tint(context, office.size, light, point)
-  lampPools(context, pieces, light, frame, point)
-  lightInAir(context, office.size, light, frame, point, DENSITY)
-  lampHalos(context, office.size, pieces, light, frame, point)
+
+  // Toda la luz, en una capa aparte: se le quitan las sombras y se pone encima.
+  const glow = layer('glow', context)
+  const lit = glow ?? context
+
+  lightOnFloor(lit, office.size, light, frame, point, DENSITY)
+  emitted(lit, office.size, pieces, light, frame, point, DENSITY)
+  lightInAir(lit, office.size, light, frame, point, DENSITY)
+  if (glow !== null) {
+    glow.setTransform(1, 0, 0, 1, 0, 0)
+    if (shadows !== null) {
+      glow.globalCompositeOperation = 'destination-out'
+      glow.drawImage(shadows.canvas, 0, 0)
+    }
+    context.save()
+    context.setTransform(1, 0, 0, 1, 0, 0)
+    context.globalCompositeOperation = 'screen'
+    context.drawImage(glow.canvas, 0, 0)
+    context.restore()
+  }
 
   for (const { x, y, bubble } of said) {
     context.drawImage(
@@ -406,6 +470,35 @@ export function paintOffice(
       Math.round(y - BUBBLE_HEIGHT),
     )
   }
+}
+
+/** Pone un fotograma dibujado en la escena (y su sombra en la capa de sombras). */
+type Put = (found: Drawn, x: number, y: number) => void
+
+const layers = new Map<string, HTMLCanvasElement>()
+
+/**
+ * Un lienzo aparte del tamaño de la escena de `context`, vacío y con su misma
+ * escala (`DENSITY`): para las sombras y para la luz. Sin lienzo, `null`.
+ */
+function layer(name: string, context: CanvasRenderingContext2D): CanvasRenderingContext2D | null {
+  const canvas = layers.get(name) ?? document.createElement('canvas')
+
+  layers.set(name, canvas)
+  if (canvas.width !== context.canvas.width) canvas.width = context.canvas.width
+  if (canvas.height !== context.canvas.height) canvas.height = context.canvas.height
+
+  const found = canvas.getContext('2d')
+
+  if (found === null) return null
+  found.setTransform(1, 0, 0, 1, 0, 0)
+  found.globalCompositeOperation = 'source-over'
+  found.filter = 'none'
+  found.clearRect(0, 0, canvas.width, canvas.height)
+  found.setTransform(DENSITY, 0, 0, DENSITY, 0, 0)
+  found.imageSmoothingEnabled = false
+
+  return found
 }
 
 /** Un punto del mundo (en unidades, baldosa de 16) en la escena de una oficina de `size`. */
@@ -419,7 +512,7 @@ function cleanProps(props: Props): Props {
 }
 
 function paintPiece(
-  context: CanvasRenderingContext2D,
+  put: Put,
   at: (gx: number, gy: number) => [number, number],
   piece: Piece,
   frame: number,
@@ -431,7 +524,7 @@ function paintPiece(
     depth: depthOf(piece.model, piece.gx, piece.gy),
     tie: piece.gx,
     paint: () => {
-      place(context, drawn(piece.model, piece.props, frame).canvas, x, y - lift)
+      put(drawn(piece.model, piece.props, frame), x, y - lift)
     },
   }
 }

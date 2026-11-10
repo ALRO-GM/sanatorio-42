@@ -490,7 +490,8 @@ export function drawFloor(
 ): void {
   const end = size * TILE
 
-  sprite.plane(2, 0, [0, end], [0, end], (u, v) => floorColor(floor, u, v))
+  // Un poco por debajo de las paredes: sin rendijas entre el suelo y el zócalo.
+  sprite.plane(2, 0, [-2, end], [-2, end], (u, v) => floorColor(floor, u, v))
   const look = LOOK[floor]
   const [left, right] = look.edge
 
