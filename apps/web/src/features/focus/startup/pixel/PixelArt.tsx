@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 
 import type { ModelId, Props } from './models'
-import { DENSITY, boundsOf, paintModel } from './paint'
+import { DENSITY, boundsOf, canPaint, paintModel } from './paint'
 import { useFrame } from './useFrame'
 
 /**
@@ -18,8 +18,11 @@ export function PixelArt({
   props?: Props
   size: number
 }) {
-  // Los fotogramas ya están guardados: recortar cada vez no cuesta.
-  const bounds = boundsOf(model, props)
+  // Los fotogramas ya están guardados: recortar cada vez no cuesta. Sin
+  // lienzo no se dibuja nada: un hueco del tamaño pedido.
+  const bounds = canPaint()
+    ? boundsOf(model, props)
+    : { x: 0, y: 0, width: size * DENSITY, height: size * DENSITY }
   // En píxeles del dibujo: el lienzo es `DENSITY` veces más fino, no más grande.
   const logical = { width: bounds.width / DENSITY, height: bounds.height / DENSITY }
   const frame = useFrame()

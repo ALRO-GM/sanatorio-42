@@ -246,10 +246,28 @@ class Paper {
     this.pixels = new Array<Color | null>(this.w * this.h).fill(null)
   }
 
-  /** Pinta donde `fn(x, y)` (en unidades, centro del píxel) da color; `alpha` mezcla con lo de debajo. */
-  paint(fn: (x: number, y: number) => Color | null, alpha = 1): void {
-    for (let py = 0; py < this.h; py += 1) {
-      for (let px = 0; px < this.w; px += 1) {
+  /**
+   * Pinta donde `fn(x, y)` (en unidades, centro del píxel) da color; `alpha`
+   * mezcla con lo de debajo. Con `box` (`[x0, y0, x1, y1]` en unidades), solo
+   * ahí: lo que más cuesta es recorrer el lienzo entero por cada forma.
+   */
+  paint(
+    fn: (x: number, y: number) => Color | null,
+    alpha = 1,
+    box?: readonly [number, number, number, number],
+  ): void {
+    const [fromX, fromY, toX, toY] =
+      box === undefined
+        ? [0, 0, this.w - 1, this.h - 1]
+        : [
+            Math.max(0, Math.floor(box[0] * this.k)),
+            Math.max(0, Math.floor(box[1] * this.k)),
+            Math.min(this.w - 1, Math.ceil(box[2] * this.k)),
+            Math.min(this.h - 1, Math.ceil(box[3] * this.k)),
+          ]
+
+    for (let py = fromY; py <= toY; py += 1) {
+      for (let px = fromX; px <= toX; px += 1) {
         const color = fn((px + 0.5) / this.k, (py + 0.5) / this.k)
 
         if (color === null) continue
@@ -302,10 +320,13 @@ function oval(
   keep?: (x: number, y: number) => boolean,
   lift = 0,
 ): void {
-  paper.paint((x, y) =>
-    inside(x, y, cx, cy, rx, ry) && (keep?.(x, y) ?? true)
-      ? lit(tones, (x - cx) / rx, (y - cy) / ry, lift)
-      : null,
+  paper.paint(
+    (x, y) =>
+      inside(x, y, cx, cy, rx, ry) && (keep?.(x, y) ?? true)
+        ? lit(tones, (x - cx) / rx, (y - cy) / ry, lift)
+        : null,
+    1,
+    [cx - rx, cy - ry, cx + rx, cy + ry],
   )
 }
 
@@ -327,13 +348,22 @@ function capsule(
   radius: number,
   tones: Tones,
 ): void {
-  paper.paint((x, y) => {
-    const [dx, dy] = [bx - ax, by - ay]
-    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy || 1)))
-    const [px, py] = [ax + dx * t - x, ay + dy * t - y]
+  paper.paint(
+    (x, y) => {
+      const [dx, dy] = [bx - ax, by - ay]
+      const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy || 1)))
+      const [px, py] = [ax + dx * t - x, ay + dy * t - y]
 
-    return Math.hypot(px, py) > radius ? null : lit(tones, -px / radius, -0.1 + t * 0.3)
-  })
+      return Math.hypot(px, py) > radius ? null : lit(tones, -px / radius, -0.1 + t * 0.3)
+    },
+    1,
+    [
+      Math.min(ax, bx) - radius,
+      Math.min(ay, by) - radius,
+      Math.max(ax, bx) + radius,
+      Math.max(ay, by) + radius,
+    ],
+  )
 }
 
 const at = <T>(list: readonly T[], index: number): T =>

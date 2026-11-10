@@ -229,6 +229,28 @@ export class Sprite {
       // Ya tapado por algo más cerca que lo más cerca de la caja: nada que hacer.
       if (lo > hi || this.hidden(px, py, 3 * hi - b)) return
 
+      // Donde la recta entra en la caja: si cae en el llano de una cara (lejos
+      // de los cantos), ahí está la superficie; solo cerca de un canto hace
+      // falta buscarla paso a paso.
+      {
+        const p: Point = [a / 2 + hi, -a / 2 + hi, hi - b]
+        const beyond =
+          Number(Math.abs(p[0] - cx) > hx) +
+          Number(Math.abs(p[1] - cy) > hy) +
+          Number(Math.abs(p[2] - cz) > hz)
+
+        if (r === 0 || beyond <= 1) {
+          const normal = flatNormal(p, x, y, z, X, Y, Z)
+          const face = normal[2] > 0.7 ? 'top' : normal[1] >= normal[0] ? 'left' : 'right'
+          const own = texture?.(face, p[0] - x, p[1] - y, p[2] - z)
+          const low = z < 0.5 && p[2] < 1 && normal[2] < 0.5 ? -0.5 : 0
+
+          this.put(px, py, p[0] + p[1] + p[2], own ?? this.shade(tones, normal, low), id)
+
+          return
+        }
+      }
+
       let s = hi + 0.01
 
       for (let step = 0; step < 48 && s >= lo - 0.01; step += 1) {
@@ -503,67 +525,69 @@ export class Sprite {
     return this
   }
 
-  /** Cuánto se oscurece cada píxel que tiene muy cerca otra pieza por delante. */
+  /**
+   * Cuánto se oscurece cada píxel que tiene muy cerca otra pieza por delante:
+   * un anillo de ocho muestras alrededor. Es lo que más se repite al dibujar,
+   * así que va sin listas intermedias.
+   */
   private occlusion(): [number, number][] {
     const out: [number, number][] = []
-    const radius = Math.max(2, Math.round(this.scale * 1.5))
-    const ring: [number, number][] = []
+    const radius = Math.max(2, Math.round(this.scale * 1.25))
+    const { pw, ph, ids, depth } = this
+    const ring: number[] = []
 
-    // Dos anillos de ocho: basta para saber cuánto tiene encima, y es lo que más cuesta.
-    for (const r of [radius / 2, radius]) {
-      for (let k = 0; k < 8; k += 1) {
-        ring.push([
-          Math.round(Math.cos((k / 8) * Math.PI * 2) * r),
-          Math.round(Math.sin((k / 8) * Math.PI * 2) * r * 0.75),
-        ])
-      }
+    for (let k = 0; k < 8; k += 1) {
+      ring.push(
+        Math.round(Math.cos((k / 8) * Math.PI * 2) * radius),
+        Math.round(Math.sin((k / 8) * Math.PI * 2) * radius * 0.75),
+      )
     }
 
-    for (let y = 0; y < this.ph; y += 1) {
-      for (let x = 0; x < this.pw; x += 1) {
-        const index = y * this.pw + x
-        const id = this.ids[index] ?? 0
+    for (let y = radius; y < ph - radius; y += 1) {
+      for (let x = radius; x < pw - radius; x += 1) {
+        const index = y * pw + x
+        const id = ids[index] ?? 0
 
         if (id === 0) continue
 
-        const near = this.depth[index] ?? 0
+        const near = depth[index] ?? 0
         let hidden = 0
 
-        for (const [dx, dy] of ring) {
-          const [i, j] = [x + dx, y + dy]
+        for (let k = 0; k < 16; k += 2) {
+          const other = index + (ring[k + 1] ?? 0) * pw + (ring[k] ?? 0)
+          const otherId = ids[other] ?? 0
+          const gap = (depth[other] ?? OVER) - near
 
-          if (i < 0 || j < 0 || i >= this.pw || j >= this.ph) continue
-
-          const other = j * this.pw + i
-          const gap = (this.depth[other] ?? OVER) - near
-
-          if ((this.ids[other] ?? 0) !== 0 && this.ids[other] !== id && gap > 0.6 && gap < 10)
-            hidden += 1
+          if (otherId !== 0 && otherId !== id && gap > 0.6 && gap < 10) hidden += 1
         }
-        if (hidden > 0) out.push([index, Math.min(1, (hidden / ring.length) * 2.2) * 0.26])
+        if (hidden > 0) out.push([index, Math.min(1, (hidden / 8) * 2.2) * 0.26])
       }
     }
 
     return out
   }
 
-  /** La sombra en el suelo (z = 0) bajo lo que lo toca: más fuerte debajo y que se desvanece fuera. */
+  /**
+   * La sombra en el suelo (z = 0) bajo lo que lo toca: bajo todo lo que toca
+   * el suelo junto (las patas de una mesa, la mesa entera), más fuerte debajo
+   * y que se desvanece fuera.
+   */
   private contact(): [number, number][] {
     const out: [number, number][] = []
 
     if (this.ground.length === 0) return out
 
-    // Solo el trozo de pantalla donde puede caer la sombra.
     const reach = 1.6
-    const x0 = Math.min(...this.ground.map(([gx]) => gx)) - reach
-    const y0 = Math.min(...this.ground.map(([, gy]) => gy)) - reach
-    const x1 = Math.max(...this.ground.map(([gx, , gw]) => gx + gw)) + reach
-    const y1 = Math.max(...this.ground.map(([, gy, , gd]) => gy + gd)) + reach
+    const gx0 = Math.min(...this.ground.map(([gx]) => gx))
+    const gy0 = Math.min(...this.ground.map(([, gy]) => gy))
+    const gx1 = Math.max(...this.ground.map(([gx, , gw]) => gx + gw))
+    const gy1 = Math.max(...this.ground.map(([, gy, , gd]) => gy + gd))
+    // Solo el trozo de pantalla donde puede caer la sombra.
     const corners = [
-      this.project(x0, y0, 0),
-      this.project(x1, y0, 0),
-      this.project(x0, y1, 0),
-      this.project(x1, y1, 0),
+      this.project(gx0 - reach, gy0 - reach, 0),
+      this.project(gx1 + reach, gy0 - reach, 0),
+      this.project(gx0 - reach, gy1 + reach, 0),
+      this.project(gx1 + reach, gy1 + reach, 0),
     ]
     const fromX = Math.max(0, Math.floor(Math.min(...corners.map(([cx]) => cx)) * this.scale))
     const toX = Math.min(
@@ -586,15 +610,11 @@ export class Sprite {
         const a = this.turned ? -raw : raw
         const s = (py + 0.5) / this.scale - this.oy
         const [wx, wy] = [a / 2 + s, -a / 2 + s]
-        let best = Infinity
+        const dx = Math.max(gx0 - wx, 0, wx - gx1)
+        const dy = Math.max(gy0 - wy, 0, wy - gy1)
+        const away = Math.sqrt(dx * dx + dy * dy)
 
-        for (const [gx, gy, gw, gd] of this.ground) {
-          const dx = Math.max(gx - wx, 0, wx - gx - gw)
-          const dy = Math.max(gy - wy, 0, wy - gy - gd)
-
-          best = Math.min(best, Math.hypot(dx, dy))
-        }
-        if (best < reach) out.push([index, 0.22 * (1 - best / reach)])
+        if (away < reach) out.push([index, 0.22 * (1 - away / reach)])
       }
     }
 
@@ -632,13 +652,14 @@ export class Sprite {
     let y1 = -1
 
     for (let y = 0; y < this.ph; y += 1) {
-      for (let x = 0; x < this.pw; x += 1) {
-        if (this.at(x, y) === null) continue
+      const row = y * this.pw
 
-        x0 = Math.min(x0, x)
-        y0 = Math.min(y0, y)
-        x1 = Math.max(x1, x)
-        y1 = Math.max(y1, y)
+      for (let x = 0; x < this.pw; x += 1) {
+        if (this.pixels[row + x] === null) continue
+        if (x < x0) x0 = x
+        if (x > x1) x1 = x
+        if (y < y0) y0 = y
+        y1 = y
       }
     }
 

@@ -36,6 +36,19 @@ const OY = HEIGHT - 18
 /** Lo que sobresale lo más alto por encima de la fila de atrás, en píxeles. */
 const HEADROOM = 46
 
+let painting: boolean | null = null
+
+/**
+ * Si este navegador sabe pintar en un lienzo. Sin él (un navegador muy
+ * cerrado o los tests en jsdom) no se calcula ningún dibujo: cuesta y no se vería.
+ */
+export function canPaint(): boolean {
+  painting ??=
+    typeof document !== 'undefined' && document.createElement('canvas').getContext('2d') !== null
+
+  return painting
+}
+
 /** Copia los píxeles de un dibujo a un lienzo nuevo de su tamaño. */
 export function toCanvas(sprite: Sprite): HTMLCanvasElement {
   const canvas = document.createElement('canvas')
@@ -69,7 +82,8 @@ export function toCanvas(sprite: Sprite): HTMLCanvasElement {
   return canvas
 }
 
-type Drawn = { canvas: HTMLCanvasElement; sprite: Sprite }
+/** Un fotograma dibujado: su lienzo y su recorte (lo pintado, en píxeles de verdad), guardado para no recorrerlo otra vez. */
+type Drawn = { canvas: HTMLCanvasElement; bounds: [number, number, number, number] | null }
 
 const frames = new Map<string, Drawn>()
 
@@ -98,7 +112,7 @@ function drawn(model: ModelId, props: Props, frame: number): Drawn {
 
     const sprite = modelSprite(model, props, frame)
 
-    found = { canvas: toCanvas(sprite), sprite }
+    found = { canvas: toCanvas(sprite), bounds: sprite.bounds() }
     frames.set(key, found)
   }
 
@@ -413,9 +427,13 @@ export function boundsOf(
   props: Props,
 ): { x: number; y: number; width: number; height: number } {
   let box: [number, number, number, number] = [WIDTH * DENSITY, HEIGHT * DENSITY, 0, 0]
+  const count = MODELS[model].frames
+  // Cuatro fotogramas repartidos, no todos: dibujarlos es lo que cuesta, y lo
+  // que se anima se mueve poco (con un píxel del dibujo de margen, abajo).
+  const sample = [...new Set([0, 1, 2, 3].map((part) => Math.floor((count * part) / 4)))]
 
-  for (let frame = 0; frame < MODELS[model].frames; frame += 1) {
-    const found = drawn(model, props, frame).sprite.bounds()
+  for (const frame of sample) {
+    const found = drawn(model, props, frame).bounds
 
     if (found !== null) {
       box = [
@@ -427,12 +445,13 @@ export function boundsOf(
     }
   }
 
-  return {
-    x: box[0],
-    y: box[1],
-    width: Math.max(1, box[2] - box[0] + 1),
-    height: Math.max(1, box[3] - box[1] + 1),
-  }
+  const [x0, y0] = [Math.max(0, box[0] - DENSITY), Math.max(0, box[1] - DENSITY)]
+  const [x1, y1] = [
+    Math.min(WIDTH * DENSITY - 1, box[2] + DENSITY),
+    Math.min(HEIGHT * DENSITY - 1, box[3] + DENSITY),
+  ]
+
+  return { x: x0, y: y0, width: Math.max(1, x1 - x0 + 1), height: Math.max(1, y1 - y0 + 1) }
 }
 
 /**
