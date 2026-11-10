@@ -346,6 +346,27 @@ se pinta en otra capa, se le quitan esas sombras y se pone encima de la
 escena (`paintOffice`, `layer`). El suelo se pinta un poco por debajo de las
 paredes para que no quede una rendija clara en el zócalo.
 
+**Cómo se pinta y qué se guarda** (2026-11-10, Alberto preguntó por el
+gasto). La escena va a 6 fotogramas por segundo, con un solo reloj para todos
+los dibujos (`useFrame`), y se para con la pestaña escondida, con «menos
+movimiento» o con la web quieta. Casi todo se calcula una vez y se guarda:
+
+| Qué | Se calcula | Se guarda en |
+|---|---|---|
+| Cada fotograma de cada modelo (volúmenes, luz, sombras) | la primera vez que sale | `frames` (`paint.ts`), hasta 1 500; los que se ven igual comparten dibujo (`Model.same`) |
+| Cada figura de persona | una vez por aspecto, pose y expresión | `toonOf` (`toon.ts`), hasta 600 |
+| Suelo, paredes y ventanas | una vez por tamaño, suelo y hora | `floors` (`paint.ts`) |
+| El mapa de luz (ventanas, lámparas y pantallas, difuminado y sin las sombras de lo quieto) | una vez por oficina y hora | `baked` (`paint.ts`) |
+
+En cada fotograma solo se copian lienzos ya hechos (`drawImage`), de atrás
+adelante. Luego se pone encima el mapa de luz, que respira un poco con su
+transparencia y al que se le quitan las sombras de quien anda. Por último,
+las motas y la guirnalda, que son pocas y sin desenfoque. Antes, la luz se
+recalculaba con desenfoque en cada fotograma: unos 190 ms por fotograma de
+día y 72 de noche (Chrome sin tarjeta gráfica, la oficina mediana). Ahora,
+1,7 y 2,9 ms. Solo el primer fotograma tarda (unos 0,5 s), al dibujar y
+guardar lo que sale.
+
 Lo siguiente: rehacer con formas lo que aún lleva píxeles a mano (letreros,
 el robot, la estantería de lo aprendido) y un neón con halo en las últimas
 etapas.

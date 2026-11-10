@@ -187,7 +187,7 @@ export function lightInAir(
 ): void {
   if (light === 'night') return
 
-  const { color, beam, slope, drift } = SUN[light]
+  const { color, beam } = SUN[light]
 
   context.save()
   clipRoom(context, size, point)
@@ -220,28 +220,45 @@ export function lightInAir(
     context.fill()
   })
 
-  // Las motas, nítidas: cada una baja despacio por el haz de su cristal.
-  context.filter = 'none'
-  {
-    context.fillStyle = `rgba(${color}, 0.6)`
-    panesOf(size).forEach((pane, index) => {
-      for (let mote = 0; mote < 3; mote += 1) {
-        const seed = mote * 7 + index * 13
-        const t = (frame * 0.008 + seed * 0.37) % 1
-        const x = pane.x0 + ((seed * 5) % Math.max(1, pane.x1 - pane.x0))
-        const z = pane.z0 + ((seed * 3) % Math.max(1, pane.z1 - pane.z0))
-        const along = t * (z / slope)
-        const twinkle = Math.sin(frame * 0.3 + seed) > -0.2
-        const [px, py] = point(
-          x + drift * along + Math.sin(frame * 0.05 + seed) * 0.8,
-          along,
-          z - along * slope,
-        )
+  context.restore()
+}
 
-        if (twinkle) context.fillRect(px, py, 0.5, 0.5)
-      }
-    })
-  }
+/**
+ * Las motas de polvo de los haces, nítidas: cada una baja despacio por el
+ * haz de su cristal. Se pintan en cada fotograma (son pocas y sin
+ * desenfoque); los haces, no (`paintOffice` los guarda hechos).
+ */
+export function motes(
+  context: CanvasRenderingContext2D,
+  size: number,
+  light: Daylight,
+  frame: number,
+  point: Point,
+): void {
+  if (light === 'night') return
+
+  const { color, slope, drift } = SUN[light]
+
+  context.save()
+  context.globalCompositeOperation = 'screen'
+  context.fillStyle = `rgba(${color}, 0.6)`
+  panesOf(size).forEach((pane, index) => {
+    for (let mote = 0; mote < 3; mote += 1) {
+      const seed = mote * 7 + index * 13
+      const t = (frame * 0.008 + seed * 0.37) % 1
+      const x = pane.x0 + ((seed * 5) % Math.max(1, pane.x1 - pane.x0))
+      const z = pane.z0 + ((seed * 3) % Math.max(1, pane.z1 - pane.z0))
+      const along = t * (z / slope)
+      const twinkle = Math.sin(frame * 0.3 + seed) > -0.2
+      const [px, py] = point(
+        x + drift * along + Math.sin(frame * 0.05 + seed) * 0.8,
+        along,
+        z - along * slope,
+      )
+
+      if (twinkle) context.fillRect(px, py, 0.5, 0.5)
+    }
+  })
   context.restore()
 }
 
@@ -433,7 +450,7 @@ function halo(
 
 /**
  * La luz de lo que la emite: en el suelo, el cono de las lámparas y un brillo
- * en cada fuente; y, al caer la tarde, la guirnalda. Va después del tono de
+ * en cada fuente. Va después del tono de
  * la hora, para que de noche se vea lo que alumbra y nada más.
  */
 export function emitted(
@@ -474,13 +491,28 @@ export function emitted(
       power * 1.6,
     )
   }
-  if (light === 'dusk' || light === 'night') {
-    bulbsOf(size).forEach(([x, y, z], index) => {
-      const hex = Number.parseInt((BULBS[index % BULBS.length] ?? BULBS[0]).slice(1), 16)
-      const color = `${String(hex >> 16)}, ${String((hex >> 8) & 255)}, ${String(hex & 255)}`
+  context.restore()
+}
 
-      halo(context, point(x, y, z), 4, color, (0.3 + ((index * 7 + frame) % 5) * 0.05) * strength)
-    })
-  }
+/** La guirnalda encendida al caer la tarde: un brillo pequeño en cada bombilla, que titila. */
+export function garland(
+  context: CanvasRenderingContext2D,
+  size: number,
+  light: Daylight,
+  frame: number,
+  point: Point,
+): void {
+  if (light !== 'dusk' && light !== 'night') return
+
+  const strength = STRENGTH[light]
+
+  context.save()
+  context.globalCompositeOperation = 'screen'
+  bulbsOf(size).forEach(([x, y, z], index) => {
+    const hex = Number.parseInt((BULBS[index % BULBS.length] ?? BULBS[0]).slice(1), 16)
+    const color = `${String(hex >> 16)}, ${String((hex >> 8) & 255)}, ${String(hex & 255)}`
+
+    halo(context, point(x, y, z), 4, color, (0.3 + ((index * 7 + frame) % 5) * 0.05) * strength)
+  })
   context.restore()
 }

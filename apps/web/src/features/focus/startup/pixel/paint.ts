@@ -2,7 +2,7 @@ import { BUBBLE_HEIGHT, BUBBLE_WIDTH, drawBubble } from './bubbles'
 import { drawFloor } from './floor'
 import type { Floor } from './floor'
 import type { Office, Piece } from './layout'
-import { emitted, lightInAir, lightOnFloor, tint } from './light'
+import { emitted, garland, lightInAir, lightOnFloor, motes, tint } from './light'
 import type { Daylight } from './light'
 import { poseAt } from './life'
 import type { Bubble, Plan, Pose } from './life'
@@ -309,11 +309,28 @@ export function paintOffice(
 
   context.drawImage(floorOf(office.size, office.floor, light), 0, 0, width, height)
 
-  // Las sombras de lo que se pinta, en su propia capa y por orden (lo de
-  // delante borra lo de detrás): ahí no llega la luz.
-  const shadows = layer('shadows', context)
-  const put: Put = (found, x, y) => {
+  // La luz se calcula una vez por oficina y hora (un mapa de luz) y se
+  // guarda; en cada fotograma solo se pone encima. Al recoger o montar la
+  // oficina (cambia en cada fotograma), no se guarda.
+  const settled = packed === 0 && dropped >= 1
+  const ready =
+    settled &&
+    baked?.office === office &&
+    baked.light === light &&
+    baked.canvas.width === context.canvas.width
+      ? baked.canvas
+      : null
+  // Para calcularla: las sombras de lo quieto, en su propia capa y por orden
+  // (lo de delante borra lo de detrás); ahí no llega la luz. Las de quien
+  // anda se quitan en cada fotograma (`movers`).
+  const shadows = ready === null ? layer('shadows', context) : null
+  const movers: { shade: HTMLCanvasElement; x: number; y: number }[] = []
+  const put: Put = (found, x, y, moving = false) => {
     place(context, found.canvas, x, y)
+    if (moving) {
+      if (found.shade !== null) movers.push({ shade: found.shade, x, y })
+      return
+    }
     if (shadows === null) return
     shadows.globalCompositeOperation = 'destination-out'
     place(shadows, found.canvas, x, y)
@@ -405,7 +422,7 @@ export function paintOffice(
         depth: depthOf(model, pose.gx, pose.gy),
         tie: pose.gx + 0.001,
         paint: () => {
-          put(drawn(model, props, frame), Math.round(x), Math.round(y))
+          put(drawn(model, props, frame), Math.round(x), Math.round(y), true)
         },
       })
 
@@ -443,25 +460,58 @@ export function paintOffice(
   // La hora tiñe la sala; encima, la luz que entra y la de las lámparas.
   tint(context, office.size, light, point)
 
-  // Toda la luz, en una capa aparte: se le quitan las sombras y se pone encima.
-  const glow = layer('glow', context)
-  const lit = glow ?? context
+  // El mapa de luz: hecho una vez (con lo de cada fotograma quieto), sin las
+  // sombras de lo quieto. Sin lienzos aparte, la luz va directa, sin guardar.
+  let map = ready
 
-  lightOnFloor(lit, office.size, light, frame, point, DENSITY)
-  emitted(lit, office.size, pieces, light, frame, point, DENSITY)
-  lightInAir(lit, office.size, light, frame, point, DENSITY)
-  if (glow !== null) {
-    glow.setTransform(1, 0, 0, 1, 0, 0)
-    if (shadows !== null) {
-      glow.globalCompositeOperation = 'destination-out'
-      glow.drawImage(shadows.canvas, 0, 0)
+  if (map === null) {
+    const glow = layer('glow', context)
+    const lit = glow ?? context
+
+    lightOnFloor(lit, office.size, light, 0, point, DENSITY)
+    emitted(lit, office.size, pieces, light, 0, point, DENSITY)
+    lightInAir(lit, office.size, light, 0, point, DENSITY)
+    if (glow !== null) {
+      glow.setTransform(1, 0, 0, 1, 0, 0)
+      if (shadows !== null) {
+        glow.globalCompositeOperation = 'destination-out'
+        glow.drawImage(shadows.canvas, 0, 0)
+      }
+      map = glow.canvas
+      if (settled) {
+        const copy = document.createElement('canvas')
+
+        copy.width = glow.canvas.width
+        copy.height = glow.canvas.height
+        copy.getContext('2d')?.drawImage(glow.canvas, 0, 0)
+        baked = { office, light, canvas: copy }
+        map = copy
+      }
+    }
+  }
+  if (map !== null) {
+    let source = map
+    const work = movers.length > 0 ? layer('work', context) : null
+
+    // Quien anda: su sombra tampoco se aclara.
+    if (work !== null) {
+      work.setTransform(1, 0, 0, 1, 0, 0)
+      work.drawImage(map, 0, 0)
+      work.setTransform(DENSITY, 0, 0, DENSITY, 0, 0)
+      work.globalCompositeOperation = 'destination-out'
+      for (const { shade, x, y } of movers) place(work, shade, x, y)
+      source = work.canvas
     }
     context.save()
     context.setTransform(1, 0, 0, 1, 0, 0)
     context.globalCompositeOperation = 'screen'
-    context.drawImage(glow.canvas, 0, 0)
+    // La luz respira un poco: lo único que cambia del mapa entre fotogramas.
+    context.globalAlpha = 0.94 + Math.sin(frame * 0.15) * 0.06
+    context.drawImage(source, 0, 0)
     context.restore()
   }
+  motes(context, office.size, light, frame, point)
+  garland(context, office.size, light, frame, point)
 
   for (const { x, y, bubble } of said) {
     context.drawImage(
@@ -473,7 +523,10 @@ export function paintOffice(
 }
 
 /** Pone un fotograma dibujado en la escena (y su sombra en la capa de sombras). */
-type Put = (found: Drawn, x: number, y: number) => void
+type Put = (found: Drawn, x: number, y: number, moving?: boolean) => void
+
+/** El último mapa de luz calculado: de qué oficina y a qué hora. */
+let baked: { office: Office; light: Daylight; canvas: HTMLCanvasElement } | null = null
 
 const layers = new Map<string, HTMLCanvasElement>()
 
