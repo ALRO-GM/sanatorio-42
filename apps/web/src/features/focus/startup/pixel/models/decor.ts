@@ -33,24 +33,11 @@ import {
   WOOD,
 } from '../palette'
 import { scatter } from '../sprite'
-import type { Sprite } from '../sprite'
 import { posts } from './model'
 import type { Model } from './model'
+import { foliage } from './plants'
 
-const [DEEP, MID, BRIGHT, PALE] = LEAF
-
-/** Una copa de hojas escrita a mano, centrada en un punto del mundo. */
-function crown(sprite: Sprite, rows: readonly string[], x: number, y: number, z: number): void {
-  const [px, py] = sprite.project(x, y, z)
-  const width = Math.max(...rows.map((row) => row.length))
-
-  sprite.grid(
-    rows,
-    { g: DEEP, G: MID, L: BRIGHT, P: PALE },
-    Math.round(px) - Math.floor(width / 2),
-    Math.round(py) - rows.length,
-  )
-}
+const MID = LEAF[1]
 
 /** Una lámpara de pie: peana, palo y pantalla con su luz en el suelo. */
 export const lamp: Model = {
@@ -171,26 +158,14 @@ export const bonsai: Model = {
   frames: 1,
   draw(sprite) {
     sprite.box(3, 5, 0, 10, 6, 6, NAVY)
-    sprite.box(4, 6, 6, 8, 4, 2, POT)
+    sprite.rounded(4, 6, 6, 8, 4, 2, 0.6, POT)
     sprite.faceZ(8.01, 4.5, 11.5, 6.5, 9.5, SOIL)
-    crown(
-      sprite,
-      [
-        '..gGGg.gg...',
-        '.gGLLGgGLg..',
-        'gGLGGgGGLGg.',
-        '.gGg..gGGg..',
-        '....nn......',
-        '...nn.......',
-      ],
-      8,
-      8,
-      8,
-    )
-
-    const [x, y] = sprite.project(8, 8, 8)
-
-    sprite.set(Math.round(x) - 2, Math.round(y) - 1, WOOD[2])
+    // El tronco retorcido y dos copas planas.
+    sprite.cylinder(7, 8, 8, 10, 0.7, WOOD)
+    sprite.blob(8, 8, 10.5, 1.4, 0.7, 0.6, WOOD)
+    sprite.cylinder(9, 8, 10.5, 12, 0.5, WOOD)
+    foliage(sprite, 6, 8, 11.5, 2.2, 7, 0, 0.8)
+    foliage(sprite, 9.8, 8, 13, 2, 6, 0, 0.8)
   },
 }
 
@@ -343,30 +318,10 @@ export const arcade: Model = {
 export const tree: Model = {
   frames: 8,
   draw(sprite, frame) {
-    sprite.box(4, 4, 0, 8, 8, 7, STONE)
+    sprite.rounded(4, 4, 0, 8, 8, 7, 1, STONE)
     sprite.faceZ(7.01, 4.5, 11.5, 4.5, 11.5, SOIL)
-    sprite.box(7.5, 7.5, 7, 1.2, 1.2, 12, WOOD)
-
-    const sway = frame >= 4 ? 1 : 0
-
-    crown(
-      sprite,
-      [
-        `${sway === 1 ? '.' : ''}....gGGg.....`,
-        '..ggGLLGgg...',
-        '.gGLLPLGGGg..',
-        'gGGLGGLLGLGg.',
-        'gGLGgGGLGGGGg',
-        '.gGGgGLGPLGg.',
-        'gGLGGgGGLGGg.',
-        '.gGGLGgGGGg..',
-        '..gggGGgGg...',
-        '....gg.gg....',
-      ],
-      8,
-      8,
-      22,
-    )
+    sprite.cylinder(8, 8, 7, 20, 0.8, WOOD)
+    foliage(sprite, 8, 8, 24, 5.5, 26, frame)
   },
 }
 

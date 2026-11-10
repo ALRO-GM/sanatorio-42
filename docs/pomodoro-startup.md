@@ -142,8 +142,8 @@ su startup.
 
 ## La oficina en píxeles
 
-Pedido por Alberto el 2026-10-28: pixel art isométrico, sin paredes (solo el
-suelo, como una isla) y fácil de ampliar poco a poco. Todo se dibuja con
+Pedido por Alberto el 2026-10-28: pixel art isométrico y fácil de ampliar
+poco a poco (desde el 2026-11-10, con paredes, ventanas y ambiente). Todo se dibuja con
 código, sin imágenes: así casa siempre, no hay licencias de terceros y cada
 pieza crece con la partida. Vive en `apps/web/src/features/focus/startup/pixel/`.
 
@@ -153,7 +153,7 @@ pieza crece con la partida. Vive en `apps/web/src/features/focus/startup/pixel/`
 | `palette.ts` | La paleta. Cada caja lleva tres tonos: arriba el claro, a la izquierda el medio y a la derecha el oscuro (la luz viene de arriba a la izquierda). |
 | `toon.ts` | Las personas: chibis de cabeza grande con aire de película de animación, de frente o de espaldas, quietas, andando (ocho fases) o sentadas tecleando, con su expresión, el uniforme de su oficio (gorra, gorro de cocina o casco) y lo que llevan en las manos. Cada parte sale de su aspecto (`Avatar`, el configurador) o, si no lo han tocado, de `look`. |
 | `models/` | Un modelo por pieza (`Model`: `frames` y `draw`), reunidos en `models/index.ts`. |
-| `floor.ts` | Los suelos, uno por sitio: tablas de madera (tu cuarto), cemento pulido (coworking), parquet, moqueta, suelo técnico y mármol. |
+| `floor.ts` | Los suelos y las paredes, en tonos cálidos y uno por sitio: tablas de madera con veta (tu cuarto), cemento pulido con ladrillo visto (coworking), parquet en espiga con pared verde salvia, moqueta terracota, suelo técnico y mármol. En la pared de la derecha, ventanas (cielo con colinas y nubes; de noche, estrellas), alféizar con maceta, cortinas y jardineras colgadas entre ventana y ventana; en la de la izquierda, estantes con libros y plantas colgantes, cuadros y un reloj; arriba, una guirnalda de bombillas. Es fondo: no ocupa baldosas. |
 | `layout.ts` | Qué sale y dónde, solo a partir de la partida: todo sale del motor (`world.ts`, `layoutOf`, lo mismo que comprueba la API), y aquí se le pone dibujo; la recepción, en su mostrador. También quién anda por la oficina (`people`). |
 | `paint.ts` | Pasa los dibujos al lienzo (`DENSITY`: cuatro píxeles de verdad por píxel del dibujo): cada fotograma de cada modelo se dibuja una vez y se guarda. Pinta de atrás adelante por la suma de la esquina de atrás de cada baldosa (`depthOf`), también para quien anda a medio camino, así nadie se pinta encima de lo que tiene delante; lo plano (alfombras) va antes que todo. |
 | `PixelScene` / `PixelArt` / `ItemArt` | La oficina, un modelo suelto y el dibujo de cada tarjeta. |
@@ -287,10 +287,27 @@ futurista:
 
 Paletas abiertas a probar (Lospec; confirmar la licencia con su autor antes de
 usarlas): Resurrect 64 (64 colores, cálidos y fríos), Apollo (46) y
-Endesga 32. Lo siguiente, por orden: rehacer con formas redondas los modelos
-que aún llevan píxeles a mano (plantas, mascotas, bandera, letreros), paredes
-con ventana y su luz en el suelo en las primeras etapas, y neón con halo en
-las últimas.
+Endesga 32.
+
+**Calidez y ambiente** (pedido por Alberto el 2026-11-10: «aún es una estética
+muy fría»). La paleta entera se movió hacia lo cálido (metales y pantallas
+con un punto rojizo, servidores de ciruela oscura, porcelana y cristal
+cremosos); los suelos y las paredes van como se cuenta en `floor.ts`. La
+monstera, el cactus (con su flor), el bonsái, el árbol, el gato, el perro y
+la bandera se rehicieron con formas (hojas en racimos por el ángulo de oro,
+`foliage`), sin píxeles a mano. Y en la escena (`paint.ts`), cada fotograma:
+
+- de día, el rincón de luz que deja cada ventana en el suelo, que respira un
+  poco, y motas de polvo que flotan en ella;
+- de noche, las ventanas oscuras con estrellas, un velo violeta más suave que
+  el azul de antes, la guirnalda encendida titilando y un halo de luz
+  alrededor de lo que alumbra: cálido en las mesas, la recepción y las
+  lámparas; de su color en el neón, la tele, el arcade, el acuario y la
+  máquina expendedora.
+
+Lo siguiente: rehacer con formas lo que aún lleva píxeles a mano (letreros,
+el robot, la estantería de lo aprendido) y un neón con halo en las últimas
+etapas.
 
 ## La pantalla del Pomodoro en el móvil (2026-10-29)
 

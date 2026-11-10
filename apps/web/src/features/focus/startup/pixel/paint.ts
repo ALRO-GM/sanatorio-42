@@ -1,5 +1,5 @@
 import { BUBBLE_HEIGHT, BUBBLE_WIDTH, drawBubble } from './bubbles'
-import { drawFloor } from './floor'
+import { BULBS, bulbsOf, drawFloor, windowsOf } from './floor'
 import type { Floor } from './floor'
 import type { Office, Piece } from './layout'
 import { poseAt } from './life'
@@ -154,15 +154,15 @@ export function tileAt(size: number, x: number, y: number): [number, number] | n
 
 const floors = new Map<string, HTMLCanvasElement>()
 
-function floorOf(size: number, floor: Floor): HTMLCanvasElement {
-  const key = `${String(size)}|${floor}`
+function floorOf(size: number, floor: Floor, night: boolean): HTMLCanvasElement {
+  const key = `${String(size)}|${floor}|${String(night)}`
   let canvas = floors.get(key)
 
   if (canvas === undefined) {
     const { width, height } = sceneSize(size)
     const sprite = new Sprite(width, height, size * TILE + 4, HEADROOM, DENSITY)
 
-    drawFloor(sprite, size, floor)
+    drawFloor(sprite, size, floor, night)
     canvas = toCanvas(sprite)
     floors.set(key, canvas)
   }
@@ -265,7 +265,10 @@ export function paintOffice(
 
   context.imageSmoothingEnabled = false
   context.clearRect(0, 0, width, height)
-  context.drawImage(floorOf(office.size, office.floor), 0, 0, width, height)
+  const night = extras.night === true
+
+  context.drawImage(floorOf(office.size, office.floor, night), 0, 0, width, height)
+  if (!night) sunlight(context, office.size, frame)
 
   if (extras.selected !== undefined && extras.selected !== null) {
     const chosen = pieces.find((piece) => targetOf(piece) === extras.selected)
@@ -384,10 +387,11 @@ export function paintOffice(
     context.globalAlpha = 1
   }
 
-  if (extras.night === true) {
-    context.fillStyle = 'rgba(20, 24, 66, 0.32)'
+  if (night) {
+    context.fillStyle = 'rgba(36, 26, 72, 0.3)'
     context.fillRect(0, 0, width, height)
-  }
+    glows(context, office, at, frame)
+  } else dust(context, office.size, frame)
 
   for (const { x, y, bubble } of said) {
     context.drawImage(
@@ -395,6 +399,108 @@ export function paintOffice(
       Math.round(x - BUBBLE_WIDTH / 2),
       Math.round(y - BUBBLE_HEIGHT),
     )
+  }
+}
+
+/** Un color `#rrggbb` con transparencia, para los degradados. */
+function hexAlpha(color: string, alpha: number): string {
+  const value = Number.parseInt(color.slice(1, 7), 16)
+
+  return `rgba(${String((value >> 16) & 255)}, ${String((value >> 8) & 255)}, ${String(value & 255)}, ${alpha.toFixed(3)})`
+}
+
+/** Un punto del mundo (en unidades, baldosa de 16) en la escena de una oficina de `size`. */
+function scenePoint(size: number, x: number, y: number, z = 0): [number, number] {
+  return [size * TILE + 4 + x - y, HEADROOM + (x + y) / 2 - z]
+}
+
+/** El rincón de luz que deja cada ventana en el suelo, cálido y que respira un poco. */
+function sunlight(context: CanvasRenderingContext2D, size: number, frame: number): void {
+  const reach = Math.min(size * TILE, 26)
+  const glow = 0.16 + Math.sin(frame * 0.15) * 0.03
+
+  context.fillStyle = `rgba(255, 222, 150, ${glow.toFixed(3)})`
+  for (const { x0, x1 } of windowsOf(size)) {
+    const corners = [
+      scenePoint(size, x0 + 1, 0),
+      scenePoint(size, x1 - 1, 0),
+      scenePoint(size, x1 + 6, reach),
+      scenePoint(size, x0 + 8, reach),
+    ]
+
+    context.beginPath()
+    corners.forEach(([x, y], index) => {
+      if (index === 0) context.moveTo(x, y)
+      else context.lineTo(x, y)
+    })
+    context.closePath()
+    context.fill()
+  }
+}
+
+/** Motas de polvo que flotan despacio en la luz de cada ventana. */
+function dust(context: CanvasRenderingContext2D, size: number, frame: number): void {
+  context.fillStyle = 'rgba(255, 246, 214, 0.75)'
+  windowsOf(size).forEach(({ x0, x1 }, index) => {
+    for (let mote = 0; mote < 5; mote += 1) {
+      const seed = mote * 7 + index * 13
+      const t = (frame * 0.02 + seed * 0.37) % 1
+      const x = x0 + ((seed * 5) % (x1 - x0)) + t * 4
+      const y = 2 + t * 18
+      const z = 6 + Math.sin(frame * 0.1 + seed) * 2 + ((seed * 3) % 10)
+      const [px, py] = scenePoint(size, x, y, z)
+
+      context.fillRect(px, py, 0.5, 0.5)
+    }
+  })
+}
+
+/** Lo que da luz de noche: las pantallas de las mesas (cálida) y lo que brilla (frío). */
+const LIGHTS: Partial<Record<ModelId, string>> = {
+  workstation: '255, 196, 120',
+  reception: '255, 196, 120',
+  lamp: '255, 210, 130',
+  neon: '255, 120, 210',
+  tv: '140, 210, 255',
+  arcade: '170, 140, 255',
+  aquarium: '120, 220, 230',
+  vending: '255, 230, 170',
+}
+
+/** De noche, un halo de luz alrededor de lo que alumbra. */
+function glows(
+  context: CanvasRenderingContext2D,
+  office: Office,
+  at: (gx: number, gy: number) => [number, number],
+  frame: number,
+): void {
+  // La guirnalda: un brillo pequeño en cada bombilla, que titila.
+  bulbsOf(office.size).forEach(([x, y, z], index) => {
+    const [cx, cy] = scenePoint(office.size, x, y, z)
+    const color = BULBS[index % BULBS.length] ?? BULBS[0]
+    const on = 0.35 + ((index * 7 + frame) % 5) * 0.06
+    const halo = context.createRadialGradient(cx, cy, 0, cx, cy, 4)
+
+    halo.addColorStop(0, hexAlpha(color, on))
+    halo.addColorStop(1, hexAlpha(color, 0))
+    context.fillStyle = halo
+    context.fillRect(cx - 4, cy - 4, 8, 8)
+  })
+
+  for (const piece of office.pieces) {
+    const light = LIGHTS[piece.model]
+
+    if (light === undefined) continue
+
+    const [x, y] = at(piece.gx, piece.gy)
+    const [cx, cy] = [x, y + 2]
+    const flicker = 0.32 + Math.sin(frame * 0.3 + piece.gx * 3 + piece.gy) * 0.03
+    const halo = context.createRadialGradient(cx, cy, 2, cx, cy, 26)
+
+    halo.addColorStop(0, `rgba(${light}, ${flicker.toFixed(3)})`)
+    halo.addColorStop(1, `rgba(${light}, 0)`)
+    context.fillStyle = halo
+    context.fillRect(cx - 26, cy - 26, 52, 52)
   }
 }
 

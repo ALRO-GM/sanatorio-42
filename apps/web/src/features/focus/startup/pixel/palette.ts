@@ -11,22 +11,22 @@ import type { Shades } from './sprite'
  * izquierda, el medio; la de la derecha, el más oscuro. La luz viene siempre
  * de arriba a la izquierda.
  */
-export const WOOD: Shades = ['#d99a5b', '#b87440', '#8f552d']
-export const PLYWOOD: Shades = ['#ecc893', '#d1a66c', '#a87f4c']
-export const METAL: Shades = ['#8a8fa8', '#666b85', '#4b4f66']
-export const NAVY: Shades = ['#4a5891', '#33406e', '#242e52']
-export const SILVER: Shades = ['#e6e9f0', '#c3c8d6', '#9ea4b8']
-export const DARK: Shades = ['#4a5170', '#30354d', '#22263a']
-export const POT: Shades = ['#e08a5c', '#c4643a', '#9a4a2a']
+export const WOOD: Shades = ['#e2a865', '#c07e45', '#965a30']
+export const PLYWOOD: Shades = ['#f2d29e', '#d9ac70', '#b0834e']
+export const METAL: Shades = ['#b3a196', '#8c786c', '#6a574d']
+export const NAVY: Shades = ['#4a6a80', '#344f63', '#26394a']
+export const SILVER: Shades = ['#f4ede4', '#dbcfc2', '#b9aa9a']
+export const DARK: Shades = ['#5e4a56', '#45343f', '#32252e']
+export const POT: Shades = ['#e8956a', '#c96e44', '#9e4f30']
 export const MUSTARD: Shades = ['#f2c95c', '#dba43a', '#b9822a']
-export const WATER: Shades = ['#bfe6ff', '#9ad6ff', '#6fb6e6']
-export const PORCELAIN: Shades = ['#ffffff', '#e8e4ee', '#c9c3d4']
-export const GLASS: Shades = ['#cfe9f7', '#a9d3ea', '#86b7d4']
+export const WATER: Shades = ['#b6e8e2', '#8ed4cc', '#62b0a8']
+export const PORCELAIN: Shades = ['#fffaf2', '#ede4d8', '#cfc2b2']
+export const GLASS: Shades = ['#d4ece6', '#acd6cc', '#88b8ac']
 
-export const SOIL = '#4a3326'
-export const LEAF = ['#2f6b3a', '#43914a', '#6dbb5a', '#a3dc72'] as const
+export const SOIL = '#5a3a28'
+export const LEAF = ['#2e6a3c', '#46944c', '#74bf5a', '#b0e07a'] as const
 
-export const SCREEN = '#16223d'
+export const SCREEN = '#1e2a3a'
 export const GLOW = '#7fd4ff'
 export const CODE = ['#8ff0a4', '#ffd27a', '#ff8fa8'] as const
 
@@ -42,9 +42,9 @@ export const GOLD = { light: '#fff6c4', mid: '#ffd04d', dark: '#b9761c' }
 export const OCEAN = ['#3f8fd9', '#2f6fb5'] as const
 export const LAND = ['#6dbb5a', '#43914a'] as const
 export const FLAME = ['#ffe27a', '#ffb02e', '#ef7d3a'] as const
-export const STEAM = '#f4f0fa'
+export const STEAM = '#fbf4ec'
 export const RED = '#e0524f'
-export const BOARD = '#f4f5fa'
+export const BOARD = '#fbf7ee'
 
 /**
  * El color de cada modelo de negocio, el mismo que en las tarjetas y en el
@@ -75,7 +75,7 @@ export const UNIFORM: Record<Role, Shades> = {
 /** La decoración: tapicería, piedra, corcho, teclas, neón y el agua del acuario. */
 export const TEAL: Shades = ['#5fc2b6', '#3a9e93', '#2a776f']
 export const PLUM: Shades = ['#b07ab8', '#8a5594', '#683e70']
-export const STONE: Shades = ['#e4e1da', '#c2beb4', '#9b968b']
+export const STONE: Shades = ['#ece2d2', '#cbbda8', '#a69580']
 export const CORK = '#c8955a'
 export const CHERRY: Shades = ['#e86a5f', '#c94a40', '#9c362e']
 export const BRASS: Shades = [GOLD.light, GOLD.mid, GOLD.dark]
@@ -87,4 +87,4 @@ export const LIGHT = '#fff3b0'
 export const CARDBOARD: Shades = ['#e2b878', '#c4955a', '#9f7442']
 
 /** La ropa de quien aún no tiene modelo de negocio. */
-export const PLAIN: Shades = ['#a7b0bd', '#7d8a99', '#5e6a78']
+export const PLAIN: Shades = ['#c9b8a4', '#a6927c', '#82705e']

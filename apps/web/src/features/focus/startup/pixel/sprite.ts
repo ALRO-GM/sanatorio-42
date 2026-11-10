@@ -507,9 +507,9 @@ export class Sprite {
    * queda pegado detrás de otra cosa, un poco más oscuro) y la sombra de
    * contacto en el suelo bajo lo que lo toca, suave y transparente.
    */
-  finish(): this {
+  finish({ contact = true }: { contact?: boolean } = {}): this {
     const occlusion = this.occlusion()
-    const shadow = this.contact()
+    const shadow = contact ? this.contact() : []
 
     for (const [index, amount] of occlusion) {
       const color = this.pixels[index]

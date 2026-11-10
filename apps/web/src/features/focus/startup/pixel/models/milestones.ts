@@ -1,5 +1,6 @@
 import {
   AXIS_SHADES,
+  BRASS,
   FLAME,
   GLASS,
   GOLD,
@@ -125,16 +126,15 @@ export const flag: Model = {
     sprite.box(6.5, 6.5, 0, 3, 3, 1.5, METAL)
     sprite.box(7.5, 7.5, 1.5, 1, 1, 22, SILVER)
 
-    const [x, y] = sprite.project(8.5, 8, 22)
-    const wave = frame % 2
+    // La tela ondea: cada columna sube y baja un poco, con la sombra en los pliegues.
+    sprite.plane(1, 8.2, [8.5, 16], [15, 23.5], (u, v) => {
+      const wave = Math.sin((u - 8.5) * 0.9 - frame * 1.5) * 0.8 * ((u - 8.5) / 7.5)
 
-    for (let column = 0; column < 9; column += 1) {
-      const lift = column % 4 === (wave === 0 ? 1 : 3) ? 1 : 0
+      if (v < 16 + wave || v > 22.5 + wave) return null
 
-      for (let row = 0; row < 6; row += 1) {
-        sprite.set(x + column, y + row - lift + Math.floor(column / 3), row === 5 ? fold : cloth)
-      }
-    }
+      return Math.cos((u - 8.5) * 0.9 - frame * 1.5) > 0.3 ? fold : cloth
+    })
+    sprite.blob(8, 8, 23.8, 0.7, 0.7, 0.7, BRASS)
   },
 }
 
