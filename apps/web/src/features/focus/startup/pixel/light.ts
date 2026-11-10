@@ -23,17 +23,27 @@ type Point = (x: number, y: number, z?: number) => [number, number]
 /**
  * La luz que entra por las ventanas: su color, cuánto baja (`slope`, más
  * tumbada con el sol bajo), hacia qué lado se tuerce (`drift`) y lo fuerte
- * que se ve el haz en el aire (`beam`) y la mancha en el suelo (`pool`). De
- * noche, la de la luna: azulada y muy suave.
+ * que se ve el haz en el aire (`beam`) y la mancha en el suelo (`pool`).
+ * Sutil: se nota sin tapar lo que alumbra. De noche no entra.
  */
+type Sunny = Exclude<Daylight, 'night'>
+
 const SUN: Record<
-  Daylight,
+  Sunny,
   { color: string; slope: number; drift: number; beam: number; pool: number }
 > = {
-  dawn: { color: '255, 200, 168', slope: 0.5, drift: 0.55, beam: 0.3, pool: 0.32 },
-  day: { color: '255, 238, 196', slope: 0.85, drift: 0.2, beam: 0.26, pool: 0.38 },
-  dusk: { color: '255, 168, 96', slope: 0.45, drift: -0.5, beam: 0.32, pool: 0.34 },
-  night: { color: '168, 190, 255', slope: 0.7, drift: 0.1, beam: 0.1, pool: 0.12 },
+  dawn: { color: '255, 200, 168', slope: 0.5, drift: 0.55, beam: 0.14, pool: 0.22 },
+  day: { color: '255, 238, 196', slope: 0.85, drift: 0.2, beam: 0.11, pool: 0.24 },
+  dusk: { color: '255, 168, 96', slope: 0.45, drift: -0.5, beam: 0.15, pool: 0.22 },
+}
+
+/**
+ * Lo que se difumina la luz, en píxeles del dibujo: mucho en el suelo (una
+ * mancha sin bordes) y algo en el aire. `density`, los píxeles de verdad de
+ * cada uno (el filtro va en píxeles del lienzo).
+ */
+function soften(context: CanvasRenderingContext2D, amount: number, density: number): void {
+  context.filter = `blur(${String(amount * density)}px)`
 }
 
 /** El tono que se le da a toda la sala encima de lo pintado (nada de día). */
@@ -62,7 +72,7 @@ function panesOf(size: number): { x0: number; x1: number; z0: number; z1: number
 }
 
 /** Dónde llega al suelo el rayo que entra por (x, 0, z): hacia dentro (+y) y abajo. */
-function hit(light: Daylight, x: number, z: number): [number, number] {
+function hit(light: Sunny, x: number, z: number): [number, number] {
   const { slope, drift } = SUN[light]
   const t = z / slope
 
@@ -133,7 +143,11 @@ export function lightOnFloor(
   light: Daylight,
   frame: number,
   point: Point,
+  density: number,
 ): void {
+  // De noche no entra luz por las ventanas.
+  if (light === 'night') return
+
   const { color, pool } = SUN[light]
   const breathe = 1 + Math.sin(frame * 0.15) * 0.08
 
@@ -141,6 +155,7 @@ export function lightOnFloor(
   // Solo en el suelo: lo que caería más allá no sube por la pared.
   clipRoom(context, size, point, 0)
   context.globalCompositeOperation = 'screen'
+  soften(context, 3, density)
   context.fillStyle = `rgba(${color}, ${(pool * breathe).toFixed(3)})`
   for (const pane of panesOf(size)) {
     trace(
@@ -168,12 +183,16 @@ export function lightInAir(
   light: Daylight,
   frame: number,
   point: Point,
+  density: number,
 ): void {
+  if (light === 'night') return
+
   const { color, beam, slope, drift } = SUN[light]
 
   context.save()
   clipRoom(context, size, point)
   context.globalCompositeOperation = 'screen'
+  soften(context, 1.5, density)
   panesOf(size).forEach((pane, index) => {
     const wall: [number, number][] = [
       point(pane.x0, 0, pane.z0),
@@ -201,9 +220,10 @@ export function lightInAir(
     context.fill()
   })
 
-  // Las motas: cada una baja despacio por el haz de su cristal.
-  if (light !== 'night') {
-    context.fillStyle = `rgba(${color}, 0.9)`
+  // Las motas, nítidas: cada una baja despacio por el haz de su cristal.
+  context.filter = 'none'
+  {
+    context.fillStyle = `rgba(${color}, 0.6)`
     panesOf(size).forEach((pane, index) => {
       for (let mote = 0; mote < 3; mote += 1) {
         const seed = mote * 7 + index * 13
@@ -259,7 +279,7 @@ const LIGHTS: Partial<Record<ModelId, { color: string; z: number; day: boolean }
 }
 
 /** Cuánto se nota la luz de las lámparas a cada hora: poco de día, mucho de noche. */
-const STRENGTH: Record<Daylight, number> = { day: 0.6, dawn: 0.75, dusk: 0.9, night: 1 }
+const STRENGTH: Record<Daylight, number> = { day: 0.4, dawn: 0.55, dusk: 0.7, night: 0.85 }
 
 /** Lo que alumbra, encendido a esta hora. */
 function lit(pieces: readonly Piece[], light: Daylight) {
@@ -294,8 +314,8 @@ export function lampPools(
     const flicker = 1 + Math.sin(frame * 0.3 + piece.gx * 3 + piece.gy) * 0.05
     const pool = context.createRadialGradient(0, 0, 0, 0, 0, radius)
 
-    pool.addColorStop(0, `rgba(${color}, ${(0.4 * strength * flicker).toFixed(3)})`)
-    pool.addColorStop(0.55, `rgba(${color}, ${(0.16 * strength * flicker).toFixed(3)})`)
+    pool.addColorStop(0, `rgba(${color}, ${(0.3 * strength * flicker).toFixed(3)})`)
+    pool.addColorStop(0.55, `rgba(${color}, ${(0.12 * strength * flicker).toFixed(3)})`)
     pool.addColorStop(1, `rgba(${color}, 0)`)
     // Un círculo aplastado a la mitad: en el suelo de la perspectiva, un óvalo.
     context.save()
@@ -337,7 +357,7 @@ export function lampHalos(
     const [cx, cy] = point(piece.gx * TILE + 8, piece.gy * TILE + 8, z)
     const flicker = 1 + Math.sin(frame * 0.3 + piece.gx * 3 + piece.gy) * 0.06
 
-    glow(cx, cy, 14, color, 0.5 * strength * flicker)
+    glow(cx, cy, 14, color, 0.35 * strength * flicker)
   }
   if (light === 'dusk' || light === 'night') {
     bulbsOf(size).forEach(([x, y, z], index) => {

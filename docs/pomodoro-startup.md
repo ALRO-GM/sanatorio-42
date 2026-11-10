@@ -325,11 +325,12 @@ día (de 9 a 18), atardecer (de 18 a 21) y noche. Con ella cambian:
   de la sala;
 - la luz que entra (`lightOnFloor`, `lightInAir`): por cada cristal, una
   mancha en el suelo y un haz en el aire que se desvanece al bajar (efecto
-  Tyndall), con motas de polvo que brillan al cruzarlo. Más tumbada y de
-  color al amanecer y al atardecer; de noche, la de la luna, azulada y suave;
+  Tyndall), con motas de polvo que brillan al cruzarlo. Sutil y difuminada
+  (sin bordes, sobre todo en el suelo: pedido por Alberto el mismo día);
+  más tumbada y de color al amanecer y al atardecer. De noche no entra;
 - las lámparas (`lampPools`, `lampHalos`): un óvalo de luz transparente que
-  aclara la zona y un halo alrededor de la luz; sutil de día y más fuerte de
-  noche. Las pantallas de las mesas se encienden al caer la tarde; la
+  aclara la zona y un halo alrededor de la luz; muy suave de día y algo más
+  de noche. Las pantallas de las mesas se encienden al caer la tarde; la
   guirnalda, también.
 
 Lo siguiente: rehacer con formas lo que aún lleva píxeles a mano (letreros,

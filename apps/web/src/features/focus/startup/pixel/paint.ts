@@ -274,7 +274,7 @@ export function paintOffice(
   const point = (x: number, y: number, z = 0) => scenePoint(office.size, x, y, z)
 
   context.drawImage(floorOf(office.size, office.floor, light), 0, 0, width, height)
-  lightOnFloor(context, office.size, light, frame, point)
+  lightOnFloor(context, office.size, light, frame, point, DENSITY)
 
   if (extras.selected !== undefined && extras.selected !== null) {
     const chosen = pieces.find((piece) => targetOf(piece) === extras.selected)
@@ -396,7 +396,7 @@ export function paintOffice(
   // La hora tiñe la sala; encima, la luz que entra y la de las lámparas.
   tint(context, office.size, light, point)
   lampPools(context, pieces, light, frame, point)
-  lightInAir(context, office.size, light, frame, point)
+  lightInAir(context, office.size, light, frame, point, DENSITY)
   lampHalos(context, office.size, pieces, light, frame, point)
 
   for (const { x, y, bubble } of said) {
