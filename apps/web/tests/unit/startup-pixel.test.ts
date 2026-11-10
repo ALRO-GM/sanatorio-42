@@ -11,7 +11,7 @@ import { officeOf, ROOM } from '../../src/features/focus/startup/pixel/layout'
 import { friendsOf, lifeOf, poseAt } from '../../src/features/focus/startup/pixel/life'
 import { MODELS } from '../../src/features/focus/startup/pixel/models'
 import type { ModelId } from '../../src/features/focus/startup/pixel/models'
-import { tileAt, tileOrigin } from '../../src/features/focus/startup/pixel/paint'
+import { byDepth, depthOf, tileAt, tileOrigin } from '../../src/features/focus/startup/pixel/paint'
 import { INK, Sprite } from '../../src/features/focus/startup/pixel/sprite'
 import { drawTower, towerOf, towerSize } from '../../src/features/focus/startup/pixel/tower'
 
@@ -417,6 +417,65 @@ describe('16 bits (2026-11-09)', () => {
 
       MODELS[id].draw(sprite, 0, {})
       expect(sprite.outline().bounds(), id).not.toBeNull()
+    }
+  })
+})
+
+describe('el orden de pintado', () => {
+  /** Un cuadrado de una baldosa con la esquina de atrás en (gx, gy): quieto o andando. */
+  const square = (
+    name: string,
+    gx: number,
+    gy: number,
+    model: ModelId = 'sofa',
+    walking = false,
+  ) => ({
+    name,
+    depth: depthOf(model, gx, gy),
+    tie: gx + (walking ? 0.001 : 0),
+    paint: () => undefined,
+    gx,
+    gy,
+  })
+  const order = (...items: ReturnType<typeof square>[]) =>
+    [...items].sort(byDepth).map((item) => item.name)
+
+  it('quien pasa junto a una mesa que tiene delante no se le pinta encima', () => {
+    // Bajando de (3, 3) a (3, 4), a medio camino, con una mesa en (4, 3): la mesa está delante.
+    expect(order(square('mesa', 4, 3), square('andando', 3, 3.5, 'walker', true))).toEqual([
+      'andando',
+      'mesa',
+    ])
+    // Y una que queda detrás, en (2, 3), se pinta antes.
+    expect(order(square('andando', 3, 3.5, 'walker', true), square('mesa', 2, 3))).toEqual([
+      'mesa',
+      'andando',
+    ])
+  })
+
+  it('las alfombras van debajo de todo, también de quien está detrás', () => {
+    expect(order(square('andando', 2, 2, 'walker', true), square('alfombra', 3, 3, 'rug'))).toEqual(
+      ['alfombra', 'andando'],
+    )
+    expect(order(square('alfombra', 1, 1, 'rug'), square('encima', 1, 1, 'walker', true))).toEqual([
+      'alfombra',
+      'encima',
+    ])
+  })
+
+  it('de dos cuadrados que no se pisan y se tapan en pantalla, el de delante va después', () => {
+    // Delante en el mundo: separado por x o por y hacia abajo. Se tapan si están cerca en pantalla.
+    for (let i = 0; i < 400; i += 1) {
+      const a = square('a', (i * 7) % 6, (i * 11) % 6)
+      const b = square('b', ((i * 13) % 50) / 10, ((i * 17) % 50) / 10, 'walker', true)
+      const apart = Math.abs(a.gx - b.gx) >= 1 || Math.abs(a.gy - b.gy) >= 1
+      const near = Math.abs(a.gx - a.gy - (b.gx - b.gy)) < 2
+
+      if (!apart || !near) continue
+
+      const front = a.gx >= b.gx + 1 || a.gy >= b.gy + 1 ? 'a' : 'b'
+
+      expect(order(a, b)[1]).toBe(front)
     }
   })
 })

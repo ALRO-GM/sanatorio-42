@@ -210,6 +210,26 @@ export type Extras = {
 
 type Drawable = { depth: number; tie: number; paint: () => void }
 
+/** Lo que va pegado al suelo: se pinta antes que todo lo demás, y se puede pisar. */
+const FLAT: ReadonlySet<ModelId> = new Set<ModelId>(['rug'])
+
+/**
+ * Dónde va en el orden de pintado algo que ocupa una baldosa con su esquina de
+ * atrás en (gx, gy), aunque esté a medio camino entre dos (quien anda): la
+ * suma de esa esquina. Entre dos cuadrados de una baldosa que no se pisan, el
+ * de suma mayor está siempre delante o al lado sin taparse; por eso quien anda
+ * no lleva medio punto de más (con él, al pasar junto a una mesa que tiene
+ * delante, se le pintaba encima). Lo plano (alfombras) va antes que nada.
+ */
+export function depthOf(model: ModelId, gx: number, gy: number): number {
+  return FLAT.has(model) ? -1 : gx + gy
+}
+
+/** De atrás adelante; a la par, primero lo de más a la izquierda y lo quieto antes que quien anda. */
+export function byDepth(a: Drawable, b: Drawable): number {
+  return a.depth - b.depth || a.tie - b.tie
+}
+
 /**
  * Pinta la oficina en el fotograma `frame`: el suelo, lo colocado y quien
  * anda por ella, de atrás adelante; luego los bocadillos y, de noche, la luz
@@ -319,8 +339,8 @@ export function paintOffice(
             })
 
       items.push({
-        depth: pose.gx + pose.gy + 0.5,
-        tie: pose.gx,
+        depth: depthOf(model, pose.gx, pose.gy),
+        tie: pose.gx + 0.001,
         paint: () => {
           place(context, drawn(model, props, frame, quality).canvas, Math.round(x), Math.round(y))
         },
@@ -346,7 +366,7 @@ export function paintOffice(
     })
   }
 
-  items.sort((a, b) => a.depth - b.depth || a.tie - b.tie)
+  items.sort(byDepth)
   for (const item of items) item.paint()
 
   if (extras.ghost !== undefined && extras.ghost !== null) {
@@ -387,7 +407,7 @@ function paintPiece(
   const [x, y] = at(piece.gx, piece.gy)
 
   return {
-    depth: piece.gx + piece.gy,
+    depth: depthOf(piece.model, piece.gx, piece.gy),
     tie: piece.gx,
     paint: () => {
       place(context, drawn(piece.model, piece.props, frame, quality).canvas, x, y - lift)

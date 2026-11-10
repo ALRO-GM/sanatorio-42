@@ -156,7 +156,7 @@ pieza crece con la partida. Vive en `apps/web/src/features/focus/startup/pixel/`
 | `floor.ts` | Los suelos, uno por sitio: tablas de madera (tu cuarto), cemento pulido (coworking), parquet, moqueta, suelo técnico y mármol. |
 | `layout.ts` | Qué sale y dónde, solo a partir de la partida: todo sale del motor (`world.ts`, `layoutOf`, lo mismo que comprueba la API), y aquí se le pone dibujo; la recepción, en su mostrador. También quién anda por la oficina (`people`). |
 | `quality.ts` | La calidad de los dibujos que elige cada cual (8 o 16 bits, en su navegador), con sus píxeles por píxel del dibujo. Ver [Calidad: 8 y 16 bits](#calidad-8-y-16-bits). |
-| `paint.ts` | Pasa los dibujos al lienzo: cada fotograma de cada modelo se dibuja una vez y se guarda. |
+| `paint.ts` | Pasa los dibujos al lienzo: cada fotograma de cada modelo se dibuja una vez y se guarda. Pinta de atrás adelante por la suma de la esquina de atrás de cada baldosa (`depthOf`), también para quien anda a medio camino, así nadie se pinta encima de lo que tiene delante; lo plano (alfombras) va antes que todo. |
 | `PixelScene` / `PixelArt` / `ItemArt` | La oficina, un modelo suelto y el dibujo de cada tarjeta. |
 | `life.ts` | La vida: un plan con semilla por persona (programar, café, charlar con quien mejor le cae, descansar; limpiar, hacer la ronda, repartir, servir café, revisar servidores; las mascotas pasean) por caminos de la cuadrícula que esquivan lo que ocupa sitio. Dónde está cada cual en un fotograma es una cuenta sobre su plan (`poseAt`). Las amistades salen de los aspectos (`friendsOf`). |
 | `bubbles.ts` | Los bocadillos sin palabras: café, charla, corazón, idea, música, sueño, paquete, brillo, escudo, llave y cara contenta. |
