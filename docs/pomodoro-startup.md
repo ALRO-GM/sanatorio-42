@@ -153,7 +153,8 @@ pieza crece con la partida. Vive en `apps/web/src/features/focus/startup/pixel/`
 | `palette.ts` | La paleta. Cada caja lleva tres tonos: arriba el claro, a la izquierda el medio y a la derecha el oscuro (la luz viene de arriba a la izquierda). |
 | `toon.ts` | Las personas: chibis de cabeza grande con aire de película de animación, de frente o de espaldas, quietas, andando (ocho fases) o sentadas tecleando, con su expresión, el uniforme de su oficio (gorra, gorro de cocina o casco) y lo que llevan en las manos. Cada parte sale de su aspecto (`Avatar`, el configurador) o, si no lo han tocado, de `look`. |
 | `models/` | Un modelo por pieza (`Model`: `frames` y `draw`), reunidos en `models/index.ts`. |
-| `floor.ts` | Los suelos y las paredes, en tonos cálidos y uno por sitio: tablas de madera con veta (tu cuarto), cemento pulido con ladrillo visto (coworking), parquet en espiga con pared verde salvia, moqueta terracota, suelo técnico y mármol. En la pared de la derecha, ventanas (cielo con colinas y nubes; de noche, estrellas), alféizar con maceta, cortinas y jardineras colgadas entre ventana y ventana; en la de la izquierda, estantes con libros y plantas colgantes, cuadros y un reloj; arriba, una guirnalda de bombillas. Es fondo: no ocupa baldosas. |
+| `light.ts` | La luz según la hora (`daylightOf`): el tono de la sala, la luz de las ventanas en el suelo y en el aire (efecto Tyndall, con motas) y la de las lámparas (zona iluminada y halo). |
+| `floor.ts` | Los suelos y las paredes, en tonos cálidos y uno por sitio: tablas de madera con veta (tu cuarto), cemento pulido con ladrillo visto (coworking), parquet en espiga con pared verde salvia, moqueta terracota, suelo técnico y mármol. Todo el suelo, de una pieza y sin juntas marcadas. En la pared de la derecha, ventanas con el paisaje de la hora (amanecer, día, atardecer o noche con luna), alféizar con maceta, cortinas y jardineras colgadas entre ventana y ventana; en la de la izquierda, estantes con libros y plantas colgantes, cuadros y un reloj; arriba, una guirnalda de bombillas. Es fondo: no ocupa baldosas. |
 | `layout.ts` | Qué sale y dónde, solo a partir de la partida: todo sale del motor (`world.ts`, `layoutOf`, lo mismo que comprueba la API), y aquí se le pone dibujo; la recepción, en su mostrador. También quién anda por la oficina (`people`). |
 | `paint.ts` | Pasa los dibujos al lienzo (`DENSITY`: cuatro píxeles de verdad por píxel del dibujo): cada fotograma de cada modelo se dibuja una vez y se guarda. Pinta de atrás adelante por la suma de la esquina de atrás de cada baldosa (`depthOf`), también para quien anda a medio camino, así nadie se pinta encima de lo que tiene delante; lo plano (alfombras) va antes que todo. |
 | `PixelScene` / `PixelArt` / `ItemArt` | La oficina, un modelo suelto y el dibujo de cada tarjeta. |
@@ -306,15 +307,30 @@ con un punto rojizo, servidores de ciruela oscura, porcelana y cristal
 cremosos); los suelos y las paredes van como se cuenta en `floor.ts`. La
 monstera, el cactus (con su flor), el bonsái, el árbol, el gato, el perro y
 la bandera se rehicieron con formas (hojas en racimos por el ángulo de oro,
-`foliage`), sin píxeles a mano. Y en la escena (`paint.ts`), cada fotograma:
+`foliage`), sin píxeles a mano.
 
-- de día, el rincón de luz que deja cada ventana en el suelo, que respira un
-  poco, y motas de polvo que flotan en ella;
-- de noche, las ventanas oscuras con estrellas, un velo violeta más suave que
-  el azul de antes, la guirnalda encendida titilando y un halo de luz
-  alrededor de lo que alumbra: cálido en las mesas, la recepción y las
-  lámparas; de su color en el neón, la tele, el arcade, el acuario y la
-  máquina expendedora.
+**Luz y hora del día** (pedido por Alberto el 2026-11-10: suelo sin líneas
+oscuras, halos en las lámparas, luz por las ventanas con efecto Tyndall y lo
+de fuera según la hora). El suelo se pinta de una pieza (`floorColor`, un
+solo plano): con una pieza por baldosa, el sombreado de rincones del motor
+marcaba cada junta. Las piezas se distinguen solo por el tono. La hora de
+quien mira (`light.ts`, `daylightOf`) da cuatro luces: amanecer (de 7 a 9),
+día (de 9 a 18), atardecer (de 18 a 21) y noche. Con ella cambian:
+
+- lo que se ve por las ventanas (`floor.ts`, `sky`): cielo melocotón y lila
+  con el sol bajo a un lado; azul con el sol alto y nubes; naranja y morado
+  con el sol poniéndose al otro lado y las colinas a contraluz; azul noche
+  con estrellas y luna;
+- el tono de la sala (un velo rosado, nada, malva o violeta), solo dentro
+  de la sala;
+- la luz que entra (`lightOnFloor`, `lightInAir`): por cada cristal, una
+  mancha en el suelo y un haz en el aire que se desvanece al bajar (efecto
+  Tyndall), con motas de polvo que brillan al cruzarlo. Más tumbada y de
+  color al amanecer y al atardecer; de noche, la de la luna, azulada y suave;
+- las lámparas (`lampPools`, `lampHalos`): un óvalo de luz transparente que
+  aclara la zona y un halo alrededor de la luz; sutil de día y más fuerte de
+  noche. Las pantallas de las mesas se encienden al caer la tarde; la
+  guirnalda, también.
 
 Lo siguiente: rehacer con formas lo que aún lleva píxeles a mano (letreros,
 el robot, la estantería de lo aprendido) y un neón con halo en las últimas

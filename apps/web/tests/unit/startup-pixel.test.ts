@@ -15,7 +15,9 @@ import {
 import type { StartupState } from '@sanatorio/startup'
 import { describe, expect, it } from 'vitest'
 
+import { drawFloor } from '../../src/features/focus/startup/pixel/floor'
 import { officeOf, ROOM } from '../../src/features/focus/startup/pixel/layout'
+import { daylightOf } from '../../src/features/focus/startup/pixel/light'
 import { friendsOf, lifeOf, poseAt } from '../../src/features/focus/startup/pixel/life'
 import { MODELS } from '../../src/features/focus/startup/pixel/models'
 import type { ModelId } from '../../src/features/focus/startup/pixel/models'
@@ -414,6 +416,49 @@ describe('el mundo vivo', () => {
 
     expect(eyes(false)).toBeGreaterThan(0)
     expect(eyes(true)).toBe(0)
+  })
+
+  it('la luz sigue la hora: amanecer, día, atardecer y noche, sin huecos', () => {
+    expect([0, 6, 7, 8, 9, 17, 18, 20, 21, 23].map(daylightOf)).toEqual([
+      'night',
+      'night',
+      'dawn',
+      'dawn',
+      'day',
+      'day',
+      'dusk',
+      'dusk',
+      'night',
+      'night',
+    ])
+  })
+
+  it('el suelo no tiene juntas oscuras: en el borde de una baldosa, el mismo color que dentro', () => {
+    const sprite = new Sprite(140, 110, 68, 46, 4)
+
+    drawFloor(sprite, 4, 'carpet')
+
+    const colorAt = (u: number, v: number) => {
+      const [x, y] = sprite.project(u, v, 0)
+
+      return sprite.at(Math.round(x * sprite.scale), Math.round(y * sprite.scale))
+    }
+    const seen = new Set([16, 32, 48].flatMap((edge) => [colorAt(edge, 24), colorAt(24, edge)]))
+
+    // Las juntas, lejos de las paredes: solo los dos tonos de la moqueta.
+    for (const color of seen) expect(['#b56e56', '#b97259']).toContain(color)
+  })
+
+  it('lo que se ve por las ventanas cambia con la hora', () => {
+    const drawn = (['dawn', 'day', 'dusk', 'night'] as const).map((light) => {
+      const sprite = new Sprite(140, 110, 68, 46)
+
+      drawFloor(sprite, 4, 'planks', light)
+
+      return sprite.pixels.join()
+    })
+
+    expect(new Set(drawn).size).toBe(4)
   })
 
   it('tocar una baldosa da esa baldosa; fuera del suelo, nada', () => {

@@ -1,5 +1,6 @@
 import { LEAF, POT, WOOD } from './palette'
 import { mix, scatter, TILE } from './sprite'
+import type { Daylight } from './light'
 import type { Color, Ramp, Sprite } from './sprite'
 
 /**
@@ -25,8 +26,10 @@ export const FLOOR_OF_SPACE: readonly Floor[] = [
 
 /** Lo alta que es la pared y dónde van las ventanas (en altura). */
 const WALL = 34
-const SILL = 11
-const LINTEL = 29
+/** Hasta dónde llega lo alto de la pared, con su remate (para teñir la sala entera). */
+export const WALL_TOP = WALL + 2
+export const SILL = 11
+export const LINTEL = 29
 
 /** Las ventanas de la pared de la derecha (`y` = 0): de `x0` a `x1`, una cada dos baldosas. */
 export function windowsOf(size: number): { x0: number; x1: number }[] {
@@ -38,9 +41,8 @@ export function windowsOf(size: number): { x0: number; x1: number }[] {
   return out
 }
 
-/** Cómo es cada sitio: juntas, canto, zócalo, pared y cortinas. */
+/** Cómo es cada sitio: canto, zócalo, pared y cortinas (sin juntas marcadas: el suelo, de una pieza). */
 type Look = {
-  joint: Color
   edge: readonly [Color, Color]
   /** La pared de arriba y el zócalo de abajo. */
   wall: Ramp
@@ -54,47 +56,40 @@ const ramp = (...tones: [Color, Color, Color, Color, Color]): Ramp => tones
 
 const LOOK: Record<Floor, Look> = {
   planks: {
-    joint: '#7a4a2a',
     edge: ['#9a6238', '#7a4a2a'],
     wall: ramp('#b88e74', '#d8b392', '#efd2ad', '#f8e4c4', '#fff4de'),
     base: ramp('#6a3e24', '#8e5632', '#b27142', '#cc8d58', '#e2ac78'),
     curtain: ramp('#7a2a2a', '#a8403a', '#d0604a', '#e88a68', '#f8b892'),
   },
   concrete: {
-    joint: '#b09a86',
     edge: ['#b8a592', '#9a8672'],
     wall: ramp('#a89480', '#c8b49c', '#e0cfb6', '#efe2cc', '#faf2e2'),
     base: ramp('#5a4a3e', '#7a6656', '#9a8470', '#b8a08a', '#d2bca4'),
     brick: true,
   },
   parquet: {
-    joint: '#8e5a32',
     edge: ['#a8703f', '#8a5a31'],
     wall: ramp('#7e8e6c', '#9cac86', '#bcc8a2', '#d4dcbc', '#e8eed6'),
     base: ramp('#5a3a22', '#7e5232', '#a26a40', '#c08454', '#daa272'),
     curtain: ramp('#7a5a1e', '#a87e2a', '#d4a640', '#ecc866', '#fae29a'),
   },
   tiles: {
-    joint: '#cdbfa8',
     edge: ['#cfc2ac', '#b9ab94'],
     wall: ramp('#b8a48e', '#d6c2aa', '#ecdcc4', '#f6ead6', '#fff8ea'),
     base: ramp('#6a4e3a', '#8e6c52', '#b08a6a', '#caa686', '#e0c2a4'),
   },
   carpet: {
-    joint: '#9a5a4a',
     edge: ['#b06a54', '#8e5242'],
     wall: ramp('#b89c84', '#d4baa0', '#ead4ba', '#f6e6d2', '#fff6ea'),
     base: ramp('#4a3424', '#6a4a32', '#8c6444', '#aa805c', '#c69e7a'),
     curtain: ramp('#2e4a4a', '#3e6a66', '#5a908a', '#86b6ac', '#b6d8cc'),
   },
   raised: {
-    joint: '#a89682',
     edge: ['#b8a692', '#9a8874'],
     wall: ramp('#a8988a', '#c4b4a4', '#ddcfbf', '#ece2d6', '#f8f2ea'),
     base: ramp('#4a3a30', '#665044', '#86685a', '#a48676', '#c2a696'),
   },
   marble: {
-    joint: '#d8c8b0',
     edge: ['#e2d4bc', '#c8b89e'],
     wall: ramp('#c4b29a', '#dccab0', '#efe0c8', '#f8eedc', '#fffaf0'),
     base: ramp('#6a4a2a', '#8e6a3a', '#b88e4e', '#d6ae6a', '#ecce92'),
@@ -102,89 +97,56 @@ const LOOK: Record<Floor, Look> = {
   },
 }
 
-/** Una baldosa del suelo en (gx, gy). */
-function drawTile(sprite: Sprite, gx: number, gy: number, floor: Floor): void {
-  const x = gx * TILE
-  const y = gy * TILE
+/**
+ * El color del suelo en (u, v): se pinta entero de una vez (un solo plano),
+ * para que las baldosas no se hagan sombra entre ellas y no salgan líneas en
+ * las juntas. Lo que distingue una pieza de otra es el tono, nunca una raya.
+ */
+function floorColor(floor: Floor, u: number, v: number): Color {
+  const [gx, gy] = [Math.floor(u / TILE), Math.floor(v / TILE)]
+  const [x, y] = [u - gx * TILE, v - gy * TILE]
   const odd = (gx + gy) % 2 === 1
-  const seed = (n: number): number => scatter(gx * 71 + gy * 17 + n)
 
   switch (floor) {
-    case 'concrete': {
+    case 'concrete':
       // Cemento pulido cálido, con nubes suaves de otro tono.
-      sprite.plane(2, 0, [x, x + TILE], [y, y + TILE], (u, v) =>
-        Math.sin(u * 0.31 + gy) + Math.cos(v * 0.27 + gx) > 1.2 ? '#cdb9a4' : '#d6c3ad',
-      )
-      break
-    }
+      return Math.sin(u * 0.31 + gy) + Math.cos(v * 0.27 + gx) > 1.2 ? '#d0bca7' : '#d6c3ad'
     case 'parquet': {
       // Espiga: tablillas en diagonal que cambian de sentido en cada baldosa.
-      sprite.plane(2, 0, [x, x + TILE], [y, y + TILE], (u, v) => {
-        const along = odd ? u - x : v - y
-        const across = odd ? v - y : u - x
-        const strip = Math.floor((along + across) / 4)
-        const tone =
-          ['#c98f58', '#bb8150', '#d39a62', '#c48a55'][(strip + gx + gy) % 4] ?? '#c98f58'
+      const [along, across] = odd ? [x, y] : [y, x]
+      const strip = Math.floor((along + across) / 4)
 
-        return (along + across) % 4 < 0.35 ? '#9c6a3e' : tone
-      })
-      break
+      return ['#c98f58', '#c08752', '#d09860', '#c68c56'][(strip + gx + gy) % 4] ?? '#c98f58'
     }
-    case 'tiles': {
-      sprite.faceZ(0, x, x + TILE, y, y + TILE, odd ? '#ecdcc2' : '#e4d2b6')
-      break
-    }
-    case 'carpet': {
-      // Moqueta terracota con un dibujo suave de rombos.
-      sprite.plane(2, 0, [x, x + TILE], [y, y + TILE], (u, v) => {
-        const d = Math.abs(u - x - 8) + Math.abs(v - y - 8)
-
-        return d > 6.6 && d < 7.2 ? '#bd765c' : '#b56e56'
-      })
-      break
-    }
+    case 'tiles':
+      return odd ? '#ecdcc2' : '#e6d5ba'
+    case 'carpet':
+      // Moqueta terracota lisa, con un moteado muy suave.
+      return scatter(Math.floor(u * 2) * 37 + Math.floor(v * 2) * 11) % 9 === 0
+        ? '#b97259'
+        : '#b56e56'
     case 'planks': {
-      // Tablas anchas con veta: la junta de cada una cae en un sitio distinto.
-      for (let board = 0; board < 4; board += 1) {
-        const base =
-          ['#c08048', '#b47442', '#c88a52', '#ba7a46'][(board + gy * 3 + gx) % 4] ?? '#c08048'
-        const cut = seed(board) % 16
+      // Tablas largas, de cuatro de ancho, cortadas a distinta altura; con veta.
+      const board = Math.floor(u / 4)
+      const piece = Math.floor((v + (scatter(board) % 24)) / 24)
+      const base =
+        ['#c08048', '#b87844', '#c6884f', '#bc7c46'][(board * 3 + piece) % 4] ?? '#c08048'
+      const grain = Math.sin((u % 4) * 2.1 + Math.sin(v * 0.4 + board) * 1.6)
 
-        sprite.plane(2, 0, [x + board * 4, x + board * 4 + 4], [y, y + TILE], (u, v) => {
-          if (Math.abs(v - y - cut) < 0.3) return '#8a5430'
-          if (Math.abs(u - x - board * 4) < 0.25) return '#8a5430'
-
-          const grain = Math.sin((u - x) * 2.1 + Math.sin((v - y) * 0.4 + board) * 1.6)
-
-          return grain > 0.85
-            ? mix(base, '#7a4a2a', 0.18)
-            : grain < -0.9
-              ? mix(base, '#f0c48a', 0.15)
-              : base
-        })
-      }
-      break
+      return grain > 0.85
+        ? mix(base, '#7a4a2a', 0.12)
+        : grain < -0.9
+          ? mix(base, '#f0c48a', 0.12)
+          : base
     }
     case 'marble': {
-      sprite.plane(2, 0, [x, x + TILE], [y, y + TILE], (u, v) => {
-        const vein = Math.abs(Math.sin((u + v * 0.6) * 0.22 + seed(1) * 0.001) * 6 - (v - y) * 0.3)
+      const vein = Math.abs(Math.sin((u + v * 0.6) * 0.22 + gx * 0.7 + gy) * 6 - y * 0.3)
 
-        return vein < 0.35 ? '#d8c4a8' : odd ? '#f6ecdc' : '#efe3d0'
-      })
-      break
+      return vein < 0.35 ? '#e0cdb2' : odd ? '#f6ecdc' : '#f1e6d4'
     }
-    case 'raised': {
-      sprite.faceZ(0, x, x + TILE, y, y + TILE, '#c8b6a2')
-      sprite.faceZ(0, x + 1.5, x + TILE - 1.5, y + 1.5, y + TILE - 1.5, '#dccbb8')
-      break
-    }
+    case 'raised':
+      return x < 1.5 || y < 1.5 || x > TILE - 1.5 || y > TILE - 1.5 ? '#d8c6b2' : '#dccbb8'
   }
-
-  const joint = LOOK[floor].joint
-
-  sprite.plane(2, 0, [x, x + TILE], [y, y + TILE], (u, v) =>
-    u - x < 0.3 || v - y < 0.3 ? joint : null,
-  )
 }
 
 /** La pared de la derecha (`y` = 0) o de la izquierda (`x` = 0), con zócalo y su remate. */
@@ -212,14 +174,107 @@ function wall(sprite: Sprite, size: number, along: 'x' | 'y', look: Look): void 
   })
 }
 
-/** Una ventana en la pared de la derecha, de `x0` a `x1`: cielo, nubes o estrellas, marco, alféizar y cortinas. */
+/**
+ * El cielo de cada hora: del horizonte a lo alto, colinas delante y otras
+ * más lejos, nubes, y el sol (o la luna) en su sitio del paisaje: bajo y a
+ * un lado al amanecer y al atardecer, alto de día. Cada ventana enseña su
+ * trozo del mismo paisaje.
+ */
+const SKY: Record<
+  Daylight,
+  {
+    low: Color
+    high: Color
+    hill: Color
+    far: Color
+    cloud: Color
+    sun: Color
+    sunAt: readonly [number, number]
+  }
+> = {
+  dawn: {
+    low: '#ffd2a8',
+    high: '#b8b4e0',
+    hill: '#5e7e64',
+    far: '#7e9a82',
+    cloud: '#ffd6d2',
+    sun: '#fff2c8',
+    sunAt: [0.2, 0.3],
+  },
+  day: {
+    low: '#e8f2e8',
+    high: '#7ab8e8',
+    hill: '#5e9a5a',
+    far: '#78b266',
+    cloud: '#fffaf0',
+    sun: '#fff8d8',
+    sunAt: [0.5, 0.82],
+  },
+  dusk: {
+    low: '#ffa060',
+    high: '#6a4a8e',
+    hill: '#4a3448',
+    far: '#6a4658',
+    cloud: '#f49a8a',
+    sun: '#ffd27a',
+    sunAt: [0.8, 0.32],
+  },
+  night: {
+    low: '#3a3a6e',
+    high: '#141c40',
+    hill: '#1c2034',
+    far: '#262a44',
+    cloud: '#2e3462',
+    sun: '#f4eecc',
+    sunAt: [0.6, 0.78],
+  },
+}
+
+/** El color del cielo en (a, b) de la ventana `index` de `count` (en unidades desde su esquina de abajo). */
+function sky(
+  light: Daylight,
+  a: number,
+  b: number,
+  width: number,
+  height: number,
+  index: number,
+  count: number,
+): Color {
+  const look = SKY[light]
+  const t = b / height
+  // Dónde cae este punto en el paisaje entero de la pared (de 0 a 1).
+  const across = (index + a / width) / Math.max(1, count)
+  const [sunX, sunY] = look.sunAt
+  const sun = Math.hypot((across - sunX) * count * width, b - sunY * height)
+  // Colinas con árboles delante; detrás, otras más lejanas.
+  const hill = 3.2 + Math.sin(a * 0.55 + index * 2) * 1.2 + Math.sin(a * 1.7) * 0.4
+  const far = 5.2 + Math.sin(a * 0.3 + index * 1.3) * 1.4
+
+  if (b < hill) return b < hill - 1.2 ? look.hill : mix(look.hill, look.far, 0.5)
+  if (b < far) return look.far
+  if (sun < 2.2) return look.sun
+  if (light !== 'night' && sun < 3.4) return mix(look.sun, look.low, 0.45)
+  if (
+    light === 'night' &&
+    t > 0.35 &&
+    scatter(Math.floor(a * 2) * 131 + Math.floor(b * 2) * 17 + index) % 97 === 0
+  )
+    return '#fff4c8'
+
+  const cloud = Math.sin(a * 0.7 + index) + Math.cos(b * 0.9 - a * 0.2) > 1.3 && t > 0.55
+
+  return cloud ? look.cloud : mix(look.low, look.high, Math.min(1, Math.max(0, (t - 0.2) * 1.4)))
+}
+
+/** Una ventana en la pared de la derecha, de `x0` a `x1`: lo que se ve a esa hora, marco, alféizar y cortinas. */
 function window(
   sprite: Sprite,
   x0: number,
   x1: number,
   look: Look,
-  night: boolean,
+  light: Daylight,
   index: number,
+  count: number,
 ): void {
   const frame = WOOD[0]
   const width = x1 - x0
@@ -231,22 +286,7 @@ function window(
     if (a < 0.9 || a > width - 0.9 || b < 0.9 || b > height - 0.9) return frame
     if (Math.abs(a - width / 2) < 0.45 || Math.abs(b - height * 0.55) < 0.4) return WOOD[1]
 
-    const t = b / height
-
-    if (night) {
-      const star = scatter(Math.floor(a * 2) * 131 + Math.floor(b * 2) * 17 + index) % 97 === 0
-
-      return star ? '#fff4c8' : mix('#1e2a52', '#3a3a6e', t)
-    }
-
-    // Abajo, colinas y copas de árboles; arriba, cielo con nubes.
-    const hill = 3.2 + Math.sin(a * 0.55 + index * 2) * 1.2 + Math.sin(a * 1.7) * 0.4
-
-    if (b < hill) return b < hill - 1.2 ? '#5e9a5a' : '#78b266'
-
-    const cloud = Math.sin(a * 0.7 + index) + Math.cos(b * 0.9 - a * 0.2) > 1.3 && t > 0.55
-
-    return cloud ? '#fffaf0' : mix('#f6d8a8', '#9ccce0', Math.min(1, (t - 0.15) * 1.6))
+    return sky(light, a, b, width, height, index, count)
   })
   // Alféizar y una maceta con su planta en una de cada dos.
   sprite.box(x0 - 1, 0, SILL - 1, width + 2, 2.2, 1, WOOD, 0.3)
@@ -439,15 +479,18 @@ function planter(sprite: Sprite, x: number): void {
 
 /**
  * El suelo entero, de `size × size` baldosas, con su canto delante y las dos
- * paredes de atrás con lo suyo. De noche (`night`), las ventanas muestran el
- * cielo oscuro con estrellas.
+ * paredes de atrás con lo suyo. Por las ventanas se ve el cielo de la hora
+ * (`light`): amanecer, día, atardecer o noche con estrellas y luna.
  */
-export function drawFloor(sprite: Sprite, size: number, floor: Floor, night = false): void {
-  for (let gx = 0; gx < size; gx += 1) {
-    for (let gy = 0; gy < size; gy += 1) drawTile(sprite, gx, gy, floor)
-  }
-
+export function drawFloor(
+  sprite: Sprite,
+  size: number,
+  floor: Floor,
+  light: Daylight = 'day',
+): void {
   const end = size * TILE
+
+  sprite.plane(2, 0, [0, end], [0, end], (u, v) => floorColor(floor, u, v))
   const look = LOOK[floor]
   const [left, right] = look.edge
 
@@ -456,8 +499,8 @@ export function drawFloor(sprite: Sprite, size: number, floor: Floor, night = fa
 
   wall(sprite, size, 'x', look)
   wall(sprite, size, 'y', look)
-  windowsOf(size).forEach(({ x0, x1 }, index) => {
-    window(sprite, x0, x1, look, night, index)
+  windowsOf(size).forEach(({ x0, x1 }, index, all) => {
+    window(sprite, x0, x1, look, light, index, all.length)
   })
 
   // Entre ventana y ventana, una jardinera colgada.
@@ -466,7 +509,7 @@ export function drawFloor(sprite: Sprite, size: number, floor: Floor, night = fa
   windows.slice(1).forEach(({ x0 }, index) => {
     planter(sprite, (x0 + (windows[index]?.x1 ?? x0)) / 2)
   })
-  garland(sprite, size, night)
+  garland(sprite, size, light === 'night' || light === 'dusk')
 
   // La pared de la izquierda: cada dos baldosas, un estante, un cuadro o el reloj.
   for (let tile = 0; tile + 1 < size; tile += 2) {

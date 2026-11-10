@@ -43,7 +43,6 @@ const MID = LEAF[1]
 export const lamp: Model = {
   frames: 1,
   draw(sprite) {
-    sprite.faceZ(0.01, 3, 13, 3, 13, '#f3e3b0')
     sprite.box(6, 6, 0, 4, 4, 1, DARK)
     sprite.box(7.5, 7.5, 1, 1, 1, 22, METAL)
     sprite.box(5, 5, 22, 6, 6, 6, MUSTARD)

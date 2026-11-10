@@ -7,6 +7,8 @@ import { canPut, targetOf } from '../target'
 import type { Target } from '../target'
 import { officeOf } from './layout'
 import type { Office } from './layout'
+import { daylightOf } from './light'
+import type { Daylight } from './light'
 import { lifeOf } from './life'
 import { lengthOf, moveSize, paintMove } from './move'
 import type { Move } from './move'
@@ -19,11 +21,8 @@ import { useAnimated, useFrame } from './useFrame'
 const MAX_SCALE = 4
 
 /** De noche (de las 21 a las 7, en tu reloj), la oficina con la luz baja y más ventanas encendidas. */
-const isNight = (): boolean => {
-  const hour = new Date().getHours()
-
-  return hour >= 21 || hour < 7
-}
+/** La hora de quien mira, para la luz de la oficina y las ventanas del edificio. */
+const lightNow = (): Daylight => daylightOf(new Date().getHours())
 
 /** Colocar a mano: qué pieza está elegida y qué hacer al elegir o soltar. */
 type Editing = {
@@ -99,7 +98,7 @@ export function PixelScene({
     else
       paintOffice(context, office, frame, {
         plans,
-        night: isNight(),
+        light: lightNow(),
         selected: editing?.selected,
         ghost,
       })
@@ -238,7 +237,7 @@ const towers = new Map<string, HTMLCanvasElement>()
 /** El edificio visto de fuera, al lado de la planta: sus luces y servidores parpadean. */
 function TowerView({ tower, frame }: { tower: Tower; frame: number }) {
   const canvas = useRef<HTMLCanvasElement>(null)
-  const night = isNight()
+  const night = lightNow() === 'night'
   const key = `${JSON.stringify(tower)}|${String(frame % 24)}|${String(night)}`
 
   useEffect(() => {
