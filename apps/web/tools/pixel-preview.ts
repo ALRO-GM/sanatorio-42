@@ -31,9 +31,11 @@ import { drawFloor } from '../src/features/focus/startup/pixel/floor'
 import { officeOf } from '../src/features/focus/startup/pixel/layout'
 import { lifeOf, poseAt } from '../src/features/focus/startup/pixel/life'
 import { MODELS } from '../src/features/focus/startup/pixel/models'
+import { petHeading } from '../src/features/focus/startup/pixel/models/pets'
 import type { ModelId, Props } from '../src/features/focus/startup/pixel/models'
 import { DENSITY, depthOf } from '../src/features/focus/startup/pixel/paint'
 import { Sprite, TILE } from '../src/features/focus/startup/pixel/sprite'
+import { toonOf } from '../src/features/focus/startup/pixel/toon'
 import { drawTower, towerOf } from '../src/features/focus/startup/pixel/tower'
 
 const BACKGROUND: readonly [number, number, number] = [0xe7, 0xe3, 0xec]
@@ -270,6 +272,67 @@ function people(): Picture {
   return grid(rows)
 }
 
+/**
+ * Hacia dónde mira quien anda: una fila por modelo (persona, gato, perro,
+ * robot) y una columna por sentido, con `back` y `turn` como en `life.ts`:
+ * +x (abajo a la derecha), +y (abajo a la izquierda), -x (arriba a la
+ * izquierda) y -y (arriba a la derecha).
+ */
+function headings(): Picture {
+  const moves = [
+    [1, 0],
+    [0, 1],
+    [-1, 0],
+    [0, -1],
+  ] as const
+  const poseOf = (dx: number, dy: number) => ({
+    step: 1,
+    back: dx < 0 || dy < 0,
+    turn: dx - dy > 0,
+  })
+  const rows = (['walker', 'cat', 'dog', 'robot'] as const).map((id) =>
+    moves.map(([dx, dy]) => {
+      const pose = poseOf(dx, dy)
+
+      return model(
+        id,
+        id === 'walker' ? { ...pose, avatar: avatarKey(avatarOf(412)) } : petHeading(id, pose),
+        2,
+      )
+    }),
+  )
+
+  return grid(rows)
+}
+
+/**
+ * Los retratos del configurador (`AvatarPortrait`): la figura dibujada a ×3,
+ * no agrandada, con pecas, gafas y barba para ver los detalles pequeños.
+ */
+function portraits(): Picture {
+  const zoom = 3
+  const looks = [412, 77, 905, 260]
+  const cells = looks.map((look) => {
+    const toon = toonOf({
+      avatar: { ...avatarOf(look), freckles: 1, glasses: look % 2 },
+      k: (zoom * DENSITY) / 2,
+    })
+    const sprite = new Sprite(20 * zoom, 22 * zoom, 10 * zoom, 21 * zoom, DENSITY)
+
+    sprite.figure(toon.pixels, toon.w, toon.h, 0, 0, 0)
+
+    return sprite
+  })
+  const width = 20 * zoom * DENSITY
+  const sheet = new Picture(cells.length * width, 22 * zoom * DENSITY)
+
+  cells.forEach((cell, index) => {
+    sheet.paste(cell, index * width, 0)
+  })
+
+  return sheet
+}
+
 /** Seis partidas, del garaje al control global. */
 const GAMES: Record<string, StartupState> = {
   garaje: { ...EMPTY_STARTUP, levels: { 'learn-front': 2, computer: 1 } },
@@ -366,6 +429,8 @@ if (only !== undefined) {
 
   save('modelos', grid(ids.map((id) => LEVELS.map((level) => model(id, { ...SAMPLE, level }, 1)))))
   save('gente', people())
+  save('sentidos', headings())
+  save('retratos', portraits())
 
   for (const [name, state] of Object.entries(GAMES)) {
     // Tres momentos de cada oficina: la gente se mueve.

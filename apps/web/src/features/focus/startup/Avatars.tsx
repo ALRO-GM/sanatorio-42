@@ -3,6 +3,7 @@ import type { Avatar, AvatarPart, Role, StartupAction, StartupState } from '@san
 import { useState } from 'react'
 
 import { useI18n } from '../../../shared/i18n'
+import { AvatarPortrait } from './pixel/AvatarPortrait'
 import { PixelArt } from './pixel/PixelArt'
 import { swatchOf } from './pixel/toon'
 
@@ -84,11 +85,7 @@ export function AvatarEditor({
 
       <div className="su-avatar">
         <div className="su-avatar-preview">
-          <PixelArt
-            model="person"
-            props={{ avatar: avatarKey(current), role: person.role }}
-            size={96}
-          />
+          <AvatarPortrait avatar={current} role={person.role} />
           <strong>{nameOf(person)}</strong>
         </div>
         <div className="su-avatar-parts">

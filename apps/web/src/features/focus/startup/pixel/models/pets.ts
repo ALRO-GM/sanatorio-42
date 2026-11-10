@@ -5,12 +5,13 @@
  */
 import { CARDBOARD, CHERRY, DARK, GLOW, LED, METAL, PORCELAIN, SILVER, WATER } from '../palette'
 import type { Ramp, Sprite } from '../sprite'
-import type { Model } from './model'
+import type { Model, Props } from './model'
 
 const CAT: Ramp = ['#7a3e1a', '#b8682e', '#e89650', '#f4b878', '#fcd8a8']
 const DOG: Ramp = ['#6a4426', '#9c6c42', '#c99a68', '#e2bc8c', '#f4dcb6']
 const WHITE: Ramp = ['#b8a89a', '#d8ccc0', '#f2e8dc', '#fbf4ea', '#ffffff']
 const NOSE = '#3a2420'
+const EAR: Ramp = ['#4a2a16', '#6a4426', '#8c5e38', '#a87a50', '#c49a70']
 
 /**
  * Un animal de cuatro patas mirando hacia `x` (girado, hacia el otro lado):
@@ -20,10 +21,23 @@ function animal(
   sprite: Sprite,
   coat: Ramp,
   frame: number,
-  step: number,
+  { step = 0, back = false }: Props,
   { tall, tail, ears }: { tall: number; tail: number; ears: 'cat' | 'dog' },
 ): void {
   const walk = step === 0 ? 0 : step === 1 ? 1 : -1
+  // De espaldas, la cabeza hacia -x: el mismo animal, del revés a lo largo.
+  const along = (x: number): number => (back ? 16 - x : x)
+  const blob = (
+    x: number,
+    y: number,
+    z: number,
+    rx: number,
+    ry: number,
+    rz: number,
+    ramp: Ramp,
+  ) => {
+    sprite.blob(along(x), y, z, rx, ry, rz, ramp)
+  }
   // Patas: delante y detrás, a los dos lados; al andar, se adelantan por pares.
   for (const [px, side] of [
     [5.5, 0],
@@ -33,68 +47,81 @@ function animal(
   ] as const) {
     const swing = (side === (px > 8 ? 1 : 0) ? 1 : -1) * walk * 0.7
 
-    sprite.cylinder(px + swing, 7 + side * 2, 0, tall, 0.55, coat)
+    sprite.cylinder(along(px + swing), 7 + side * 2, 0, tall, 0.55, coat)
   }
-  sprite.blob(8, 8, tall + 1.6, 3.6, 1.9, 1.8, coat)
-  sprite.blob(8.4, 9.4, tall + 1.2, 2.2, 0.6, 1.1, WHITE)
+  blob(8, 8, tall + 1.6, 3.6, 1.9, 1.8, coat)
+  blob(8.4, 9.4, tall + 1.2, 2.2, 0.6, 1.1, WHITE)
   // La cabeza, delante, y su hocico.
-  sprite.blob(12, 8, tall + 3.6, 1.8, 1.7, 1.7, coat)
-  sprite.blob(13.3, 8.3, tall + 3.1, 0.9, 0.9, 0.7, WHITE)
-  sprite.dot(14.1, 8.4, tall + 3.4, NOSE)
-  sprite.dot(13.2, 9.3, tall + 4.3, NOSE)
+  blob(12, 8, tall + 3.6, 1.8, 1.7, 1.7, coat)
+  blob(13.3, 8.3, tall + 3.1, 0.9, 0.9, 0.7, WHITE)
+  sprite.dot(along(14.1), 8.4, tall + 3.4, NOSE)
+  sprite.dot(along(13.2), 9.3, tall + 4.3, NOSE)
   if (ears === 'cat') {
-    sprite.blob(11.6, 7.2, tall + 5.4, 0.6, 0.6, 0.9, coat)
-    sprite.blob(12.4, 9, tall + 5.4, 0.6, 0.6, 0.9, coat)
+    blob(11.6, 7.2, tall + 5.4, 0.6, 0.6, 0.9, coat)
+    blob(12.4, 9, tall + 5.4, 0.6, 0.6, 0.9, coat)
   } else {
-    sprite.blob(11.3, 6.6, tall + 3.9, 0.7, 0.4, 1.4, [
-      '#4a2a16',
-      '#6a4426',
-      '#8c5e38',
-      '#a87a50',
-      '#c49a70',
-    ])
-    sprite.blob(11.3, 9.5, tall + 3.9, 0.7, 0.4, 1.4, [
-      '#4a2a16',
-      '#6a4426',
-      '#8c5e38',
-      '#a87a50',
-      '#c49a70',
-    ])
+    blob(11.3, 6.6, tall + 3.9, 0.7, 0.4, 1.4, EAR)
+    blob(11.3, 9.5, tall + 3.9, 0.7, 0.4, 1.4, EAR)
   }
   // La cola: de la grupa hacia arriba y atrás, que se mueve.
   for (let t = 0; t < 1; t += 0.2) {
     const wag = Math.sin(frame * 1.2 + t * 2) * tail
 
-    sprite.blob(4.4 - t * 2, 8 + wag * t, tall + 2 + t * 3, 0.55, 0.55, 0.55, coat)
+    blob(4.4 - t * 2, 8 + wag * t, tall + 2 + t * 3, 0.55, 0.55, 0.55, coat)
   }
 }
 
 /** Un gato atigrado: anda o, quieto, mueve la cola. */
 export const cat: Model = {
   frames: 8,
-  draw(sprite, frame, { step = 0 }) {
-    animal(sprite, CAT, frame, step, { tall: 2.2, tail: step === 0 ? 1 : 0.3, ears: 'cat' })
+  draw(sprite, frame, props) {
+    animal(sprite, CAT, frame, props, {
+      tall: 2.2,
+      tail: (props.step ?? 0) === 0 ? 1 : 0.3,
+      ears: 'cat',
+    })
   },
 }
 
 /** Un perro canela: anda o, quieto, mueve la cola sin parar. */
 export const dog: Model = {
   frames: 8,
-  draw(sprite, frame, { step = 0 }) {
-    animal(sprite, DOG, frame, step, { tall: 3, tail: 1.4, ears: 'dog' })
-    if (frame % 8 < 4) sprite.dot(13.6, 8.4, 5.2, '#ff8a9a')
+  draw(sprite, frame, props) {
+    animal(sprite, DOG, frame, props, { tall: 3, tail: 1.4, ears: 'dog' })
+    if (frame % 8 < 4) sprite.dot(props.back === true ? 2.4 : 13.6, 8.4, 5.2, '#ff8a9a')
   },
+}
+
+/**
+ * Hacia dónde mira una mascota según su paso (`back` y `turn` de
+ * `pixel/life.ts`, pensados para la gente, que mira hacia +y). El robot
+ * también mira hacia +y; el gato y el perro, de lado, a lo largo de x: sin
+ * girar miran hacia +x; girados, hacia +y; de espaldas, al revés. Así el
+ * cuerpo va siempre en el sentido en que anda.
+ */
+export function petHeading(
+  pet: 'cat' | 'dog' | 'robot',
+  { step, back, turn }: { step: number; back: boolean; turn: boolean },
+): Props {
+  return pet === 'robot' ? { step, back, turn } : { step, back, turn: turn === back }
 }
 
 /** Un robot pequeño de ruedas, con su antena que parpadea. */
 export const robot: Model = {
   frames: 12,
-  draw(sprite, frame, { step = 0 }) {
+  draw(sprite, frame, { step = 0, back = false }) {
+    const bob = step === 1 ? 0.5 : 0
+
     sprite.box(5, 5, 0, 6, 6, 1.5, DARK)
-    sprite.box(5.5, 5.5, 1.5 + (step === 1 ? 0.5 : 0), 5, 5, 6, SILVER)
-    sprite.faceY(10.51, 6.5, 9.5, 4 + (step === 1 ? 0.5 : 0), 6.5 + (step === 1 ? 0.5 : 0), DARK[1])
-    sprite.dot(7.2, 10.52, 5.5, GLOW)
-    sprite.dot(8.8, 10.52, 5.5, GLOW)
+    sprite.box(5.5, 5.5, 1.5 + bob, 5, 5, 6, SILVER)
+    // La cara, delante (+y); de espaldas no se ve: una rejilla en su lugar.
+    if (back) {
+      for (const z of [4, 5.2, 6.4]) sprite.faceY(10.51, 6.8, 9.2, z + bob, z + 0.5 + bob, DARK[1])
+    } else {
+      sprite.faceY(10.51, 6.5, 9.5, 4 + bob, 6.5 + bob, DARK[1])
+      sprite.dot(7.2, 10.52, 5.5 + bob, GLOW)
+      sprite.dot(8.8, 10.52, 5.5 + bob, GLOW)
+    }
     sprite.box(7.7, 7.7, 7.5, 0.6, 0.6, 3, METAL)
     sprite.dot(8, 8, 11, frame % 12 < 6 ? LED.red : LED.off)
   },

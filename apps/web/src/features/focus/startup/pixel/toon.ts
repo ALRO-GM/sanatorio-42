@@ -907,8 +907,8 @@ function faceOf(
       ] as const) {
         flat(
           paper,
-          (x, y) => inside(x, y, cx + side * 6 + dx, ey + 2.9 + dy, 0.16, 0.16),
-          '#d08a70',
+          (x, y) => inside(x, y, cx + side * 5.4 + dx * 1.3, ey + 3.7 + dy * 0.8, 0.3, 0.3),
+          '#b4684e',
         )
       }
     }

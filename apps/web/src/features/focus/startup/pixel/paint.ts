@@ -6,6 +6,7 @@ import { poseAt } from './life'
 import type { Bubble, Plan, Pose } from './life'
 import { MODELS } from './models'
 import type { ModelId, Props } from './models'
+import { petHeading } from './models/pets'
 import { targetOf } from '../target'
 import { Sprite, TILE } from './sprite'
 
@@ -336,7 +337,7 @@ export function paintOffice(
       const model: ModelId = person.pet ?? 'walker'
       const props: Props =
         person.pet !== undefined
-          ? { step: pose.step, turn: pose.turn }
+          ? petHeading(person.pet, pose)
           : cleanProps({
               look: person.look,
               avatar: person.avatar,

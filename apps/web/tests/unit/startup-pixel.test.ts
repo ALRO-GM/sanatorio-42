@@ -19,6 +19,7 @@ import { officeOf, ROOM } from '../../src/features/focus/startup/pixel/layout'
 import { friendsOf, lifeOf, poseAt } from '../../src/features/focus/startup/pixel/life'
 import { MODELS } from '../../src/features/focus/startup/pixel/models'
 import type { ModelId } from '../../src/features/focus/startup/pixel/models'
+import { petHeading } from '../../src/features/focus/startup/pixel/models/pets'
 import { byDepth, depthOf, tileAt, tileOrigin } from '../../src/features/focus/startup/pixel/paint'
 import { INK, Sprite } from '../../src/features/focus/startup/pixel/sprite'
 import { drawTower, towerOf, towerSize } from '../../src/features/focus/startup/pixel/tower'
@@ -364,6 +365,55 @@ describe('el mundo vivo', () => {
       }
     }
     expect(same / (plain.pw * plain.ph)).toBeGreaterThan(0.99)
+  })
+
+  it('las mascotas andan mirando hacia donde van, no de lado', () => {
+    // Los cuatro sentidos, con `back` y `turn` como los pone `life.ts`: +x
+    // va abajo a la derecha, +y abajo a la izquierda, -x arriba a la
+    // izquierda y -y arriba a la derecha.
+    const moves = [
+      { dx: 1, dy: 0, right: true },
+      { dx: 0, dy: 1, right: false },
+      { dx: -1, dy: 0, right: false },
+      { dx: 0, dy: -1, right: true },
+    ]
+
+    for (const pet of ['cat', 'dog'] as const) {
+      for (const { dx, dy, right } of moves) {
+        const props = petHeading(pet, { step: 1, back: dx < 0 || dy < 0, turn: dx - dy > 0 })
+        const sprite = new Sprite(40, 76, 20, 58)
+        const [nose, body] = [[] as number[], [] as number[]]
+
+        sprite.turned = props.turn === true
+        MODELS[pet].draw(sprite, 0, props)
+        for (let y = 0; y < sprite.ph; y += 1) {
+          for (let x = 0; x < sprite.pw; x += 1) {
+            const color = sprite.at(x, y)
+
+            if (color !== null) body.push(x)
+            if (color === '#3a2420') nose.push(x)
+          }
+        }
+
+        const mean = (list: number[]) => list.reduce((sum, x) => sum + x, 0) / list.length
+
+        expect(nose.length, `${pet} ${String(dx)},${String(dy)}`).toBeGreaterThan(0)
+        expect(mean(nose) > mean(body), `${pet} ${String(dx)},${String(dy)}`).toBe(right)
+      }
+    }
+  })
+
+  it('el robot enseña la cara de frente y la espalda al alejarse', () => {
+    const eyes = (back: boolean): number => {
+      const sprite = new Sprite(40, 76, 20, 58)
+
+      MODELS.robot.draw(sprite, 0, petHeading('robot', { step: 1, back, turn: false }))
+
+      return sprite.pixels.filter((color) => color === '#7fd4ff').length
+    }
+
+    expect(eyes(false)).toBeGreaterThan(0)
+    expect(eyes(true)).toBe(0)
   })
 
   it('tocar una baldosa da esa baldosa; fuera del suelo, nada', () => {

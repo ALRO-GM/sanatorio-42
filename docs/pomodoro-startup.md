@@ -245,7 +245,8 @@ fases de paso con los brazos al revés.
 
 **El configurador** («Personajes», el botón de la persona junto al de
 recolocar): eliges a alguien (tú o alguien de la plantilla), cambias cada
-parte mirándolo en grande y lo guardas (`{ type: 'avatar', index, avatar }`,
+parte mirándolo en grande (`AvatarPortrait`: la figura dibujada a ×3, no
+agrandada, para que se noten las pecas o las cejas) y lo guardas (`{ type: 'avatar', index, avatar }`,
 `-1` eres tú; gratis). Las partes y cuántas opciones tiene cada una están en
 `packages/startup/src/avatar.ts` (`AVATAR_PARTS`), que la API usa para
 validar; cómo se dibuja cada una, en `toon.ts`:
@@ -268,9 +269,19 @@ oficio, el uniforme manda sobre la ropa de arriba. Añadir una opción: subir su
 número en `AVATAR_PARTS` (al final, sin mover las de antes) y dibujarla en
 `toon.ts`; los tests comprueban que cada opción cambie el dibujo.
 
+**Hacia dónde miran al andar**: `life.ts` da a cada paso `back` (va hacia
+arriba en pantalla) y `turn` (va hacia la derecha), pensados para la gente,
+que mira hacia +y. El robot también; el gato y el perro van de lado, a lo
+largo de x, así que `petHeading` (`models/pets.ts`) lo traduce: girados miran
+hacia +y y, de espaldas, el cuerpo se da la vuelta a lo largo. El robot, de
+espaldas, enseña una rejilla en vez de la cara. Un test lo comprueba en los
+cuatro sentidos.
+
 **Ver los dibujos sin abrir la web**: `npm run pixel -w @sanatorio/web` deja en
-`apps/web/.pixel/` todos los modelos, las oficinas de ejemplo y `gente.png`
-(cada parte del configurador con todas sus opciones).
+`apps/web/.pixel/` todos los modelos, las oficinas de ejemplo, `gente.png`
+(cada parte del configurador con todas sus opciones), `sentidos.png` (la
+gente y las mascotas andando en los cuatro sentidos) y `retratos.png` (el
+retrato grande del configurador).
 
 **Referencias de estética** (buscadas el 2026-11-09; inspiración, nunca copiar
 dibujos ni recrear un juego). La startup empieza en lo cotidiano y acaba
