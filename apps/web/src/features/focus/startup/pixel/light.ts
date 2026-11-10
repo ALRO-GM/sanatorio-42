@@ -169,9 +169,10 @@ export function tinted(canvas: HTMLCanvasElement, light: Daylight): HTMLCanvasEl
  * - `width` y `height`: lo que mide la pantalla, que alumbra entera (no un
  *   punto): de lado a lado, hacia delante;
  * - `reach`: hasta dónde llega en el suelo; `power`, cuánta luz da;
- * - `air`: si se ve brillar el aire delante. Las pantallas de las mesas no:
- *   miran a quien se sienta, de espaldas a la sala, y su luz se le ve en la
- *   cara (`glow` en `models/workplace.ts`).
+ * - `air`: si se ve brillar el aire delante. Las pantallas de las mesas miran
+ *   a quien se sienta, de espaldas a la sala: se ven encendidas por el brillo
+ *   azul alrededor del monitor (`behind`) y su luz se le ve en la cara
+ *   (`glow` en `models/workplace.ts`).
  *
  * Las lámparas echan un cono desde la bombilla al suelo que cubre su
  * baldosa y las ocho de alrededor. Todas bajan con el cuadrado de la distancia.
@@ -186,6 +187,12 @@ type Emitter = {
   reach: number
   power: number
   air: boolean
+  /**
+   * La pantalla mira hacia el otro lado (las de las mesas): su brillo se ve
+   * alrededor del monitor, por detrás, y se pinta antes que su pieza para
+   * que el monitor lo tape por el centro.
+   */
+  behind?: boolean
 }
 
 const SCREEN_BLUE = '150, 190, 255'
@@ -207,8 +214,9 @@ const EMITTERS: Partial<Record<ModelId, Emitter>> = {
     width: 6,
     height: 8,
     reach: 20,
-    power: 0.3,
-    air: false,
+    power: 0.45,
+    air: true,
+    behind: true,
   },
   dashboard: {
     color: SCREEN_BLUE,
@@ -300,7 +308,9 @@ function sourcesOf(pieces: readonly Piece[]): Source[] {
     if (found === undefined) return []
 
     const turned = piece.props.turn === true
-    const [x, y, z] = found.at
+    // Con portátil (nivel 0 y 1), la pantalla es más pequeña y está más baja.
+    const laptop = piece.model === 'workstation' && (piece.props.level ?? 0) <= 1
+    const [x, y, z] = laptop ? ([4.25, 8.9, 14.8] as const) : found.at
     const [lx, ly] = turned ? [y, x] : [x, y]
     const facing =
       found.facing === null
@@ -309,7 +319,15 @@ function sourcesOf(pieces: readonly Piece[]): Source[] {
           ? ([found.facing[1], found.facing[0]] as const)
           : found.facing
 
-    return [{ ...found, facing, world: [piece.gx * TILE + lx, piece.gy * TILE + ly, z], piece }]
+    return [
+      {
+        ...found,
+        ...(laptop ? { width: 4.5, height: 4, power: found.power * 0.7 } : {}),
+        facing,
+        world: [piece.gx * TILE + lx, piece.gy * TILE + ly, z],
+        piece,
+      },
+    ]
   })
 }
 
@@ -501,7 +519,14 @@ function screenGlow(
 }
 
 /** Una luz en el aire ya dibujada: su lienzo, dónde va y en qué orden (`depth` como `depthOf`). */
-export type AirLight = { canvas: HTMLCanvasElement; x: number; y: number; depth: number }
+export type AirLight = {
+  canvas: HTMLCanvasElement
+  x: number
+  y: number
+  depth: number
+  /** Antes que su pieza (`behind`) o después de todo lo de su fila. */
+  before: boolean
+}
 
 /**
  * Dibuja una luz en su propio lienzo, recortado a lo que ocupa (`box`, en
@@ -532,7 +557,7 @@ function airLight(
   soften(context, 1.5, density)
   draw(context)
 
-  return { canvas, x: x0, y: y0, depth }
+  return { canvas, x: x0, y: y0, depth, before: false }
 }
 
 /** Lo que ocupa en la escena un puñado de puntos. */
@@ -566,7 +591,24 @@ export function airLights(
     const depth = source.piece.gx + source.piece.gy
     const reach = source.reach * Math.SQRT2
 
-    if (source.cone === true) {
+    if (source.behind === true) {
+      // El brillo del monitor encendido: alrededor de la pantalla, azul y
+      // fuerte; el monitor lo tapa por el centro y quien se sienta, por detrás.
+      const [cx, cy] = point(x, y, z)
+      const glow = airLight(
+        [cx - 14, cy - 14, cx + 14, cy + 14],
+        depth,
+        size,
+        point,
+        density,
+        (context) => {
+          halo(context, [cx, cy], 12, source.color, Math.min(0.9, power * 2))
+          screenGlow(context, point, source, power)
+        },
+      )
+
+      out.push(glow === null ? null : { ...glow, before: true })
+    } else if (source.cone === true) {
       const [cx, cy] = point(x, y, 0)
       const [bx, by] = point(x, y, z)
 

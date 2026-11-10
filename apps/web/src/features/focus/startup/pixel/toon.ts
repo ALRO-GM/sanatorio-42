@@ -605,7 +605,7 @@ function drawToon({
         // De la cabeza (arriba) a la cintura, cada vez menos.
         const fade = Math.max(0, 1 - (Math.floor(index / paper.w) / paper.h) * 1.4)
 
-        return mix(color, SCREEN_LIGHT, 0.3 * fade)
+        return mix(color, SCREEN_LIGHT, 0.42 * fade)
       })
     : paper.pixels
 

@@ -289,7 +289,7 @@ export function depthOf(model: ModelId, gx: number, gy: number): number {
 
 /** De atrás adelante; a la par, primero lo de más a la izquierda y lo quieto antes que quien anda. */
 export function byDepth(a: Drawable, b: Drawable): number {
-  return a.depth - b.depth || a.tie - b.tie
+  return a.depth - b.depth || (a.tie === b.tie ? 0 : a.tie < b.tie ? -1 : 1)
 }
 
 /**
@@ -500,11 +500,12 @@ export function paintOffice(
   }
 
   // La luz del aire, en su sitio del orden: después de su pieza y de lo que
-  // tiene detrás, antes de lo que tiene delante (que la tapa).
+  // tiene detrás, antes de lo que tiene delante (que la tapa). La de los
+  // monitores, antes que su mesa: el monitor y quien se sienta la tapan.
   for (const air of lights.air) {
     items.push({
       depth: air.depth,
-      tie: Number.POSITIVE_INFINITY,
+      tie: air.before ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
       paint: () => {
         context.save()
         context.globalCompositeOperation = 'screen'
