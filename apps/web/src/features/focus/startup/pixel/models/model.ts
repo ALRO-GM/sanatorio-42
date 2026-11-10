@@ -15,6 +15,8 @@ export type Props = {
   axis?: Axis | null
   /** Si trabaja: teclea y parpadea. Si no, se queda quieto. */
   busy?: boolean
+  /** Al caer la tarde: la luz azulada de la pantalla en quien se sienta delante. */
+  glow?: boolean | undefined
   /** El oficio de quien se dibuja, si no programa: su uniforme. */
   role?: Role | undefined
   /** Girado: mira a la derecha (lo hace el motor, `Sprite.turned`). */

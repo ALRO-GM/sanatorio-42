@@ -2,8 +2,8 @@ import { BUBBLE_HEIGHT, BUBBLE_WIDTH, drawBubble } from './bubbles'
 import { drawFloor } from './floor'
 import type { Floor } from './floor'
 import type { Office, Piece } from './layout'
-import { emitted, garland, lightInAir, lightOnFloor, motes, tint } from './light'
-import type { Daylight } from './light'
+import { airLights, floorLights, garland, motes, tinted } from './light'
+import type { AirLight, Daylight } from './light'
 import { poseAt } from './life'
 import type { Bubble, Plan, Pose } from './life'
 import { MODELS } from './models'
@@ -120,6 +120,21 @@ type Drawn = {
   bounds: [number, number, number, number] | null
   /** Solo su sombra en el suelo, opaca: dónde no llega la luz (`paintOffice`). */
   shade: HTMLCanvasElement | null
+  /** El dibujo con el tono de cada hora, hecho la primera vez que hace falta. */
+  tints: Partial<Record<Daylight, HTMLCanvasElement>>
+}
+
+/** Un fotograma dibujado con el tono de la hora. */
+function shownAt(found: Drawn, light: Daylight): HTMLCanvasElement {
+  const done = found.tints[light]
+
+  if (done !== undefined) return done
+
+  const made = tinted(found.canvas, light)
+
+  found.tints[light] = made
+
+  return made
 }
 
 const frames = new Map<string, Drawn>()
@@ -149,7 +164,7 @@ function drawn(model: ModelId, props: Props, frame: number): Drawn {
 
     const sprite = modelSprite(model, props, frame)
 
-    found = { canvas: toCanvas(sprite), bounds: sprite.bounds(), shade: shadeOf(sprite) }
+    found = { canvas: toCanvas(sprite), bounds: sprite.bounds(), shade: shadeOf(sprite), tints: {} }
     frames.set(key, found)
   }
 
@@ -200,7 +215,7 @@ function floorOf(size: number, floor: Floor, light: Daylight): HTMLCanvasElement
     const sprite = new Sprite(width, height, size * TILE + 4, HEADROOM, DENSITY)
 
     drawFloor(sprite, size, floor, light)
-    canvas = toCanvas(sprite)
+    canvas = tinted(toCanvas(sprite), light)
     floors.set(key, canvas)
   }
 
@@ -301,43 +316,108 @@ export function paintOffice(
   const pieces = office.pieces
   const packed = extras.packed ?? 0
   const dropped = extras.dropped ?? 1
+  const settled = packed === 0 && dropped >= 1
+  const light = extras.light ?? 'day'
+  const point = (x: number, y: number, z = 0) => scenePoint(office.size, x, y, z)
+  // Con la luz de la pantalla en la cara, quien se sienta a la mesa al caer la tarde.
+  const glowing = light === 'dusk' || light === 'night'
+  const propsOf = (piece: Piece): Props => {
+    const seated = piece.seat === undefined ? null : poses[piece.seat]
+    // Quien se ha levantado deja la silla vacía.
+    const props =
+      seated !== null && seated !== undefined && !seated.seated
+        ? Object.fromEntries(Object.entries(piece.props).filter(([name]) => name !== 'look'))
+        : piece.props
+
+    return cleanProps(
+      glowing && piece.model === 'workstation' && props.look !== undefined
+        ? { ...props, glow: true }
+        : props,
+    )
+  }
+  const put: Put = (found, x, y) => {
+    place(context, shownAt(found, light), x, y)
+  }
 
   context.imageSmoothingEnabled = false
   context.clearRect(0, 0, width, height)
-  const light = extras.light ?? 'day'
-  const point = (x: number, y: number, z = 0) => scenePoint(office.size, x, y, z)
-
   context.drawImage(floorOf(office.size, office.floor, light), 0, 0, width, height)
 
-  // La luz se calcula una vez por oficina y hora (un mapa de luz) y se
-  // guarda; en cada fotograma solo se pone encima. Al recoger o montar la
-  // oficina (cambia en cada fotograma), no se guarda.
-  const settled = packed === 0 && dropped >= 1
+  // Quien anda: dónde y cómo, antes de nada (su sombra se quita de la luz del suelo).
+  const walkers = settled
+    ? office.people.flatMap((person, index) => {
+        const pose = poses[index]
+
+        if (pose === null || pose === undefined || pose.seated || pose.away) return []
+
+        const [x, y] = at(pose.gx, pose.gy)
+        const model: ModelId = person.pet ?? 'walker'
+        const props: Props =
+          person.pet !== undefined
+            ? petHeading(person.pet, pose)
+            : cleanProps({
+                look: person.look,
+                avatar: person.avatar,
+                axis: person.axis,
+                role: person.role,
+                step: pose.step,
+                back: pose.back,
+                turn: pose.turn,
+                carry: pose.carry,
+              })
+
+        return [
+          {
+            person,
+            pose,
+            model,
+            found: drawn(model, props, frame),
+            x: Math.round(x),
+            y: Math.round(y),
+          },
+        ]
+      })
+    : []
+
+  // La luz (`light.ts`) se calcula una vez por oficina y hora y se guarda: la
+  // del suelo, en un lienzo; la del aire, cada una en el suyo. Al recoger o
+  // montar la oficina (cambia en cada fotograma), no se guarda.
   const ready =
     settled &&
     baked?.office === office &&
     baked.light === light &&
-    baked.canvas.width === context.canvas.width
-      ? baked.canvas
+    baked.width === context.canvas.width
+      ? baked
       : null
-  // Para calcularla: las sombras de lo quieto, en su propia capa y por orden
-  // (lo de delante borra lo de detrás); ahí no llega la luz. Las de quien
-  // anda se quitan en cada fotograma (`movers`).
-  const shadows = ready === null ? layer('shadows', context) : null
-  const movers: { shade: HTMLCanvasElement; x: number; y: number }[] = []
-  const put: Put = (found, x, y, moving = false) => {
-    place(context, found.canvas, x, y)
-    if (moving) {
-      if (found.shade !== null) movers.push({ shade: found.shade, x, y })
-      return
+  const lights = ready ?? bake(context, office, light, frame, propsOf, point)
+
+  if (settled && ready === null) baked = lights
+
+  // La luz del suelo, debajo de todo lo demás: lo que hay encima la tapa.
+  // Las sombras de quien anda tampoco se aclaran.
+  const breathe = 0.94 + Math.sin(frame * 0.15) * 0.06
+
+  if (lights.floor !== null) {
+    let source = lights.floor
+    const shades = walkers.flatMap(({ found, x, y }) =>
+      found.shade === null ? [] : [{ shade: found.shade, x, y }],
+    )
+    const work = shades.length > 0 ? layer('work', context) : null
+
+    if (work !== null) {
+      work.setTransform(1, 0, 0, 1, 0, 0)
+      work.drawImage(lights.floor, 0, 0)
+      work.setTransform(DENSITY, 0, 0, DENSITY, 0, 0)
+      work.globalCompositeOperation = 'destination-out'
+      for (const { shade, x, y } of shades) place(work, shade, x, y)
+      source = work.canvas
     }
-    if (shadows === null) return
-    shadows.globalCompositeOperation = 'destination-out'
-    place(shadows, found.canvas, x, y)
-    if (found.shade !== null) {
-      shadows.globalCompositeOperation = 'source-over'
-      place(shadows, found.shade, x, y)
-    }
+    context.save()
+    context.setTransform(1, 0, 0, 1, 0, 0)
+    context.globalCompositeOperation = 'screen'
+    context.globalAlpha = breathe
+    context.drawImage(source, 0, 0)
+    context.restore()
   }
 
   if (extras.selected !== undefined && extras.selected !== null) {
@@ -354,11 +434,6 @@ export function paintOffice(
 
   pieces.forEach((piece, index) => {
     const seated = piece.seat === undefined ? null : poses[piece.seat]
-    // Quien se ha levantado deja la silla vacía.
-    const props: Props =
-      seated !== null && seated !== undefined && !seated.seated
-        ? Object.fromEntries(Object.entries(piece.props).filter(([name]) => name !== 'look'))
-        : piece.props
     const share = index / Math.max(1, pieces.length)
 
     if (packed > share) {
@@ -383,7 +458,7 @@ export function paintOffice(
       paintPiece(
         put,
         at,
-        { ...piece, props: cleanProps(props) },
+        { ...piece, props: propsOf(piece) },
         frame,
         Math.round((1 - fall) ** 2 * 40),
       ),
@@ -396,53 +471,53 @@ export function paintOffice(
     }
   })
 
-  if (packed === 0 && dropped >= 1) {
-    office.people.forEach((person, index) => {
-      const pose = poses[index]
+  for (const { person, pose, model, found, x, y } of walkers) {
+    items.push({
+      depth: depthOf(model, pose.gx, pose.gy),
+      tie: pose.gx + 0.001,
+      paint: () => {
+        put(found, x, y)
+      },
+    })
 
-      if (pose === null || pose === undefined || pose.seated || pose.away) return
-
-      const [x, y] = at(pose.gx, pose.gy)
-      const model: ModelId = person.pet ?? 'walker'
-      const props: Props =
-        person.pet !== undefined
-          ? petHeading(person.pet, pose)
-          : cleanProps({
-              look: person.look,
-              avatar: person.avatar,
-              axis: person.axis,
-              role: person.role,
-              step: pose.step,
-              back: pose.back,
-              turn: pose.turn,
-              carry: pose.carry,
-            })
-
-      items.push({
-        depth: depthOf(model, pose.gx, pose.gy),
-        tie: pose.gx + 0.001,
-        paint: () => {
-          put(drawn(model, props, frame), Math.round(x), Math.round(y), true)
-        },
+    if (pose.bubble !== null) {
+      said.push({
+        x,
+        y: y + 8 - (person.pet === undefined ? WALKER_HEIGHT : 8),
+        bubble: pose.bubble,
       })
+    }
 
-      if (pose.bubble !== null) {
-        said.push({
-          x,
-          y: y + 8 - (person.pet === undefined ? WALKER_HEIGHT : 8),
-          bubble: pose.bubble,
-        })
-      }
+    // Quien charla con alguien sentado: le contesta.
+    const partner = pose.with === null ? undefined : office.people[pose.with]
+    const answer = pose.with === null ? null : poses[pose.with]
 
-      // Quien charla con alguien sentado: le contesta.
-      const partner = pose.with === null ? undefined : office.people[pose.with]
-      const answer = pose.with === null ? null : poses[pose.with]
+    if (pose.bubble !== null && partner?.desk !== undefined && answer?.seated === true) {
+      const [px, py] = at(partner.desk[0], partner.desk[1])
 
-      if (pose.bubble !== null && partner?.desk !== undefined && answer?.seated === true) {
-        const [px, py] = at(partner.desk[0], partner.desk[1])
+      said.push({ x: px, y: py - 16, bubble: pose.bubble === 'heart' ? 'heart' : 'chat' })
+    }
+  }
 
-        said.push({ x: px, y: py - 16, bubble: pose.bubble === 'heart' ? 'heart' : 'chat' })
-      }
+  // La luz del aire, en su sitio del orden: después de su pieza y de lo que
+  // tiene detrás, antes de lo que tiene delante (que la tapa).
+  for (const air of lights.air) {
+    items.push({
+      depth: air.depth,
+      tie: Number.POSITIVE_INFINITY,
+      paint: () => {
+        context.save()
+        context.globalCompositeOperation = 'screen'
+        context.globalAlpha = breathe
+        context.drawImage(
+          air.canvas,
+          air.x,
+          air.y,
+          air.canvas.width / DENSITY,
+          air.canvas.height / DENSITY,
+        )
+        context.restore()
+      },
     })
   }
 
@@ -457,59 +532,6 @@ export function paintOffice(
     context.globalAlpha = 1
   }
 
-  // La hora tiñe la sala; encima, la luz que entra y la de las lámparas.
-  tint(context, office.size, light, point)
-
-  // El mapa de luz: hecho una vez (con lo de cada fotograma quieto), sin las
-  // sombras de lo quieto. Sin lienzos aparte, la luz va directa, sin guardar.
-  let map = ready
-
-  if (map === null) {
-    const glow = layer('glow', context)
-    const lit = glow ?? context
-
-    lightOnFloor(lit, office.size, light, 0, point, DENSITY)
-    emitted(lit, office.size, pieces, light, 0, point, DENSITY)
-    lightInAir(lit, office.size, light, 0, point, DENSITY)
-    if (glow !== null) {
-      glow.setTransform(1, 0, 0, 1, 0, 0)
-      if (shadows !== null) {
-        glow.globalCompositeOperation = 'destination-out'
-        glow.drawImage(shadows.canvas, 0, 0)
-      }
-      map = glow.canvas
-      if (settled) {
-        const copy = document.createElement('canvas')
-
-        copy.width = glow.canvas.width
-        copy.height = glow.canvas.height
-        copy.getContext('2d')?.drawImage(glow.canvas, 0, 0)
-        baked = { office, light, canvas: copy }
-        map = copy
-      }
-    }
-  }
-  if (map !== null) {
-    let source = map
-    const work = movers.length > 0 ? layer('work', context) : null
-
-    // Quien anda: su sombra tampoco se aclara.
-    if (work !== null) {
-      work.setTransform(1, 0, 0, 1, 0, 0)
-      work.drawImage(map, 0, 0)
-      work.setTransform(DENSITY, 0, 0, DENSITY, 0, 0)
-      work.globalCompositeOperation = 'destination-out'
-      for (const { shade, x, y } of movers) place(work, shade, x, y)
-      source = work.canvas
-    }
-    context.save()
-    context.setTransform(1, 0, 0, 1, 0, 0)
-    context.globalCompositeOperation = 'screen'
-    // La luz respira un poco: lo único que cambia del mapa entre fotogramas.
-    context.globalAlpha = 0.94 + Math.sin(frame * 0.15) * 0.06
-    context.drawImage(source, 0, 0)
-    context.restore()
-  }
   motes(context, office.size, light, frame, point)
   garland(context, office.size, light, frame, point)
 
@@ -522,11 +544,70 @@ export function paintOffice(
   }
 }
 
-/** Pone un fotograma dibujado en la escena (y su sombra en la capa de sombras). */
-type Put = (found: Drawn, x: number, y: number, moving?: boolean) => void
+/** La luz calculada de una oficina a una hora: la del suelo y la del aire. */
+type Baked = {
+  office: Office
+  light: Daylight
+  width: number
+  floor: HTMLCanvasElement | null
+  air: AirLight[]
+}
 
-/** El último mapa de luz calculado: de qué oficina y a qué hora. */
-let baked: { office: Office; light: Daylight; canvas: HTMLCanvasElement } | null = null
+/** La última luz calculada (`paintOffice`). */
+let baked: Baked | null = null
+
+/**
+ * Calcula la luz de una oficina a una hora: la del suelo, sin las sombras de
+ * lo que hay colocado (ahí no llega), y la del aire, cada una en su lienzo.
+ */
+function bake(
+  context: CanvasRenderingContext2D,
+  office: Office,
+  light: Daylight,
+  frame: number,
+  propsOf: (piece: Piece) => Props,
+  point: Point,
+): Baked {
+  const glow = layer('glow', context)
+  let floor: HTMLCanvasElement | null = null
+
+  if (glow !== null) {
+    floorLights(glow, office.size, office.pieces, light, point, DENSITY)
+
+    const shadows = layer('shadows', context)
+
+    if (shadows !== null) {
+      for (const piece of office.pieces) {
+        const { shade } = drawn(piece.model, propsOf(piece), frame)
+        const [x, y] = tileOrigin(office.size, piece.gx, piece.gy)
+
+        if (shade !== null) place(shadows, shade, x, y)
+      }
+      glow.setTransform(1, 0, 0, 1, 0, 0)
+      glow.globalCompositeOperation = 'destination-out'
+      glow.drawImage(shadows.canvas, 0, 0)
+    }
+
+    floor = document.createElement('canvas')
+    floor.width = glow.canvas.width
+    floor.height = glow.canvas.height
+    floor.getContext('2d')?.drawImage(glow.canvas, 0, 0)
+  }
+
+  return {
+    office,
+    light,
+    width: context.canvas.width,
+    floor,
+    air: airLights(office.size, office.pieces, light, point, DENSITY),
+  }
+}
+
+/** Pone un fotograma dibujado en la escena (y su sombra en la capa de sombras). */
+type Put = (found: Drawn, x: number, y: number) => void
+
+/** Un punto del mundo en la escena (`scenePoint` de una oficina). */
+type Point = (x: number, y: number, z?: number) => [number, number]
 
 const layers = new Map<string, HTMLCanvasElement>()
 

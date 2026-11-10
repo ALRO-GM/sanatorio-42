@@ -153,7 +153,7 @@ pieza crece con la partida. Vive en `apps/web/src/features/focus/startup/pixel/`
 | `palette.ts` | La paleta. Cada caja lleva tres tonos: arriba el claro, a la izquierda el medio y a la derecha el oscuro (la luz viene de arriba a la izquierda). |
 | `toon.ts` | Las personas: chibis de cabeza grande con aire de película de animación, de frente o de espaldas, quietas, andando (ocho fases) o sentadas tecleando, con su expresión, el uniforme de su oficio (gorra, gorro de cocina o casco) y lo que llevan en las manos. Cada parte sale de su aspecto (`Avatar`, el configurador) o, si no lo han tocado, de `look`. |
 | `models/` | Un modelo por pieza (`Model`: `frames` y `draw`), reunidos en `models/index.ts`. |
-| `light.ts` | La luz según la hora (`daylightOf`): el tono de la sala, la luz de las ventanas en el suelo y en el aire (efecto Tyndall, con motas) y la de lo que emite luz (conos de las lámparas, pantallas que alumbran hacia delante, LED), que baja con el cuadrado de la distancia y no aclara las sombras. |
+| `light.ts` | La luz según la hora (`daylightOf`): el tono de cada dibujo, la luz del suelo (ventanas y fuentes, `floorLights`) y la del aire, cada una en su lienzo y en su sitio del orden de pintado (`airLights`: conos de las lámparas, brillo delante de las pantallas, LED y haces de las ventanas). Baja con el cuadrado de la distancia, las pantallas alumbran enteras y solo hacia delante, y no aclara las sombras ni pasa por delante de lo que la tapa. |
 | `floor.ts` | Los suelos y las paredes, en tonos cálidos y uno por sitio: tablas de madera con veta (tu cuarto), cemento pulido con ladrillo visto (coworking), parquet en espiga con pared verde salvia, moqueta terracota, suelo técnico y mármol. Todo el suelo, de una pieza y sin juntas marcadas. En la pared de la derecha, ventanas con el paisaje de la hora (amanecer, día, atardecer o noche con luna), alféizar con maceta, cortinas y jardineras colgadas entre ventana y ventana; en la de la izquierda, estantes con libros y plantas colgantes, cuadros y un reloj; arriba, una guirnalda de bombillas. Es fondo: no ocupa baldosas. |
 | `layout.ts` | Qué sale y dónde, solo a partir de la partida: todo sale del motor (`world.ts`, `layoutOf`, lo mismo que comprueba la API), y aquí se le pone dibujo; la recepción, en su mostrador. También quién anda por la oficina (`people`). |
 | `paint.ts` | Pasa los dibujos al lienzo (`DENSITY`: cuatro píxeles de verdad por píxel del dibujo): cada fotograma de cada modelo se dibuja una vez y se guarda. Pinta de atrás adelante por la suma de la esquina de atrás de cada baldosa (`depthOf`), también para quien anda a medio camino, así nadie se pinta encima de lo que tiene delante; lo plano (alfombras) va antes que todo. |
@@ -323,27 +323,35 @@ día (de 9 a 18), atardecer (de 18 a 21) y noche. Con ella cambian:
   con estrellas y luna;
 - el tono de la sala (un velo rosado, nada, malva o violeta), solo dentro
   de la sala;
-- la luz que entra (`lightOnFloor`, `lightInAir`): por cada cristal, una
+- la luz que entra (`floorLights` y los haces de `airLights`): por cada cristal, una
   mancha en el suelo y un haz en el aire que se desvanece al bajar (efecto
   Tyndall), con motas de polvo que brillan al cruzarlo. Sutil y difuminada
   (sin bordes, sobre todo en el suelo: pedido por Alberto el mismo día);
   más tumbada y de color al amanecer y al atardecer. De noche no entra;
-- lo que emite luz (`emitted`; pedido por Alberto el mismo día: de noche
-  solo alumbra lo que da luz). Cada fuente tiene su sitio, su altura, hacia
-  dónde apunta y su alcance (`EMITTERS`), y su luz baja con el cuadrado de
-  la distancia (`falloff`). Las lámparas echan un cono de la bombilla al
-  suelo que cubre su baldosa y las ocho de alrededor. Las pantallas (mesas,
-  panel de métricas, tele, arcade) dan una luz azulada y suave solo hacia
-  donde miran: las de las mesas, hacia quien se sienta. Los servidores
-  alumbran un poco con sus LED; el neón, el acuario y la máquina, a su
-  color. Casi no se nota de día y del todo de noche, con la sala más oscura.
-  La guirnalda se enciende al caer la tarde.
+- lo que emite luz (pedido por Alberto el mismo día: de noche solo alumbra
+  lo que da luz). Cada fuente (`EMITTERS`) tiene su sitio, su altura, hacia
+  dónde apunta, su alcance y, si es una pantalla, su tamaño: la pantalla
+  entera alumbra hacia donde mira (`across`, cinco puntos de lado a lado), y
+  por detrás nada. La luz baja con el cuadrado de la distancia (`falloff`).
+  Las lámparas echan un cono de la bombilla al suelo que cubre su baldosa y
+  las ocho de alrededor. La tele, el panel de métricas y el arcade dan una
+  luz azulada que llena el aire delante de la pantalla (`screenGlow`). Las de
+  las mesas miran hacia quien se sienta: de espaldas a la sala, su luz se le
+  ve en la cara (`glow`, `toon.ts`), y la trasera del monitor queda a
+  oscuras. Los servidores alumbran un poco con sus LED; el neón, el acuario y
+  la máquina, a su color. Casi no se nota de día y del todo de noche. La
+  guirnalda se enciende al caer la tarde.
 
-Las sombras no se aclaran con la luz (pedido el mismo día). Cada dibujo
-guarda su sombra aparte (`shadeOf`). Al pintar la escena, las sombras van a
-su propia capa, por orden, y lo de delante borra lo de detrás. Toda la luz
-se pinta en otra capa, se le quitan esas sombras y se pone encima de la
-escena (`paintOffice`, `layer`). El suelo se pinta un poco por debajo de las
+**Luz que respeta lo que hay delante** (pedido el mismo día). La luz va en
+dos partes. La del suelo (ventanas y fuentes, `floorLights`) se pinta debajo
+de los muebles y de la gente, así que lo que está encima la tapa; se le
+quitan las sombras de lo colocado y, en cada fotograma, las de quien anda
+(las sombras no se aclaran). La del aire (`airLights`: conos, brillo delante
+de las pantallas, LED, haces de las ventanas) va cada una en su lienzo y
+entra en el orden de pintado en su sitio: después de su pieza y de lo que
+tiene detrás, antes de lo que tiene delante, que la tapa. El tono de la hora
+se le da a cada dibujo (`tinted`), no por encima de todo, para que la noche
+no apague lo que alumbra. El suelo se pinta un poco por debajo de las
 paredes para que no quede una rendija clara en el zócalo.
 
 **Cómo se pinta y qué se guarda** (2026-11-10, Alberto preguntó por el
@@ -356,15 +364,16 @@ movimiento» o con la web quieta. Casi todo se calcula una vez y se guarda:
 | Cada fotograma de cada modelo (volúmenes, luz, sombras) | la primera vez que sale | `frames` (`paint.ts`), hasta 1 500; los que se ven igual comparten dibujo (`Model.same`) |
 | Cada figura de persona | una vez por aspecto, pose y expresión | `toonOf` (`toon.ts`), hasta 600 |
 | Suelo, paredes y ventanas | una vez por tamaño, suelo y hora | `floors` (`paint.ts`) |
-| El mapa de luz (ventanas, lámparas y pantallas, difuminado y sin las sombras de lo quieto) | una vez por oficina y hora | `baked` (`paint.ts`) |
+| Cada dibujo con el tono de la hora | la primera vez que sale a esa hora | `Drawn.tints` (`paint.ts`) |
+| La luz del suelo (difuminada y sin las sombras de lo colocado) y la del aire (cada luz en su lienzo) | una vez por oficina y hora | `baked` (`paint.ts`) |
 
-En cada fotograma solo se copian lienzos ya hechos (`drawImage`), de atrás
-adelante. Luego se pone encima el mapa de luz, que respira un poco con su
-transparencia y al que se le quitan las sombras de quien anda. Por último,
-las motas y la guirnalda, que son pocas y sin desenfoque. Antes, la luz se
+En cada fotograma solo se copian lienzos ya hechos (`drawImage`): el suelo,
+su luz (sin las sombras de quien anda), y las piezas, la gente y las luces
+del aire de atrás adelante. La luz respira un poco con su transparencia. Por
+último, las motas y la guirnalda, que son pocas y sin desenfoque. Antes, la luz se
 recalculaba con desenfoque en cada fotograma: unos 190 ms por fotograma de
 día y 72 de noche (Chrome sin tarjeta gráfica, la oficina mediana). Ahora,
-1,7 y 2,9 ms. Solo el primer fotograma tarda (unos 0,5 s), al dibujar y
+menos de 3 ms. Solo el primer fotograma tarda (unos 0,5 s), al dibujar y
 guardar lo que sale.
 
 Lo siguiente: rehacer con formas lo que aún lleva píxeles a mano (letreros,

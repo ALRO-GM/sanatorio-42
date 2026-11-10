@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest'
 import { drawFloor } from '../../src/features/focus/startup/pixel/floor'
 import { officeOf, ROOM } from '../../src/features/focus/startup/pixel/layout'
 import { daylightOf } from '../../src/features/focus/startup/pixel/light'
+import { toonOf } from '../../src/features/focus/startup/pixel/toon'
 import { friendsOf, lifeOf, poseAt } from '../../src/features/focus/startup/pixel/life'
 import { MODELS } from '../../src/features/focus/startup/pixel/models'
 import type { ModelId } from '../../src/features/focus/startup/pixel/models'
@@ -447,6 +448,29 @@ describe('el mundo vivo', () => {
 
     // Las juntas, lejos de las paredes: solo los dos tonos de la moqueta.
     for (const color of seen) expect(['#b56e56', '#b97259']).toContain(color)
+  })
+
+  it('la luz de una pantalla delante tiñe de azul a quien se sienta, más arriba que abajo', () => {
+    const avatar = avatarOf(412)
+    const plain = toonOf({ avatar, k: 2 })
+    const lit = toonOf({ avatar, glow: true, k: 2 })
+    const blue = (color: string | null) =>
+      color === null
+        ? 0
+        : Number.parseInt(color.slice(5, 7), 16) - Number.parseInt(color.slice(1, 3), 16)
+    const shift = (from: number, to: number) => {
+      let sum = 0
+
+      for (let index = from * plain.w; index < to * plain.w; index += 1) {
+        sum += blue(lit.pixels[index] ?? null) - blue(plain.pixels[index] ?? null)
+      }
+
+      return sum
+    }
+
+    expect(lit.pixels).not.toEqual(plain.pixels)
+    expect(shift(0, plain.h / 2)).toBeGreaterThan(shift(plain.h / 2, plain.h))
+    expect(shift(0, plain.h / 2)).toBeGreaterThan(0)
   })
 
   it('lo que se ve por las ventanas cambia con la hora', () => {

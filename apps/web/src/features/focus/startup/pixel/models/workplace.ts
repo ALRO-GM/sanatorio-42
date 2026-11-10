@@ -61,6 +61,7 @@ function seated(sprite: Sprite, frame: number, props: Props): void {
       pose: SEATED[pose],
       blink,
       expression,
+      glow: props.glow,
     },
     8.5,
     4.5,

@@ -378,11 +378,16 @@ export type ToonSpec = {
   blink?: boolean | undefined
   expression?: Expression | undefined
   carry?: Carry | undefined
+  /** La luz azulada de una pantalla delante: más en la cara, menos al bajar. */
+  glow?: boolean | undefined
   /** Píxeles por unidad del lienzo de la figura. */
   k: number
 }
 
 type Toon = { pixels: readonly (Color | null)[]; w: number; h: number }
+
+/** El azul de la luz de una pantalla (`glow`), el mismo que en `light.ts`. */
+const SCREEN_LIGHT = '#96beff'
 
 const drawn = new Map<string, Toon>()
 
@@ -408,6 +413,7 @@ function drawToon({
   blink = false,
   expression = 'contenta',
   carry = null,
+  glow = false,
   k,
 }: ToonSpec): Toon {
   const paper = new Paper(k)
@@ -592,7 +598,18 @@ function drawToon({
     hatOf(paper, hat, uniform ?? (['#ffffff', '#eceaf2', '#c9c5d6'] as Shades), cx, hy, rx, ry)
   carryOf(paper, carry, cx, shY, back)
 
-  return { pixels: paper.pixels, w: paper.w, h: paper.h }
+  const pixels = glow
+    ? paper.pixels.map((color, index) => {
+        if (color === null) return null
+
+        // De la cabeza (arriba) a la cintura, cada vez menos.
+        const fade = Math.max(0, 1 - (Math.floor(index / paper.w) / paper.h) * 1.4)
+
+        return mix(color, SCREEN_LIGHT, 0.3 * fade)
+      })
+    : paper.pixels
+
+  return { pixels, w: paper.w, h: paper.h }
 }
 
 /** Lo de delante de cada prenda de arriba: cuello, cuello de camisa, capucha, solapas. */

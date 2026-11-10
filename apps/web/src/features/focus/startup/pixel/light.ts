@@ -46,7 +46,10 @@ function soften(context: CanvasRenderingContext2D, amount: number, density: numb
   context.filter = `blur(${String(amount * density)}px)`
 }
 
-/** El tono que se le da a toda la sala encima de lo pintado (nada de día). */
+/**
+ * El tono de la hora, que se le da a cada dibujo (suelo, muebles, gente) y no
+ * a la luz: así lo que alumbra no se apaga con la noche (`tinted`).
+ */
 const TINT: Record<Daylight, string | null> = {
   dawn: 'rgba(255, 180, 170, 0.07)',
   day: null,
@@ -134,93 +137,520 @@ function clipRoom(
 }
 
 /**
- * La mancha de luz de cada cristal en el suelo: va antes que los muebles y
- * la gente, que la tapan. Respira un poco.
+ * Un dibujo con el tono de la hora (`TINT`), hecho una vez: solo sobre lo
+ * pintado, sin salirse. De día, el mismo dibujo.
  */
-export function lightOnFloor(
+export function tinted(canvas: HTMLCanvasElement, light: Daylight): HTMLCanvasElement {
+  const color = TINT[light]
+
+  if (color === null) return canvas
+
+  const copy = document.createElement('canvas')
+  const context = copy.getContext('2d')
+
+  copy.width = canvas.width
+  copy.height = canvas.height
+  if (context === null) return canvas
+  context.drawImage(canvas, 0, 0)
+  context.globalCompositeOperation = 'source-atop'
+  context.fillStyle = color
+  context.fillRect(0, 0, copy.width, copy.height)
+
+  return copy
+}
+
+/**
+ * Lo que da luz por sí mismo (pedido por Alberto el 2026-11-10: de noche solo
+ * alumbra lo que emite luz). Cada fuente, en su baldosa sin girar:
+ *
+ * - `at`: el centro de lo que alumbra (unidades; z, la altura);
+ * - `facing`: hacia dónde apunta (las pantallas solo alumbran por delante);
+ *   `null`, a todos lados;
+ * - `width` y `height`: lo que mide la pantalla, que alumbra entera (no un
+ *   punto): de lado a lado, hacia delante;
+ * - `reach`: hasta dónde llega en el suelo; `power`, cuánta luz da;
+ * - `air`: si se ve brillar el aire delante. Las pantallas de las mesas no:
+ *   miran a quien se sienta, de espaldas a la sala, y su luz se le ve en la
+ *   cara (`glow` en `models/workplace.ts`).
+ *
+ * Las lámparas echan un cono desde la bombilla al suelo que cubre su
+ * baldosa y las ocho de alrededor. Todas bajan con el cuadrado de la distancia.
+ */
+type Emitter = {
+  cone?: boolean
+  color: string
+  at: readonly [number, number, number]
+  facing: readonly [number, number] | null
+  width?: number
+  height?: number
+  reach: number
+  power: number
+  air: boolean
+}
+
+const SCREEN_BLUE = '150, 190, 255'
+
+const EMITTERS: Partial<Record<ModelId, Emitter>> = {
+  lamp: {
+    cone: true,
+    color: '255, 212, 150',
+    at: [8, 8, 22],
+    facing: null,
+    reach: 24,
+    power: 0.42,
+    air: true,
+  },
+  workstation: {
+    color: SCREEN_BLUE,
+    at: [4, 7.8, 19],
+    facing: [0, -1],
+    width: 6,
+    height: 8,
+    reach: 20,
+    power: 0.3,
+    air: false,
+  },
+  dashboard: {
+    color: SCREEN_BLUE,
+    at: [8, 8.4, 12],
+    facing: [0, 1],
+    width: 12,
+    height: 10,
+    reach: 26,
+    power: 0.3,
+    air: true,
+  },
+  tv: {
+    color: SCREEN_BLUE,
+    at: [8, 9.7, 10.5],
+    facing: [0, 1],
+    width: 10,
+    height: 7,
+    reach: 24,
+    power: 0.3,
+    air: true,
+  },
+  arcade: {
+    color: '160, 170, 255',
+    at: [8, 14.2, 19],
+    facing: [0, 1],
+    width: 8,
+    height: 8,
+    reach: 24,
+    power: 0.28,
+    air: true,
+  },
+  rack: {
+    color: '120, 230, 200',
+    at: [8, 13.2, 8],
+    facing: [0, 1],
+    width: 8,
+    height: 10,
+    reach: 14,
+    power: 0.16,
+    air: true,
+  },
+  vending: {
+    color: '255, 236, 196',
+    at: [8, 14.2, 15],
+    facing: [0, 1],
+    width: 8,
+    height: 12,
+    reach: 18,
+    power: 0.16,
+    air: true,
+  },
+  neon: { color: '255, 120, 210', at: [8, 8, 14], facing: null, reach: 18, power: 0.18, air: true },
+  aquarium: {
+    color: '120, 220, 230',
+    at: [8, 8, 9],
+    facing: null,
+    reach: 16,
+    power: 0.14,
+    air: true,
+  },
+}
+
+/** Cuánto se nota lo que emite luz a cada hora: casi nada de día, todo de noche. */
+const STRENGTH: Record<Daylight, number> = { day: 0.15, dawn: 0.35, dusk: 0.65, night: 1 }
+
+/**
+ * Cuánta luz llega a un punto del suelo a `distance` de la fuente, que está a
+ * `height`: con el cuadrado de la distancia (y el coseno del ángulo con que
+ * llega), y a cero en el borde de su alcance.
+ */
+function falloff(distance: number, height: number, reach: number): number {
+  const h = Math.max(4, height)
+  const fade = 1 - (distance / reach) ** 2
+
+  return (h / Math.hypot(h, distance)) ** 3 * Math.max(0, fade)
+}
+
+type Source = Emitter & {
+  facing: readonly [number, number] | null
+  world: readonly [number, number, number]
+  piece: Piece
+}
+
+/** Las fuentes encendidas, ya en el mundo (girada la pieza, se giran con ella). */
+function sourcesOf(pieces: readonly Piece[]): Source[] {
+  return pieces.flatMap((piece) => {
+    const found = EMITTERS[piece.model]
+
+    if (found === undefined) return []
+
+    const turned = piece.props.turn === true
+    const [x, y, z] = found.at
+    const [lx, ly] = turned ? [y, x] : [x, y]
+    const facing =
+      found.facing === null
+        ? null
+        : turned
+          ? ([found.facing[1], found.facing[0]] as const)
+          : found.facing
+
+    return [{ ...found, facing, world: [piece.gx * TILE + lx, piece.gy * TILE + ly, z], piece }]
+  })
+}
+
+/** Los puntos de una pantalla de lado a lado (perpendicular a donde mira): alumbra entera. */
+function across(source: Source, count: number): [number, number, number][] {
+  const [x, y, z] = source.world
+  const half = (source.width ?? 0) / 2
+
+  if (source.facing === null || half === 0 || count <= 1) return [[x, y, z]]
+
+  const [fx, fy] = source.facing
+
+  return Array.from({ length: count }, (_, index) => {
+    const t = -half + (index / (count - 1)) * half * 2
+
+    return [x - fy * t, y + fx * t, z]
+  })
+}
+
+/**
+ * La luz en el suelo de una fuente puntual: en el plano del suelo (un
+ * círculo del mundo, en la escena un óvalo), solo hacia donde apunta, que
+ * baja con la distancia.
+ */
+function floorLight(
+  context: CanvasRenderingContext2D,
+  point: Point,
+  [x, y, z]: readonly [number, number, number],
+  color: string,
+  reach: number,
+  facing: readonly [number, number] | null,
+  power: number,
+): void {
+  const [cx, cy] = point(x, y, 0)
+  const pool = context.createRadialGradient(0, 0, 0, 0, 0, reach)
+
+  for (const stop of [0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1]) {
+    pool.addColorStop(
+      stop,
+      `rgba(${color}, ${(power * falloff(stop * reach, z, reach)).toFixed(3)})`,
+    )
+  }
+  context.save()
+  // Las unidades del suelo: +x hacia abajo a la derecha, +y hacia abajo a la izquierda.
+  context.translate(cx, cy)
+  context.transform(1, 0.5, -1, 0.5, 0, 0)
+  context.beginPath()
+  if (facing === null) context.arc(0, 0, reach, 0, Math.PI * 2)
+  else {
+    const angle = Math.atan2(facing[1], facing[0])
+
+    context.moveTo(0, 0)
+    context.arc(0, 0, reach, angle - 1.25, angle + 1.25)
+    context.closePath()
+  }
+  context.fillStyle = pool
+  context.fill()
+  context.restore()
+}
+
+/**
+ * La luz que llega al suelo, toda junta: la de las ventanas (de día) y la de
+ * lo que emite luz. Va debajo de los muebles y de la gente, que la tapan si
+ * están delante; se calcula una vez (`paintOffice`).
+ */
+export function floorLights(
   context: CanvasRenderingContext2D,
   size: number,
+  pieces: readonly Piece[],
   light: Daylight,
-  frame: number,
   point: Point,
   density: number,
 ): void {
-  // De noche no entra luz por las ventanas.
-  if (light === 'night') return
-
-  const { color, pool } = SUN[light]
-  const breathe = 1 + Math.sin(frame * 0.15) * 0.08
-
   context.save()
   // Solo en el suelo: lo que caería más allá no sube por la pared.
   clipRoom(context, size, point, 0)
   context.globalCompositeOperation = 'screen'
   soften(context, 3, density)
-  context.fillStyle = `rgba(${color}, ${(pool * breathe).toFixed(3)})`
-  for (const pane of panesOf(size)) {
-    trace(
-      context,
-      [
-        hit(light, pane.x0, pane.z0),
-        hit(light, pane.x1, pane.z0),
-        hit(light, pane.x1, pane.z1),
-        hit(light, pane.x0, pane.z1),
-      ].map(([x, y]) => point(x, y, 0)),
-    )
-    context.fill()
+  if (light !== 'night') {
+    const { color, pool } = SUN[light]
+
+    context.fillStyle = `rgba(${color}, ${pool.toFixed(3)})`
+    for (const pane of panesOf(size)) {
+      trace(
+        context,
+        [
+          hit(light, pane.x0, pane.z0),
+          hit(light, pane.x1, pane.z0),
+          hit(light, pane.x1, pane.z1),
+          hit(light, pane.x0, pane.z1),
+        ].map(([x, y]) => point(x, y, 0)),
+      )
+      context.fill()
+    }
+  }
+  soften(context, 1.5, density)
+  for (const source of sourcesOf(pieces)) {
+    const points = across(source, 5)
+    const power = (source.power * STRENGTH[light]) / points.length
+
+    for (const at of points) {
+      floorLight(context, point, at, source.color, source.reach, source.facing, power)
+    }
   }
   context.restore()
 }
 
-/**
- * Los haces de luz en el aire (efecto Tyndall): de cada cristal al suelo, más
- * fuertes junto a la ventana y desvaneciéndose al bajar, con motas de polvo
- * que brillan al cruzarlos. Van encima de todo, como la luz en el aire.
- */
-export function lightInAir(
+/** Un brillo pequeño alrededor de un punto: la bombilla, el neón, el acuario. */
+function halo(
   context: CanvasRenderingContext2D,
+  [cx, cy]: [number, number],
+  radius: number,
+  color: string,
+  alpha: number,
+): void {
+  const glow = context.createRadialGradient(cx, cy, 0, cx, cy, radius)
+
+  glow.addColorStop(0, `rgba(${color}, ${alpha.toFixed(3)})`)
+  glow.addColorStop(0.4, `rgba(${color}, ${(alpha * 0.35).toFixed(3)})`)
+  glow.addColorStop(1, `rgba(${color}, 0)`)
+  context.fillStyle = glow
+  context.fillRect(cx - radius, cy - radius, radius * 2, radius * 2)
+}
+
+/** El cono de una lámpara: de la bombilla al óvalo que alumbra en el suelo. */
+function cone(
+  context: CanvasRenderingContext2D,
+  point: Point,
+  source: Source,
+  power: number,
+): void {
+  const [x, y, z] = source.world
+  const [bx, by] = point(x, y, z)
+  const [cx, cy] = point(x, y, 0)
+  // Un círculo del suelo de radio `reach`, visto en la escena.
+  const [rx, ry] = [source.reach * Math.SQRT2, (source.reach * Math.SQRT2) / 2]
+  const gradient = context.createLinearGradient(bx, by, cx, cy + ry)
+
+  gradient.addColorStop(0, `rgba(${source.color}, ${(power * 0.9).toFixed(3)})`)
+  gradient.addColorStop(0.5, `rgba(${source.color}, ${(power * 0.5).toFixed(3)})`)
+  gradient.addColorStop(1, `rgba(${source.color}, ${(power * 0.2).toFixed(3)})`)
+  context.beginPath()
+  context.moveTo(bx - 2.5, by)
+  context.lineTo(cx - rx, cy)
+  context.ellipse(cx, cy, rx, ry, 0, Math.PI, 0, true)
+  context.lineTo(bx + 2.5, by)
+  context.closePath()
+  context.fillStyle = gradient
+  context.fill()
+}
+
+/**
+ * El aire que brilla delante de una pantalla: un volumen con su forma (la de
+ * la pantalla entera), que sale hacia donde mira y se apaga al alejarse.
+ */
+function screenGlow(
+  context: CanvasRenderingContext2D,
+  point: Point,
+  source: Source,
+  power: number,
+): void {
+  const [x, y, z] = source.world
+  const [fx, fy] = source.facing ?? [0, 1]
+  const [half, tall, out] = [(source.width ?? 6) / 2, (source.height ?? 6) / 2, source.reach * 0.35]
+  const corner = (side: number, up: number, ahead: number, spread: number): [number, number] =>
+    point(
+      x - fy * side * spread + fx * ahead,
+      y + fx * side * spread + fy * ahead,
+      z + up * spread - ahead * 0.35,
+    )
+  const shape = hull(
+    [-1, 1].flatMap((side) =>
+      [-1, 1].flatMap((up) => [
+        corner(side * half, up * tall, 0, 1),
+        corner(side * half, up * tall, out, 1.5),
+      ]),
+    ),
+  )
+  const from = point(x, y, z)
+  const to = point(x + fx * out, y + fy * out, z - out * 0.35)
+  const gradient = context.createLinearGradient(from[0], from[1], to[0], to[1])
+
+  gradient.addColorStop(0, `rgba(${source.color}, ${Math.min(0.8, power * 1.8).toFixed(3)})`)
+  gradient.addColorStop(0.4, `rgba(${source.color}, ${(power * 0.7).toFixed(3)})`)
+  gradient.addColorStop(1, `rgba(${source.color}, 0)`)
+  context.fillStyle = gradient
+  trace(context, shape)
+  context.fill()
+}
+
+/** Una luz en el aire ya dibujada: su lienzo, dónde va y en qué orden (`depth` como `depthOf`). */
+export type AirLight = { canvas: HTMLCanvasElement; x: number; y: number; depth: number }
+
+/**
+ * Dibuja una luz en su propio lienzo, recortado a lo que ocupa (`box`, en
+ * píxeles del dibujo), difuminada y solo dentro de la sala.
+ */
+function airLight(
+  box: [number, number, number, number],
+  depth: number,
   size: number,
-  light: Daylight,
-  frame: number,
   point: Point,
   density: number,
-): void {
-  if (light === 'night') return
+  draw: (context: CanvasRenderingContext2D) => void,
+): AirLight | null {
+  const [x0, y0, x1, y1] = [
+    Math.floor(box[0]) - 4,
+    Math.floor(box[1]) - 4,
+    Math.ceil(box[2]) + 4,
+    Math.ceil(box[3]) + 4,
+  ]
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')
 
-  const { color, beam } = SUN[light]
-
-  context.save()
-  clipRoom(context, size, point)
-  context.globalCompositeOperation = 'screen'
+  canvas.width = (x1 - x0) * density
+  canvas.height = (y1 - y0) * density
+  if (context === null) return null
+  context.setTransform(density, 0, 0, density, -x0 * density, -y0 * density)
+  clipRoom(context, size, point, WALL_TOP)
   soften(context, 1.5, density)
-  panesOf(size).forEach((pane, index) => {
-    const wall: [number, number][] = [
-      point(pane.x0, 0, pane.z0),
-      point(pane.x1, 0, pane.z0),
-      point(pane.x1, 0, pane.z1),
-      point(pane.x0, 0, pane.z1),
-    ]
-    const floor = [
-      hit(light, pane.x0, pane.z0),
-      hit(light, pane.x1, pane.z0),
-      hit(light, pane.x1, pane.z1),
-      hit(light, pane.x0, pane.z1),
-    ].map(([x, y]) => point(x, y, 0))
-    const from = point((pane.x0 + pane.x1) / 2, 0, (pane.z0 + pane.z1) / 2)
-    const [fx, fy] = hit(light, (pane.x0 + pane.x1) / 2, (pane.z0 + pane.z1) / 2)
-    const to = point(fx, fy, 0)
-    const shimmer = 1 + Math.sin(frame * 0.12 + index * 1.7) * 0.12
-    const gradient = context.createLinearGradient(from[0], from[1], to[0], to[1])
+  draw(context)
 
-    gradient.addColorStop(0, `rgba(${color}, ${(beam * shimmer).toFixed(3)})`)
-    gradient.addColorStop(0.6, `rgba(${color}, ${(beam * shimmer * 0.45).toFixed(3)})`)
-    gradient.addColorStop(1, `rgba(${color}, 0)`)
-    context.fillStyle = gradient
-    trace(context, hull([...wall, ...floor]))
-    context.fill()
-  })
+  return { canvas, x: x0, y: y0, depth }
+}
 
-  context.restore()
+/** Lo que ocupa en la escena un puñado de puntos. */
+function boxOf(points: [number, number][]): [number, number, number, number] {
+  const xs = points.map(([x]) => x)
+  const ys = points.map(([, y]) => y)
+
+  return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)]
+}
+
+/**
+ * La luz en el aire, cada una en su lienzo y con su sitio en el orden de
+ * pintado: los conos de las lámparas, el brillo delante de las pantallas, el
+ * de los LED, el neón y el acuario, y los haces de las ventanas (efecto
+ * Tyndall, de día). Así lo que está delante la tapa. Se calcula una vez.
+ */
+export function airLights(
+  size: number,
+  pieces: readonly Piece[],
+  light: Daylight,
+  point: Point,
+  density: number,
+): AirLight[] {
+  const out: (AirLight | null)[] = []
+
+  for (const source of sourcesOf(pieces)) {
+    if (!source.air) continue
+
+    const power = source.power * STRENGTH[light]
+    const [x, y, z] = source.world
+    const depth = source.piece.gx + source.piece.gy
+    const reach = source.reach * Math.SQRT2
+
+    if (source.cone === true) {
+      const [cx, cy] = point(x, y, 0)
+      const [bx, by] = point(x, y, z)
+
+      out.push(
+        airLight(
+          [cx - reach, by - 8, cx + reach, cy + reach / 2],
+          depth,
+          size,
+          point,
+          density,
+          (context) => {
+            cone(context, point, source, power)
+            halo(context, [bx, by], 8, source.color, Math.min(0.85, power * 2.6))
+          },
+        ),
+      )
+    } else if (source.facing === null) {
+      const [cx, cy] = point(x, y, z)
+
+      out.push(
+        airLight([cx - 10, cy - 10, cx + 10, cy + 10], depth, size, point, density, (context) => {
+          halo(context, [cx, cy], 9, source.color, Math.min(0.8, power * 2.4))
+        }),
+      )
+    } else {
+      const [cx, cy] = point(x, y, z)
+      const span = source.reach * 0.5 + (source.width ?? 6)
+
+      out.push(
+        airLight(
+          [cx - span * 1.5, cy - span, cx + span * 1.5, cy + span],
+          depth,
+          size,
+          point,
+          density,
+          (context) => {
+            screenGlow(context, point, source, power)
+          },
+        ),
+      )
+    }
+  }
+
+  if (light !== 'night') {
+    const { color, beam } = SUN[light]
+
+    for (const pane of panesOf(size)) {
+      const wall: [number, number][] = [
+        point(pane.x0, 0, pane.z0),
+        point(pane.x1, 0, pane.z0),
+        point(pane.x1, 0, pane.z1),
+        point(pane.x0, 0, pane.z1),
+      ]
+      const hits = [
+        hit(light, pane.x0, pane.z0),
+        hit(light, pane.x1, pane.z0),
+        hit(light, pane.x1, pane.z1),
+        hit(light, pane.x0, pane.z1),
+      ]
+      const floor = hits.map(([hx, hy]) => point(hx, hy, 0))
+      const middle = (pane.z0 + pane.z1) / 2
+      const [mx, my] = hit(light, (pane.x0 + pane.x1) / 2, middle)
+      const from = point((pane.x0 + pane.x1) / 2, 0, middle)
+      const to = point(mx, my, 0)
+      // En el orden de pintado, a media altura del haz: lo que está más
+      // cerca lo tapa.
+      const depth = (mx + my) / 2 / TILE
+
+      out.push(
+        airLight(boxOf([...wall, ...floor]), depth, size, point, density, (context) => {
+          const gradient = context.createLinearGradient(from[0], from[1], to[0], to[1])
+
+          gradient.addColorStop(0, `rgba(${color}, ${beam.toFixed(3)})`)
+          gradient.addColorStop(0.6, `rgba(${color}, ${(beam * 0.45).toFixed(3)})`)
+          gradient.addColorStop(1, `rgba(${color}, 0)`)
+          context.fillStyle = gradient
+          trace(context, hull([...wall, ...floor]))
+          context.fill()
+        }),
+      )
+    }
+  }
+
+  return out.filter((one) => one !== null)
 }
 
 /**
@@ -259,238 +689,6 @@ export function motes(
       if (twinkle) context.fillRect(px, py, 0.5, 0.5)
     }
   })
-  context.restore()
-}
-
-/** El tono de la hora sobre toda la sala (antes de las luces, que brillan por encima). */
-export function tint(
-  context: CanvasRenderingContext2D,
-  size: number,
-  light: Daylight,
-  point: Point,
-): void {
-  const color = TINT[light]
-
-  if (color === null) return
-  context.save()
-  clipRoom(context, size, point, WALL_TOP)
-  context.fillStyle = color
-  context.fillRect(-1e4, -1e4, 2e4, 2e4)
-  context.restore()
-}
-
-/**
- * Lo que da luz por sí mismo (pedido por Alberto el 2026-11-10: de noche solo
- * alumbra lo que emite luz). Cada fuente, en su baldosa sin girar:
- *
- * - `at`: de dónde sale (unidades; z, la altura);
- * - `facing`: hacia dónde apunta (las pantallas solo alumbran por delante);
- *   `null`, a todos lados;
- * - `reach`: hasta dónde llega en el suelo; `power`, cuánta luz da.
- *
- * Las lámparas echan un cono desde la bombilla al suelo que cubre su
- * baldosa y las ocho de alrededor; las pantallas (mesas, panel, tele,
- * arcade), una luz azulada y suave hacia delante; los servidores, la de sus
- * LED. Todas bajan con el cuadrado de la distancia.
- */
-type Emitter = {
-  cone?: boolean
-  color: string
-  at: readonly [number, number, number]
-  facing: readonly [number, number] | null
-  reach: number
-  power: number
-}
-
-const SCREEN_BLUE = '150, 190, 255'
-
-const EMITTERS: Partial<Record<ModelId, Emitter>> = {
-  lamp: { cone: true, color: '255, 212, 150', at: [8, 8, 22], facing: null, reach: 24, power: 0.3 },
-  // La pantalla mira hacia quien se sienta (hacia -y): alumbra su cara y la pared.
-  workstation: { color: SCREEN_BLUE, at: [4, 7.8, 18], facing: [0, -1], reach: 20, power: 0.3 },
-  dashboard: { color: SCREEN_BLUE, at: [8, 8.4, 12], facing: [0, 1], reach: 26, power: 0.3 },
-  tv: { color: SCREEN_BLUE, at: [8, 9.7, 10.5], facing: [0, 1], reach: 24, power: 0.3 },
-  arcade: { color: '160, 170, 255', at: [8, 14.2, 19], facing: [0, 1], reach: 24, power: 0.28 },
-  rack: { color: '120, 230, 200', at: [8, 13.2, 8], facing: [0, 1], reach: 14, power: 0.16 },
-  vending: { color: '255, 236, 196', at: [8, 14.2, 15], facing: [0, 1], reach: 18, power: 0.16 },
-  neon: { color: '255, 120, 210', at: [8, 8, 14], facing: null, reach: 18, power: 0.18 },
-  aquarium: { color: '120, 220, 230', at: [8, 8, 9], facing: null, reach: 16, power: 0.14 },
-}
-
-/** Cuánto se nota lo que emite luz a cada hora: casi nada de día, todo de noche. */
-const STRENGTH: Record<Daylight, number> = { day: 0.15, dawn: 0.35, dusk: 0.65, night: 1 }
-
-/**
- * Cuánta luz llega a un punto del suelo a `distance` de la fuente, que está a
- * `height`: con el cuadrado de la distancia (y el coseno del ángulo con que
- * llega), y a cero en el borde de su alcance.
- */
-function falloff(distance: number, height: number, reach: number): number {
-  const h = Math.max(4, height)
-  const fade = 1 - (distance / reach) ** 2
-
-  return (h / Math.hypot(h, distance)) ** 3 * Math.max(0, fade)
-}
-
-/** Las fuentes encendidas, ya en el mundo (girada la pieza, se giran con ella). */
-function emittersOf(pieces: readonly Piece[]) {
-  return pieces.flatMap((piece) => {
-    const found = EMITTERS[piece.model]
-
-    if (found === undefined) return []
-
-    const turned = piece.props.turn === true
-    const [x, y, z] = found.at
-    const [lx, ly] = turned ? [y, x] : [x, y]
-    const facing =
-      found.facing === null
-        ? null
-        : turned
-          ? ([found.facing[1], found.facing[0]] as const)
-          : found.facing
-
-    return [
-      {
-        ...found,
-        facing,
-        world: [piece.gx * TILE + lx, piece.gy * TILE + ly, z] as const,
-        seed: piece.gx * 3 + piece.gy,
-      },
-    ]
-  })
-}
-
-/**
- * La luz en el suelo de una fuente: en el plano del suelo (un círculo del
- * mundo, en la escena un óvalo), solo hacia donde apunta, que baja con la
- * distancia y con los bordes difuminados.
- */
-function floorLight(
-  context: CanvasRenderingContext2D,
-  point: Point,
-  [x, y, z]: readonly [number, number, number],
-  {
-    color,
-    reach,
-    facing,
-  }: { color: string; reach: number; facing: readonly [number, number] | null },
-  power: number,
-): void {
-  const [cx, cy] = point(x, y, 0)
-  const pool = context.createRadialGradient(0, 0, 0, 0, 0, reach)
-
-  for (const stop of [0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1]) {
-    pool.addColorStop(
-      stop,
-      `rgba(${color}, ${(power * falloff(stop * reach, z, reach)).toFixed(3)})`,
-    )
-  }
-  context.save()
-  // Las unidades del suelo: +x hacia abajo a la derecha, +y hacia abajo a la izquierda.
-  context.translate(cx, cy)
-  context.transform(1, 0.5, -1, 0.5, 0, 0)
-  context.beginPath()
-  if (facing === null) context.arc(0, 0, reach, 0, Math.PI * 2)
-  else {
-    const angle = Math.atan2(facing[1], facing[0])
-
-    context.moveTo(-facing[0], -facing[1])
-    context.arc(0, 0, reach, angle - 1.15, angle + 1.15)
-    context.closePath()
-  }
-  context.fillStyle = pool
-  context.fill()
-  context.restore()
-}
-
-/** El cono de una lámpara: de la bombilla al óvalo que alumbra en el suelo. */
-function cone(
-  context: CanvasRenderingContext2D,
-  point: Point,
-  [x, y, z]: readonly [number, number, number],
-  color: string,
-  reach: number,
-  power: number,
-): void {
-  const [bx, by] = point(x, y, z)
-  const [cx, cy] = point(x, y, 0)
-  // Un círculo del suelo de radio `reach`, visto en la escena.
-  const [rx, ry] = [reach * Math.SQRT2, (reach * Math.SQRT2) / 2]
-  const gradient = context.createLinearGradient(bx, by, cx, cy + ry)
-
-  gradient.addColorStop(0, `rgba(${color}, ${(power * 0.55).toFixed(3)})`)
-  gradient.addColorStop(0.5, `rgba(${color}, ${(power * 0.22).toFixed(3)})`)
-  gradient.addColorStop(1, `rgba(${color}, ${(power * 0.06).toFixed(3)})`)
-  context.beginPath()
-  context.moveTo(bx - 2.5, by)
-  context.lineTo(cx - rx, cy)
-  context.ellipse(cx, cy, rx, ry, 0, Math.PI, 0, true)
-  context.lineTo(bx + 2.5, by)
-  context.closePath()
-  context.fillStyle = gradient
-  context.fill()
-}
-
-/** Un brillo pequeño alrededor de un punto: la bombilla, la pantalla, el LED. */
-function halo(
-  context: CanvasRenderingContext2D,
-  [cx, cy]: [number, number],
-  radius: number,
-  color: string,
-  alpha: number,
-): void {
-  const glow = context.createRadialGradient(cx, cy, 0, cx, cy, radius)
-
-  glow.addColorStop(0, `rgba(${color}, ${alpha.toFixed(3)})`)
-  glow.addColorStop(0.4, `rgba(${color}, ${(alpha * 0.35).toFixed(3)})`)
-  glow.addColorStop(1, `rgba(${color}, 0)`)
-  context.fillStyle = glow
-  context.fillRect(cx - radius, cy - radius, radius * 2, radius * 2)
-}
-
-/**
- * La luz de lo que la emite: en el suelo, el cono de las lámparas y un brillo
- * en cada fuente. Va después del tono de
- * la hora, para que de noche se vea lo que alumbra y nada más.
- */
-export function emitted(
-  context: CanvasRenderingContext2D,
-  size: number,
-  pieces: readonly Piece[],
-  light: Daylight,
-  frame: number,
-  point: Point,
-  density: number,
-): void {
-  const strength = STRENGTH[light]
-  const sources = emittersOf(pieces)
-
-  context.save()
-  clipRoom(context, size, point, WALL_TOP)
-  context.globalCompositeOperation = 'screen'
-  // Lo de la luz en el suelo y los conos, sin bordes.
-  soften(context, 1.5, density)
-  for (const source of sources) {
-    const flicker = 1 + Math.sin(frame * 0.3 + source.seed) * 0.04
-    const power = source.power * strength * flicker
-
-    if (source.cone === true) cone(context, point, source.world, source.color, source.reach, power)
-    floorLight(context, point, source.world, source, power)
-  }
-  context.filter = 'none'
-  for (const source of sources) {
-    const [x, y, z] = source.world
-    const [fx, fy] = source.facing ?? [0, 0]
-    const power = source.power * strength
-
-    halo(
-      context,
-      point(x + fx * 1.5, y + fy * 1.5, z),
-      source.cone === true ? 7 : 5,
-      source.color,
-      power * 1.6,
-    )
-  }
   context.restore()
 }
 
