@@ -18,9 +18,16 @@ import { useWakeLock } from './useWakeLock'
  * si el navegador deja, pide además la pantalla completa de verdad. Va siempre
  * encima: si se abre otra ventana (un aviso, una petición de ayuda), se vuelve
  * a poner delante. Mientras está, la web de debajo ni se pinta ni gasta
- * (`cover`). Salir de ella (el botón, Escape o
- * cuando el navegador quita la pantalla completa) pregunta si de verdad se
- * quiere parar; «quitar pantalla completa» solo la cierra, sin parar nada.
+ * (`cover`). «Parar la sesión» pregunta si de verdad se quiere parar; lo
+ * demás solo la quita, sin parar nada.
+ *
+ * Escape, en dos pasos (pedido por Alberto, 2026-11-12): el primero lo usa el
+ * navegador para quitar la pantalla completa de verdad, y la ventana sigue
+ * tapando la web; el segundo la cierra y vuelve al temporizador pequeño. Antes
+ * el primero preguntaba si parar, y al tercero Chrome cerraba la ventana a la
+ * fuerza (no deja frenar Escape dos veces seguidas sin un clic) con la web aún
+ * tapada: todo en negro. Por eso, si el navegador la cierra por su cuenta,
+ * también se vuelve al temporizador pequeño.
  *
  * @param onExit Quiere acabar la sesión: se le pregunta.
  * @param onShrink Vuelve al temporizador pequeño, sin parar.
@@ -45,9 +52,9 @@ export function FocusScreen({
   const dialog = useRef<HTMLDialogElement>(null)
   // Al quitarla con el botón, el aviso de que se ha salido no es una huida.
   const leaving = useRef(false)
-  const exit = useRef(onExit)
+  const shrink = useRef(onShrink)
 
-  exit.current = onExit
+  shrink.current = onShrink
 
   useEffect(() => {
     const element = dialog.current
@@ -83,21 +90,13 @@ export function FocusScreen({
 
     // La de verdad es un extra: sin ella (o sin permiso, o en un iPhone, que
     // no la tiene) la ventana ya lo tapa todo. Safari la tiene con prefijo.
-    const asked = enterFullscreen()
-
-    const changed = (): void => {
-      if (asked && fullscreenElement() === null && !leaving.current) exit.current()
-    }
-
-    document.addEventListener('fullscreenchange', changed)
-    document.addEventListener('webkitfullscreenchange', changed)
+    // Quitarla (Escape, F11) no cierra nada: la ventana sigue tapando la web.
+    enterFullscreen()
 
     return () => {
       leaving.current = true
       watcher.disconnect()
       cover(false)
-      document.removeEventListener('fullscreenchange', changed)
-      document.removeEventListener('webkitfullscreenchange', changed)
       leaveFullscreen()
     }
   }, [])
@@ -113,8 +112,25 @@ export function FocusScreen({
       className="focus-screen"
       aria-label={t('focus.screen.label')}
       onCancel={(event) => {
+        // El Escape de una ventana de dentro (la pregunta de parar) es suyo.
+        if (event.target !== event.currentTarget) return
         event.preventDefault()
-        onExit()
+        // Si el navegador no se ha quedado el Escape, primero la de verdad.
+        if (fullscreenElement() !== null) {
+          leaveFullscreen()
+
+          return
+        }
+        leaving.current = true
+        onShrink()
+      }}
+      onClose={(event) => {
+        if (event.target !== event.currentTarget) return
+        // Cerrada por el navegador (o al ponerse delante, que se reabre al momento).
+        if (!leaving.current && dialog.current?.open === false) {
+          leaving.current = true
+          shrink.current()
+        }
       }}
     >
       <p className="focus-sign">

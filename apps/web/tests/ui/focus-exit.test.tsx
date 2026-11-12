@@ -1,7 +1,7 @@
 /**
  * Pomodoro (#80 del buzón): acabar no para en seco. Pregunta, pide un motivo y
  * da diez segundos para pensarlo; seguir felicita y se apunta. La pantalla
- * completa se quita sin parar, y Escape lleva a la misma pregunta.
+ * completa se quita sin parar: Escape vuelve al temporizador pequeño.
  */
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import es from 'virtual:textos/es'
@@ -121,7 +121,7 @@ describe('acabar un Pomodoro antes de tiempo', () => {
     expect(stats.reasons.find((one) => one.reason === 'tired')?.stayed).toBe(1)
   }, 20_000)
 
-  it('a pantalla completa: Escape pregunta; quitarla no para nada', async () => {
+  it('a pantalla completa: «Parar» pregunta; Escape la quita sin parar nada', async () => {
     fireEvent.click(button(text('focus.screen.open')))
 
     const full = screen.getByRole('dialog', { name: text('focus.screen.label') })
@@ -129,8 +129,8 @@ describe('acabar un Pomodoro antes de tiempo', () => {
     expect(full.textContent).toContain(text('focus.screen.sign'))
     expect(within(full).getByRole('timer', { name: text('focus.timerLabel') })).toBeTruthy()
 
-    // Escape en la pantalla completa: la misma pregunta que «Acabar».
-    fireEvent(full, new Event('cancel', { cancelable: true }))
+    // «Parar la sesión»: la misma pregunta que «Acabar».
+    fireEvent.click(button(text('focus.screen.exit'), full))
     const ask = screen.getByRole('dialog', { name: text('focus.exit.title') })
 
     // Escape en la pregunta es seguir.
@@ -139,7 +139,34 @@ describe('acabar un Pomodoro antes de tiempo', () => {
     expect(screen.queryByRole('dialog', { name: text('focus.exit.title') })).toBeNull()
     expect(within(full).getByText(text('focus.exit.cheer'))).toBeTruthy()
 
-    fireEvent.click(button(text('focus.screen.shrink'), full))
+    // Escape (ya sin la pantalla completa de verdad): al temporizador pequeño, sin preguntar.
+    fireEvent(full, new Event('cancel', { cancelable: true }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(document.documentElement.dataset.covered).toBe('off')
+    expect(screen.getByRole('timer', { name: text('focus.timerLabel') })).toBeTruthy()
+    expect(focusing()).toBe(true)
+
+    // Con el botón, igual.
+    fireEvent.click(button(text('focus.screen.open')))
+    fireEvent.click(
+      button(
+        text('focus.screen.shrink'),
+        screen.getByRole('dialog', { name: text('focus.screen.label') }),
+      ),
+    )
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(focusing()).toBe(true)
+  })
+
+  it('a pantalla completa: si el navegador la cierra por su cuenta, no se queda la web tapada', async () => {
+    fireEvent.click(button(text('focus.screen.open')))
+
+    const full = screen.getByRole<HTMLDialogElement>('dialog', {
+      name: text('focus.screen.label'),
+    })
+
+    full.close()
+    await pass(0)
     expect(screen.queryByRole('dialog')).toBeNull()
     expect(document.documentElement.dataset.covered).toBe('off')
     expect(screen.getByRole('timer', { name: text('focus.timerLabel') })).toBeTruthy()

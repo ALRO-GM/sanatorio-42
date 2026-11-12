@@ -30,8 +30,9 @@ const CHEER_MS = 6000
  * Va en la pila de la esquina (`shared/dock`), con las demás ventanitas:
  * plegado queda el anillo con el tiempo. A pantalla completa sale de la pila.
  *
- * Se puede poner a pantalla completa (#80 del buzón). «Acabar», salir de la
- * pantalla completa o Escape no paran en seco: preguntan (`FocusExit`).
+ * Se puede poner a pantalla completa (#80 del buzón). «Acabar» no para en
+ * seco: pregunta (`FocusExit`). Escape solo quita la pantalla completa
+ * (`FocusScreen`).
  */
 export function FocusTimer() {
   const { t } = useI18n()

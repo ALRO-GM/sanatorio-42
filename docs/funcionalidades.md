@@ -402,7 +402,7 @@ Detalle: [rendimiento.md](rendimiento.md#9-cargas-largas-2026-11-02).
 | Funcionalidad | Modo | Quién | Dónde |
 | --- | --- | --- | --- |
 | Temporizador del Pomodoro, plegable y arrastrable | S | Todos `[focus]` | `features/focus/FocusTimer.tsx` |
-| Pomodoro a pantalla completa: «no molestar», pantalla encendida, la startup en pequeño | S | Todos `[focus]` | `FocusScreen.tsx`, `useWakeLock.ts` |
+| Pomodoro a pantalla completa: «no molestar», pantalla encendida, la startup en pequeño; Escape en dos pasos (quita la del navegador y luego vuelve al flotante) | S | Todos `[focus]` | `FocusScreen.tsx`, `useWakeLock.ts` |
 | Al parar antes de tiempo: motivos, diez segundos y seguir con felicitación | S | Todos `[focus]` | `FocusExit.tsx` |
 | Sonido de fondo: ruido, naturaleza o diez lo-fi | S | Todos `[focus]` | `FocusSound.tsx` |
 | Mientras dura: solo las pestañas elegidas, juegos callados, solo los avisos elegidos; «concentrado» en tu ficha | S | Todos | `app/sections.ts` (`hiddenInFocus`) |
