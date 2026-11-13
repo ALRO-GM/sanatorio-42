@@ -65,3 +65,5 @@
 @import './agenda.css';
 @import './comfort.css';
 @import './startup.css';
+/* Normas para cualquier dispositivo: tamaños mínimos, dedo, contraste, impresión. La última. */
+@import './standards.css';

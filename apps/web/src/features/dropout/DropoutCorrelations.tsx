@@ -52,7 +52,7 @@ export function DropoutCorrelations({ report }: { report: DropoutReport }) {
     <section className="card dropout-block" aria-labelledby="dropout-correlations">
       <h3 id="dropout-correlations">{t('dropout.correlations.title')}</h3>
       <p className="hint">{t('dropout.correlations.hint', { people: report.sample })}</p>
-      <div className="table-scroll">
+      <div className="table-scroll" tabIndex={0}>
         <table className="stat-table dropout-matrix">
           <caption className="sr-only">{t('dropout.correlations.title')}</caption>
           <thead>
@@ -167,7 +167,7 @@ export function DropoutFactorsPanel({ report }: { report: DropoutReport }) {
         </>
       )}
       <h4>{t('dropout.factors.pairs')}</h4>
-      <div className="table-scroll">
+      <div className="table-scroll" tabIndex={0}>
         <table className="stat-table">
           <thead>
             <tr>

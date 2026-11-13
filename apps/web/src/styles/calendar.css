@@ -162,7 +162,7 @@ button.event-chip.compact {
   padding: 0.15rem 0.3rem;
   border-left-width: 3px;
   border-radius: 6px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   line-height: 1.3;
 }
 .compact .event-title {
@@ -171,7 +171,7 @@ button.event-chip.compact {
   text-overflow: ellipsis;
 }
 .compact .event-icon {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 
 /* Mes: cuadrícula de semanas. */
@@ -182,7 +182,7 @@ button.event-chip.compact {
 }
 .month-dow {
   padding-bottom: 0.2rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-align: center;
   text-transform: uppercase;
@@ -199,7 +199,7 @@ button.event-chip.compact {
   min-width: 0;
 }
 .month-cell.outside {
-  opacity: 0.5;
+  opacity: 0.72;
 }
 .month-cell.today {
   box-shadow: inset 0 0 0 2px var(--accent);
@@ -220,7 +220,7 @@ button.month-day {
 button.month-more {
   padding: 0;
   background: none;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   color: var(--text-2);
   text-align: left;
 }
@@ -269,7 +269,7 @@ button.day-head strong {
   margin: 0;
   padding: 0.3rem;
   font-size: 0.75rem;
-  color: var(--text-4);
+  color: var(--text-3);
 }
 .agenda-source {
   margin: 0;
@@ -407,7 +407,7 @@ a.button {
   position: absolute;
   right: 0.3rem;
   transform: translateY(-50%);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   color: var(--text-3);
 }

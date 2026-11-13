@@ -67,7 +67,7 @@
 }
 .meet-chat small {
   color: var(--text-3);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 .meet-chat li.kind-late strong,
 .meet-chat li.kind-absent strong {
@@ -165,14 +165,14 @@
   display: block;
   padding-bottom: 0.4rem;
   border-bottom: 1px dashed #b9c4bd;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 .quota-ticket-turn small {
   display: block;
   margin-top: 0.4rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
 }
 .quota-ticket-turn strong {
@@ -199,7 +199,7 @@
 }
 .quota-ticket-foot {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
 }
 .meet-people {
   display: grid;
@@ -254,7 +254,7 @@
   border-radius: 999px;
   background: var(--danger);
   color: var(--on-accent);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 1;
 }
@@ -532,7 +532,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 .conversation-tags .chip.pending {
   background: var(--warn-soft);

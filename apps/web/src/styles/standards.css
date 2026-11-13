@@ -1,0 +1,280 @@
+/* ── Normas para cualquier dispositivo ──────────────────────────────────────────
+   Lo que tiene que cumplirse en toda la web, se abra donde se abra. Va la
+   última para que ninguna sección lo deshaga. Cada bloque dice su norma
+   (`docs/interfaz.md` § «Normas para cualquier dispositivo»):
+
+   1. Texto: nada por debajo de 12 px, y crece con la letra del navegador.
+   2. Dianas: todo lo que se pulsa mide 24 × 24 px o más (WCAG 2.2, 2.5.8), y
+      con el dedo (`pointer: coarse`) los mandos principales, 44 px.
+   3. Móviles con muesca o barra de gestos: nada queda debajo (`safe-area`).
+   4. Quien pide menos movimiento, más contraste o colores forzados, los tiene.
+   5. Impresa, la página sale sin barras ni ventanitas.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* --- 1. Texto ---------------------------------------------------------------- */
+html {
+  /* Que el móvil tumbado no agrande la letra por su cuenta. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  /* En rem (15 px con la letra de fábrica): sigue el tamaño que cada cual
+     tenga puesto en su navegador. */
+  font-size: 0.9375rem;
+  /* Una palabra larguísima (un login, una dirección) se parte antes de sacar
+     una barra de desplazamiento a la página. */
+  overflow-wrap: break-word;
+}
+/* Los tamaños en `em` que caían por debajo de 12 px. */
+small,
+sub,
+sup {
+  font-size: max(0.8em, 0.75rem);
+}
+
+/* --- 2. Dianas ---------------------------------------------------------------- */
+/* El mínimo, siempre: 24 px de alto. Fuera quedan los puestos del plano (se
+   amplía con su propio zoom) y lo que es parte de un dibujo. */
+button:not(.seat, .graph-node),
+select,
+summary,
+[role='button'],
+[role='tab'],
+[role='switch'] {
+  min-height: 24px;
+}
+.icon-btn,
+button.link,
+.range-value {
+  min-width: 24px;
+}
+button.link {
+  justify-content: center;
+}
+/* Los enlaces sueltos (no los de dentro de una frase) y los títulos plegables. */
+a.record-link,
+a.profile-link,
+a.link,
+.exam-who a,
+button.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+}
+summary {
+  padding-block: 2px;
+}
+.info-tip {
+  width: max(1.6em, 24px);
+  height: max(1.6em, 24px);
+}
+/* Casillas y botones de opción: del tamaño de la letra, nunca diminutos, y con
+   el color del tema. */
+input[type='checkbox']:not(.switch),
+input[type='radio'] {
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  accent-color: var(--accent);
+}
+label:has(> input[type='checkbox']:not(.switch)),
+label:has(> input[type='radio']) {
+  min-height: 1.75rem;
+}
+fieldset {
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* Con el dedo: los mandos principales, 44 px (las guías de iOS y Android). Lo
+   denso (tablas, calendarios, planos) se queda en su mínimo de 24 px. */
+@media (pointer: coarse) {
+  button:not([class]),
+  button.primary,
+  button.small,
+  button.secondary,
+  button.danger,
+  .pill,
+  .subtab,
+  .back-btn,
+  .user-menu-btn,
+  select,
+  input:not([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file']),
+  .info-tip {
+    min-height: 44px;
+  }
+  .icon-btn,
+  .info-tip {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .info-tip {
+    width: 44px;
+    height: 44px;
+    margin-block: -10px;
+  }
+  button.link,
+  a.link,
+  a.record-link,
+  a.profile-link,
+  summary,
+  .sort-head,
+  .block-head,
+  .range-value {
+    min-height: 32px;
+  }
+  input[type='checkbox']:not(.switch),
+  input[type='radio'] {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  label:has(> input[type='checkbox']:not(.switch)),
+  label:has(> input[type='radio']) {
+    min-height: 2.25rem;
+    margin-inline-end: 0.5rem;
+  }
+  /* El interruptor: la diana crece sin que cambie el dibujo. */
+  .switch {
+    position: relative;
+  }
+  .switch::before {
+    content: '';
+    position: absolute;
+    inset: -10px -4px;
+  }
+  /* iOS agranda la página al enfocar un campo con letra de menos de 16 px. */
+  input:not([type='checkbox'], [type='radio'], [type='range']),
+  select,
+  textarea {
+    font-size: max(1rem, 16px);
+  }
+}
+
+/* --- 3. Muescas y barras del sistema ------------------------------------------ */
+.appbar {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.appbar-inner,
+.container,
+.footer {
+  padding-left: max(var(--gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--gutter), env(safe-area-inset-right, 0px));
+}
+@media (max-width: 640px) {
+  .appbar-inner {
+    padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+    padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+  }
+  /* «En vivo» en la barra de abajo: un punto, que la palabra se salía de la
+     pantalla en los móviles estrechos. El texto sigue para los lectores. */
+  nav.tabs .tab .tab-live {
+    width: 0.6rem;
+    height: 0.6rem;
+    padding: 0;
+    overflow: hidden;
+    color: transparent;
+    white-space: nowrap;
+    box-shadow: 0 0 0 2px var(--surface);
+  }
+}
+/* Un ancla o un salto con el teclado no deja el destino debajo de la cabecera. */
+html {
+  scroll-padding-top: 7rem;
+}
+/* Las ventanas, nunca más altas que la pantalla visible (con el teclado del
+   móvil abierto incluido). */
+dialog {
+  max-height: calc(100dvh - 1.5rem);
+  overscroll-behavior: contain;
+}
+
+/* --- 4. Contraste y preferencias ----------------------------------------------- */
+/* «En vivo»: blanco sobre un rojo que da 4,5:1 en claro y en oscuro. */
+.tab .tab-live,
+.subtab .tab-live {
+  background: color-mix(in srgb, var(--danger) 72%, #000);
+  color: #fff;
+}
+/* El foco del teclado, siempre visible y con el mismo dibujo. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (prefers-contrast: more) {
+  :root {
+    --text-3: var(--text-2);
+    --text-4: var(--text-2);
+    --border: var(--border-strong);
+  }
+  :focus-visible {
+    outline-width: 3px;
+  }
+}
+/* Colores forzados (alto contraste de Windows): los bordes que el tema pinta
+   con fondos vuelven a verse. */
+@media (forced-colors: active) {
+  button,
+  .pill,
+  .subtab,
+  .tab,
+  .card,
+  .badge,
+  .switch {
+    border: 1px solid ButtonText;
+  }
+  .switch::after {
+    background: ButtonText;
+  }
+  .tab.active,
+  .subtab.active,
+  .pill.active {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- 5. Impresa ------------------------------------------------------------------ */
+@media print {
+  .appbar,
+  nav.tabs,
+  .subtabs,
+  .footer,
+  .dock-slot,
+  .meet-toast,
+  .info-tip,
+  .blocks-customize {
+    display: none !important;
+  }
+  body {
+    padding: 0;
+    background: #fff;
+    color: #000;
+  }
+  .container,
+  .container.wide {
+    max-width: none;
+    padding: 0;
+  }
+  .card,
+  section {
+    break-inside: avoid;
+  }
+  a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.8em;
+  }
+}

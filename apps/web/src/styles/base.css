@@ -358,7 +358,7 @@ button.link {
 }
 .badge.subtle {
   background: transparent;
-  color: var(--text-4);
+  color: var(--text-3);
   padding-left: 0;
   padding-right: 0;
 }

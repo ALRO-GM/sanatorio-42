@@ -252,7 +252,7 @@
 :root[data-style='historial'] .chip {
   border-radius: var(--sketch-sm);
   font-family: var(--eyebrow-font);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 /* Los campos son una raya sobre la que escribir. Casillas, interruptores y
    deslizadores se quedan como son: sin su forma no se reconocen. */

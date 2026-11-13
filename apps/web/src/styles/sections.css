@@ -65,7 +65,7 @@ button.primary.small {
 }
 .eyebrow {
   display: block;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -344,8 +344,10 @@ input[type='checkbox'] {
   /* Un post-it es papel de color claro en los dos temas: dentro, la tinta es
      siempre oscura. */
   --text: #2c3a34;
-  --text-2: #5c6a63;
-  --text-3: #6f7d76;
+  --text-2: #46524c;
+  --text-3: #55625b;
+  --accent-text: #0b5f58;
+  --accent-soft: rgba(0, 0, 0, 0.07);
   --surface: #fff;
   --border: #d9e3dc;
   width: 100%;
@@ -409,7 +411,8 @@ input[type='checkbox'] {
   color: var(--accent-text);
 }
 .postit-status.resolved {
-  color: var(--ok);
+  /* Sobre el papel claro del post-it, en los dos temas. */
+  color: #1d6b43;
 }
 .postit.empty {
   background: transparent;
@@ -498,7 +501,7 @@ input[type='checkbox'] {
   margin-bottom: 0.75rem;
 }
 .cal-dow {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-3);
   padding: 0.3rem 0;
@@ -570,7 +573,7 @@ input[type='checkbox'] {
 }
 .date-badge span {
   display: block;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 .date-badge strong {
@@ -1125,7 +1128,7 @@ dialog.welcome .actions {
 /* La mejor nota, pequeña bajo la de hoy, que es la grande. */
 .exam-best {
   color: var(--text-3);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -1224,7 +1227,7 @@ dialog.welcome .actions {
 }
 .exam-badges .badge {
   padding: 0.05rem 0.45rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 .exam-mark {
   min-width: 2.5rem;
@@ -1275,7 +1278,7 @@ dialog.welcome .actions {
   border-radius: 999px;
   background: var(--danger);
   color: #fff;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -1749,14 +1752,14 @@ dialog.layout-dialog.focus-dialog.wide {
 .focus-sound-kind.on small {
   max-width: 100%;
   overflow: hidden;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--text-2);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .focus-sound-kind.small {
   padding: 0.15rem 0.5rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   opacity: 0.6;
 }
 .focus-sound-kind.small:hover,

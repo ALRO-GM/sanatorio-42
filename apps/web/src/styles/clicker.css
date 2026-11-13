@@ -258,7 +258,7 @@
 }
 .cc-bugs small {
   color: var(--cc-dim);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 .cc-bug {
   padding: 0;
@@ -451,7 +451,7 @@
   background: transparent;
   color: var(--cc-dim);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   cursor: pointer;
 }
 .cc-amounts button.on {
@@ -601,7 +601,7 @@ dialog.cc-pill-dialog::after {
 .cc-pill-eyebrow {
   display: block;
   margin-bottom: 0.4rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #3fbf75;
@@ -724,7 +724,7 @@ dialog.cc-pill-dialog h3::before {
 }
 .cc-pill small {
   color: rgba(255, 255, 255, 0.72);
-  font-size: 0.74rem;
+  font-size: 0.75rem;
   line-height: 1.45;
 }
 .cc-pill.blue {
@@ -1006,7 +1006,7 @@ dialog.cc-pill-dialog h3::before {
 .cc-level b {
   position: relative;
   display: block;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   line-height: 15px;
   text-shadow: 0 1px 3px #000;
 }
@@ -1106,7 +1106,7 @@ small.cc-bugs {
   display: block;
   max-width: 30ch;
   color: var(--cc-dim);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 .cc.boosted .cc-bank {
   box-shadow: inset 0 0 70px color-mix(in srgb, var(--cc-gold) 30%, transparent);
@@ -1717,7 +1717,7 @@ dialog.cc-bust:not([open]) {
 }
 .cc-mini-open small {
   color: var(--text-3);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 .cc-mini-key {
   display: grid;
@@ -1770,7 +1770,7 @@ dialog.cc-bust:not([open]) {
   border-radius: 6px;
   background: var(--cc-main);
   color: var(--cc-bg);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;

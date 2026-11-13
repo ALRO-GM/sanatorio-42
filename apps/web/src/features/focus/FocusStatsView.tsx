@@ -188,7 +188,7 @@ export function FocusCharts({ stats }: { stats: FocusStats }) {
       </div>
 
       <span className="eyebrow">{t('focus.stats.reasons')}</span>
-      <div className="table-scroll">
+      <div className="table-scroll" tabIndex={0}>
         <table className="stat-table">
           <thead>
             <tr>

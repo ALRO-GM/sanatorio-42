@@ -386,3 +386,36 @@ Cómo funciona:
 - Se recuerda en el navegador (`sanatorio_dock`): el orden (también de las que
   ahora no se ven, para que vuelvan a su sitio), dónde flota cada una y cuáles
   están plegadas. Lo guardado con mala forma se ignora.
+
+## Normas para cualquier dispositivo
+
+Pedidas por Alberto el 2026-11-13: que la web se vea y se navegue bien en
+cualquier pantalla y situación. Están en `apps/web/src/styles/standards.css`
+(la última hoja, para que ninguna sección las deshaga). Lo nuevo las cumple
+sin hacer nada; lo que las rompa se arregla en su hoja, no ahí.
+
+| Norma | Regla | Por qué |
+| --- | --- | --- |
+| Texto | Nada por debajo de 12 px (`0.75rem`); el cuerpo va en `rem` | Se lee en un móvil y crece con la letra que cada cual tenga en su navegador |
+| Dianas | Todo lo que se pulsa mide 24 × 24 px o más; con el dedo (`pointer: coarse`), los mandos principales (botones, pastillas, pestañas, campos, iconos) miden 44 px | WCAG 2.2 (2.5.8) y las guías de iOS y Android. Fuera quedan los puestos del plano (tienen su zoom) y las barras de la línea de tiempo de la Red (se puede escribir el valor) |
+| Campos en el móvil | Letra de 16 px en campos y desplegables con el dedo | iOS agranda la página al enfocar un campo con letra menor |
+| Casillas | 20 px (24 con el dedo), con el color del tema; los `fieldset`, con la raya del tema | Las de fábrica medían 13-17 px |
+| Muescas | `viewport-fit=cover` y `env(safe-area-inset-*)` en cabecera, contenido, pie y barra de abajo | Nada queda debajo de la muesca ni de la barra de gestos, tampoco con el móvil tumbado |
+| «En vivo» en la barra de abajo | Un punto rojo; la palabra sigue para los lectores de pantalla | En 320-390 px la palabra se salía de la pantalla |
+| Contraste | El texto que informa usa `--text-3` o más; `--text-4` queda para lo decorativo o inactivo. «En vivo», blanco sobre rojo oscurecido | 4,5:1 en claro y en oscuro (WCAG 1.4.3) |
+| Foco | `:focus-visible` con el mismo contorno en todo lo que no traiga el suyo | Navegar con el teclado |
+| Preferencias | `prefers-reduced-motion` (sin transiciones ni desplazamiento suave), `prefers-contrast: more` (grises y bordes más fuertes), `forced-colors` (bordes y marcas visibles) | Lo pide el sistema de cada persona |
+| Ventanas | Nunca más altas que la pantalla visible (`100dvh`) | Con el teclado del móvil abierto se sigue viendo el botón |
+| Impresa | Sin cabecera, pestañas, pie ni ventanitas; los enlaces enseñan su dirección | Una hoja limpia |
+
+Cómo se comprobó: las 24 secciones en seis tamaños (320 × 568, 390 × 844,
+844 × 390 tumbado, 768 × 1024, 1280 × 800 y 1920 × 1080) sobre la API de
+mentira, midiendo desbordes, dianas, tamaños de letra y las reglas WCAG 2.2 AA
+de axe, sumando las 144 combinaciones. Antes: «en vivo» fuera de la pantalla
+en los móviles (48 veces), 2 168 textos por debajo de 12 px, 2 432 dianas de
+menos de 24 px y 426 avisos de axe. Después: ningún desborde, 22 textos (las
+iniciales de los avatares pequeños y de los puestos del plano), 337 dianas y
+150 avisos, todos de las dos excepciones de arriba (las barras de la línea
+de tiempo de la Red y los puestos del plano) y de casillas de 20 px con su
+texto al lado.
+

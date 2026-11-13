@@ -118,7 +118,7 @@ details.hours-report[open] > summary::before {
   grid-template-columns: 2.4rem repeat(24, 1fr);
   gap: 2px;
   margin: 0.6rem 0 0.4rem;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   color: var(--text-3);
 }
 .week-pattern > small {
@@ -225,7 +225,7 @@ details.hours-report[open] > summary::before {
   margin: 0.6rem 0 1rem;
 }
 .report-link {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--text-4);
   justify-self: start;
 }
@@ -298,7 +298,7 @@ details.hours-report[open] > summary::before {
 .stat-hour small {
   height: 1em;
   color: var(--text-4);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
 }
 .stat-bar {
   display: flex;
@@ -408,7 +408,7 @@ dialog.broadcast-dialog .actions {
   justify-self: center;
   height: 2.2rem;
   color: var(--text-3);
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -430,7 +430,7 @@ dialog.broadcast-dialog .actions {
   bottom: calc(100% + 2px);
   left: 50%;
   color: var(--text-3);
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   font-weight: 600;
   line-height: 1;
   writing-mode: vertical-rl;
@@ -439,7 +439,7 @@ dialog.broadcast-dialog .actions {
 .heat td small {
   display: block;
   opacity: 0.75;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 .cell-bar {
   display: inline-block;
@@ -566,7 +566,7 @@ dialog.broadcast-dialog .actions {
 .segment-ends {
   display: flex;
   justify-content: space-between;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 
 /* Limpiar datos: qué es cada tipo y la ventana con lo que se va a borrar. */
@@ -1019,7 +1019,7 @@ dialog.data-review h3 {
 }
 
 .seat-weights-cell small {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   opacity: 0.7;
 }
 

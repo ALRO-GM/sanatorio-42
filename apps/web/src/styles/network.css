@@ -252,7 +252,7 @@
 }
 .net-scale-actions .pill {
   padding: 0.15rem 0.6rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 .net-legend li {
   display: inline-flex;
@@ -274,7 +274,7 @@
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface) 86%, transparent);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: var(--text-3);
 }
 
@@ -315,7 +315,7 @@
   text-align: center;
 }
 .net-facts dt {
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   color: var(--text-3);
 }
 .net-facts dd {
@@ -475,12 +475,12 @@
 .net-timeline-years {
   display: flex;
   justify-content: space-between;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   color: var(--text-3);
 }
 .net-timeline .hint {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
 }
 /* Correcciones de una pareja, dentro de la ficha. */
 .net-pair-box {
@@ -739,7 +739,7 @@ ol.net-rows .net-row-name {
   border-radius: 999px;
   background: var(--surface-2);
   color: var(--text-3);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
 }
 .rank-order {
   flex: none;
@@ -748,7 +748,7 @@ ol.net-rows .net-row-name {
   border: 1.5px solid var(--border);
   background: var(--surface);
   color: var(--text-2);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   cursor: pointer;
   white-space: nowrap;
 }
@@ -1027,7 +1027,7 @@ ol.net-rows .net-row-name {
 }
 .heat-axis {
   color: var(--text-3);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   text-align: center;
@@ -1111,7 +1111,7 @@ ol.net-rows .net-row-name {
   gap: 0.35rem;
   margin: 0;
   color: var(--text-3);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-variant-numeric: tabular-nums;
 }
 .heat-scale .heat-ramp {

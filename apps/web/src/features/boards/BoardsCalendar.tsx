@@ -112,7 +112,7 @@ export function BoardsCalendar() {
                 </button>
               </span>
             </header>
-            <div className="cal-grid" role="grid">
+            <div className="cal-grid" role="group">
               {t('days.short')
                 .split(',')
                 // Por posición: en inglés martes y jueves empiezan igual, y sábado y domingo.

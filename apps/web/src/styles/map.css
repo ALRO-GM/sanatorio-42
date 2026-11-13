@@ -30,7 +30,7 @@
   align-items: center;
   gap: 0.25rem;
   margin-left: 0.4rem;
-  font-size: 0.8em;
+  font-size: max(0.8em, 0.75rem);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   opacity: 0.8;
@@ -70,12 +70,12 @@
   align-items: center;
   justify-content: flex-end;
   padding-right: 4px;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   white-space: nowrap;
   color: var(--text-3);
 }
 .density-dots .row-label {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
 }
 
 /* Cada puesto es una tecla: cara clara arriba, canto debajo y una sombra corta.
@@ -522,7 +522,7 @@ button.seat.open {
   border-radius: 8px;
   background: var(--text);
   color: var(--surface);
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
   line-height: 12px;
   text-align: center;
@@ -694,6 +694,6 @@ button.seat.open {
   height: 12px;
   padding: 0 2px;
   border-width: 1px;
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   line-height: 10px;
 }
