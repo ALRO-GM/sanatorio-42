@@ -7,37 +7,23 @@ Hecho y subido: muebles de las mejoras de espacio que se giran y se venden
 (`styles/standards.css`, 355529b; despliegue relanzado desacoplado, comprobar
 `curl -s https://peer4u.app/api/health/db`).
 
-En marcha, dos agentes en worktrees (`.claude/worktrees/`), sin push:
+Hecho y desplegado después (0c962a0, esquema 93): curso de NetPractice
+(`cursonet`, `packages/netsim`, migración 0092) y curso de RAG (`cursorag`,
+`packages/ragsim`, migración 0093), unidos a mano (los dos son `extra`: fuera
+de los logros de «los cuatro cursos»; 32 logros, 1 255 XP, 9 clasificaciones).
 
-| Encargo | Sección | Paquete | Migración |
-| --- | --- | --- | --- |
-| Curso de NetPractice (esquemas de red que se configuran, traza del ping) | `cursonet` | `packages/netsim` | 0092 |
-| Curso de RAG (banco de pruebas de la tubería, guía paso a paso) | `cursorag` | `packages/ragsim` | 0093 (puede llegar como 0092: renumerar) |
+Subido sin desplegar (0612a3e): el motor de demostraciones da a cada frase su
+tiempo de lectura por idioma (`paced` en `shared/tour/Tour.tsx`).
 
-**Estado al cortar (límite de uso):** NetPractice ya está unido en `main`
-(62a780e, check en verde, SIN push). Falta unir RAG: rama
-`worktree-agent-a5b35da0b25beeedf` (commit b320c1b); el merge da 57 ficheros
-en conflicto con NetPractice (casi todos «las dos líneas valen»), su migración
-llega como 0092 y hay que renumerarla a 0093 (fichero, `version`, import en
-`migrations/index.ts`, menciones «migración 92»), vigilar jscpd (0,87 %, tope
-1 %: si pasa, sacar `BossView`/`Stop` a `shared/course`) y las cifras de los
-tests (logros, XP, clasificaciones) y del README.
+En marcha, un agente en worktree: las siete demostraciones que faltan (`focus`,
+`startup`, `dropout`, `piscineProgress`, `countdowns`, `admin`, `clicker`). Al
+acabar: `git merge --no-ff`, `npm run textos -- --write`, `npm run check`,
+push y despliegue desacoplado (skill `desplegar`), y `git worktree prune` de
+las ramas ya unidas.
 
-Al acabar: `git merge --no-ff` de cada rama (una a una), `npm install`,
-`npm run textos -- --write`, unir las reglas de estrellas si las dos añaden una
-parecida en `@sanatorio/course`, `npm run check`, un push y un despliegue
-(skill `desplegar`, desacoplado del SSH).
-
-Después (pedido por Alberto, cuando lo anterior esté hecho):
-1. Revisar todas las demostraciones (`docs/demos.md`, `*Tour.tsx`): que las
-   marcas de tiempo del guion coincidan con su frase y su acción.
-2. Crear demostraciones animadas para las ventanas y secciones que no la
-   tienen (mirar qué `InfoTip` faltan: Pomodoro y Startup, abandono, gestión,
-   ventanitas…), con `npm run demo:new`.
-
-En producción hasta 7a69796. Si la CI falla: `gh run view --job <id> --log-failed`
-(gh en `~/.local/bin`).
-
+Pendiente menor de los cursos nuevos: preguntas de Not-games para NetPractice
+y RAG; contenido en francés de las unidades (sale el inglés); jscpd al 0,86 %
+(tope 1 %: sacar `BossView`/`Stop` a `shared/course` si sube).
 
 ## Cola del 2026-11-09 (push y despliegue autorizados)
 
