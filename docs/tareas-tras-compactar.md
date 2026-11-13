@@ -1,5 +1,31 @@
 # Tareas tras compactar (2026-11-01)
 
+## Tanda del 2026-11-13 (push y despliegue autorizados)
+
+Hecho y subido: muebles de las mejoras de espacio que se giran y se venden
+(34b5ed1, desplegado) y normas para cualquier dispositivo
+(`styles/standards.css`, 355529b; despliegue relanzado desacoplado, comprobar
+`curl -s https://peer4u.app/api/health/db`).
+
+En marcha, dos agentes en worktrees (`.claude/worktrees/`), sin push:
+
+| Encargo | Sección | Paquete | Migración |
+| --- | --- | --- | --- |
+| Curso de NetPractice (esquemas de red que se configuran, traza del ping) | `cursonet` | `packages/netsim` | 0092 |
+| Curso de RAG (banco de pruebas de la tubería, guía paso a paso) | `cursorag` | `packages/ragsim` | 0093 (puede llegar como 0092: renumerar) |
+
+Al acabar: `git merge --no-ff` de cada rama (una a una), `npm install`,
+`npm run textos -- --write`, unir las reglas de estrellas si las dos añaden una
+parecida en `@sanatorio/course`, `npm run check`, un push y un despliegue
+(skill `desplegar`, desacoplado del SSH).
+
+Después (pedido por Alberto, cuando lo anterior esté hecho):
+1. Revisar todas las demostraciones (`docs/demos.md`, `*Tour.tsx`): que las
+   marcas de tiempo del guion coincidan con su frase y su acción.
+2. Crear demostraciones animadas para las ventanas y secciones que no la
+   tienen (mirar qué `InfoTip` faltan: Pomodoro y Startup, abandono, gestión,
+   ventanitas…), con `npm run demo:new`.
+
 En producción hasta 7a69796. Si la CI falla: `gh run view --job <id> --log-failed`
 (gh en `~/.local/bin`).
 
