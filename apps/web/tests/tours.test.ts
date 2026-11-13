@@ -9,7 +9,8 @@ import ca from 'virtual:textos/ca'
 import en from 'virtual:textos/en'
 import es from 'virtual:textos/es'
 import eu from 'virtual:textos/eu'
-import { click, cut, typing } from '../src/shared/tour/Tour'
+import fr from 'virtual:textos/fr'
+import { click, cut, paced, READ_MS, typing } from '../src/shared/tour/Tour'
 import type { TourDef } from '../src/shared/tour/Tour'
 
 /**
@@ -113,6 +114,70 @@ describe('demostraciones', () => {
       expect(last('dark') ?? false).toBe(false)
     },
   )
+
+  // Las marcas de tiempo coinciden con lo que se explica (2026-11-13): el
+  // motor da a cada frase el tiempo de leerla, en cada idioma, sin partir
+  // ninguna acción ni desordenar el guion.
+  describe.each([
+    ['es', es],
+    ['en', en],
+    ['ca', ca],
+    ['eu', eu],
+    ['fr', fr],
+  ] as const)('tiempo de lectura (%s)', (_lang, dict) => {
+    it.each(DEFS)('%s: cada frase dura lo que se tarda en leerla', (name, tour) => {
+      const letters = (caption: number): number =>
+        (dict[`tour.${name}.${caption}`] ?? es[`tour.${name}.${caption}`] ?? '').length
+      const script = paced(tour.script, letters) as readonly AnyCue[]
+      const end = Math.max(...script.map(([at]) => at)) + 1800
+      const starts = [
+        [0, 1] as const,
+        ...script.flatMap(([at, cue]) =>
+          cue.caption === undefined ? [] : [[at, cue.caption] as const],
+        ),
+      ]
+
+      starts.forEach(([at, caption], index) => {
+        const until = starts[index + 1]?.[0] ?? end
+
+        expect(until - at, `tour.${name}.${caption}`).toBeGreaterThanOrEqual(
+          letters(caption) * READ_MS,
+        )
+      })
+      // Nada se adelanta ni cambia de orden, y ninguna demostración se eterniza.
+      expect(script.map(([at]) => at)).toEqual([...script.map(([at]) => at)].sort((a, b) => a - b))
+      // (salvo el respiro que gana la última frase, un paso vacío al final)
+      expect(script.slice(0, tour.script.length).map(([, cue]) => cue)).toEqual(
+        [...(tour.script as readonly AnyCue[])].sort((a, b) => a[0] - b[0]).map(([, cue]) => cue),
+      )
+      expect(end).toBeLessThanOrEqual(32_000)
+    })
+  })
+
+  it('una frase larga retrasa lo que viene, sin partir el clic que trae la siguiente', () => {
+    const script = [
+      ...click<{ on: boolean }>(1000, 'a', { on: true, caption: 2 }),
+      ...cut<{ on: boolean }>(2500, { scene: 1, caption: 3 }),
+    ]
+    // La primera frase pide 3 000 ms y la segunda llegaba a los 1 700: faltan 1 300.
+    const slow = paced(script, (caption) => (caption === 1 ? 3000 / READ_MS : 0))
+
+    expect(slow.map(([at]) => at)).toEqual([2300, 2920, 3000, 3130, 3800, 4200, 4550])
+    // Con tiempo de sobra no se toca; vacío, tampoco; y la última gana su respiro.
+    expect(paced(script, () => 1)).toEqual(script)
+    expect(paced([], () => 0)).toEqual([])
+    expect(
+      paced<object>([[500, { caption: 2 }]], (caption) => (caption === 2 ? 100 : 0)).at(-1),
+    ).toEqual([500 + 100 * READ_MS - 1800, {}])
+  })
+
+  it('un guion apuntado fuera de orden se ordena al definirlo', () => {
+    for (const [, tour] of DEFS) {
+      const times = tour.script.map(([at]) => at)
+
+      expect(times).toEqual([...times].sort((a, b) => a - b))
+    }
+  })
 
   it('un clic llega, aprieta, cambia y suelta, en ese orden', () => {
     expect(click<{ on: boolean }>(1000, 'save', { on: true })).toEqual([

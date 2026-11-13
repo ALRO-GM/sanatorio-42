@@ -1,4 +1,4 @@
-import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import type { TourName } from '@sanatorio/contracts'
@@ -128,15 +128,74 @@ export function defineTour<S extends object>(
   return {
     name,
     start,
-    script,
+    // Por orden de tiempo (y, a igualdad, como se escribió): un guion con un
+    // paso apuntado fuera de su sitio se ve igual, y las marcas de la barra
+    // salen de la primera vez que aparece cada frase.
+    script: [...script].sort((a, b) => a[0] - b[0]),
     steps: [...new Set([1, ...captions])].sort((a, b) => a - b),
     spots,
   }
 }
 
+/**
+ * Lo que necesita una frase en pantalla, en ms de guion por letra. Con el
+ * ritmo de fábrica (`PACE`) son 60 ms reales: unas 190 palabras por minuto,
+ * lo que se lee con calma una frase corta.
+ */
+export const READ_MS = 40
+
+/**
+ * El guion con tiempo para leer cada frase (pedido por Alberto, 2026-11-13:
+ * que las marcas de tiempo coincidan con lo que se explica). Si una frase
+ * cambia antes de que dé tiempo a leerla, todo lo que viene después se
+ * retrasa lo que falte: el ratón espera quieto y luego sigue. La espera entra
+ * antes de la acción que trae la frase siguiente (el clic o el fundido donde
+ * va), para no partirla. Depende del idioma: una frase más larga en francés
+ * espera más. `letters` dice cuántas letras tiene cada frase.
+ */
+export function paced<S>(
+  script: readonly Cue<S>[],
+  letters: (caption: number) => number,
+): readonly Cue<S>[] {
+  const cues = [...script].sort((a, b) => a[0] - b[0])
+  // Dónde empieza la acción que trae cada cambio de frase: el último «ir a»
+  // o fundido de los 800 ms de antes, o el propio cambio.
+  const starts = cues.flatMap(([at, change], index) => {
+    if (change.caption === undefined) return []
+
+    const lead = cues.findIndex(
+      ([when, other], before) =>
+        before <= index &&
+        when >= at - 800 &&
+        ((other.cursor !== undefined && other.cursor !== 'rest') || other.dark === true),
+    )
+
+    return [{ caption: change.caption, at: index, from: lead === -1 ? index : lead }]
+  })
+  const out = cues.map(([at, change]): [number, Partial<Shot<S>>] => [at, change])
+  let shown = { caption: 1, since: 0 }
+
+  for (const next of starts) {
+    const arrives = out[next.at]?.[0] ?? 0
+    const missing = shown.since + letters(shown.caption) * READ_MS - arrives
+
+    if (missing > 0) for (const cue of out.slice(next.from)) cue[0] += missing
+    shown = { caption: next.caption, since: out[next.at]?.[0] ?? 0 }
+  }
+
+  // La última: que quepa antes del respiro final (`lengthOf`).
+  const end = out.at(-1)?.[0] ?? 0
+  const needed = shown.since + letters(shown.caption) * READ_MS - REST
+
+  return needed > end ? [...out, [needed, {}]] : out
+}
+
+/** El respiro tras el último paso antes de dar el guion por visto. */
+const REST = 1800
+
 /** Lo que dura el guion entero, con el último respiro antes de darlo por visto. */
 function lengthOf<S>(script: readonly Cue<S>[]): number {
-  return script.reduce((last, [at]) => Math.max(last, at), 0) + 1800
+  return script.reduce((last, [at]) => Math.max(last, at), 0) + REST
 }
 
 /** Cómo está todo a los `at` ms del guion: lo de antes, ya aplicado. */
@@ -205,13 +264,18 @@ type TourProps<S> = {
  * API. Quien prefiere menos movimiento ve los mismos pasos como lista.
  */
 export function Tour<S extends object>({ tour, tab, sub, bell, children }: TourProps<S>) {
-  const { name, start, script, steps } = tour
+  const { name, start, steps } = tour
   const { t } = useI18n()
+  // El guion, con el tiempo de leer cada frase en el idioma de quien mira.
+  const script = useMemo(
+    () => paced(tour.script, (caption) => t(`tour.${tour.name}.${String(caption)}`).length),
+    [tour, t],
+  )
   const { number } = useFormat()
   const spot = useContext(DemoSpot)
   const [still] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const length = lengthOf(script)
-  const chapters = chaptersOf(tour)
+  const chapters = chaptersOf({ ...tour, script })
   // Abierta desde el interrogante encima de algo: desde el paso que habla de eso.
   const [first] = useState(() => stepAt(tour.spots, spot))
   // Justo cuando sale su frase: con el margen de la barra se vería aún la anterior.

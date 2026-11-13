@@ -12,6 +12,15 @@ ratón de mentira hace lo que haría una persona, con una frase corta por acció
 2. **20 segundos de guion como mucho**. El motor lo estira un 50 % para quien
    la ve por primera vez, y cada cual puede acelerarla o frenarla (la API
    aprende la velocidad media y la ajusta, `tours.service.ts`).
+   **Cada frase dura lo que se tarda en leerla** (2026-11-13): si el guion
+   cambia de frase antes de 40 ms de guion por letra (60 ms reales al ritmo
+   de fábrica, unas 190 palabras por minuto), el motor retrasa todo lo que
+   viene detrás lo que falte (`paced` en `Tour.tsx`): el ratón espera quieto
+   antes de la acción que trae la frase siguiente, sin partirla. Va por
+   idioma (una frase más larga en francés o euskera espera más) y las marcas
+   de la barra salen del guion ya ajustado. Por eso una demostración puede
+   pasar algo de los 20 s: el tope del guion escrito sigue siendo ese, y con
+   las esperas, 32 s. `defineTour` además ordena el guion por tiempo.
 3. **Lo que se ve es lo que hay**: las etiquetas salen de las mismas claves que
    la web (`t('map.reportBroken')`), no se inventan. Los logins son inventados.
 4. **El ratón solo señala cosas que existen** en la escena en ese momento.
@@ -21,7 +30,8 @@ ratón de mentira hace lo que haría una persona, con una frase corta por acció
    sistema se ven los mismos pasos como lista. Salen solos del guion.
 7. **Es un decorado**: nada es un control de verdad ni llama a la API.
 
-Los criterios 1, 2, 4 y 6, que las frases existan en los cuatro idiomas y que
+Los criterios 1, 2, 4 y 6, el tiempo de lectura de cada frase en los cinco
+idiomas, que las frases existan en los cuatro idiomas y que
 el ratón acabe suelto y la pantalla sin fundido los comprueban
 `apps/web/tests/tours.test.ts` y `apps/web/tests/ui/tours.test.tsx`, que
 encuentran solas todas las demostraciones.
