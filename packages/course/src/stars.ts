@@ -1,10 +1,12 @@
 /**
- * Las estrellas de un punto del curso. Dos maneras de medir, según el punto:
+ * Las estrellas de un punto del curso. Tres maneras de medir, según el punto:
  *
  * - **Por comandos** (unidades): tres estrellas con tantos comandos como la
  *   solución de referencia, contados igual; dos hasta la mitad más uno; una
  *   con los que sean, al conseguirlo. Lo que no cuenta (mirar, lo que falla)
  *   lo decide cada motor.
+ * - **Por comprobaciones** (pruebas que se configuran): tres estrellas a la
+ *   primera, dos con hasta tres comprobaciones y una con más (`checkGoals`).
  * - **Por tiempo** (jefes contrarreloj): tres estrellas en la mitad del tiempo
  *   o menos, dos hasta tres cuartos y una dentro del límite. Fuera del límite
  *   no hay punto: es un contrarreloj.
@@ -23,6 +25,18 @@ export type TimeGoals = { three: number; two: number; limit: number }
 
 export function commandGoals(par: number): StarGoals {
   return { three: par, two: Math.ceil(par * 1.5) + 1 }
+}
+
+/**
+ * Por **comprobaciones**, la regla hermana de `commandGoals` para las pruebas
+ * que no se teclean en una terminal sino que se configuran y se comprueban
+ * (el esquema de red del curso de NetPractice): lo que cuenta es cuántas
+ * veces hubo que pulsar «Comprobar» hasta acertar. ★★★ a la primera, ★★☆ con
+ * hasta dos fallos (tres comprobaciones) y ★☆☆ con más. Se puntúa con
+ * `starsFor`, como los comandos.
+ */
+export function checkGoals(): StarGoals {
+  return { three: 1, two: 3 }
 }
 
 export function starsFor(used: number, goals: StarGoals): Stars {

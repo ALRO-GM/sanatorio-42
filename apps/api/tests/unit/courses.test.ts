@@ -45,7 +45,13 @@ function progress(
     )
   }
 
-  return { shell: of('shell'), git: of('git'), docker: of('docker'), k8s: of('k8s') }
+  return {
+    shell: of('shell'),
+    git: of('git'),
+    docker: of('docker'),
+    k8s: of('k8s'),
+    net: of('net'),
+  }
 }
 
 const unlocked = (p: CoursesProgress): string[] =>
@@ -57,7 +63,7 @@ describe('logros de los cursos', () => {
   it('sin nada hecho no hay ninguno, y cada uno dice cuánto falta', () => {
     const list = courseAchievements(progress({}))
 
-    expect(list).toHaveLength(22)
+    expect(list).toHaveLength(27)
     expect(list.every((entry) => !entry.unlocked && entry.progress === 0 && entry.goal > 0)).toBe(
       true,
     )
@@ -181,6 +187,7 @@ describe('clasificaciones de los cursos (reglas)', () => {
       'git',
       'docker',
       'k8s',
+      'net',
       'bosses',
       'certificates',
     ])
@@ -204,7 +211,7 @@ describe('clasificaciones de los cursos (reglas)', () => {
   it('vacío: todas las clasificaciones, sin nadie', () => {
     const boards = courseBoards([], 'ana')
 
-    expect(boards).toHaveLength(7)
+    expect(boards).toHaveLength(8)
     expect(boards.every((board) => board.ranking.length === 0 && board.me === null)).toBe(true)
   })
 

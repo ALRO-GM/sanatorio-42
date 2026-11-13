@@ -32,7 +32,7 @@ const MONTH: Record<string, Partial<Record<CourseId, Tally>>> = {
   lsoto: { git: [12, 5, 1, 0, 0] },
 }
 
-const COURSE_IDS: readonly CourseId[] = ['shell', 'git', 'docker', 'k8s']
+const COURSE_IDS: readonly CourseId[] = ['shell', 'git', 'docker', 'k8s', 'net']
 
 /** Qué ordena cada clasificación y qué desempata (índices de `Tally`), y sus cifras del campus. */
 const BOARDS: Record<CourseBoardId, { order: [number, number]; totals: string[] }> = {
@@ -41,6 +41,7 @@ const BOARDS: Record<CourseBoardId, { order: [number, number]; totals: string[] 
   git: { order: [0, 1], totals: ['people', 'units', 'finished'] },
   docker: { order: [0, 1], totals: ['people', 'units', 'finished'] },
   k8s: { order: [0, 1], totals: ['people', 'units', 'finished'] },
+  net: { order: [0, 1], totals: ['people', 'units', 'finished'] },
   bosses: { order: [2, 0], totals: ['people', 'bosses'] },
   certificates: { order: [3, 2], totals: ['people', 'certificates'] },
 }
@@ -112,6 +113,11 @@ const MINE: Record<CourseAchievementId, [progress: number, goal: number]> = {
   k8s_intermediate: [0, 14],
   k8s_advanced: [0, 14],
   k8s_bosses: [0, 9],
+  net_first: [1, 1],
+  net_beginner: [6, 18],
+  net_intermediate: [0, 16],
+  net_advanced: [0, 13],
+  net_bosses: [1, 12],
   courses_explorer: [3, 4],
   courses_all: [0, 4],
   courses_order: [0, 4],

@@ -32,6 +32,7 @@ export type PoolKey =
   | 'shellcourse'
   | 'dockercourse'
   | 'k8scourse'
+  | 'netcourse'
   | 'estadisticas'
   // Calendario
   | 'calendario'

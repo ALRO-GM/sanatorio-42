@@ -34,6 +34,7 @@ import { gitCourseMock } from './gitcourse'
 import { shellCourseMock } from './shellcourse'
 import { dockerCourseMock } from './dockercourse'
 import { k8sCourseMock } from './k8scourse'
+import { netCourseMock } from './netcourse'
 import { coursesMock } from './courses'
 import { unlocksMock } from './unlocks'
 import { gitRoomsMock } from './gitrooms'
@@ -77,6 +78,7 @@ export const mockApi: Api = withHidden({
   ...shellCourseMock,
   ...dockerCourseMock,
   ...k8sCourseMock,
+  ...netCourseMock,
   ...coursesMock,
   ...unlocksMock,
   ...gitRoomsMock,

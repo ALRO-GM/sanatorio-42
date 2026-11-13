@@ -97,6 +97,7 @@ import { k8sCourseSchema } from './0088-k8s-course.js'
 import { actionLimitsSchema } from './0089-action-limits.js'
 import { seatUsageSchema } from './0091-seat-usage.js'
 import { unlockAnnouncementsSchema } from './0090-unlock-announcements.js'
+import { netCourseSchema } from './0092-net-course.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -191,6 +192,7 @@ export const MIGRATIONS: readonly Migration[] = [
   actionLimitsSchema,
   unlockAnnouncementsSchema,
   seatUsageSchema,
+  netCourseSchema,
 ]
 
 /** Versión más alta que existe en el código. */

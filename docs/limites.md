@@ -68,7 +68,7 @@ Medido el 2026-11-09 buscando topes, cuotas y máximos en `apps/api/src`.
 | Segundo factor | 5 fallos en 15 min | `admin/second-factor.ts` | Seguridad |
 | Códigos de llegada fallidos | 5 por evento | `attendance.rules.ts` | Anti-trampas de la XP |
 | Topes de XP (dudas resueltas, revisiones, sesiones de sprint al día, pareja/día y pareja/semana de ayuda) y faltas | varios | `doubts.service.ts`, `therapy.service.ts`, `help.service.ts` | Anti-trampas (`AGENTS.md`, «XP y anti-trampas»): subirlos regala XP |
-| Intentos de los cursos (shell, git, Docker, Kubernetes) y órdenes de las salas de git | 30 / 20 cada 10 min, 60/min | `shellcourse`, `gitcourse`, `rooms.ts`… | Cada intento vuelve a ejecutar hasta 300 órdenes: protegen la CPU de la máquina |
+| Intentos de los cursos (shell, git, Docker, Kubernetes, NetPractice) y órdenes de las salas de git | 30 / 20 cada 10 min, 60/min | `shellcourse`, `gitcourse`, `rooms.ts`… | Cada intento vuelve a ejecutar hasta 300 órdenes: protegen la CPU de la máquina |
 | Análisis nuevos de la red y de asientos | 20/min | `network.service.ts`, `seating.service.ts` | Cálculo caro: CPU |
 | Telemetría de uso y errores de la web | 40/min, 10/min | `usage/index.ts`, `client-errors/index.ts` | Protegen la base de envíos automáticos |
 | Documentos y comprobaciones del staff | 40/día, 60 cada 10 min | `staff.service.ts` | Cuentas de staff, no personas de la web |

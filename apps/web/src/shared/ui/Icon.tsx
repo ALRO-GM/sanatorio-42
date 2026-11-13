@@ -253,6 +253,13 @@ const PATHS = {
       <path d="M12 3v7.2M19.6 8.3l-6.2 2.9M18.3 18.1l-4.7-4.9M12 21v-7.2M5.7 18.1l4.7-4.9M4.4 8.3l6.2 2.9" />
     </>
   ),
+  /** Curso de NetPractice: un router, con las flechas de los paquetes que reparte. */
+  enrutador: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7v10M7 12h10M10 9l2-2 2 2M10 15l2 2 2-2M9 10l-2 2 2 2M15 10l2 2-2 2" />
+    </>
+  ),
 
   // --- Avisos de un evento ---------------------------------------------------
   visto: (

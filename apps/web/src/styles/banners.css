@@ -154,6 +154,11 @@
   --veil-angle: 60deg;
   --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='36'%3E%3Cpath d='M12 4l8 4.5v9L12 22l-8-4.5v-9z' fill='none' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3Ccircle cx='31' cy='27' r='2'/%3E%3C/svg%3E");
 }
+/* NetPractice: máquinas unidas por cables a un router. */
+.title-banner[data-title^='net_'] {
+  --veil-angle: 20deg;
+  --pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='52' height='34'%3E%3Cpath d='M8 26L26 9l18 17' fill='none' stroke='black' stroke-width='2'/%3E%3Ccircle cx='26' cy='9' r='4'/%3E%3Crect x='4' y='22' width='8' height='8'/%3E%3Crect x='40' y='22' width='8' height='8'/%3E%3C/svg%3E");
+}
 /* Los cuatro cursos: la bandera de cuadros de la meta. */
 .title-banner[data-title^='courses_'] {
   --ink: var(--gold);

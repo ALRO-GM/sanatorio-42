@@ -66,6 +66,11 @@ export function withUnlockChecks(api: Api): Api {
         api.submitK8sAttempt(unit, input),
       (result) => result.done,
     ),
+    submitNetAttempt: after(
+      (unit: string, input: Parameters<Api['submitNetAttempt']>[1]) =>
+        api.submitNetAttempt(unit, input),
+      (result) => result.done,
+    ),
     submitGitAttempt: after(
       (level: string, input: Parameters<Api['submitGitAttempt']>[1]) =>
         api.submitGitAttempt(level, input),

@@ -37,6 +37,7 @@ export const SECTIONS = [
   { id: 'cursoshell', icon: 'terminal', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'cursodocker', icon: 'contenedor', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'cursok8s', icon: 'timon', inNav: true, category: 'aprender', from: 'normal' },
+  { id: 'cursonet', icon: 'enrutador', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'notgames', icon: 'pregunta', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'pomodoro', icon: 'reloj', inNav: true, category: 'aprender', from: 'simple' },
   // Campus: cómo va el campus y cómo vas tú frente a él.
@@ -132,6 +133,7 @@ const POOL_KEY: Record<Section, PoolKey | null> = {
   cursoshell: 'shellcourse',
   cursodocker: 'dockercourse',
   cursok8s: 'k8scourse',
+  cursonet: 'netcourse',
   notgames: 'notgames',
   pomodoro: 'focus',
   estadisticas: 'estadisticas',

@@ -28,6 +28,7 @@ const TABLES: Record<CourseId, { table: string; column: 'unit' | 'level' }> = {
   git: { table: 'git_progress', column: 'level' },
   docker: { table: 'docker_progress', column: 'unit' },
   k8s: { table: 'k8s_progress', column: 'unit' },
+  net: { table: 'net_progress', column: 'unit' },
 }
 
 const periodQuery = z.object({ period: z.enum(['month', 'all']).default('month') })

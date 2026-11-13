@@ -20,6 +20,7 @@ import {
 } from '@sanatorio/dockersim'
 import { GATES, LEVELS } from '@sanatorio/gitsim'
 import { FINALS as K8S_FINALS, TIERS as K8S_TIERS, UNITS as K8S_UNITS } from '@sanatorio/k8ssim'
+import { FINALS as NET_FINALS, TIERS as NET_TIERS, UNITS as NET_UNITS } from '@sanatorio/netsim'
 import {
   FINALS as SHELL_FINALS,
   TIERS as SHELL_TIERS,
@@ -78,7 +79,16 @@ export const COURSES: readonly CourseSpec[] = [
   },
   terminalCourse('docker', DOCKER_UNITS, DOCKER_FINALS, DOCKER_TIERS),
   terminalCourse('k8s', K8S_UNITS, K8S_FINALS, K8S_TIERS),
+  terminalCourse('net', NET_UNITS, NET_FINALS, NET_TIERS),
 ]
+
+/**
+ * Los del orden sugerido (shell → git → Docker → Kubernetes): solo ellos
+ * cuentan para los logros «de todos» (empezarlos, terminarlos y en orden). El
+ * de NetPractice va aparte: no depende de ninguno y quien ya tenía esos logros
+ * no los pierde porque llegue un curso nuevo.
+ */
+const PATH: readonly CourseSpec[] = COURSES.filter((spec) => spec.id !== 'net')
 
 /** Las pruebas de grupo de git (sin el jefe final). */
 const GIT_GROUPS = GATES.filter((gate) => gate.kind === 'group').map((gate) => gate.id)
@@ -125,7 +135,7 @@ export function inOrder(progress: CoursesProgress): number {
   let previous = ''
   let streak = 0
 
-  for (const spec of COURSES) {
+  for (const spec of PATH) {
     const at = finishedAt(spec, progress)
 
     if (at === null || at < previous) break
@@ -169,14 +179,14 @@ export function courseAchievements(progress: CoursesProgress): CourseAchievement
       bosses,
     ]
   })
-  const started = COURSES.filter((spec) => progress[spec.id].size > 0).length
-  const finished = COURSES.filter((spec) => finishedAt(spec, progress) !== null).length
+  const started = PATH.filter((spec) => progress[spec.id].size > 0).length
+  const finished = PATH.filter((spec) => finishedAt(spec, progress) !== null).length
 
   return [
     ...perCourse,
-    achievement('courses_explorer', started, COURSES.length),
-    achievement('courses_all', finished, COURSES.length),
-    achievement('courses_order', inOrder(progress), COURSES.length),
+    achievement('courses_explorer', started, PATH.length),
+    achievement('courses_all', finished, PATH.length),
+    achievement('courses_order', inOrder(progress), PATH.length),
   ]
 }
 

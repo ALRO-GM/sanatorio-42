@@ -103,6 +103,8 @@ describe('migraciones', () => {
       'k8s_progress',
       'k8s_runs',
       'legal_acceptances',
+      'net_progress',
+      'net_runs',
       'notices',
       'pace_refs',
       'piscine_activity',

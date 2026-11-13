@@ -35,6 +35,7 @@ const TREE: Record<PoolKey, Group> = {
   shellcourse: 'aprender',
   dockercourse: 'aprender',
   k8scourse: 'aprender',
+  netcourse: 'aprender',
   estadisticas: 'campus',
   calendario: 'yo',
   clusters: 'campus',

@@ -4,8 +4,15 @@ Pedido por Alberto el 2026-11-08: que los cuatro cursos de Aprender (shell,
 git, Docker y Kubernetes) tengan su parte de juego en Clasificaciones y logros
 que se luzcan como título del banner.
 
+Ampliado el 2026-11-13 con el quinto curso, el de NetPractice
+([curso-netpractice.md](curso-netpractice.md)): tiene su clasificación y sus
+cinco logros con título, banner y XP, como los de Docker y Kubernetes. No
+depende de ningún otro curso, así que **no entra en el orden sugerido**: los
+logros «de todos» (`courses_explorer`, `courses_all`, `courses_order`) siguen
+siendo de los cuatro de siempre, y quien ya los tenía no los pierde.
+
 Los logros no tienen tabla propia: salen de lo que ya guarda cada curso
-(`shell_progress`, `git_progress`, `docker_progress`, `k8s_progress`). Módulo
+(`shell_progress`, `git_progress`, `docker_progress`, `k8s_progress`, `net_progress`). Módulo
 `modules/courses` (solo lee); las reglas, en `courses.rules.ts`. Ampliado el
 2026-11-09 (también pedido por Alberto): los logros dan XP y se celebran en
 pantalla al conseguirlos (ver «XP» y «Celebración», más abajo); eso vive en
@@ -17,8 +24,8 @@ pantalla al conseguirlos (ver «XP» y «Celebración», más abajo); eso vive e
 | --- | --- |
 | Estrellas (puntos) | La mejor nota (1–3) de cada punto superado del camino. Es lo que ordena las clasificaciones de cada curso y del total |
 | Superados | Puntos del camino superados |
-| Jefes | Shell, Docker y Kubernetes: los contrarrelojes de bloque y los jefes finales de nivel. Git: los repasos de mundo (`w*-world`) y el jefe final (`boss`) |
-| Certificados | Shell, Docker y Kubernetes: los tres jefes finales de nivel. Git no tiene niveles: cuenta su jefe final |
+| Jefes | Shell, Docker, Kubernetes y NetPractice: los contrarrelojes de bloque y los jefes finales de nivel. Git: los repasos de mundo (`w*-world`) y el jefe final (`boss`) |
+| Certificados | Shell, Docker, Kubernetes y NetPractice: los tres jefes finales de nivel. Git no tiene niveles: cuenta su jefe final |
 | Terminado | El último punto del camino (el jefe final avanzado; en git, `boss`). El camino va en orden: sin los anteriores no se llega |
 
 ## Clasificaciones (Campus → Clasificaciones)
@@ -33,7 +40,7 @@ se quita antes de poner los puestos. Mientras carga, la animación de progreso
 
 ## Logros y títulos
 
-22 logros, en el bloque de logros del perfil (en columnas, bajo los de
+27 logros, en el bloque de logros del perfil (en columnas, bajo los de
 siempre) y en el perfil público. Cada logro conseguido es también un título:
 sale en el desplegable de títulos (solo los conseguidos, para no llenarlo de
 apagados) y la API no deja ponerse uno que no se tiene.
@@ -43,6 +50,7 @@ apagados) y la API no deja ponerse uno que no se tiene.
 | `shell_first` · `docker_first` · `k8s_first` · `git_first` | El primer punto del curso | `$ echo hola` · `docker run hello-world` · `kubectl get pods` · `git init` |
 | `<curso>_beginner` / `_intermediate` / `_advanced` | Cada certificado de nivel (shell, Docker, Kubernetes) | Pipes bajo control, Script que funciona, Root de corazón; En mi contenedor funciona, Imagen ligera, Capitanía de contenedores; Pods en pie, Rollout sin sustos, Al timón del clúster |
 | `<curso>_bosses` | Todos los jefes del curso con tres estrellas | kill -9 a los jefes · Exit code 0 · Cero CrashLoopBackOff · Historial limpio (git: repasos de mundo y jefe final) |
+| `net_first` · `net_beginner` / `_intermediate` / `_advanced` · `net_bosses` | Lo mismo en el curso de NetPractice: el primer punto, cada certificado y todos los jefes con tres estrellas | ping 127.0.0.1 · En mi subred funciona, Ruta por defecto, Enruta medio internet · 0 % packet loss |
 | `git_group` | Las tres pruebas de grupo de git | Sin conflictos de merge |
 | `git_boss` | El jefe final de git | git push --force (con permiso) |
 | `courses_explorer` | Empezar los cuatro cursos | Un poco de todo |
@@ -57,8 +65,8 @@ empezados o terminados, y cursos terminados seguidos en el orden sugerido.
 
 Cada título de los cursos trae el banner de su curso (`styles/banners.css`,
 por el prefijo del id): el `$ _` de la terminal en shell, ramas en git,
-contenedores apilados en Docker, un panal en Kubernetes y la bandera de cuadros
-en los de todos. El color dice lo conseguido: acento para el primer punto,
+contenedores apilados en Docker, un panal en Kubernetes, máquinas unidas a un
+router en NetPractice y la bandera de cuadros en los de todos. El color dice lo conseguido: acento para el primer punto,
 verde para principiante y las pruebas de grupo, dorado para avanzado y el jefe
 final de git, y el color de peligro para todos los jefes con tres estrellas. El
 icono es el de la pestaña del curso (`shared/courseTitles.ts`).
@@ -70,15 +78,16 @@ Cada logro de los cursos da XP una sola vez, y cuenta para el nivel
 
 | Logro | XP |
 | --- | --- |
-| `<curso>_first` (el primer punto) | 10 |
-| `<curso>_beginner` · `_intermediate` · `_advanced` (cada certificado) | 25 · 40 · 60 |
-| `<curso>_bosses` (todos los jefes con tres estrellas) | 50 |
+| `<curso>_first` (el primer punto; también `net_first`) | 10 |
+| `<curso>_beginner` · `_intermediate` · `_advanced` (cada certificado; también los de `net`) | 25 · 40 · 60 |
+| `<curso>_bosses` (todos los jefes con tres estrellas; también `net_bosses`) | 50 |
 | `git_group` (las tres pruebas de grupo) · `git_boss` (el jefe final) | 40 · 60 |
 | `courses_explorer` (empezar los cuatro) | 20 |
 | `courses_all` (terminar los cuatro) | 100 |
 | `courses_order` (en el orden sugerido) | 50 |
 
-Los 22 juntos suman 885 XP: el nivel 6 entero, más que una sesión de ayuda
+Los 22 de los cuatro cursos suman 885 XP y, con los cinco de NetPractice (185),
+los 27 suman 1 070: el nivel 6 entero, más que una sesión de ayuda
 suelta pero menos que lo que da ayudar a menudo, que es para lo que está la
 web. No entra en la clasificación de quién ayuda más (`HELP_KINDS`).
 

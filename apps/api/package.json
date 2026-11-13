@@ -28,6 +28,7 @@
     "@sanatorio/gitsim": "*",
     "@sanatorio/dockersim": "*",
     "@sanatorio/k8ssim": "*",
+    "@sanatorio/netsim": "*",
     "@sanatorio/shellsim": "*",
     "chess.js": "1.4.0",
     "fastify": "^5.2.1",

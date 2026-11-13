@@ -24,12 +24,12 @@ function shellTier(index: number): readonly string[] {
 }
 
 describe('XP de los logros de los cursos (reglas)', () => {
-  it('cada logro da algo, más cuanto más cuesta, y todos juntos 885 (nivel 6)', () => {
+  it('cada logro da algo, más cuanto más cuesta, y todos juntos 1070 (nivel 6)', () => {
     const amounts = Object.values(COURSE_XP)
 
-    expect(amounts).toHaveLength(22)
+    expect(amounts).toHaveLength(27)
     expect(amounts.every((xp) => xp > 0)).toBe(true)
-    expect(amounts.reduce((sum, xp) => sum + xp, 0)).toBe(885)
+    expect(amounts.reduce((sum, xp) => sum + xp, 0)).toBe(1070)
     expect(COURSE_XP.shell_first).toBeLessThan(COURSE_XP.shell_beginner)
     expect(COURSE_XP.shell_beginner).toBeLessThan(COURSE_XP.shell_advanced)
     expect(COURSE_XP.courses_all).toBe(Math.max(...amounts))

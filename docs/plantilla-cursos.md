@@ -11,6 +11,7 @@ Los cursos que la siguen:
 | Shell de Linux | `packages/shellsim` | [curso-shell.md](curso-shell.md) |
 | Docker | `packages/dockersim` (encima de la shell) | [curso-docker.md](curso-docker.md) |
 | Kubernetes | `packages/k8ssim` (encima de la shell; despliega lo que publica el de Docker) | [curso-kubernetes.md](curso-kubernetes.md) |
+| NetPractice (redes IPv4) | `packages/netsim` (no es de terminal: la prueba es un esquema de red que se configura) | [curso-netpractice.md](curso-netpractice.md) |
 
 ## Las reglas
 
@@ -49,6 +50,11 @@ Los cursos que la siguen:
      la solución, ★★☆ hasta la mitad más uno, ★☆☆ con más. Lo que solo mira
      y lo que falla no cuenta; las **formas equivalentes cuentan igual** (un
      test por curso lo comprueba con variantes).
+   - Por **comprobaciones** en las pruebas que no se teclean sino que se
+     configuran y se comprueban, como el esquema de red de NetPractice
+     (`checkGoals`, la regla hermana de `commandGoals`): ★★★ a la primera, ★★☆
+     con hasta tres comprobaciones y ★☆☆ con más. Cuenta cada vez que se pulsa
+     «Comprobar», acierte o no.
    - Por **tiempo** en los jefes (`timeGoals`): ★★★ en la mitad del límite,
      ★★☆ hasta tres cuartos, ★☆☆ dentro del límite. Pasado, no hay punto.
 6. **La API no se fía de la web.** La web juega con el motor en el navegador
@@ -101,7 +107,7 @@ Los cursos que la siguen:
 
 | Pieza | Dónde | Qué hace |
 | --- | --- | --- |
-| Reglas | `packages/course` | `commandGoals`, `starsFor`, `timeGoals`, `starsForTime`, `unlocked`, `firstOpen`, `Theory`, `UnitKind` |
+| Reglas | `packages/course` | `commandGoals`, `checkGoals`, `starsFor`, `timeGoals`, `starsForTime`, `unlocked`, `firstOpen`, `Theory`, `UnitKind` |
 | Contrato | `packages/contracts/src/course.ts` | `CourseStars`, `CourseBest`, `CourseRun`, `CourseTier`, `CourseCertificate` |
 | Terminal | `apps/web/src/shared/course/Terminal.tsx` | Escribir, historial con flechas, `clear`, órdenes de varias líneas (`>`), número de cada orden que cuenta |
 | Estrellas | `apps/web/src/shared/course/Stars.tsx` | `StarRules` (comandos o tiempo), `StarsWhy`, `starText`, `clock` |
@@ -127,7 +133,9 @@ Los cursos que la siguen:
    guarda el progreso (migración nueva), con sus rutas en `docs/api.md`,
    en `POOL_ROUTES` y sus tablas en `personal`. Un curso de terminal reutiliza
    el servicio del de shell (`createShellCourseService` con su motor y sus
-   tablas, como `modules/dockercourse`).
+   tablas, como `modules/dockercourse`). Uno que no es de terminal también, si
+   lo que manda la web cabe en `entries` (en `modules/netcourse`, cada entrada
+   es una comprobación del esquema, en JSON).
 4. Una pestaña en Not-games con el camino, la unidad (las tres pestañas) y
    los jefes, usando las piezas de `shared/course`; textos en su tabla; un
    recorrido en `tests/ui` y su demostración animada. Si conviene hacer antes
