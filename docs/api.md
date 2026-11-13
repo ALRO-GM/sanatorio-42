@@ -2063,10 +2063,41 @@ cerrado (`locked: false`), `short` es el nombre corto (`Shell 00`, `C 07`,
 suspendido sale como por hacer (`todo`); un rush buscando grupo, en curso. Los
 avisos siguen las mismas reglas.
 
+## Curso de RAG (`modules/ragcourse`)
+
+```
+GET  /ragcourse                   → RagCourse { stars: { [punto]: 1–3 }, best: { [punto]: { commands, seconds } }, runs: { [jefe]: { startedAt, deadline } }, certificates: { tier, stars, seconds, at }[] }
+POST /ragcourse/units/:id         → RagAttemptInput { entries: string[] (≤ 60, ≤ 600 caracteres), activeSeconds?: entero 0–21600 } → RagAttemptResult { done, stars, commands, seconds, misses, course }
+POST /ragcourse/bosses/:id/start  → RagBossStart { unit, run: { startedAt, deadline }, course }
+```
+
+- El mismo servicio que los cursos de terminal (`createShellCourseService` con
+  el motor de `@sanatorio/ragsim` y sus tablas): las formas (`RagCourse`…) son
+  las de shell con otro nombre. Ver `docs/curso-rag.md`.
+- No es una terminal: cada elemento de `entries` es una **comprobación** del
+  banco de pruebas, un JSON con `t` (qué tarea de la unidad, desde 0) y una de:
+  `c` (los mandos de la tubería), `v` (números calculados a mano), `p` (lo
+  elegido en cada caso), `o` (trozos en orden) o `r` (una petición a la API del
+  RAG: `method`, `path`, `q`, `k`). La API las **vuelve a corregir** una a una
+  con el mismo motor; lo que no tiene esa forma se salta y no cuenta, y los
+  mandos fuera de rango se recortan.
+- Hecho cuando todas las tareas de la unidad tienen una comprobación que
+  cumple. `commands` son las comprobaciones que contaron (hasta que sale la
+  última tarea); `misses`, `task:N` por cada tarea sin salir, o `time`.
+- Estrellas: por comprobaciones en las unidades (`tryGoals`: ★★★ con las de la
+  solución más una) y por tiempo en los jefes, con el reloj de la API.
+- Progreso en `rag_progress` y relojes de los jefes en `rag_runs` (migración
+  92); el tiempo activo, en `course_times` con `course = 'rag'`. Jefes
+  finales: `rag-final-beginner`, `rag-final-intermediate`, `rag-final-advanced`.
+  Topes y códigos (404, 409, 400, 429), como en shell. No pide estar en un
+  puesto del clúster.
+
 ## Juego de los cursos (`modules/courses`)
 
 Clasificaciones y logros de los cuatro cursos (`docs/cursos-logros.md`). No tiene
-tablas: solo lee `shell_progress`, `git_progress`, `docker_progress` y `k8s_progress`.
+tablas: solo lee `shell_progress`, `git_progress`, `docker_progress`, `k8s_progress`
+y `rag_progress` (el curso de RAG tiene su clasificación `rag` y sus logros
+`rag_*`, pero no cuenta para los de «los cuatro cursos»).
 
 ```
 GET /courses/ranking?period=month|all  → CourseRanking: { period, boards: CourseBoard[] }

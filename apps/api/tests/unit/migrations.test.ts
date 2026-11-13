@@ -121,6 +121,8 @@ describe('migraciones', () => {
       'quiz_rounds',
       'quiz_stats',
       'quota_queue',
+      'rag_progress',
+      'rag_runs',
       'reactions',
       'report_exports',
       'request_stats',

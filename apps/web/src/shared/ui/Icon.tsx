@@ -253,6 +253,15 @@ const PATHS = {
       <path d="M12 3v7.2M19.6 8.3l-6.2 2.9M18.3 18.1l-4.7-4.9M12 21v-7.2M5.7 18.1l4.7-4.9M4.4 8.3l6.2 2.9" />
     </>
   ),
+  /** Curso de RAG: un documento y la lupa que busca en él antes de responder. */
+  fuentes: (
+    <>
+      <path d="M11 21H6a1 1 0 01-1-1V4a1 1 0 011-1h7l4 4v3" />
+      <path d="M13 3v4h4M8 11h5M8 14h2.5" />
+      <circle cx="16" cy="16" r="3.2" />
+      <path d="M18.4 18.4L21 21" />
+    </>
+  ),
 
   // --- Avisos de un evento ---------------------------------------------------
   visto: (

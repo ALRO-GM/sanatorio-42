@@ -5,7 +5,8 @@ git, Docker y Kubernetes) tengan su parte de juego en Clasificaciones y logros
 que se luzcan como título del banner.
 
 Los logros no tienen tabla propia: salen de lo que ya guarda cada curso
-(`shell_progress`, `git_progress`, `docker_progress`, `k8s_progress`). Módulo
+(`shell_progress`, `git_progress`, `docker_progress`, `k8s_progress`,
+`rag_progress`). Módulo
 `modules/courses` (solo lee); las reglas, en `courses.rules.ts`. Ampliado el
 2026-11-09 (también pedido por Alberto): los logros dan XP y se celebran en
 pantalla al conseguirlos (ver «XP» y «Celebración», más abajo); eso vive en
@@ -21,6 +22,12 @@ pantalla al conseguirlos (ver «XP» y «Celebración», más abajo); eso vive e
 | Certificados | Shell, Docker y Kubernetes: los tres jefes finales de nivel. Git no tiene niveles: cuenta su jefe final |
 | Terminado | El último punto del camino (el jefe final avanzado; en git, `boss`). El camino va en orden: sin los anteriores no se llega |
 
+El **curso de RAG** (añadido el 2026-11-13) se cuenta igual que shell, Docker
+y Kubernetes y tiene su clasificación y sus cinco logros, pero va aparte del
+camino sugerido: «todos los cursos», «los cuatro» y «en orden» siguen siendo
+shell, git, Docker y Kubernetes (`extra` en `courses.rules.ts`), para que
+nadie pierda un logro que ya tenía.
+
 ## Clasificaciones (Campus → Clasificaciones)
 
 Debajo de las de Ayuda y con su mismo periodo (este mes, desde el día 1 en
@@ -33,7 +40,7 @@ se quita antes de poner los puestos. Mientras carga, la animación de progreso
 
 ## Logros y títulos
 
-22 logros, en el bloque de logros del perfil (en columnas, bajo los de
+27 logros, en el bloque de logros del perfil (en columnas, bajo los de
 siempre) y en el perfil público. Cada logro conseguido es también un título:
 sale en el desplegable de títulos (solo los conseguidos, para no llenarlo de
 apagados) y la API no deja ponerse uno que no se tiene.
@@ -42,6 +49,7 @@ apagados) y la API no deja ponerse uno que no se tiene.
 | --- | --- | --- |
 | `shell_first` · `docker_first` · `k8s_first` · `git_first` | El primer punto del curso | `$ echo hola` · `docker run hello-world` · `kubectl get pods` · `git init` |
 | `<curso>_beginner` / `_intermediate` / `_advanced` | Cada certificado de nivel (shell, Docker, Kubernetes) | Pipes bajo control, Script que funciona, Root de corazón; En mi contenedor funciona, Imagen ligera, Capitanía de contenedores; Pods en pie, Rollout sin sustos, Al timón del clúster |
+| `rag_first` · `rag_beginner` · `rag_intermediate` · `rag_advanced` · `rag_bosses` | Lo mismo en el curso de RAG: el primer punto, cada certificado y todos los jefes con tres estrellas | top_k = 3 · Aguja en el pajar · Con fuentes, por favor · RAG against the machine · Cero alucinaciones |
 | `<curso>_bosses` | Todos los jefes del curso con tres estrellas | kill -9 a los jefes · Exit code 0 · Cero CrashLoopBackOff · Historial limpio (git: repasos de mundo y jefe final) |
 | `git_group` | Las tres pruebas de grupo de git | Sin conflictos de merge |
 | `git_boss` | El jefe final de git | git push --force (con permiso) |
@@ -57,7 +65,8 @@ empezados o terminados, y cursos terminados seguidos en el orden sugerido.
 
 Cada título de los cursos trae el banner de su curso (`styles/banners.css`,
 por el prefijo del id): el `$ _` de la terminal en shell, ramas en git,
-contenedores apilados en Docker, un panal en Kubernetes y la bandera de cuadros
+contenedores apilados en Docker, un panal en Kubernetes, las líneas de un
+documento con el trozo encontrado en RAG y la bandera de cuadros
 en los de todos. El color dice lo conseguido: acento para el primer punto,
 verde para principiante y las pruebas de grupo, dorado para avanzado y el jefe
 final de git, y el color de peligro para todos los jefes con tres estrellas. El
@@ -78,7 +87,7 @@ Cada logro de los cursos da XP una sola vez, y cuenta para el nivel
 | `courses_all` (terminar los cuatro) | 100 |
 | `courses_order` (en el orden sugerido) | 50 |
 
-Los 22 juntos suman 885 XP: el nivel 6 entero, más que una sesión de ayuda
+Los 27 juntos suman 1070 XP: el nivel 6 entero, más que una sesión de ayuda
 suelta pero menos que lo que da ayudar a menudo, que es para lo que está la
 web. No entra en la clasificación de quién ayuda más (`HELP_KINDS`).
 

@@ -96,6 +96,7 @@ import { dockerCourseSchema } from './0087-docker-course.js'
 import { k8sCourseSchema } from './0088-k8s-course.js'
 import { actionLimitsSchema } from './0089-action-limits.js'
 import { seatUsageSchema } from './0091-seat-usage.js'
+import { ragCourseSchema } from './0092-rag-course.js'
 import { unlockAnnouncementsSchema } from './0090-unlock-announcements.js'
 import type { Migration } from './types.js'
 
@@ -191,6 +192,7 @@ export const MIGRATIONS: readonly Migration[] = [
   actionLimitsSchema,
   unlockAnnouncementsSchema,
   seatUsageSchema,
+  ragCourseSchema,
 ]
 
 /** Versión más alta que existe en el código. */

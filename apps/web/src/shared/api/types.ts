@@ -43,6 +43,10 @@ import type {
   K8sAttemptResult,
   K8sBossStart,
   K8sCourse,
+  RagAttemptInput,
+  RagAttemptResult,
+  RagBossStart,
+  RagCourse,
   GitAttemptResult,
   GitCourse,
   CoursePlace,
@@ -449,6 +453,9 @@ export type Api = {
   getK8sCourse: () => Promise<K8sCourse>
   submitK8sAttempt: (unit: string, input: K8sAttemptInput) => Promise<K8sAttemptResult>
   startK8sBoss: (unit: string) => Promise<K8sBossStart>
+  getRagCourse: () => Promise<RagCourse>
+  submitRagAttempt: (unit: string, input: RagAttemptInput) => Promise<RagAttemptResult>
+  startRagBoss: (unit: string) => Promise<RagBossStart>
   startFocus: (settings: FocusSettings) => Promise<Focus>
   stopFocus: (reasons?: FocusReason[]) => Promise<Focus>
   /** Querías acabar el Pomodoro y sigues: se apunta con los motivos marcados. */

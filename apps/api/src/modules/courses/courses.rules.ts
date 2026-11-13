@@ -20,6 +20,7 @@ import {
 } from '@sanatorio/dockersim'
 import { GATES, LEVELS } from '@sanatorio/gitsim'
 import { FINALS as K8S_FINALS, TIERS as K8S_TIERS, UNITS as K8S_UNITS } from '@sanatorio/k8ssim'
+import { FINALS as RAG_FINALS, TIERS as RAG_TIERS, UNITS as RAG_UNITS } from '@sanatorio/ragsim'
 import {
   FINALS as SHELL_FINALS,
   TIERS as SHELL_TIERS,
@@ -37,6 +38,11 @@ type CourseSpec = {
   last: string
   /** Cada nivel con su certificado (git no tiene niveles). */
   tiers: readonly { tier: CourseTier; units: readonly string[]; final: string }[]
+  /**
+   * Si va aparte del camino sugerido (shell → git → Docker → Kubernetes): tiene
+   * su clasificación y sus logros, pero no cuenta para «los cuatro cursos».
+   */
+  extra?: true
 }
 
 type TerminalUnit = { id: string; tier: CourseTier; kind: 'unit' | 'boss' | 'final' }
@@ -63,7 +69,10 @@ function terminalCourse(
 /** El jefe final de git: una prueba de grupo que va después del último mundo. */
 const GIT_BOSS = 'boss'
 
-/** Los cuatro cursos, en el orden sugerido (shell → git → Docker → Kubernetes). */
+/**
+ * Los cursos: los cuatro del camino, en el orden sugerido (shell → git →
+ * Docker → Kubernetes), y detrás los que van aparte (RAG).
+ */
 export const COURSES: readonly CourseSpec[] = [
   terminalCourse('shell', SHELL_UNITS, SHELL_FINALS, SHELL_TIERS),
   {
@@ -78,7 +87,11 @@ export const COURSES: readonly CourseSpec[] = [
   },
   terminalCourse('docker', DOCKER_UNITS, DOCKER_FINALS, DOCKER_TIERS),
   terminalCourse('k8s', K8S_UNITS, K8S_FINALS, K8S_TIERS),
+  { ...terminalCourse('rag', RAG_UNITS, RAG_FINALS, RAG_TIERS), extra: true },
 ]
+
+/** Los cuatro del camino sugerido: de ellos salen los logros de «todos los cursos». */
+const PATH = COURSES.filter((spec) => spec.extra !== true)
 
 /** Las pruebas de grupo de git (sin el jefe final). */
 const GIT_GROUPS = GATES.filter((gate) => gate.kind === 'group').map((gate) => gate.id)
@@ -125,7 +138,7 @@ export function inOrder(progress: CoursesProgress): number {
   let previous = ''
   let streak = 0
 
-  for (const spec of COURSES) {
+  for (const spec of PATH) {
     const at = finishedAt(spec, progress)
 
     if (at === null || at < previous) break
@@ -169,14 +182,14 @@ export function courseAchievements(progress: CoursesProgress): CourseAchievement
       bosses,
     ]
   })
-  const started = COURSES.filter((spec) => progress[spec.id].size > 0).length
-  const finished = COURSES.filter((spec) => finishedAt(spec, progress) !== null).length
+  const started = PATH.filter((spec) => progress[spec.id].size > 0).length
+  const finished = PATH.filter((spec) => finishedAt(spec, progress) !== null).length
 
   return [
     ...perCourse,
-    achievement('courses_explorer', started, COURSES.length),
-    achievement('courses_all', finished, COURSES.length),
-    achievement('courses_order', inOrder(progress), COURSES.length),
+    achievement('courses_explorer', started, PATH.length),
+    achievement('courses_all', finished, PATH.length),
+    achievement('courses_order', inOrder(progress), PATH.length),
   ]
 }
 

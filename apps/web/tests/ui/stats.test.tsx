@@ -64,6 +64,7 @@ describe('Estadísticas de Ayuda', () => {
       'nav.cursogit',
       'nav.cursodocker',
       'nav.cursok8s',
+      'nav.cursorag',
       'stats.courses.bosses',
       'stats.courses.certificates',
     ]

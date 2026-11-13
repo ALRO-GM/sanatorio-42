@@ -23,16 +23,17 @@ import type { Api } from '../types'
 type Tally = [points: number, units: number, bosses: number, certificates: number, done: number]
 
 const MONTH: Record<string, Partial<Record<CourseId, Tally>>> = {
-  [ME.login]: { shell: [42, 16, 4, 1, 0], git: [9, 4, 0, 0, 0] },
+  [ME.login]: { shell: [42, 16, 4, 1, 0], git: [9, 4, 0, 0, 0], rag: [6, 2, 0, 0, 0] },
   jdoe: { shell: [61, 22, 6, 2, 0], docker: [12, 5, 1, 0, 0] },
   mgarcia: { git: [54, 20, 3, 0, 0], k8s: [7, 3, 0, 0, 0] },
   cfernandez: { shell: [30, 11, 2, 1, 0], git: [18, 7, 1, 0, 0], docker: [24, 9, 2, 1, 0] },
   anavarro: { docker: [33, 12, 3, 1, 0] },
   lruiz: { k8s: [27, 10, 3, 1, 0], shell: [96, 36, 9, 3, 1] },
-  lsoto: { git: [12, 5, 1, 0, 0] },
+  lsoto: { git: [12, 5, 1, 0, 0], rag: [21, 8, 1, 0, 0] },
+  nvidal: { rag: [44, 17, 4, 1, 0] },
 }
 
-const COURSE_IDS: readonly CourseId[] = ['shell', 'git', 'docker', 'k8s']
+const COURSE_IDS: readonly CourseId[] = ['shell', 'git', 'docker', 'k8s', 'rag']
 
 /** Qué ordena cada clasificación y qué desempata (índices de `Tally`), y sus cifras del campus. */
 const BOARDS: Record<CourseBoardId, { order: [number, number]; totals: string[] }> = {
@@ -41,6 +42,7 @@ const BOARDS: Record<CourseBoardId, { order: [number, number]; totals: string[] 
   git: { order: [0, 1], totals: ['people', 'units', 'finished'] },
   docker: { order: [0, 1], totals: ['people', 'units', 'finished'] },
   k8s: { order: [0, 1], totals: ['people', 'units', 'finished'] },
+  rag: { order: [0, 1], totals: ['people', 'units', 'finished'] },
   bosses: { order: [2, 0], totals: ['people', 'bosses'] },
   certificates: { order: [3, 2], totals: ['people', 'certificates'] },
 }
@@ -112,6 +114,11 @@ const MINE: Record<CourseAchievementId, [progress: number, goal: number]> = {
   k8s_intermediate: [0, 14],
   k8s_advanced: [0, 14],
   k8s_bosses: [0, 9],
+  rag_first: [1, 1],
+  rag_beginner: [2, 16],
+  rag_intermediate: [0, 14],
+  rag_advanced: [0, 15],
+  rag_bosses: [0, 12],
   courses_explorer: [3, 4],
   courses_all: [0, 4],
   courses_order: [0, 4],

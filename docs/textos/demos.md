@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-268 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+276 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -275,3 +275,11 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.kubernetesCourse.title.3` | Demostración animada del curso de Kubernetes: título del paso 3 | shared/tour/Tour | La terminal | The terminal | El terminal | Terminala | Le terminal |
 | `tour.kubernetesCourse.4` | Demostración animada del curso de Kubernetes: frase del paso 4 | shared/tour/Tour | Cada bloque acaba en un jefe contrarreloj. | Each block ends with a timed boss. | Cada bloc acaba amb un cap contrarellotge. | Bloke bakoitza erlojupeko buruzagi batekin amaitzen da. | Chaque bloc se termine par un boss contre la montre. |
 | `tour.kubernetesCourse.title.4` | Demostración animada del curso de Kubernetes: título del paso 4 | shared/tour/Tour | Jefe contrarreloj | Timed boss | Cap contrarellotge | Erlojupeko buruzagia | Boss contre la montre |
+| `tour.ragCourse.1` | Demostración animada del curso de RAG: frase del paso 1 | shared/tour/Tour | Elige la siguiente unidad del camino. | Pick the next unit on the path. | Tria la unitat següent del camí. | Aukeratu bideko hurrengo unitatea. | Choisis l’unité suivante du chemin. |
+| `tour.ragCourse.title.1` | Demostración animada del curso de RAG: título del paso 1 | shared/tour/Tour | Las unidades | The units | Les unitats | Unitateak | Les unités |
+| `tour.ragCourse.2` | Demostración animada del curso de RAG: frase del paso 2 | shared/tour/Tour | Lees la teoría y ves la tubería encenderse, etapa a etapa. | Read the theory and watch the pipeline light up, stage by stage. | Llegeixes la teoria i veus la canonada encendre’s, etapa a etapa. | Teoria irakurri eta hodia etapaz etapa pizten ikusten duzu. | Tu lis la théorie et vois le pipeline s’allumer, étape par étape. |
+| `tour.ragCourse.title.2` | Demostración animada del curso de RAG: título del paso 2 | shared/tour/Tour | Teoría y ejemplo | Theory and example | Teoria i exemple | Teoria eta adibidea | Théorie et exemple |
+| `tour.ragCourse.3` | Demostración animada del curso de RAG: frase del paso 3 | shared/tour/Tour | Mueve los mandos gratis; cada «Comprobar» cuenta. | Move the knobs for free; every "Check" counts. | Mou els comandaments de franc; cada «Comprovar» compta. | Mugitu aginteak doan; «Egiaztatu» bakoitzak balio du. | Bouge les réglages librement ; chaque « Vérifier » compte. |
+| `tour.ragCourse.title.3` | Demostración animada del curso de RAG: título del paso 3 | shared/tour/Tour | Banco de pruebas | Test bench | Banc de proves | Proba-bankua | Banc d’essai |
+| `tour.ragCourse.4` | Demostración animada del curso de RAG: frase del paso 4 | shared/tour/Tour | Cada bloque acaba en un jefe contrarreloj. | Each block ends with a timed boss. | Cada bloc acaba en un cap contrarellotge. | Bloke bakoitza erlojupeko buruzagi batekin amaitzen da. | Chaque bloc se termine par un boss chronométré. |
+| `tour.ragCourse.title.4` | Demostración animada del curso de RAG: título del paso 4 | shared/tour/Tour | Jefe contrarreloj | Timed boss | Cap contrarellotge | Erlojupeko buruzagia | Boss chronométré |

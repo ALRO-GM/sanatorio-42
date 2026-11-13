@@ -1,0 +1,983 @@
+/* ── Curso de RAG (`features/ragcourse`, `docs/curso-rag.md`) ───────────────────
+   El camino usa lo de los cursos de terminal (`shell-*`, `course-*`); aquí va
+   lo propio: la tubería que se ve (documento troceado, barras de cada
+   buscador, fusión, prompt con su presupuesto, respuesta con su cita) y el
+   banco de pruebas. Todo con las variables del tema: vale en claro y en
+   nocturno. Los dos tonos de trozo salen del acento y del dorado. */
+.rag-course,
+.rag-unit {
+  --rag-a: color-mix(in srgb, var(--accent) 16%, var(--surface));
+  --rag-b: color-mix(in srgb, var(--gold) 18%, var(--surface));
+  --rag-both: color-mix(in srgb, var(--accent) 34%, var(--surface));
+  --rag-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+}
+
+/* --- El camino --------------------------------------------------------------- */
+/* La tubería entera, etapa a etapa, con el bloque en el que se construye cada una. */
+.rag-map {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  margin: 0.5rem 0;
+  padding: 0;
+  list-style: none;
+}
+.rag-map li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-weight: 600;
+  line-height: 1.25;
+}
+.rag-map li small {
+  color: var(--text-3);
+  font-weight: 400;
+}
+.rag-map li.done {
+  border-color: var(--ok);
+  background: var(--ok-soft);
+}
+.rag-map li + li::before {
+  content: '→';
+  position: absolute;
+  left: -0.95rem;
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--text-3);
+  font-weight: 400;
+}
+.rag-guide,
+.rag-build {
+  margin: 0.5rem 0;
+  border-left: 3px solid var(--accent);
+  padding: 0.15rem 0 0.15rem 0.75rem;
+}
+.rag-guide > summary,
+.rag-build > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.rag-build {
+  border-left-color: var(--border-strong);
+}
+.rag-build > summary {
+  font-weight: 400;
+}
+.rag-skeleton {
+  overflow-x: auto;
+  margin: 0.4rem 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--rag-mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.rag-rank {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.25rem;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Teoría y ejemplo -------------------------------------------------------- */
+.rag-theory pre {
+  overflow-x: auto;
+}
+.rag-predict {
+  margin: 0 0 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--warn);
+  background: var(--warn-soft);
+  color: var(--text);
+  font-weight: 600;
+}
+.rag-frames {
+  display: grid;
+  gap: 0.9rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rag-frame {
+  min-width: 0;
+  animation: rag-in 0.45s ease both;
+}
+.rag-frame-caption {
+  display: flex;
+  gap: 0.45rem;
+  align-items: baseline;
+  margin: 0 0 0.4rem;
+  font-weight: 600;
+}
+
+/* --- La tubería de una pregunta ---------------------------------------------- */
+.rag-trace {
+  min-width: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.rag-question {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.rag-tag {
+  margin-right: 0.3rem;
+  color: var(--text-3);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.rag-pipe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.9rem;
+  margin-bottom: 0.6rem;
+}
+.rag-pipe .pill {
+  position: relative;
+}
+.rag-pipe .pill + .pill::before {
+  content: '→';
+  position: absolute;
+  left: -0.8rem;
+  color: var(--text-3);
+}
+.rag-pipe .pill.rag-passed {
+  border-color: var(--ok);
+}
+.rag-pipe .pill.rag-lost {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+  color: var(--text);
+}
+.rag-pipe .pill.rag-after:not(.active) {
+  color: var(--text-3);
+}
+.rag-panel {
+  min-width: 0;
+  animation: rag-in 0.35s ease both;
+}
+.rag-caption {
+  margin: 0 0 0.35rem;
+  color: var(--text-2);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+.rag-good {
+  color: var(--ok);
+  font-weight: 600;
+}
+.rag-bad {
+  color: var(--danger);
+  font-weight: 600;
+}
+.rag-empty {
+  margin: 0.4rem 0;
+  padding: 0.6rem 0.75rem;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+}
+
+/* El documento con sus trozos: dos tonos que se alternan, el solape más
+   oscuro, la frase de la respuesta subrayada y un número donde empieza cada
+   trozo. */
+.rag-doc {
+  overflow: auto;
+  max-height: 17rem;
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--rag-mono);
+  font-size: 0.8rem;
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rag-seg {
+  padding: 0.12em 0;
+  transition: background-color 0.3s;
+}
+.rag-seg.c0 {
+  background: var(--rag-a);
+}
+.rag-seg.c1 {
+  background: var(--rag-b);
+}
+.rag-seg.both {
+  background: var(--rag-both);
+}
+.rag-doc mark,
+.rag-legend mark {
+  padding: 0.05em 0.1em;
+  border-bottom: 2px solid var(--ok);
+  background: var(--ok-soft);
+  color: var(--text);
+  font-weight: 700;
+}
+.rag-chunk-tag {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.3em;
+  margin-right: 0.25em;
+  padding: 0 0.3em;
+  border-radius: 0.35em;
+  background: var(--text-2);
+  color: var(--surface);
+  font-weight: 700;
+  line-height: 1.35;
+}
+.rag-legend {
+  margin: 0.35rem 0 0;
+  color: var(--text-2);
+  font-size: 0.8rem;
+}
+.rag-key {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.75rem;
+  border-radius: 2px;
+  vertical-align: -1px;
+}
+.rag-key.c0 {
+  background: var(--rag-a);
+}
+.rag-key.c1 {
+  background: var(--rag-b);
+}
+.rag-key.both {
+  background: var(--rag-both);
+}
+.rag-hit {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+/* Las barras de cada buscador: BM25 en el acento, coseno en dorado. */
+.rag-bars {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rag-bars li {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 11rem) minmax(0, 1fr) 3.2rem;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+.rag-bars li.out {
+  color: var(--text-3);
+}
+.rag-bar-name {
+  overflow: hidden;
+  font-family: var(--rag-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rag-bar {
+  height: 0.8rem;
+  border-radius: 999px;
+  background: var(--surface-3);
+}
+.rag-bar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent);
+  transform-origin: left;
+  animation: rag-grow 0.7s cubic-bezier(0.3, 0.8, 0.3, 1) both;
+}
+.rag-bars.semantic .rag-bar i {
+  background: var(--gold);
+}
+.rag-bars li.out .rag-bar i {
+  opacity: 0.45;
+}
+.rag-bar-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Listas una junto a otra, con una línea de cada trozo a su puesto nuevo. Las
+   filas miden lo mismo que en `Pipeline.tsx` (`ROW`), para que las líneas casen. */
+.rag-flow {
+  display: flex;
+  align-items: flex-start;
+  min-width: 0;
+}
+.rag-flow-part {
+  display: flex;
+  flex: 1 1 0;
+  align-items: flex-start;
+  min-width: 0;
+}
+.rag-flow-col {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.rag-flow-col strong {
+  display: block;
+  overflow: hidden;
+  height: 26px;
+  font-size: 0.8rem;
+  line-height: 26px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rag-flow-col ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rag-flow-col li {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+  height: 30px;
+  padding: 0 0.3rem;
+  border-radius: 6px;
+  color: var(--text-2);
+  font-size: 0.8rem;
+  animation: rag-in 0.4s ease both;
+}
+.rag-flow-part.main li.in {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+.rag-flow-col li.gold {
+  color: var(--text);
+  font-weight: 700;
+}
+.rag-flow-name {
+  overflow: hidden;
+  min-width: 0;
+  font-family: var(--rag-mono);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rag-links {
+  flex: none;
+  margin-top: 26px;
+}
+.rag-links path {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1.5;
+  stroke-dasharray: 80;
+  animation: rag-draw 0.9s ease both;
+}
+.rag-links path.up {
+  stroke: var(--ok);
+  stroke-width: 2;
+}
+.rag-links path.down {
+  stroke: var(--text-3);
+}
+
+/* El prompt llenándose: lo fijo, cada trozo que entra y, pasada la raya del
+   presupuesto, lo que no cabe. */
+.rag-meter {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  height: 1.5rem;
+  margin: 0.2rem 0 0.5rem;
+  border-radius: 6px;
+  background: var(--surface-3);
+}
+.rag-meter i {
+  flex: none;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: rag-grow 0.5s ease both;
+}
+.rag-meter i.fixed {
+  background: var(--text-3);
+}
+.rag-meter i.gold {
+  background: var(--ok);
+}
+.rag-meter i.out {
+  border: 1px dashed var(--danger);
+  background: var(--danger-soft);
+}
+.rag-meter-limit {
+  position: absolute;
+  top: -0.3rem;
+  bottom: -0.3rem;
+  width: 0;
+  border-left: 2px solid var(--text);
+}
+.rag-sources {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+.rag-sources li {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: space-between;
+  overflow-wrap: anywhere;
+}
+.rag-sources li.out,
+.rag-sources li.fixed {
+  color: var(--text-3);
+}
+.rag-sources li.out code {
+  text-decoration: line-through;
+}
+.rag-tokens {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.rag-cite {
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+/* La respuesta: con fundamento, inventada o «no lo sé». */
+.rag-badge {
+  display: inline-block;
+  padding: 0.05rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: 0.8rem;
+  font-style: normal;
+  font-weight: 700;
+}
+.rag-badge.grounded,
+.rag-badge.cached {
+  background: var(--ok-soft);
+  box-shadow: 0 0 0 1px var(--ok) inset;
+}
+.rag-badge.memory {
+  background: var(--danger-soft);
+  box-shadow: 0 0 0 1px var(--danger) inset;
+}
+.rag-answer-line {
+  margin: 0.6rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border-strong);
+  overflow-wrap: anywhere;
+}
+.rag-bubble {
+  padding: 0.6rem 0.75rem;
+  border-left: 3px solid var(--ok);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--surface-2);
+}
+.rag-bubble.memory {
+  border-left-color: var(--danger);
+}
+.rag-bubble.idk {
+  border-left-color: var(--text-3);
+}
+.rag-bubble p {
+  margin: 0.35rem 0 0;
+  overflow-wrap: anywhere;
+}
+.rag-answer-line.memory .rag-answer-text,
+.rag-bubble.memory .rag-answer-text {
+  text-decoration: underline wavy var(--danger);
+  text-underline-offset: 3px;
+}
+.rag-cite-btn {
+  min-width: 2rem;
+  min-height: 1.75rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  font-weight: 700;
+  cursor: pointer;
+}
+.rag-source {
+  margin-top: 0.5rem;
+  animation: rag-in 0.3s ease both;
+}
+.rag-verdict {
+  margin: 0.5rem 0 0;
+  font-weight: 600;
+}
+.rag-verdict.ok {
+  color: var(--ok);
+}
+.rag-verdict.lost {
+  color: var(--danger);
+}
+
+/* --- Cálculos, métricas, producción y API ------------------------------------ */
+.rag-cards,
+.rag-rows,
+.rag-steps,
+.rag-ops ol {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.3rem 0;
+  padding: 0;
+  list-style: none;
+}
+.rag-cards li {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  background: var(--surface-2);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+.rag-cards strong,
+.rag-row-label {
+  font-family: var(--rag-mono);
+  font-size: 0.8rem;
+}
+.rag-rows > li {
+  display: grid;
+  gap: 0.15rem;
+  font-size: 0.85rem;
+}
+.rag-row-label {
+  color: var(--text-2);
+  overflow-wrap: anywhere;
+}
+.rag-rows ol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: place;
+}
+.rag-rows ol li {
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  font-family: var(--rag-mono);
+  font-size: 0.8rem;
+  counter-increment: place;
+}
+.rag-rows ol li:not(.none)::before {
+  content: counter(place) '. ';
+  color: var(--text-3);
+}
+.rag-rows ol li.mark {
+  border-color: var(--ok);
+  background: var(--ok-soft);
+  font-weight: 700;
+}
+.rag-rows ol li.mark::after {
+  content: ' ✓';
+  color: var(--ok);
+}
+.rag-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1rem;
+  margin: 0.3rem 0;
+  font-family: var(--rag-mono);
+  font-size: 0.85rem;
+}
+.rag-facts div {
+  display: flex;
+  gap: 0.35rem;
+  overflow-wrap: anywhere;
+}
+.rag-facts dt {
+  color: var(--text-2);
+}
+.rag-facts dt::after {
+  content: ' =';
+}
+.rag-facts dd {
+  margin: 0;
+}
+.rag-formula {
+  margin: 0.3rem 0;
+  overflow-wrap: anywhere;
+}
+.rag-steps li {
+  padding: 0.25rem 0.6rem;
+  border-left: 3px solid var(--accent);
+  background: var(--surface-2);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+  animation: rag-in 0.4s ease both;
+}
+.rag-steps li:last-child {
+  border-left-color: var(--ok);
+  font-weight: 700;
+}
+.rag-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.3rem 0;
+}
+.rag-tiles div {
+  flex: 1 1 7rem;
+  min-width: 0;
+  padding: 0.4rem 0.6rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  animation: rag-in 0.4s ease both;
+}
+.rag-tiles dt {
+  color: var(--text-2);
+  font-size: 0.8rem;
+}
+.rag-tiles dd {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.rag-ops li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.75rem;
+  justify-content: space-between;
+  padding: 0.3rem 0.6rem;
+  border-left: 3px solid var(--border-strong);
+  background: var(--surface-2);
+  font-size: 0.85rem;
+  animation: rag-in 0.4s ease both;
+}
+.rag-ops li.index {
+  border-left-color: var(--accent);
+}
+.rag-ops li.cached {
+  border-left-color: var(--ok);
+}
+.rag-ops li.stale {
+  border-left-color: var(--danger);
+}
+.rag-ops-q {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.rag-api pre {
+  overflow-x: auto;
+  margin: 0.3rem 0;
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-family: var(--rag-mono);
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.rag-api-res {
+  border-left: 3px solid var(--ok);
+}
+.rag-api-res.bad {
+  border-left-color: var(--danger);
+}
+
+/* --- El banco de pruebas ----------------------------------------------------- */
+.rag-bench {
+  min-width: 0;
+}
+.rag-task {
+  min-width: 0;
+  margin-top: 0.5rem;
+}
+.rag-task-text {
+  margin: 0.2rem 0 0.5rem;
+  font-weight: 600;
+}
+.pill.rag-task-done {
+  border-color: var(--ok);
+}
+.rag-task-verdict {
+  margin: 0.6rem 0 0;
+  font-weight: 600;
+}
+.rag-task-verdict.ok {
+  color: var(--ok);
+}
+.rag-task-verdict.no {
+  color: var(--danger);
+}
+.rag-check {
+  margin-top: 0.6rem;
+}
+/* Los mandos a un lado y lo que se mira al otro; en el móvil, uno debajo del otro. */
+.rag-tune {
+  display: grid;
+  grid-template-columns: minmax(15rem, 22rem) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+.rag-knobs,
+.rag-look {
+  min-width: 0;
+}
+.rag-tune h4 {
+  margin: 0 0 0.4rem;
+}
+.rag-knob {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0 0 0.55rem;
+}
+.rag-knob.range {
+  display: grid;
+  gap: 0.15rem;
+}
+.rag-knob.range input {
+  width: 100%;
+  min-height: 1.75rem;
+  accent-color: var(--accent);
+}
+.rag-knob.range span {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+.rag-knob-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.rag-knob.choice {
+  display: block;
+}
+.rag-knob-name {
+  flex-basis: 100%;
+}
+.rag-knob.many {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.4rem 0.6rem;
+}
+.rag-knob.many label,
+.rag-option {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+.rag-objectives strong,
+.rag-now {
+  font-variant-numeric: tabular-nums;
+}
+.rag-now {
+  color: var(--text-2);
+  font-style: normal;
+}
+.rag-probe select {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 0.5rem;
+}
+.rag-dev {
+  margin-top: 0.6rem;
+}
+.rag-ask {
+  min-width: 0;
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.75rem 0.7rem;
+}
+.rag-ask legend {
+  padding: 0 0.3rem;
+  font-weight: 600;
+}
+.rag-ask.ok {
+  border-color: var(--ok);
+}
+.rag-ask.no {
+  border-color: var(--danger);
+}
+.rag-answer-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.6rem;
+  align-items: center;
+  margin-top: 0.4rem;
+  font-weight: 600;
+}
+.rag-answer-input small {
+  color: var(--text-2);
+  font-weight: 400;
+}
+.rag-answer-input input {
+  width: 8rem;
+  font-variant-numeric: tabular-nums;
+}
+.rag-options {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+.rag-option {
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  background: var(--surface-2);
+  overflow-wrap: anywhere;
+}
+.rag-option:has(input:checked) {
+  box-shadow: 0 0 0 2px var(--accent) inset;
+}
+.rag-options.relevant .rag-option {
+  font-size: 0.85rem;
+}
+.rag-options.relevant strong {
+  font-family: var(--rag-mono);
+}
+.rag-order-list {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 30rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rag-order-list li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+.rag-order-name {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.rag-order-name strong {
+  font-family: var(--rag-mono);
+  font-size: 0.85rem;
+}
+.rag-order-name small {
+  color: var(--text-2);
+}
+.rag-order-moves {
+  display: flex;
+  flex: none;
+  gap: 0.25rem;
+}
+.rag-order-moves button {
+  min-width: 2rem;
+  min-height: 2rem;
+}
+.rag-api-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+}
+.rag-api-form label {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.rag-api-form label.wide {
+  flex: 1 1 14rem;
+}
+.rag-api-form select,
+.rag-api-form input {
+  max-width: 100%;
+}
+.rag-api-form input {
+  width: 5rem;
+}
+
+@media (max-width: 760px) {
+  .rag-tune {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .rag-bars li {
+    grid-template-columns: minmax(5rem, 7.5rem) minmax(0, 1fr) 2.9rem;
+    gap: 0.35rem;
+  }
+  .rag-trace {
+    padding: 0.55rem 0.5rem;
+  }
+}
+/* En pantallas muy estrechas, las listas de la fusión van sin su número. */
+@media (max-width: 420px) {
+  .rag-flow-part:not(.main) .rag-rank {
+    display: none;
+  }
+}
+
+@keyframes rag-in {
+  from {
+    opacity: 0;
+    translate: 0 6px;
+  }
+}
+@keyframes rag-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes rag-draw {
+  from {
+    stroke-dashoffset: 80;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+/* Sin movimiento: todo sale ya puesto. */
+@media (prefers-reduced-motion: reduce) {
+  .rag-frame,
+  .rag-panel,
+  .rag-source,
+  .rag-bar i,
+  .rag-meter i,
+  .rag-flow-col li,
+  .rag-links path,
+  .rag-steps li,
+  .rag-tiles div,
+  .rag-ops li {
+    animation: none;
+  }
+  .rag-links path {
+    stroke-dasharray: none;
+  }
+  .rag-seg {
+    transition: none;
+  }
+}
+/* Con más contraste o colores forzados, los trozos se distinguen por su borde. */
+@media (forced-colors: active), (prefers-contrast: more) {
+  .rag-seg.c0,
+  .rag-seg.c1,
+  .rag-seg.both {
+    outline: 1px solid currentColor;
+  }
+}

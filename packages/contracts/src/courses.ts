@@ -7,8 +7,12 @@
 import type { LeaderboardPeriod } from './profile.js'
 import type { StatsEntry, StatsTotal } from './stats.js'
 
-/** Los cuatro cursos, en el orden sugerido: shell → git → Docker → Kubernetes. */
-export type CourseId = 'shell' | 'git' | 'docker' | 'k8s'
+/**
+ * Los cursos. Los cuatro primeros, en el orden sugerido: shell → git → Docker →
+ * Kubernetes. El de RAG va aparte: tiene su clasificación y sus logros, pero no
+ * entra en los de «los cuatro cursos».
+ */
+export type CourseId = 'shell' | 'git' | 'docker' | 'k8s' | 'rag'
 
 /**
  * Las clasificaciones de los cursos: el total de todos, una por curso, los
@@ -32,7 +36,7 @@ export type CourseRanking = {
 
 /**
  * Los logros de los cursos. Cada uno, al conseguirlo, también es un título
- * para el banner. De shell, Docker y Kubernetes: el primer punto, cada
+ * para el banner. De shell, Docker, Kubernetes y RAG: el primer punto, cada
  * certificado de nivel y todos los jefes con tres estrellas. De git: el primer
  * punto, las tres pruebas de grupo, el jefe final y todos los jefes con tres
  * estrellas. Y de todos: empezar los cuatro, terminarlos y terminarlos en el
@@ -58,6 +62,11 @@ export type CourseAchievementId =
   | 'k8s_intermediate'
   | 'k8s_advanced'
   | 'k8s_bosses'
+  | 'rag_first'
+  | 'rag_beginner'
+  | 'rag_intermediate'
+  | 'rag_advanced'
+  | 'rag_bosses'
   | 'courses_explorer'
   | 'courses_all'
   | 'courses_order'

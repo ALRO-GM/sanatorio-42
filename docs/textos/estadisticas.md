@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/estadisticas.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-215 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+216 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -211,6 +211,7 @@ Generado desde `apps/web/src/shared/i18n/textos/estadisticas.csv` con
 | `stats.courses.git.rank` | Clasificaciones, cursos: de qué va la clasificación del curso de git | features/stats/CourseStats, features/stats/HelpStatsPage, features/stats/HelpStatsTour | Quién suma más estrellas en git | Who has the most git stars | Qui suma més estrelles a git | Nork dituen git izar gehien | Qui a le plus d’étoiles en git |
 | `stats.courses.docker.rank` | Clasificaciones, cursos: de qué va la clasificación del curso de Docker | features/stats/CourseStats, features/stats/HelpStatsPage, features/stats/HelpStatsTour | Quién suma más estrellas en Docker | Who has the most Docker stars | Qui suma més estrelles a Docker | Nork dituen Docker izar gehien | Qui a le plus d’étoiles en Docker |
 | `stats.courses.k8s.rank` | Clasificaciones, cursos: de qué va la clasificación del curso de Kubernetes | features/stats/CourseStats, features/stats/HelpStatsPage, features/stats/HelpStatsTour | Quién suma más estrellas en Kubernetes | Who has the most Kubernetes stars | Qui suma més estrelles a Kubernetes | Nork dituen Kubernetes izar gehien | Qui a le plus d’étoiles en Kubernetes |
+| `stats.courses.rag.rank` | Clasificaciones, cursos: de qué va la clasificación del curso de RAG | features/stats/CourseStats, features/stats/HelpStatsPage, features/stats/HelpStatsTour | Quién suma más estrellas en RAG | Who has the most RAG stars | Qui suma més estrelles a RAG | Nork dituen RAG izar gehien | Qui a le plus d’étoiles en RAG |
 | `stats.courses.bosses.rank` | Clasificaciones, cursos: de qué va la clasificación de jefes | features/stats/CourseStats, features/stats/HelpStatsPage, features/stats/HelpStatsTour | Quién ha vencido a más jefes | Who has beaten the most bosses | Qui ha vençut més caps | Nork garaitu dituen buruzagi gehien | Qui a vaincu le plus de boss |
 | `stats.courses.certificates.rank` | Clasificaciones, cursos: de qué va la clasificación de certificados (en git, su jefe final) | features/stats/CourseStats, features/stats/HelpStatsPage, features/stats/HelpStatsTour | Quién tiene más certificados | Who has the most certificates | Qui té més certificats | Nork dituen ziurtagiri gehien | Qui a le plus de certificats |
 | `stats.courses.sum.people` | Clasificaciones, cursos: cifra del campus, gente que sale en la clasificación | features/stats/CourseStats, features/stats/HelpStatsPage, features/stats/HelpStatsTour | Gente | People | Gent | Jendea | Personnes |

@@ -35,6 +35,7 @@
     "@sanatorio/gitsim": "*",
     "@sanatorio/dockersim": "*",
     "@sanatorio/k8ssim": "*",
+    "@sanatorio/ragsim": "*",
     "@sanatorio/shellsim": "*",
     "@sanatorio/startup": "*",
     "chess.js": "1.4.0",

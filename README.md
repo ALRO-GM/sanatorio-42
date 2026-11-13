@@ -41,8 +41,8 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
-| **Tamaño**      | 38 módulos de API con 272 rutas, 91 migraciones, 8 paquetes compartidos; 4 categorías con 20 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
-| **Calidad**     | 7 523 tests en 278 ficheros (6 527 de la API y 996 de la web, con 76 ficheros de pantallas; medido el 2026-11-10), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
+| **Tamaño**      | 39 módulos de API con 275 rutas, 92 migraciones, 9 paquetes compartidos; 4 categorías con 21 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
+| **Calidad**     | 7 617 tests en 282 ficheros (6 608 de la API y 1 009 de la web, con 77 ficheros de pantallas; medido el 2026-11-13), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
 | **Coste**       | 0 € al mes. La web y la máquina se cortan solas antes de pasar de la capa gratuita                                                                   |
@@ -95,7 +95,7 @@ modo está en [docs/interfaz.md](docs/interfaz.md).
 | ------------ | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
 | **Yo**       | Perfil (la portada) · Agenda · Calendario                                | Nivel, XP y títulos; health check (pace y black hole); metas por proyecto; todo lo tuyo y lo de 42 en un calendario |
 | **Ayuda**    | Peer to peer · Proyectos · Sprints · Pizarras · On-call                  | Quién te puede ayudar y dónde se sienta; dudas, guía y álbum de correcciones por proyecto; quedar en grupo; explicar algo; ofrecerse |
-| **Aprender** | Curso de git · Curso de shell · Curso de Docker · Curso de Kubernetes · Not-games · Pomodoro   | Cursos con terminal simulada; preguntas y ajedrez con más gente; concentrarse (y llevar una startup en una oficina viva) |
+| **Aprender** | Curso de git · Curso de shell · Curso de Docker · Curso de Kubernetes · Curso de RAG · Not-games · Pomodoro | Cursos con terminal simulada y uno de RAG con banco de pruebas; preguntas y ajedrez con más gente; concentrarse (y llevar una startup en una oficina viva) |
 | **Campus**   | Clústeres · Amigos · Avance · Red · Exámenes · Clasificaciones            | Plano del campus; con quién te sientas; tu avance frente a la media; red de correcciones; examen en vivo     |
 
 Alrededor: el buscador de personas, el interruptor de disponibilidad, un buzón
@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-13 | Curso de RAG | Curso nuevo en Aprender: 3 niveles, 9 bloques, 33 unidades, 9 jefes y 3 jefes finales con certificado, para construir un RAG entendiéndolo (troceado, BM25, embeddings, híbrido con RRF, prompt con presupuesto, citas y «no lo sé», recall@k y MRR, fugas, caché e indexado incremental). La prueba es un banco de pruebas, no una terminal: ajustas la tubería, calculas a mano o eliges y ordenas trozos, y ves cada etapa animada; estrellas por comprobaciones (mirar es gratis). Cada bloque dice qué pieza de tu propio RAG ya puedes escribir, con su esqueleto en Python; cinco logros y títulos nuevos ([docs/curso-rag.md](docs/curso-rag.md)) |
 | 2026-11-13 | Toda la web             | Normas para cualquier dispositivo: letra mínima de 12 px, botones de 24 px (44 con el dedo), casillas grandes, campos que no hacen zoom en iOS, márgenes para móviles con muesca, contraste AA, alto contraste, menos movimiento e impresión limpia; «en vivo» ya no se sale en móviles estrechos ([docs/interfaz.md](docs/interfaz.md#normas-para-cualquier-dispositivo)) |
 | 2026-11-13 | Pomodoro · Startup      | Los muebles que vienen con las mejoras de espacio (cactus, plantas grandes, cafetera, fuente de agua y pufs) se giran y se venden como la decoración; lo demás que se gana (pizarra, bandera…) también se gira ([docs/pomodoro-startup.md](docs/pomodoro-startup.md)) |
 | 2026-11-12 | Pomodoro                | A pantalla completa en el ordenador, Escape va en dos pasos: el primero quita la pantalla completa del navegador y el Pomodoro sigue tapando la ventana; el segundo vuelve al temporizador flotante. Ya no pregunta si parar (eso es solo «Parar la sesión») ni se queda todo en negro al pulsarlo varias veces |
@@ -275,6 +276,7 @@ packages/
   gitsim/  shellsim/   git y shell simulados (web y API)
   dockersim/           Docker simulado sobre la shell (curso de Docker)
   k8ssim/              Kubernetes simulado sobre la shell (curso de Kubernetes)
+  ragsim/              un RAG en miniatura: troceado, BM25, embeddings de juguete, RRF (curso de RAG)
   clicker/ startup/    motores de Code Clicker y de la startup del Pomodoro
 infra/                 Dockerfile, compose, Caddyfile, Oracle y guiones
                        (despliegue, copias, restauración, guardia de límites)
@@ -292,7 +294,7 @@ seguridad. La base es un fichero de SQLite. Un bucle de fondo copia el campus de
 ```mermaid
 flowchart LR
   P["Navegador<br/>React 19"] -->|HTTPS| C["Caddy<br/>TLS, CSP, HSTS"]
-  C --> A["Fastify<br/>38 módulos"]
+  C --> A["Fastify<br/>39 módulos"]
   A --> D[("SQLite en WAL<br/>datos propios y réplica")]
   S["Réplica y 17 trabajos<br/>en el mismo proceso"] --> D
   S -->|"cuota 1 200/h<br/>con tres escalones"| Q["API de 42"]
@@ -380,6 +382,7 @@ Cada uno por dentro, con diagramas: [docs/componentes.md](docs/componentes.md).
 | `presence` | Quién tiene la web abierta y desde qué puesto |
 | `profile` | Perfil: XP (también la de los logros de los cursos), niveles, títulos, logros, reacciones, preferencias y lo desbloqueado que falta por celebrar |
 | `quiz` | Not-games: salas de preguntas y ajedrez, banco de preguntas, repaso y quién ve qué salas |
+| `ragcourse` | Curso de RAG con un RAG en miniatura y banco de pruebas, jefes y certificados (el servicio de `shellcourse` con otro motor) |
 | `replica` | Copia local de 42 y su cuota: el único que pide a 42 en segundo plano |
 | `shellcourse` | Curso de shell con shell simulada, jefes y certificados |
 | `staff` | Documentos con código de verificación y las cuentas de staff que los comprueban |

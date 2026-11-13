@@ -65,5 +65,7 @@
 @import './agenda.css';
 @import './comfort.css';
 @import './startup.css';
+/* Curso de RAG: la tubería que se ve y el banco de pruebas. */
+@import './ragcourse.css';
 /* Normas para cualquier dispositivo: tamaños mínimos, dedo, contraste, impresión. La última. */
 @import './standards.css';

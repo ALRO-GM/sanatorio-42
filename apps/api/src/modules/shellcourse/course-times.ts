@@ -20,7 +20,7 @@ export const activeSecondsSchema = z
 
 type CourseTime = {
   login: string
-  course: 'git' | 'shell' | 'docker' | 'k8s'
+  course: 'git' | 'shell' | 'docker' | 'k8s' | 'rag'
   unit: string
   activeSeconds: number
   estimateSeconds: number

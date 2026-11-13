@@ -64,6 +64,11 @@ const K8sCoursePage = lazy(() =>
     default: m.K8sCoursePage,
   })),
 )
+const RagCoursePage = lazy(() =>
+  import('../features/ragcourse/RagCoursePage').then((m) => ({
+    default: m.RagCoursePage,
+  })),
+)
 const FocusPage = lazy(() =>
   import('../features/focus/FocusPage').then((m) => ({ default: m.FocusPage })),
 )
@@ -205,6 +210,7 @@ export function SectionView({
       {section === 'cursoshell' && <ShellCoursePage />}
       {section === 'cursodocker' && <DockerCoursePage />}
       {section === 'cursok8s' && <K8sCoursePage />}
+      {section === 'cursorag' && <RagCoursePage />}
       {section === 'pomodoro' && <FocusPage />}
       {section === 'avance' &&
         (pool ? (

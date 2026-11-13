@@ -38,11 +38,12 @@ import type { CourseTimes } from './course-times.js'
  * Un curso que se juega en una terminal simulada y se corrige volviendo a
  * ejecutar las órdenes: el de shell, el de Docker (`modules/dockercourse`) y
  * el de Kubernetes (`modules/k8scourse`) comparten este servicio; cada uno
- * trae su motor y sus tablas.
+ * trae su motor y sus tablas. También el de RAG (`modules/ragcourse`), que no
+ * es de terminal: sus «órdenes» son las comprobaciones de un banco de pruebas.
  */
 export type TerminalCourse<U extends { id: string; limit?: number }> = {
   /** Cómo se llama en `course_times`. */
-  name: 'shell' | 'docker' | 'k8s'
+  name: 'shell' | 'docker' | 'k8s' | 'rag'
   units: readonly U[]
   finals: Record<CourseTier, string>
   tiers: readonly CourseTier[]
@@ -84,10 +85,10 @@ const STARTS_PER_WINDOW = 20
 /** Margen del contrarreloj por lo que tarda la red en llevar el intento. */
 const GRACE_S = 5
 
-/** Las tablas de cada curso (las de shell, de la migración 74; las de Docker, de la 87; las de Kubernetes, de la 88). */
+/** Las tablas de cada curso (las de shell, de la migración 74; las de Docker, de la 87; las de Kubernetes, de la 88; las de RAG, de la 92). */
 type Tables = {
-  progress: 'shell_progress' | 'docker_progress' | 'k8s_progress'
-  runs: 'shell_runs' | 'docker_runs' | 'k8s_runs'
+  progress: 'shell_progress' | 'docker_progress' | 'k8s_progress' | 'rag_progress'
+  runs: 'shell_runs' | 'docker_runs' | 'k8s_runs' | 'rag_runs'
 }
 
 export function createShellCourseRepository(

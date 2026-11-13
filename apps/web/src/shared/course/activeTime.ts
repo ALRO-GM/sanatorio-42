@@ -9,7 +9,7 @@ import { useEffect } from 'react'
  * estimaciones de cada punto.
  */
 
-type CourseName = 'git' | 'shell' | 'docker' | 'k8s'
+type CourseName = 'git' | 'shell' | 'docker' | 'k8s' | 'rag'
 
 const KEY = 'sanatorio_course_time'
 /** Sin tocar nada durante este rato, el tiempo deja de contar. */
