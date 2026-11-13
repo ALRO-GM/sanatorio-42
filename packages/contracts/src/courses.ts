@@ -7,8 +7,11 @@
 import type { LeaderboardPeriod } from './profile.js'
 import type { StatsEntry, StatsTotal } from './stats.js'
 
-/** Los cuatro cursos, en el orden sugerido: shell → git → Docker → Kubernetes. */
-export type CourseId = 'shell' | 'git' | 'docker' | 'k8s'
+/**
+ * Los cuatro cursos del orden sugerido (shell → git → Docker → Kubernetes) y,
+ * aparte, el de NetPractice (`net`), que no depende de ninguno.
+ */
+export type CourseId = 'shell' | 'git' | 'docker' | 'k8s' | 'net'
 
 /**
  * Las clasificaciones de los cursos: el total de todos, una por curso, los
@@ -58,6 +61,11 @@ export type CourseAchievementId =
   | 'k8s_intermediate'
   | 'k8s_advanced'
   | 'k8s_bosses'
+  | 'net_first'
+  | 'net_beginner'
+  | 'net_intermediate'
+  | 'net_advanced'
+  | 'net_bosses'
   | 'courses_explorer'
   | 'courses_all'
   | 'courses_order'

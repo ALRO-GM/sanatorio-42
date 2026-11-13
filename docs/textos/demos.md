@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-268 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+276 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -275,3 +275,11 @@ Generado desde `apps/web/src/shared/i18n/textos/demos.csv` con
 | `tour.kubernetesCourse.title.3` | Demostración animada del curso de Kubernetes: título del paso 3 | shared/tour/Tour | La terminal | The terminal | El terminal | Terminala | Le terminal |
 | `tour.kubernetesCourse.4` | Demostración animada del curso de Kubernetes: frase del paso 4 | shared/tour/Tour | Cada bloque acaba en un jefe contrarreloj. | Each block ends with a timed boss. | Cada bloc acaba amb un cap contrarellotge. | Bloke bakoitza erlojupeko buruzagi batekin amaitzen da. | Chaque bloc se termine par un boss contre la montre. |
 | `tour.kubernetesCourse.title.4` | Demostración animada del curso de Kubernetes: título del paso 4 | shared/tour/Tour | Jefe contrarreloj | Timed boss | Cap contrarellotge | Erlojupeko buruzagia | Boss contre la montre |
+| `tour.netCourse.1` | Demostración animada del curso de NetPractice: frase del paso 1 | shared/tour/Tour | Elige la siguiente unidad del camino. | Pick the next unit on the path. | Tria la unitat següent del camí. | Aukeratu bideko hurrengo unitatea. | Choisis la prochaine unité du chemin. |
+| `tour.netCourse.title.1` | Demostración animada del curso de NetPractice: título del paso 1 | shared/tour/Tour | Las unidades | The units | Les unitats | Unitateak | Les unités |
+| `tour.netCourse.2` | Demostración animada del curso de NetPractice: frase del paso 2 | shared/tour/Tour | Lee la teoría y toca los bits: ves salir la dirección de red. | Read the theory and tap the bits: watch the network address appear. | Llegeix la teoria i toca els bits: veus sortir l'adreça de xarxa. | Irakurri teoria eta ukitu bitak: sare-helbidea agertzen da. | Lis la théorie et touche les bits : l’adresse de réseau apparaît. |
+| `tour.netCourse.title.2` | Demostración animada del curso de NetPractice: título del paso 2 | shared/tour/Tour | Teoría y bits | Theory and bits | Teoria i bits | Teoria eta bitak | Théorie et bits |
+| `tour.netCourse.3` | Demostración animada del curso de NetPractice: frase del paso 3 | shared/tour/Tour | Rellena lo que falta en el esquema y pulsa Comprobar. | Fill in what the diagram lacks and press Check. | Omple el que falta a l'esquema i prem Comprovar. | Bete eskeman falta dena eta sakatu Egiaztatu. | Remplis ce qui manque sur le schéma et appuie sur Vérifier. |
+| `tour.netCourse.title.3` | Demostración animada del curso de NetPractice: título del paso 3 | shared/tour/Tour | El esquema | The diagram | L'esquema | Eskema | Le schéma |
+| `tour.netCourse.4` | Demostración animada del curso de NetPractice: frase del paso 4 | shared/tour/Tour | Cada bloque acaba en un jefe contrarreloj. | Each block ends with a timed boss. | Cada bloc acaba amb un cap contrarellotge. | Bloke bakoitza erlojupeko buruzagi batekin amaitzen da. | Chaque bloc se termine par un boss contre la montre. |
+| `tour.netCourse.title.4` | Demostración animada del curso de NetPractice: título del paso 4 | shared/tour/Tour | Jefe contrarreloj | Timed boss | Cap contrarellotge | Erlojupeko buruzagia | Boss contre la montre |

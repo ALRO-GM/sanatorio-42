@@ -42,7 +42,7 @@ import type { CourseTimes } from './course-times.js'
  */
 export type TerminalCourse<U extends { id: string; limit?: number }> = {
   /** Cómo se llama en `course_times`. */
-  name: 'shell' | 'docker' | 'k8s'
+  name: 'shell' | 'docker' | 'k8s' | 'net'
   units: readonly U[]
   finals: Record<CourseTier, string>
   tiers: readonly CourseTier[]
@@ -86,8 +86,8 @@ const GRACE_S = 5
 
 /** Las tablas de cada curso (las de shell, de la migración 74; las de Docker, de la 87; las de Kubernetes, de la 88). */
 type Tables = {
-  progress: 'shell_progress' | 'docker_progress' | 'k8s_progress'
-  runs: 'shell_runs' | 'docker_runs' | 'k8s_runs'
+  progress: 'shell_progress' | 'docker_progress' | 'k8s_progress' | 'net_progress'
+  runs: 'shell_runs' | 'docker_runs' | 'k8s_runs' | 'net_runs'
 }
 
 export function createShellCourseRepository(

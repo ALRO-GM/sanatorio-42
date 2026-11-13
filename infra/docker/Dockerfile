@@ -23,6 +23,7 @@ COPY packages/course/package.json packages/course/
 COPY packages/shellsim/package.json packages/shellsim/
 COPY packages/dockersim/package.json packages/dockersim/
 COPY packages/k8ssim/package.json packages/k8ssim/
+COPY packages/netsim/package.json packages/netsim/
 COPY packages/clicker/package.json packages/clicker/
 COPY packages/startup/package.json packages/startup/
 RUN npm ci
@@ -45,6 +46,7 @@ COPY packages/course/package.json packages/course/
 COPY packages/shellsim/package.json packages/shellsim/
 COPY packages/dockersim/package.json packages/dockersim/
 COPY packages/k8ssim/package.json packages/k8ssim/
+COPY packages/netsim/package.json packages/netsim/
 COPY packages/clicker/package.json packages/clicker/
 COPY packages/startup/package.json packages/startup/
 RUN npm ci --omit=dev --workspace @sanatorio/api
@@ -75,6 +77,8 @@ COPY --from=build /repo/packages/dockersim/package.json packages/dockersim/
 COPY --from=build /repo/packages/dockersim/dist packages/dockersim/dist
 COPY --from=build /repo/packages/k8ssim/package.json packages/k8ssim/
 COPY --from=build /repo/packages/k8ssim/dist packages/k8ssim/dist
+COPY --from=build /repo/packages/netsim/package.json packages/netsim/
+COPY --from=build /repo/packages/netsim/dist packages/netsim/dist
 # Y el motor del Code Clicker, que la API usa para rehacer las cuentas.
 COPY --from=build /repo/packages/clicker/package.json packages/clicker/
 COPY --from=build /repo/packages/clicker/dist packages/clicker/dist

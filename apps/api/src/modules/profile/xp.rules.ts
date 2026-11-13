@@ -52,8 +52,8 @@ export const XP_AMOUNT: Record<XpKind, number> = {
  * La XP de cada logro de los cursos (`docs/cursos-logros.md`), una sola vez.
  * Más cuanto más cuesta: el primer punto es un saludo; un certificado, un
  * nivel entero; terminar los cuatro, el curso de todos. Los cuatro cursos
- * enteros suman 885 XP (nivel 6): mucho, pero menos que ayudar, que es para lo
- * que está la web. No cuenta para la clasificación de quién ayuda más
+ * enteros suman 885 XP y, con los 185 del de NetPractice, 1 070 (nivel 6):
+ * mucho, pero menos que ayudar, que es para lo que está la web. No cuenta para la clasificación de quién ayuda más
  * (`HELP_KINDS`), y como cada logro se cobra una vez, no hay forma de repetirla.
  */
 export const COURSE_XP: Record<CourseAchievementId, number> = {
@@ -76,6 +76,11 @@ export const COURSE_XP: Record<CourseAchievementId, number> = {
   k8s_intermediate: 40,
   k8s_advanced: 60,
   k8s_bosses: 50,
+  net_first: 10,
+  net_beginner: 25,
+  net_intermediate: 40,
+  net_advanced: 60,
+  net_bosses: 50,
   courses_explorer: 20,
   courses_all: 100,
   courses_order: 50,

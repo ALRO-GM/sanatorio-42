@@ -9,7 +9,7 @@
 
 export { ESTIMATE, estimateSeconds, wordsIn } from './estimate.js'
 export type { EstimateInput } from './estimate.js'
-export { commandGoals, starsFor, starsForTime, timeGoals } from './stars.js'
+export { checkGoals, commandGoals, starsFor, starsForTime, timeGoals } from './stars.js'
 export type { StarGoals, Stars, TimeGoals } from './stars.js'
 export { courseLang, courseText } from './lang.js'
 export { firstOpen, unlocked } from './path.js'

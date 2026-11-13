@@ -211,6 +211,10 @@ export const realApi: Api = {
   submitK8sAttempt: (unit, input) =>
     sendJson('POST', `/k8scourse/units/${encodeURIComponent(unit)}`, input),
   startK8sBoss: (unit) => sendJson('POST', `/k8scourse/bosses/${encodeURIComponent(unit)}/start`),
+  getNetCourse: () => getJson('/netcourse'),
+  submitNetAttempt: (unit, input) =>
+    sendJson('POST', `/netcourse/units/${encodeURIComponent(unit)}`, input),
+  startNetBoss: (unit) => sendJson('POST', `/netcourse/bosses/${encodeURIComponent(unit)}/start`),
   getGitGatePeople: (gate) => getJson(`/gitcourse/gates/${encodeURIComponent(gate)}/people`),
   getGitRooms: (gate) => getJson(`/gitcourse/rooms?gate=${encodeURIComponent(gate)}`),
   createGitRoom: (gate) => sendJson('POST', '/gitcourse/rooms', { gate }),

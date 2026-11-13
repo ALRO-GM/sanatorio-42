@@ -251,7 +251,7 @@ GET /me/profile
 
 Ids de título: `paciente`, `interno`, `residente`, `especialista`, `jefe`.
 Ids de logro: `first_duty`, `group_therapy`, `selfless_help`, `board_teacher`, `campus_guardian`.
-Detrás van los 22 logros de los cursos (`CourseAchievementId`, ver «Juego de los
+Detrás van los 27 logros de los cursos (`CourseAchievementId`, ver «Juego de los
 cursos»), con el mismo `{ id, progress, goal, unlocked }`. Cada uno conseguido es
 también un título (`level: 0`) que sale en `titles` y se puede elegir con
 `PUT /me/settings`; los que no se tienen no salen en `titles` y elegirlos da `403`.
@@ -1965,6 +1965,33 @@ POST /k8scourse/bosses/:id/start  → K8sBossStart { unit, run: { startedAt, dea
   `k8s-final-principiante`, `k8s-final-intermedio`, `k8s-final-avanzado`. Topes y
   códigos (404, 409, 400, 429), como en shell. No pide estar en un puesto del clúster.
 
+## Curso de NetPractice (`modules/netcourse`)
+
+```
+GET  /netcourse                   → NetCourse { stars: { [punto]: 1–3 }, best: { [punto]: { commands, seconds } }, runs: { [jefe]: { startedAt, deadline } }, certificates: { tier, stars, seconds, at }[] }
+POST /netcourse/units/:id         → NetAttemptInput { entries: string[] (≤ 40, ≤ 2400 caracteres), activeSeconds?: entero 0–21600 } → NetAttemptResult { done, stars, commands, seconds, misses, course }
+POST /netcourse/bosses/:id/start  → NetBossStart { unit, run: { startedAt, deadline }, course }
+```
+
+- El mismo servicio que los cursos de terminal (`createShellCourseService` con el
+  motor de `@sanatorio/netsim` y sus tablas): las formas (`NetCourse`…) son las de
+  shell con otro nombre. Ver `docs/curso-netpractice.md`.
+- No hay terminal: la prueba es un esquema de red que se configura (o unas cuentas).
+  Cada elemento de `entries` es una **comprobación**: todos los campos tal como
+  estaban al pulsar «Comprobar», en JSON (`{"cache.eth0.ip":"10.0.5.2"}`; en las
+  cuentas, `{"q0.network":"192.168.1.0"}`). La API las **vuelve a mirar** en orden
+  con el motor hasta la primera que acierta: lanza el ping de cada objetivo sobre
+  la red con esos valores (o compara las cuentas con las que hace el motor). Lo
+  que no sea un objeto de textos cuenta como una comprobación fallida.
+- `commands` son las comprobaciones que hicieron falta, y de ahí salen las
+  estrellas de una unidad (`checkGoals`: 3 a la primera, 2 con hasta tres, 1 con
+  más); en un jefe, del tiempo, con el reloj de la API. `misses`: `goal:ana>db`
+  (ese ping no llega), el id de un campo de cuentas (`q0.broadcast`) o `time`.
+- Progreso en `net_progress` y relojes de los jefes en `net_runs` (migración 92); el
+  tiempo activo, en `course_times` con `course = 'net'`. Jefes finales:
+  `net-final-beginner`, `net-final-intermediate`, `net-final-advanced`. Topes y
+  códigos (404, 409, 400, 429), como en shell. No pide estar en un puesto del clúster.
+
 ## Mapa de calor de clics (`modules/usage/clicks.ts`)
 
 ```
@@ -2067,6 +2094,11 @@ avisos siguen las mismas reglas.
 
 Clasificaciones y logros de los cuatro cursos (`docs/cursos-logros.md`). No tiene
 tablas: solo lee `shell_progress`, `git_progress`, `docker_progress` y `k8s_progress`.
+Desde el 2026-11-13 también el de NetPractice (`net_progress`), que tiene su
+clasificación (`net`, tras `k8s`) y sus cinco logros (`net_first`, `net_beginner`,
+`net_intermediate`, `net_advanced` y `net_bosses`), pero no cuenta para
+`courses_explorer`, `courses_all` ni `courses_order`: esos siguen siendo de los
+cuatro del orden sugerido.
 
 ```
 GET /courses/ranking?period=month|all  → CourseRanking: { period, boards: CourseBoard[] }

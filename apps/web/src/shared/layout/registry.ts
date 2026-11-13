@@ -23,6 +23,7 @@ export const NAV_DEFAULT = [
   'cursoshell',
   'cursodocker',
   'cursok8s',
+  'cursonet',
   'notgames',
   'pomodoro',
   'clusters',

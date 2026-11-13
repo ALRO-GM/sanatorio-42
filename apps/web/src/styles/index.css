@@ -65,5 +65,7 @@
 @import './agenda.css';
 @import './comfort.css';
 @import './startup.css';
+/* El curso de NetPractice: el camino, el esquema de red, los 32 bits y las fichas. */
+@import './netcourse.css';
 /* Normas para cualquier dispositivo: tamaños mínimos, dedo, contraste, impresión. La última. */
 @import './standards.css';

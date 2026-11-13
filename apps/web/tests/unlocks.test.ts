@@ -24,6 +24,7 @@ function fakeApi(answers: { done: boolean; passed: boolean; room: 'passed' | nul
     submitShellAttempt: attempt,
     submitDockerAttempt: attempt,
     submitK8sAttempt: attempt,
+    submitNetAttempt: attempt,
     submitGitAttempt: attempt,
     answerGitGate: () => Promise.resolve({ passed: answers.passed }),
     getGitRoom: (id: number) => Promise.resolve(room(id)),
@@ -49,16 +50,17 @@ describe('mirar lo desbloqueado tras un curso', () => {
     await passing.submitShellAttempt('u', { entries: [] })
     await passing.submitDockerAttempt('u', { entries: [] })
     await passing.submitK8sAttempt('u', { entries: [] })
+    await passing.submitNetAttempt('u', { entries: [] })
     await passing.submitGitAttempt('w0', { lines: [] })
     await passing.answerGitGate('g', { answers: [] })
-    expect(checks.count()).toBe(5)
+    expect(checks.count()).toBe(6)
 
     const failing = withUnlockChecks(fakeApi({ done: false, passed: false, room: null }))
 
     await failing.submitShellAttempt('u', { entries: [] })
     await failing.answerGitGate('g', { answers: [] })
     await failing.getGitRoom(1)
-    expect(checks.count()).toBe(5)
+    expect(checks.count()).toBe(6)
   })
 
   it('una sala de git superada avisa una vez, aunque se pida muchas', async () => {
