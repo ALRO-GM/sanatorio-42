@@ -215,6 +215,10 @@ export const realApi: Api = {
   submitNetAttempt: (unit, input) =>
     sendJson('POST', `/netcourse/units/${encodeURIComponent(unit)}`, input),
   startNetBoss: (unit) => sendJson('POST', `/netcourse/bosses/${encodeURIComponent(unit)}/start`),
+  getRagCourse: () => getJson('/ragcourse'),
+  submitRagAttempt: (unit, input) =>
+    sendJson('POST', `/ragcourse/units/${encodeURIComponent(unit)}`, input),
+  startRagBoss: (unit) => sendJson('POST', `/ragcourse/bosses/${encodeURIComponent(unit)}/start`),
   getGitGatePeople: (gate) => getJson(`/gitcourse/gates/${encodeURIComponent(gate)}/people`),
   getGitRooms: (gate) => getJson(`/gitcourse/rooms?gate=${encodeURIComponent(gate)}`),
   createGitRoom: (gate) => sendJson('POST', '/gitcourse/rooms', { gate }),

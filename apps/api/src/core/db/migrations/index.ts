@@ -98,6 +98,7 @@ import { actionLimitsSchema } from './0089-action-limits.js'
 import { seatUsageSchema } from './0091-seat-usage.js'
 import { unlockAnnouncementsSchema } from './0090-unlock-announcements.js'
 import { netCourseSchema } from './0092-net-course.js'
+import { ragCourseSchema } from './0093-rag-course.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -193,6 +194,7 @@ export const MIGRATIONS: readonly Migration[] = [
   unlockAnnouncementsSchema,
   seatUsageSchema,
   netCourseSchema,
+  ragCourseSchema,
 ]
 
 /** Versión más alta que existe en el código. */

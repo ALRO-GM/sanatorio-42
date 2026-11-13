@@ -2,7 +2,8 @@
  * Módulo `courses`: la parte de juego de los cuatro cursos
  * (`docs/cursos-logros.md`). Clasificaciones por campus en Clasificaciones y
  * logros que se lucen como título. No tiene tablas: lee las de cada curso
- * (`shell_progress`, `git_progress`, `docker_progress`, `k8s_progress`), solo
+ * (`shell_progress`, `git_progress`, `docker_progress`, `k8s_progress`,
+ * `rag_progress`), solo
  * para leer, como las estadísticas de Ayuda leen las de cada sección.
  */
 
@@ -29,13 +30,14 @@ const TABLES: Record<CourseId, { table: string; column: 'unit' | 'level' }> = {
   docker: { table: 'docker_progress', column: 'unit' },
   k8s: { table: 'k8s_progress', column: 'unit' },
   net: { table: 'net_progress', column: 'unit' },
+  rag: { table: 'rag_progress', column: 'unit' },
 }
 
 const periodQuery = z.object({ period: z.enum(['month', 'all']).default('month') })
 
 export function createCoursesRepository(db: Db) {
   return {
-    /** Lo que alguien ha superado en los cuatro cursos, de una vez. */
+    /** Lo que alguien ha superado en todos los cursos, de una vez. */
     async progressOf(login: string): Promise<CoursesProgress> {
       const result = await db.execute({
         sql: COURSES.map(

@@ -47,6 +47,10 @@ import type {
   NetAttemptResult,
   NetBossStart,
   NetCourse,
+  RagAttemptInput,
+  RagAttemptResult,
+  RagBossStart,
+  RagCourse,
   GitAttemptResult,
   GitCourse,
   CoursePlace,
@@ -456,6 +460,9 @@ export type Api = {
   getNetCourse: () => Promise<NetCourse>
   submitNetAttempt: (unit: string, input: NetAttemptInput) => Promise<NetAttemptResult>
   startNetBoss: (unit: string) => Promise<NetBossStart>
+  getRagCourse: () => Promise<RagCourse>
+  submitRagAttempt: (unit: string, input: RagAttemptInput) => Promise<RagAttemptResult>
+  startRagBoss: (unit: string) => Promise<RagBossStart>
   startFocus: (settings: FocusSettings) => Promise<Focus>
   stopFocus: (reasons?: FocusReason[]) => Promise<Focus>
   /** Querías acabar el Pomodoro y sigues: se apunta con los motivos marcados. */

@@ -38,6 +38,8 @@ export const SECTIONS = [
   { id: 'cursodocker', icon: 'contenedor', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'cursok8s', icon: 'timon', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'cursonet', icon: 'enrutador', inNav: true, category: 'aprender', from: 'normal' },
+  // RAG: buscar en tus documentos antes de responder (`docs/curso-rag.md`).
+  { id: 'cursorag', icon: 'fuentes', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'notgames', icon: 'pregunta', inNav: true, category: 'aprender', from: 'normal' },
   { id: 'pomodoro', icon: 'reloj', inNav: true, category: 'aprender', from: 'simple' },
   // Campus: cómo va el campus y cómo vas tú frente a él.
@@ -134,6 +136,7 @@ const POOL_KEY: Record<Section, PoolKey | null> = {
   cursodocker: 'dockercourse',
   cursok8s: 'k8scourse',
   cursonet: 'netcourse',
+  cursorag: 'ragcourse',
   notgames: 'notgames',
   pomodoro: 'focus',
   estadisticas: 'estadisticas',

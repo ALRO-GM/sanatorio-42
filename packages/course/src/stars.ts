@@ -11,6 +11,13 @@
  *   o menos, dos hasta tres cuartos y una dentro del límite. Fuera del límite
  *   no hay punto: es un contrarreloj.
  *
+ * - **Por comprobaciones** (unidades que no se juegan en una terminal, como
+ *   las del curso de RAG, que son un banco de pruebas): mirar y probar es
+ *   gratis; lo que cuenta es cada vez que pides que se compruebe. Tres
+ *   estrellas con las comprobaciones de la solución de referencia más una de
+ *   margen (un tropiezo no quita la tercera); dos hasta el doble más dos; una
+ *   con las que sean.
+ *
  * Los umbrales se enseñan antes de empezar y la API puntúa con la misma
  * función, así que no hay sorpresas.
  */
@@ -37,6 +44,16 @@ export function commandGoals(par: number): StarGoals {
  */
 export function checkGoals(): StarGoals {
   return { three: 1, two: 3 }
+}
+
+/**
+ * Las comprobaciones que caben en cada estrella de un banco de pruebas. `par`
+ * son las de la solución de referencia (como poco, una).
+ */
+export function tryGoals(par: number): StarGoals {
+  const base = Math.max(1, par)
+
+  return { three: base + 1, two: base * 2 + 2 }
 }
 
 export function starsFor(used: number, goals: StarGoals): Stars {

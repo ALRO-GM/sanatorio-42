@@ -51,6 +51,7 @@ function progress(
     docker: of('docker'),
     k8s: of('k8s'),
     net: of('net'),
+    rag: of('rag'),
   }
 }
 
@@ -63,7 +64,7 @@ describe('logros de los cursos', () => {
   it('sin nada hecho no hay ninguno, y cada uno dice cuánto falta', () => {
     const list = courseAchievements(progress({}))
 
-    expect(list).toHaveLength(27)
+    expect(list).toHaveLength(32)
     expect(list.every((entry) => !entry.unlocked && entry.progress === 0 && entry.goal > 0)).toBe(
       true,
     )
@@ -151,6 +152,34 @@ describe('logros de los cursos', () => {
     // Empezar no es terminar: sin shell terminado, el orden no empieza.
     expect(inOrder(progress({ git: done('git', '2026-01-01') }))).toBe(0)
   })
+
+  it('el de RAG tiene sus logros y va aparte: no cuenta para «los cuatro»', () => {
+    const rag = spec('rag')
+    const beginner = rag.tiers[0]
+
+    expect(rag.tiers.map((tier) => tier.tier)).toEqual(['beginner', 'intermediate', 'advanced'])
+    expect(rag.bosses).toHaveLength(12)
+    expect(unlocked(progress({ rag: [beginner?.units ?? [], 2, '2026-11-13'] }))).toEqual([
+      'rag_first',
+      'rag_beginner',
+    ])
+    expect(unlocked(progress({ rag: [everything('rag'), 3, '2026-11-13'] }))).toEqual([
+      'rag_first',
+      'rag_beginner',
+      'rag_intermediate',
+      'rag_advanced',
+      'rag_bosses',
+    ])
+
+    // Terminarlo no adelanta los de todos los cursos, y no hacerlo no los quita.
+    const list = courseAchievements(progress({ rag: [everything('rag'), 3, '2026-11-13'] }))
+
+    expect(list.find((entry) => entry.id === 'courses_explorer')).toMatchObject({
+      progress: 0,
+      goal: 4,
+    })
+    expect(list.find((entry) => entry.id === 'courses_all')).toMatchObject({ progress: 0, goal: 4 })
+  })
 })
 
 describe('clasificaciones de los cursos (reglas)', () => {
@@ -188,6 +217,7 @@ describe('clasificaciones de los cursos (reglas)', () => {
       'docker',
       'k8s',
       'net',
+      'rag',
       'bosses',
       'certificates',
     ])
@@ -211,7 +241,7 @@ describe('clasificaciones de los cursos (reglas)', () => {
   it('vacío: todas las clasificaciones, sin nadie', () => {
     const boards = courseBoards([], 'ana')
 
-    expect(boards).toHaveLength(8)
+    expect(boards).toHaveLength(9)
     expect(boards.every((board) => board.ranking.length === 0 && board.me === null)).toBe(true)
   })
 
@@ -236,7 +266,7 @@ describe('clasificaciones y títulos de los cursos (API)', () => {
 
   /** Apunta puntos superados a mano, como los dejaría cada curso. */
   async function pass(
-    table: 'shell_progress' | 'docker_progress' | 'k8s_progress' | 'git_progress',
+    table: 'shell_progress' | 'docker_progress' | 'k8s_progress' | 'git_progress' | 'rag_progress',
     login: string,
     units: readonly string[],
     at: string,

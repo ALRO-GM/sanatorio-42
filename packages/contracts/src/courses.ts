@@ -9,9 +9,10 @@ import type { StatsEntry, StatsTotal } from './stats.js'
 
 /**
  * Los cuatro cursos del orden sugerido (shell → git → Docker → Kubernetes) y,
- * aparte, el de NetPractice (`net`), que no depende de ninguno.
+ * aparte, el de NetPractice (`net`) y el de RAG (`rag`): cada uno con su
+ * clasificación y sus logros, sin entrar en los de «los cuatro cursos».
  */
-export type CourseId = 'shell' | 'git' | 'docker' | 'k8s' | 'net'
+export type CourseId = 'shell' | 'git' | 'docker' | 'k8s' | 'net' | 'rag'
 
 /**
  * Las clasificaciones de los cursos: el total de todos, una por curso, los
@@ -35,7 +36,7 @@ export type CourseRanking = {
 
 /**
  * Los logros de los cursos. Cada uno, al conseguirlo, también es un título
- * para el banner. De shell, Docker y Kubernetes: el primer punto, cada
+ * para el banner. De shell, Docker, Kubernetes y RAG: el primer punto, cada
  * certificado de nivel y todos los jefes con tres estrellas. De git: el primer
  * punto, las tres pruebas de grupo, el jefe final y todos los jefes con tres
  * estrellas. Y de todos: empezar los cuatro, terminarlos y terminarlos en el
@@ -66,6 +67,11 @@ export type CourseAchievementId =
   | 'net_intermediate'
   | 'net_advanced'
   | 'net_bosses'
+  | 'rag_first'
+  | 'rag_beginner'
+  | 'rag_intermediate'
+  | 'rag_advanced'
+  | 'rag_bosses'
   | 'courses_explorer'
   | 'courses_all'
   | 'courses_order'

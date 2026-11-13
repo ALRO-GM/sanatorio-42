@@ -25,6 +25,7 @@ function fakeApi(answers: { done: boolean; passed: boolean; room: 'passed' | nul
     submitDockerAttempt: attempt,
     submitK8sAttempt: attempt,
     submitNetAttempt: attempt,
+    submitRagAttempt: attempt,
     submitGitAttempt: attempt,
     answerGitGate: () => Promise.resolve({ passed: answers.passed }),
     getGitRoom: (id: number) => Promise.resolve(room(id)),
@@ -43,7 +44,7 @@ function counter(): { count: () => number } {
 }
 
 describe('mirar lo desbloqueado tras un curso', () => {
-  it('cada punto superado de los cuatro cursos avisa; lo fallado, no', async () => {
+  it('cada punto superado de los cursos avisa; lo fallado, no', async () => {
     const checks = counter()
     const passing = withUnlockChecks(fakeApi({ done: true, passed: true, room: null }))
 
@@ -51,16 +52,17 @@ describe('mirar lo desbloqueado tras un curso', () => {
     await passing.submitDockerAttempt('u', { entries: [] })
     await passing.submitK8sAttempt('u', { entries: [] })
     await passing.submitNetAttempt('u', { entries: [] })
+    await passing.submitRagAttempt('u', { entries: [] })
     await passing.submitGitAttempt('w0', { lines: [] })
     await passing.answerGitGate('g', { answers: [] })
-    expect(checks.count()).toBe(6)
+    expect(checks.count()).toBe(7)
 
     const failing = withUnlockChecks(fakeApi({ done: false, passed: false, room: null }))
 
     await failing.submitShellAttempt('u', { entries: [] })
     await failing.answerGitGate('g', { answers: [] })
     await failing.getGitRoom(1)
-    expect(checks.count()).toBe(6)
+    expect(checks.count()).toBe(7)
   })
 
   it('una sala de git superada avisa una vez, aunque se pida muchas', async () => {

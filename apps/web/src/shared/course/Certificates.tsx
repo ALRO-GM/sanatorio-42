@@ -13,6 +13,7 @@ const TEXTS = {
   docker: { title: 'docker.certs.title', name: 'docker.certs.name' },
   k8s: { title: 'k8s.certs.title', name: 'k8s.certs.name' },
   net: { title: 'net.certs.title', name: 'net.certs.name' },
+  rag: { title: 'rag.certs.title', name: 'rag.certs.name' },
 } as const
 
 /**
@@ -24,8 +25,8 @@ export function Certificates({
   course = 'shell',
 }: {
   certificates: CourseCertificate[]
-  /** De qué curso son (sus textos: `shell.certs.*`, `docker.certs.*`, `k8s.certs.*`). */
-  course?: 'shell' | 'docker' | 'k8s' | 'net'
+  /** De qué curso son (sus textos: `shell.certs.*`, `docker.certs.*`, `k8s.certs.*`, `net.certs.*`, `rag.certs.*`). */
+  course?: 'shell' | 'docker' | 'k8s' | 'net' | 'rag'
 }) {
   const { t } = useI18n()
   const format = useFormat()
@@ -76,4 +77,11 @@ export function MyNetCertificates() {
   const course = useAsync(() => api.getNetCourse(), [])
 
   return <Certificates certificates={course.data?.certificates ?? []} course="net" />
+}
+
+/** Los certificados de RAG de quien mira, para su perfil (nada si aún no tiene). */
+export function MyRagCertificates() {
+  const course = useAsync(() => api.getRagCourse(), [])
+
+  return <Certificates certificates={course.data?.certificates ?? []} course="rag" />
 }

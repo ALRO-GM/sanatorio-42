@@ -14,6 +14,7 @@ const TITLE: Record<CourseBoardId, string> = {
   docker: 'nav.cursodocker',
   k8s: 'nav.cursok8s',
   net: 'nav.cursonet',
+  rag: 'nav.cursorag',
   bosses: 'stats.courses.bosses',
   certificates: 'stats.courses.certificates',
 }
@@ -26,6 +27,7 @@ const METRICS: Record<CourseBoardId, [string, string]> = {
   docker: ['points', 'units'],
   k8s: ['points', 'units'],
   net: ['points', 'units'],
+  rag: ['points', 'units'],
   bosses: ['bosses', 'points'],
   certificates: ['certificates', 'bosses'],
 }

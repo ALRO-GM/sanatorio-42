@@ -77,6 +77,8 @@ import type { CoursesModule } from '../modules/courses/index.js'
 import type { K8sCourseModule } from '../modules/k8scourse/index.js'
 import { createNetCourseModule } from '../modules/netcourse/index.js'
 import type { NetCourseModule } from '../modules/netcourse/index.js'
+import { createRagCourseModule } from '../modules/ragcourse/index.js'
+import type { RagCourseModule } from '../modules/ragcourse/index.js'
 import type { FacilityModule } from '../modules/facility/index.js'
 import { createStatsModule } from '../modules/stats/index.js'
 import { createCollectionModule } from '../modules/collection/index.js'
@@ -174,6 +176,7 @@ export type Services = {
   dockerCourse: DockerCourseModule['service']
   k8sCourse: K8sCourseModule['service']
   netCourse: NetCourseModule['service']
+  ragCourse: RagCourseModule['service']
   /** La parte de juego de los cursos: clasificaciones y logros. */
   courses: CoursesModule['service']
   pool: PoolModule['service']
@@ -586,6 +589,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const dockerCourse = createDockerCourseModule({ db, ...clock })
   const k8sCourse = createK8sCourseModule({ db, ...clock })
   const netCourse = createNetCourseModule({ db, ...clock })
+  const ragCourse = createRagCourseModule({ db, ...clock })
 
   // `admin` va el primero: sus ganchos de consumo solo ven las rutas que se
   // registran después.
@@ -630,6 +634,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     dockerCourse,
     k8sCourse,
     netCourse,
+    ragCourse,
     courses,
     pool,
     // El álbum de correcciones del tablón (`docs/correcciones-coleccion.md`).
@@ -698,6 +703,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
       dockerCourse: dockerCourse.service,
       k8sCourse: k8sCourse.service,
       netCourse: netCourse.service,
+      ragCourse: ragCourse.service,
       courses: courses.service,
       pool: pool.service,
       poolMembers: replica.poolMembers,

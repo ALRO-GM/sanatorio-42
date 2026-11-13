@@ -15,6 +15,7 @@ const COURSE_ICON: Record<CourseId | 'courses', IconName> = {
   docker: 'contenedor',
   k8s: 'timon',
   net: 'enrutador',
+  rag: 'fuentes',
   courses: 'trofeo',
 }
 

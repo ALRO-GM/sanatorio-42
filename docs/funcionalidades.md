@@ -34,7 +34,7 @@ dirección (que conserva los nombres de antes de Peer4U).
 
 - [Yo](#yo): Perfil · Agenda · Calendario
 - [Ayuda](#ayuda): Peer to peer · Proyectos · Sprints · Pizarras · On-call
-- [Aprender](#aprender): Curso de git · Curso de shell · Curso de Docker · Curso de Kubernetes · Curso de NetPractice · Not-games · Pomodoro
+- [Aprender](#aprender): Curso de git · Curso de shell · Curso de Docker · Curso de Kubernetes · Curso de NetPractice · Curso de RAG · Not-games · Pomodoro
 - [Campus](#campus): Clústeres · Amigos · Avance · Red · Exámenes · Clasificaciones
 - [Cabecera](#cabecera), [menú de la cuenta](#menú-de-la-cuenta) y [pie](#pie)
 - [En toda la web](#en-toda-la-web): ventanitas, avisos obligatorios, buzón, Personalizar
@@ -59,12 +59,13 @@ Sin el permiso, a un piscinero la portada solo le da la bienvenida.
 | Certificados del curso de Docker | S | Con certificados `[dockercourse]` | `MyDockerCertificates` en `shared/course/Certificates.tsx` |
 | Certificados del curso de Kubernetes | S | Con certificados `[k8scourse]` | `MyK8sCertificates` en `shared/course/Certificates.tsx` |
 | Certificados del curso de NetPractice | S | Con certificados `[netcourse]` | `MyNetCertificates` en `shared/course/Certificates.tsx` |
+| Certificados del curso de RAG | S | Con certificados `[ragcourse]` | `MyRagCertificates` en `shared/course/Certificates.tsx` |
 | Descargar las horas validadas (CSV con código de verificación) | N | Todos `[expediente.hours]` | `HoursReport.tsx` |
 | Health check: pace, cuándo caerías a cada pace, black hole, calculadora «si termino tal día»; la primera vez pregunta pace y fecha | S | Todos `[expediente.health]` | `HealthCard.tsx` (bloque `health`) |
 | Compararte en Avance desde el health check | N | Todos `[avance]` | `progressHref` |
 | Tu red de correcciones en pequeño | N | Todos `[expediente.network]` | `NetworkCard.tsx` (bloque `network`) |
 | Logros y reacciones recibidas | N | Todos `[expediente.achievements]` | `Achievements.tsx` (bloque `achievements`) |
-| Logros de los cursos: primer punto, cada certificado y todos los jefes con tres estrellas de cada curso (en git, pruebas de grupo y jefe final), y empezar, terminar y terminar en el orden sugerido los cuatro; el curso de NetPractice tiene los suyos (primer punto, certificados y jefes), fuera del orden sugerido; cada uno da su XP una vez (de 10 a 100; 1 070 en total), que cuenta para el nivel | N | Todos `[expediente.achievements]` | `Achievements.tsx`, `modules/courses`, `COURSE_XP` en `xp.rules.ts` ([cursos-logros.md](cursos-logros.md)) |
+| Logros de los cursos: primer punto, cada certificado y todos los jefes con tres estrellas de cada curso (en git, pruebas de grupo y jefe final), y empezar, terminar y terminar en el orden sugerido los cuatro; el curso de NetPractice tiene los suyos (primer punto, certificados y jefes), fuera del orden sugerido; cada uno da su XP una vez (de 10 a 100; 1 255 en total), que cuenta para el nivel | N | Todos `[expediente.achievements]` | `Achievements.tsx`, `modules/courses`, `COURSE_XP` en `xp.rules.ts` ([cursos-logros.md](cursos-logros.md)) |
 | Celebración de lo desbloqueado: ventana con el banner nuevo, lo conseguido, la XP y «Lucirlo ahora», al abrir la web y tras cada punto superado de un curso; una vez por cosa en cualquier dispositivo, sin ventanas por lo que ya se tenía | S | Con un logro de los cursos, un título de nivel o el de maestro nuevos | `features/unlocks/UnlockCelebration.tsx`, `shared/unlocks.ts`, `GET /me/unlocks` ([cursos-logros.md](cursos-logros.md)) |
 | Quién ayuda más (del mes o siempre) y «cómo te han descrito» | N | Todos `[expediente.ranking]` | `LeaderboardCard.tsx`, `AskedCard.tsx` (bloque `ranking`) |
 | Plegar y ordenar los bloques; «Ordenar o plegar estos bloques» | S | Todos | `shared/layout/Blocks.tsx` |
@@ -232,6 +233,19 @@ No pide puesto en el clúster. Detalle: [curso-kubernetes.md](curso-kubernetes.m
 | Demostración | N | Todos | `NetCourseTour.tsx` |
 
 No pide puesto en el clúster ni sugiere hacer antes otro curso. Detalle: [curso-netpractice.md](curso-netpractice.md).
+
+### Curso de RAG (`#/cursorag`) · N · `[ragcourse]`
+
+| Funcionalidad | Modo | Quién | Dónde |
+| --- | --- | --- | --- |
+| Árbol de 3 niveles y 9 bloques en capítulos plegables, con la tubería de un RAG arriba (qué bloque construye cada etapa) | N | Todos | `features/ragcourse/RagCourseTab.tsx` |
+| Guía de construcción: al acabar cada bloque, la pieza de tu propio RAG que ya puedes escribir (esqueleto en Python y cómo comprobarla) | N | Todos | `BuildStep` en `UnitView.tsx`, `packages/ragsim/src/course/blocks.ts` |
+| Cada unidad: teoría, ejemplo con la tubería en marcha (trozos en el documento, barras de BM25 y coseno, fusión, prompt con su presupuesto, respuesta con su cita) y prueba en un banco de pruebas: ajustar mandos, calcular a mano, elegir, ordenar o pedir a la API | N | Todos | `UnitView.tsx`, `Pipeline.tsx`, `Bench.tsx`, `packages/ragsim` |
+| Estrellas por comprobaciones (mirar es gratis) en las unidades y por tiempo en los jefes | N | Todos | `tryGoals` de `packages/course` |
+| Jefes contrarreloj por bloque (varias tareas) y jefe final por nivel, con certificado | N | Todos | `shared/course/Certificates.tsx` |
+| Demostración | N | Todos | `RagCourseTour.tsx` |
+
+No pide puesto en el clúster ni haber hecho otro curso. Detalle: [curso-rag.md](curso-rag.md).
 
 ### Not-games (`#/notgames`) · N · `[notgames]`
 

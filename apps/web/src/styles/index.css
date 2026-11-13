@@ -67,5 +67,7 @@
 @import './startup.css';
 /* El curso de NetPractice: el camino, el esquema de red, los 32 bits y las fichas. */
 @import './netcourse.css';
+/* Curso de RAG: la tubería que se ve y el banco de pruebas. */
+@import './ragcourse.css';
 /* Normas para cualquier dispositivo: tamaños mínimos, dedo, contraste, impresión. La última. */
 @import './standards.css';

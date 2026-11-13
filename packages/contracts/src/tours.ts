@@ -18,6 +18,7 @@ export type TourName =
   | 'dockerCourse'
   | 'kubernetesCourse'
   | 'netCourse'
+  | 'ragCourse'
   | 'guard'
   | 'helpStats'
   | 'inbox'

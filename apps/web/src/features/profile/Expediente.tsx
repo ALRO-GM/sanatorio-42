@@ -25,6 +25,7 @@ import { MyShellCertificates } from '../../shared/course/Certificates'
 import { MyDockerCertificates } from '../../shared/course/Certificates'
 import { MyK8sCertificates } from '../../shared/course/Certificates'
 import { MyNetCertificates } from '../../shared/course/Certificates'
+import { MyRagCertificates } from '../../shared/course/Certificates'
 
 type ExpedienteProps = {
   me: CurrentUser
@@ -126,6 +127,10 @@ export function Expediente({ me, profile }: ExpedienteProps) {
                 {/* Y los del curso de NetPractice. */}
                 <PoolOnly k="netcourse">
                   <MyNetCertificates />
+                </PoolOnly>
+                {/* Y los del curso de RAG. */}
+                <PoolOnly k="ragcourse">
+                  <MyRagCertificates />
                 </PoolOnly>
                 <Show from="normal">
                   <PoolOnly k="expediente.hours">

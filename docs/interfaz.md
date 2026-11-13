@@ -18,7 +18,7 @@ abajo).
 | --- | --- | --- | --- |
 | **Yo** | Lo tuyo | Expediente (la portada) · Agenda · Calendario | `app/sections.ts` |
 | **Ayuda** | Pedir y dar ayuda, quedar con gente | Sala de espera · Tablón · Terapia · Pizarras · Guardia | |
-| **Aprender** | Practicar y concentrarse | Curso de git · Curso de shell · Curso de Docker · Curso de Kubernetes · Curso de NetPractice · Not-games · Pomodoro | |
+| **Aprender** | Practicar y concentrarse | Curso de git · Curso de shell · Curso de Docker · Curso de Kubernetes · Curso de NetPractice · Curso de RAG · Not-games · Pomodoro | |
 | **Campus** | Cómo va el campus y cómo vas tú | Clústeres · Asientos · Avance · Red · Exámenes · Abandono · Clasificaciones | Abandono, solo quien administra, la vista sin límites y piscineros con permiso (`docs/abandono.md`) |
 
 Los cursos eran pestañas de Not-games (sus direcciones viejas,
@@ -91,7 +91,7 @@ de datos.
 | Tablón | En el álbum: el siguiente objetivo (colección más cercana, cromo más raro a tu alcance, nivel más cercano) y tu puesto en cada grupo, resumido | N | Motiva sin abrumar: una línea por cosa |
 | Tablón | En el álbum: la rareza de cada cromo y la clasificación de completitud por grupo (tu gente cercana, kickoff, círculo, campus) | D | Son rankings y cifras |
 | Terapia y Pizarras | Todo | S | Son quedar |
-| Pestañas | Not-games, Curso de git, Curso de shell, Curso de Docker, Curso de Kubernetes y Curso de NetPractice (en Aprender) | N | Aprender jugando: no hace falta para pedir ni dar ayuda. En el simplificado, Aprender es solo el Pomodoro |
+| Pestañas | Not-games, Curso de git, Curso de shell, Curso de Docker, Curso de Kubernetes, Curso de NetPractice y Curso de RAG (en Aprender) | N | Aprender jugando: no hace falta para pedir ni dar ayuda. En el simplificado, Aprender es solo el Pomodoro |
 | Not-games | Salas, crear sala, partida y marcador | N | La sección en sí |
 | Curso de git | Camino, animación, teoría y terminal | N | Aprender jugando; desde el 2026-10-29, su propia pestaña de Aprender (antes, de Not-games) |
 | Curso de git | Pruebas de grupo (sala, misiones, origin común) | N | Va con el curso: después del test previo de cada prueba |
@@ -99,7 +99,8 @@ de datos.
 | Curso de Docker | Camino por niveles, unidad (teoría, ejemplo, prueba), jefes contrarreloj y, arriba, la sugerencia de hacer antes el de shell | N | Pedido el 2026-11-08: sección propia de Aprender, junto a la de shell (no un bloque: es un curso entero) y en el mismo modo que los otros cursos; la sugerencia de orden no bloquea |
 | Curso de Kubernetes | Camino por niveles, unidad (teoría, ejemplo, prueba), jefes contrarreloj y, arriba, la sugerencia de hacer antes el de Docker | N | Pedido el 2026-11-08: sección propia de Aprender, junto a la de Docker (no un bloque: es un curso entero) y en el mismo modo que los otros cursos; la sugerencia de orden no bloquea |
 | Curso de NetPractice | Camino por niveles pintado como una red, unidad (teoría, ejemplo, prueba) y jefes contrarreloj; la prueba es un esquema de red que se configura (o unas cuentas con los 32 bits para tocar), no una terminal | N | Pedido el 2026-11-13: sección propia de Aprender, junto a los otros cursos (no un bloque: es un curso entero) y en su mismo modo. No sugiere hacer antes ningún otro: las redes no dependen de ellos. En el móvil, el esquema se desplaza dentro de su caja y las fichas se apilan |
-| Perfil | Certificados de los cursos de shell, de Docker, de Kubernetes y de NetPractice (jefes finales superados), en la tarjeta del perfil | S | Lo ganado se enseña donde está el resto de lo tuyo; si no hay ninguno, no ocupa nada |
+| Curso de RAG | Camino por niveles con la tubería y la guía de construcción arriba, unidad (teoría, ejemplo, prueba en un banco de pruebas) y jefes contrarreloj | N | Pedido el 2026-11-13: sección propia de Aprender, junto a los demás cursos (no un bloque: es un curso entero) y en el mismo modo que ellos. Importancia media: es para aprender, no hace falta para pedir ni dar ayuda. No sugiere ningún curso antes |
+| Perfil | Certificados de los cursos de shell, de Docker, de Kubernetes, de NetPractice y de RAG (jefes finales superados), en la tarjeta del perfil | S | Lo ganado se enseña donde está el resto de lo tuyo; si no hay ninguno, no ocupa nada |
 | Toda la web | Aviso para quien entra desde un campus que aún no se copia (#92) | S | Se ve una vez, arriba, y se cierra: explica por qué ve datos de otro campus |
 | Not-games | Repaso: lo fallado con definición y ejemplo | N | Para estudiar después de jugar |
 | Not-games | Ajedrez: tablero, relojes, pregunta encima del tablero, estilos de tablero, sonido | N | Un juego más de la sección |

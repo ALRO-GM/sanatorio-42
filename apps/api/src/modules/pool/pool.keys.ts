@@ -130,6 +130,7 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
   dockercourse: ['/dockercourse', '/dockercourse/bosses/:id/start', '/dockercourse/units/:id'],
   k8scourse: ['/k8scourse', '/k8scourse/bosses/:id/start', '/k8scourse/units/:id'],
   netcourse: ['/netcourse', '/netcourse/bosses/:id/start', '/netcourse/units/:id'],
+  ragcourse: ['/ragcourse', '/ragcourse/bosses/:id/start', '/ragcourse/units/:id'],
   'gitcourse.groups': [
     '/gitcourse/gates/:id/people',
     '/gitcourse/rooms',

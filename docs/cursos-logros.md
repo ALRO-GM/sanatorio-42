@@ -12,7 +12,8 @@ logros «de todos» (`courses_explorer`, `courses_all`, `courses_order`) siguen
 siendo de los cuatro de siempre, y quien ya los tenía no los pierde.
 
 Los logros no tienen tabla propia: salen de lo que ya guarda cada curso
-(`shell_progress`, `git_progress`, `docker_progress`, `k8s_progress`, `net_progress`). Módulo
+(`shell_progress`, `git_progress`, `docker_progress`, `k8s_progress`,
+`net_progress`, `rag_progress`). Módulo
 `modules/courses` (solo lee); las reglas, en `courses.rules.ts`. Ampliado el
 2026-11-09 (también pedido por Alberto): los logros dan XP y se celebran en
 pantalla al conseguirlos (ver «XP» y «Celebración», más abajo); eso vive en
@@ -28,6 +29,12 @@ pantalla al conseguirlos (ver «XP» y «Celebración», más abajo); eso vive e
 | Certificados | Shell, Docker, Kubernetes y NetPractice: los tres jefes finales de nivel. Git no tiene niveles: cuenta su jefe final |
 | Terminado | El último punto del camino (el jefe final avanzado; en git, `boss`). El camino va en orden: sin los anteriores no se llega |
 
+El **curso de RAG** (añadido el 2026-11-13) se cuenta igual que shell, Docker
+y Kubernetes y tiene su clasificación y sus cinco logros, pero va aparte del
+camino sugerido: «todos los cursos», «los cuatro» y «en orden» siguen siendo
+shell, git, Docker y Kubernetes (`extra` en `courses.rules.ts`), para que
+nadie pierda un logro que ya tenía.
+
 ## Clasificaciones (Campus → Clasificaciones)
 
 Debajo de las de Ayuda y con su mismo periodo (este mes, desde el día 1 en
@@ -40,7 +47,7 @@ se quita antes de poner los puestos. Mientras carga, la animación de progreso
 
 ## Logros y títulos
 
-27 logros, en el bloque de logros del perfil (en columnas, bajo los de
+32 logros, en el bloque de logros del perfil (en columnas, bajo los de
 siempre) y en el perfil público. Cada logro conseguido es también un título:
 sale en el desplegable de títulos (solo los conseguidos, para no llenarlo de
 apagados) y la API no deja ponerse uno que no se tiene.
@@ -49,6 +56,7 @@ apagados) y la API no deja ponerse uno que no se tiene.
 | --- | --- | --- |
 | `shell_first` · `docker_first` · `k8s_first` · `git_first` | El primer punto del curso | `$ echo hola` · `docker run hello-world` · `kubectl get pods` · `git init` |
 | `<curso>_beginner` / `_intermediate` / `_advanced` | Cada certificado de nivel (shell, Docker, Kubernetes) | Pipes bajo control, Script que funciona, Root de corazón; En mi contenedor funciona, Imagen ligera, Capitanía de contenedores; Pods en pie, Rollout sin sustos, Al timón del clúster |
+| `rag_first` · `rag_beginner` · `rag_intermediate` · `rag_advanced` · `rag_bosses` | Lo mismo en el curso de RAG: el primer punto, cada certificado y todos los jefes con tres estrellas | top_k = 3 · Aguja en el pajar · Con fuentes, por favor · RAG against the machine · Cero alucinaciones |
 | `<curso>_bosses` | Todos los jefes del curso con tres estrellas | kill -9 a los jefes · Exit code 0 · Cero CrashLoopBackOff · Historial limpio (git: repasos de mundo y jefe final) |
 | `net_first` · `net_beginner` / `_intermediate` / `_advanced` · `net_bosses` | Lo mismo en el curso de NetPractice: el primer punto, cada certificado y todos los jefes con tres estrellas | ping 127.0.0.1 · En mi subred funciona, Ruta por defecto, Enruta medio internet · 0 % packet loss |
 | `git_group` | Las tres pruebas de grupo de git | Sin conflictos de merge |
@@ -66,7 +74,8 @@ empezados o terminados, y cursos terminados seguidos en el orden sugerido.
 Cada título de los cursos trae el banner de su curso (`styles/banners.css`,
 por el prefijo del id): el `$ _` de la terminal en shell, ramas en git,
 contenedores apilados en Docker, un panal en Kubernetes, máquinas unidas a un
-router en NetPractice y la bandera de cuadros en los de todos. El color dice lo conseguido: acento para el primer punto,
+router en NetPractice, las líneas de un documento con el trozo encontrado en
+RAG y la bandera de cuadros en los de todos. El color dice lo conseguido: acento para el primer punto,
 verde para principiante y las pruebas de grupo, dorado para avanzado y el jefe
 final de git, y el color de peligro para todos los jefes con tres estrellas. El
 icono es el de la pestaña del curso (`shared/courseTitles.ts`).
@@ -86,8 +95,8 @@ Cada logro de los cursos da XP una sola vez, y cuenta para el nivel
 | `courses_all` (terminar los cuatro) | 100 |
 | `courses_order` (en el orden sugerido) | 50 |
 
-Los 22 de los cuatro cursos suman 885 XP y, con los cinco de NetPractice (185),
-los 27 suman 1 070: el nivel 6 entero, más que una sesión de ayuda
+Los 22 de los cuatro cursos suman 885 XP y, con los cinco de NetPractice (185)
+y los cinco de RAG (185), los 32 suman 1 255: el nivel 6 entero, más que una sesión de ayuda
 suelta pero menos que lo que da ayudar a menudo, que es para lo que está la
 web. No entra en la clasificación de quién ayuda más (`HELP_KINDS`).
 

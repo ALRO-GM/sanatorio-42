@@ -48,6 +48,7 @@ const TOURS: Record<TourName, true> = {
   dockerCourse: true,
   kubernetesCourse: true,
   netCourse: true,
+  ragCourse: true,
   guard: true,
   helpStats: true,
   inbox: true,
