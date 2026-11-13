@@ -19,7 +19,9 @@ import { useFormat } from '../../shared/i18n/useFormat'
 import { CountdownClock } from '../../shared/ui/CountdownClock'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
+import { InfoTip } from '../../shared/ui/InfoTip'
 import { CountdownPicker } from './CountdownPicker'
+import { CountdownsTour } from './CountdownsTour'
 
 /** Lo que queda por debajo de esto sale resaltado: es para hoy. */
 const URGENT_MS = 24 * 60 * 60_000
@@ -77,6 +79,12 @@ export function CountdownDock({ stamp }: { stamp: number | null }) {
                 {title}
                 {shown.length > 1 && <span className="badge subtle">{shown.length}</span>}
               </strong>
+            )}
+            {/* Desplegada, su demostración: es un botón, así que no arrastra ni pliega. */}
+            {!folded && (
+              <InfoTip title={title}>
+                <CountdownsTour />
+              </InfoTip>
             )}
             {!folded && (
               <button

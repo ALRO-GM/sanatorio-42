@@ -35,6 +35,7 @@ import type { DropoutFilter, DropoutGrouping, DropoutInclude } from './dropout'
 import { DeparturesChart, PersonHoursChart, STATUS_COLOR, TransitionsChart } from './DropoutCharts'
 import { DropoutCompare } from './DropoutCompare'
 import { DropoutCorrelations, DropoutFactorsPanel } from './DropoutCorrelations'
+import { DropoutTour } from './DropoutTour'
 import { DropoutTuningPanel } from './DropoutTuningPanel'
 import { HeavyLoad, ReloadState } from '../../shared/ui/Refreshing'
 import { timedLoad } from '../../shared/loadMemory'
@@ -116,7 +117,7 @@ export function DropoutPage() {
     <section className="progress-page dropout-page" aria-labelledby="dropout-title">
       <div className="section-head">
         <SectionTitle id="dropout-title" title={t('dropout.title')}>
-          <p>{t('dropout.info')}</p>
+          <DropoutTour />
           <p>{t('dropout.infoRules')}</p>
         </SectionTitle>
         {view === 'pool' && data !== undefined && data.pools.length > 1 && (

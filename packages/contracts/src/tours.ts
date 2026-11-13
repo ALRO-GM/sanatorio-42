@@ -7,14 +7,20 @@
  * velocidades de estas: una nueva se añade aquí y en su lista de la API.
  */
 export type TourName =
+  | 'admin'
   | 'agenda'
   | 'board'
   | 'boards'
   | 'chess'
+  | 'clicker'
   | 'clusters'
+  | 'countdowns'
+  | 'dropout'
   | 'exams'
+  | 'focus'
   | 'gitCourse'
   | 'shellCourse'
+  | 'startup'
   | 'dockerCourse'
   | 'kubernetesCourse'
   | 'netCourse'
@@ -25,6 +31,7 @@ export type TourName =
   | 'mailbox'
   | 'network'
   | 'notGames'
+  | 'piscineProgress'
   | 'progress'
   | 'record'
   | 'scrum'

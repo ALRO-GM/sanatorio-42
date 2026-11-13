@@ -11,6 +11,7 @@ import { Icon } from '../../shared/ui/Icon'
 import { PersonInput } from '../../shared/ui/PersonInput'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
 import { PiscineProgressChart } from './PiscineProgressChart'
+import { PiscineProgressTour } from './PiscineProgressTour'
 import type { Line, PiscineShown } from './PiscineProgressChart'
 import { PoolWhoPicker, usePoolLines } from './PiscinePools'
 import type { PoolWho } from './PiscinePools'
@@ -93,7 +94,7 @@ export function PiscineProgressPage({ me }: { me: string }) {
     <section className="progress-page" aria-labelledby="stats-progress">
       <div className="section-head">
         <SectionTitle id="stats-progress" title={t('stats.progress.title')}>
-          <p>{t('piscine.chart.info')}</p>
+          <PiscineProgressTour />
         </SectionTitle>
       </div>
       <ChartWithRail

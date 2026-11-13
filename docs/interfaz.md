@@ -327,7 +327,8 @@ Antes de escribir una a mano, se usa la que ya existe en `apps/web/src/shared/`:
   (`chart`, `railLabel` y las opciones dentro; `framed={false}` si ya va en
   una tarjeta).
 - **Título de sección**: `ui/SectionTitle` (el `h2` con su `InfoTip`; `tipTitle`
-  si la demostración se llama distinto que el título).
+  si la demostración se llama distinto que el título; `icon` si lleva un icono
+  delante, como el reloj del Pomodoro).
 - **Ventanas**: `ui/Modal` (se cierra con su botón, Escape y el fondo; las
   obligatorias con `cancelable={false}`). Para preguntar antes de algo que no se
   deshace, `ui/useConfirm`, nunca `window.confirm`.

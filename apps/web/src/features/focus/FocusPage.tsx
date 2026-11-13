@@ -11,7 +11,9 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { StepPicker } from '../../shared/ui/StepPicker'
 import { Icon } from '../../shared/ui/Icon'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { FocusMyStats } from './FocusMyStats'
+import { FocusTour } from './FocusTour'
 import { StartupPanel } from './startup/StartupPanel'
 import { usePoolAllows } from '../../shared/pool'
 
@@ -39,9 +41,9 @@ export function FocusPage() {
 
   return (
     <section className="focus-page">
-      <h2>
-        <Icon name="reloj" /> {t('focus.title')}
-      </h2>
+      <SectionTitle title={t('focus.title')} icon={<Icon name="reloj" />}>
+        <FocusTour />
+      </SectionTitle>
       <FocusPanel />
     </section>
   )

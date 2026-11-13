@@ -8,11 +8,13 @@ import { focusing, useFocus } from '../../shared/focus'
 import { useI18n } from '../../shared/i18n'
 import { useStill } from '../../shared/still'
 import { Avatar } from '../../shared/ui/Avatar'
+import { InfoTip } from '../../shared/ui/InfoTip'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { withMe } from '../../shared/ui/RankingList'
 import { useConfirm } from '../../shared/ui/useConfirm'
 import { BigKey, Tile } from './art'
 import { CardView } from './Card'
+import { ClickerTour } from './ClickerTour'
 import { cardFor } from './cards'
 import type { Tip } from './cards'
 import { Bust } from './Bust'
@@ -771,7 +773,12 @@ export function CodeClicker({
       className={`cc stage-${reached} ${stage === 0 && reached > 0 ? 'patched' : ''} ${boosted ? 'boosted' : ''} ${clotted ? 'clotted' : ''}`}
     >
       <header className="cc-head">
-        <h2 className="cc-title">{reached >= 3 ? '42 > ./reality' : ui('title')}</h2>
+        <h2 className="cc-title">
+          {reached >= 3 ? '42 > ./reality' : ui('title')}
+          <InfoTip title={ui('title')}>
+            <ClickerTour />
+          </InfoTip>
+        </h2>
         <PillGroup kind="tabs" options={TABS} value={tab} onChange={setTab} text={ui}>
           <button
             type="button"

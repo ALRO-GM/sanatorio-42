@@ -38,6 +38,7 @@ import { useFormat } from '../../../shared/i18n/useFormat'
 import { Async } from '../../../shared/ui/Async'
 import { ErrorNote } from '../../../shared/ui/ErrorNote'
 import { Icon } from '../../../shared/ui/Icon'
+import { InfoTip } from '../../../shared/ui/InfoTip'
 import { AxisGlyph } from './art/AxisGlyph'
 import { Card, Figure, Need, Dots, coins, hm } from './parts'
 import { ItemArt } from './pixel/ItemArt'
@@ -46,6 +47,7 @@ import type { ModelId } from './pixel/models'
 import { PixelScene } from './pixel/PixelScene'
 import { DecorEditor, DecorShop, Staff, Surprise } from './World'
 import { AvatarEditor } from './Avatars'
+import { StartupTour } from './StartupTour'
 import { putAction } from './target'
 import type { Target } from './target'
 
@@ -226,6 +228,9 @@ function Game({
             <Icon name="agarrar" size={16} />
           </button>
         )}
+        <InfoTip title={t('startup.title')}>
+          <StartupTour />
+        </InfoTip>
       </div>
       {error}
 

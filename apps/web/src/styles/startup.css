@@ -44,6 +44,10 @@
   align-items: center;
   gap: 0.5rem 1rem;
 }
+/* El icono de la demostración, al final de la fila de cifras y botones. */
+.su-figures .info-tip {
+  margin-left: 0;
+}
 .su-figure {
   display: inline-flex;
   align-items: center;

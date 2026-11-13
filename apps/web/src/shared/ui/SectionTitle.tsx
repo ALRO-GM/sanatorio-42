@@ -14,6 +14,8 @@ type SectionTitleProps = {
   tipTitle?: string
   /** `id` del encabezado, para que la sección lo nombre con `aria-labelledby`. */
   id?: string
+  /** Un icono delante del título (el reloj del Pomodoro). */
+  icon?: ReactNode
 }
 
 /**
@@ -22,9 +24,10 @@ type SectionTitleProps = {
  * título que abre la demostración. Antes cada pantalla escribía
  * `<h2>{t(k)}<InfoTip title={t(k)}>…</InfoTip></h2>` a mano.
  */
-export function SectionTitle({ title, children, tipTitle, id }: SectionTitleProps) {
+export function SectionTitle({ title, children, tipTitle, id, icon }: SectionTitleProps) {
   return (
     <h2 id={id}>
+      {icon !== undefined && <>{icon} </>}
       {title}
       <InfoTip title={tipTitle ?? title}>{children}</InfoTip>
     </h2>

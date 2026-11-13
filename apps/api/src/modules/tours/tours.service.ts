@@ -37,14 +37,20 @@ const DEAD_ZONE = 0.05
  * `Record` para que una demostración nueva (o una de menos) no compile.
  */
 const TOURS: Record<TourName, true> = {
+  admin: true,
   agenda: true,
   board: true,
   boards: true,
   chess: true,
+  clicker: true,
   clusters: true,
+  countdowns: true,
+  dropout: true,
   exams: true,
+  focus: true,
   gitCourse: true,
   shellCourse: true,
+  startup: true,
   dockerCourse: true,
   kubernetesCourse: true,
   netCourse: true,
@@ -55,6 +61,7 @@ const TOURS: Record<TourName, true> = {
   mailbox: true,
   network: true,
   notGames: true,
+  piscineProgress: true,
   progress: true,
   record: true,
   scrum: true,

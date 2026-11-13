@@ -1111,3 +1111,167 @@ dialog.info-dialog {
   right: 0;
   transition: top calc(0.94s * var(--pace)) cubic-bezier(0.4, 0.1, 0.3, 1);
 }
+
+/* --- Piezas de las demostraciones del 2026-11-13 ---------------------------- */
+/* Barras en miniatura (tiempo por días, abandonos, consumo): cada `span` es
+   una barra (`i`, con su alto en %) y, debajo, su rótulo si lo lleva. */
+.tour-bars {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35em;
+  height: 4.6em;
+}
+.tour-bars.short {
+  height: 2.8em;
+}
+.tour-bars > span {
+  display: grid;
+  flex: 1;
+  grid-template-rows: 1fr auto;
+  color: var(--text-3);
+  font-size: 0.85em;
+  text-align: center;
+}
+.tour-bars i {
+  display: block;
+  align-self: end;
+  min-height: 2px;
+  border-radius: 0.3em 0.3em 0 0;
+  background: var(--accent);
+  animation: tour-drop 0.25s ease-out;
+}
+/* Una fila de pestañas que no baila: la abierta no engorda la letra, así las
+   demás no saltan de línea al cambiar. */
+.tour-steady .tour-pill.on {
+  font-weight: 500;
+}
+/* Una fila con nombre y barra horizontal: cuánto se usa cada pestaña. */
+.tour-meter,
+.tour-nowrap {
+  flex-wrap: nowrap;
+}
+.tour-meter > span {
+  width: 9em;
+}
+.tour-meter > i {
+  display: block;
+  height: 0.7em;
+  border-radius: 1em;
+  background: var(--accent);
+}
+/* Una etiqueta de estado con su color (el de `style`): fondo del mismo tono. */
+.tour-chip.tour-status {
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+/* Una ventanita de la pila de la esquina (con `tour-pop`): abajo a la derecha. */
+.tour-corner {
+  right: 0.8em;
+  bottom: 0.8em;
+}
+/* Algo a pantalla completa, encima de toda la escena (el Pomodoro). */
+.tour-full {
+  position: absolute;
+  /* También tapa la barra de pestañas de mentira, que queda encima de la escena. */
+  inset: -2.4em 0 0;
+  z-index: 4;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.8em;
+  background: var(--bg);
+}
+.tour-full .tour-timer {
+  font-size: 3.2em;
+  line-height: 1;
+}
+/* Las tarjetas de una tienda, con su dibujo centrado (la Startup). */
+.tour-shop .tour-card {
+  justify-items: center;
+  gap: 0.3em;
+  padding: 0.5em 0.9em;
+}
+/* La oficina en baldosas: lo que hay en cada una va centrado. */
+.tour-office {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.25em;
+}
+.tour-office > span {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid var(--border);
+  border-radius: 0.4em;
+  background: var(--surface-2);
+}
+/* La ventanita de la pila que se pliega y se arrastra: el hueco de la esquina
+   (`tour-dock-slot`), la ventanita (`tour-dock`, que al sacarla se desliza a la
+   vez que el ratón) y dónde acaba su asa (`tour-dock-drop`). */
+.tour-dock-slot {
+  position: absolute;
+  right: 0.8em;
+  bottom: 0.8em;
+  z-index: 3;
+  width: 19em;
+}
+.tour-dock {
+  gap: 0.4em;
+  padding: 0.5em 0.6em;
+  box-shadow: 0 14px 34px var(--shadow);
+  transition: transform calc(0.94s * var(--pace)) cubic-bezier(0.4, 0.1, 0.3, 1);
+}
+.tour-dock.moved {
+  transform: translate(-14em, -3em);
+}
+.tour-dock-drop {
+  top: calc(1.1em - 3em);
+  left: calc(1.1em - 14em);
+}
+.tour-dock-head {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+.tour-dock .tour-item {
+  padding: 0.3em 0.5em;
+}
+/* La ficha de un evento del calendario, con el color de su tipo. */
+.tour-event {
+  width: 52%;
+  border-left: 0.3em solid var(--kind, var(--accent));
+}
+/* La tecla de Code Clicker, su marcador y la ficha de algo de la tienda. */
+.tour-key {
+  display: grid;
+  place-items: center;
+  width: 3.2em;
+  height: 3.2em;
+  border-radius: 0.8em;
+  background: var(--accent);
+  box-shadow: 0 0.3em 0 var(--shadow);
+  color: var(--on-accent);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.tour-key.small {
+  width: 1.9em;
+  height: 1.9em;
+  border-radius: 0.4em;
+  box-shadow: none;
+}
+.tour-bank {
+  justify-items: center;
+  gap: 0.25em;
+  text-align: center;
+}
+.tour-bank > .tour-timer {
+  font-size: 1.7em;
+  line-height: 1.1;
+}
+.tour-tip-card {
+  bottom: 6%;
+  left: 5%;
+  width: 46%;
+}
+.tour-nowrap > .tour-check {
+  flex: none;
+}
