@@ -79,6 +79,15 @@
 .cc.stage-3 .cc-title {
   animation: cc-glitch 2.4s steps(1) infinite;
 }
+/* El icono de la demostración, con los colores del juego. */
+.cc .info-tip {
+  color: var(--cc-dim);
+}
+.cc .info-tip:hover,
+.cc .info-tip:focus-visible {
+  background: color-mix(in srgb, var(--cc-main) 18%, transparent);
+  color: var(--cc-ink);
+}
 .cc .pill {
   border-color: var(--cc-line);
   background: transparent;

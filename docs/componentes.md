@@ -911,7 +911,7 @@ conexiones abiertas, más memoria y más complejidad detrás de Caddy), Web Push
 En vez de párrafos de ayuda, cada sección lleva un `InfoTip` que abre una
 demostración: un decorado con un ratón falso que no llama a la API
 (`shared/tour/Tour.tsx`). Un guion se escribe con `defineTour` (marcas de tiempo
-y cambios); las frases van en `textos/demos.csv`. Hay 21. `npm run demo:new`
+y cambios); las frases van en `textos/demos.csv`. Hay 32. `npm run demo:new`
 crea una desde la plantilla; `tests/tours.test.ts` comprueba nombres únicos,
 duración, frases en los idiomas y 70 caracteres como mucho, y
 `tests/ui/tours.test.tsx`, que el ratón solo va a cosas que existen. La

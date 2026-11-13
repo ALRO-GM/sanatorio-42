@@ -34,6 +34,8 @@ import { CountdownsPanel } from './CountdownsPanel'
 import { StatsPanel } from './StatsPanel'
 import { UsageTab } from './UsageTab'
 import { Icon } from '../../shared/ui/Icon'
+import { SectionTitle } from '../../shared/ui/SectionTitle'
+import { AdminTour } from './AdminTour'
 import { StaffAccounts } from './StaffAccounts'
 import { InboxTab } from './InboxTab'
 import { PanelLock } from './PanelLock'
@@ -70,7 +72,9 @@ export function AdminPage({ campusId, me }: { campusId?: number | undefined; me:
 
   return (
     <section className="admin">
-      <h2>{t('admin.title')}</h2>
+      <SectionTitle title={t('admin.title')}>
+        <AdminTour />
+      </SectionTitle>
       <PanelLock>
         <AdminTabs campusId={campusId} me={me} />
       </PanelLock>

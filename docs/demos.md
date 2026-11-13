@@ -137,6 +137,18 @@ Clases de `styles/tour.css`, que ya se ven bien en todos los estilos y temas:
 | `tour-style` (`.on`, `--sample-*`) | Un estilo del selector, con su muestra |
 | `seat-heat tour-heat`, `tour-tip` | El mapa de calor de los puestos (las casillas `heat-*` de verdad) y la ficha al pasar por un puesto |
 | `tour-card tour-net` | Tarjeta con el fondo del grafo de la red (`--stage-bg`) |
+| `tour-bars` (`.short`) | Barras en miniatura: cada `span` lleva su barra (`i`, alto en %) y, si quiere, su rótulo debajo |
+| `tour-meter` | Fila con nombre y barra horizontal (`i`, ancho en %): cuánto se usa algo |
+| `tour-chip tour-status` | Etiqueta de estado con el color que se le dé en `style` (una variable del tema) y el fondo del mismo tono |
+| `tour-pop tour-corner` | Una ventanita de la pila, en la esquina de abajo a la derecha |
+| `tour-dock-slot`, `tour-dock` (`.moved`), `tour-dock-drop`, `tour-dock-head` | La ventanita de la pila que se pliega y se arrastra: su hueco en la esquina, la ventanita (se desliza a la vez que el ratón con `drag`), el ancla donde acaba su asa y su cabecera |
+| `tour-full` | Algo a pantalla completa, encima de la escena y de la barra de mentira |
+| `tour-shop` | Fila de tarjetas de una tienda, con el dibujo centrado |
+| `tour-office` | Rejilla de baldosas (cuatro de ancho) con lo que hay en cada una |
+| `tour-event` | Ficha de un evento del calendario, con el borde del color de su tipo (`kind-*`) |
+| `tour-key` (`.small`), `tour-bank`, `tour-tip-card` | La tecla de Code Clicker, su marcador y la ficha de algo de la tienda |
+| `tour-steady` | Fila de pestañas en la que la abierta no engorda la letra: las demás no saltan de línea |
+| `tour-nowrap` | Una `tour-row` que no parte en dos líneas (una casilla y su texto) |
 
 Si hace falta una pieza nueva, va en `styles/tour.css` con las variables del
 tema (nunca un color suelto) y se apunta en esta tabla.
@@ -189,5 +201,12 @@ tema (nunca un color suelto) y se apunta en esta tabla.
 | `gitCourse` | Aprender › Curso de git | Elegir punto, animación y teoría, terminal y estrellas, misiones de grupo |
 | `shellCourse` | Aprender › Curso de shell | Elegir unidad, teoría y ejemplo, terminal con objetivos, jefe contrarreloj |
 | `seats` | Campus › Asientos | Grafo de quién se sienta cerca, color por aislamiento, ficha de una persona y periodo |
+| `focus` | Aprender › Pomodoro | Concentración y descanso, pestañas a la vista, avisos que entran, empezar (ventanita con el reloj), pantalla completa, Tus estadísticas |
+| `startup` | Aprender › Pomodoro › Startup (icono al final de la fila de cifras) | Minutos para gastar, aprender y comprar, contratar, recolocar la oficina (elegir y mover), girar y vender (dos toques), cajas sorpresa por sesiones de 30 min, ranking |
+| `dropout` | Campus › Abandono | Quién lo deja y su riesgo, filtrar por un total, ficha de una persona, gráfica por día o semana, ajustar el cálculo, comparar piscinas. Debajo queda la regla del fin de semana y del viernes (`dropout.infoRules`) |
+| `piscineProgress` | Campus › Avance (piscineros) | Tu línea de aprobados, lo que no suma, la media de tu piscina, compararte con alguien, qué aprobaste cada día |
+| `countdowns` | Ventanita de Cuentas atrás (pila de la esquina, icono en su cabecera) | Aviso con su reloj, fijar una propia con el «+», fijar un evento desde su ficha, plegar, arrastrar |
+| `admin` | Panel de gestión (menú de la cuenta, solo admins) | Consumo, Qué se usa, Incidencias (responder y cerrar), Comunicados, Cuentas atrás, Permisos y bloqueos, Límites, Mantenimiento |
+| `clicker` | Code Clicker (sección secreta, junto a su título) | Pulsar la tecla, comprar en la Tienda, mejoras, la ficha de cada cosa, Clasificación, la ventanita |
 | `studio` | Personalizar (menú de la cuenta) | Arrastrar una pestaña y un bloque, pestaña Estilo, elegir un estilo que se aplica al momento, Listo |
 
