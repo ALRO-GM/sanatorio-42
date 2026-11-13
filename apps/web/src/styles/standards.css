@@ -35,7 +35,7 @@ sup {
 /* --- 2. Dianas ---------------------------------------------------------------- */
 /* El mínimo, siempre: 24 px de alto. Fuera quedan los puestos del plano (se
    amplía con su propio zoom) y lo que es parte de un dibujo. */
-button:not(.seat, .graph-node),
+button:not(.seat, .graph-node, .tour-chapter),
 select,
 summary,
 [role='button'],
@@ -64,6 +64,13 @@ button.link {
 summary {
   padding-block: 2px;
 }
+/* Las marcas de la barra de una demostración son puntos pequeños: la diana
+   crece alrededor sin que cambie el dibujo. */
+.tour-chapter::before {
+  content: '';
+  position: absolute;
+  inset: -7px;
+}
 .info-tip {
   width: max(1.6em, 24px);
   height: max(1.6em, 24px);
@@ -81,6 +88,12 @@ input[type='radio'] {
 label:has(> input[type='checkbox']:not(.switch)),
 label:has(> input[type='radio']) {
   min-height: 1.75rem;
+}
+/* Varias opciones seguidas en una línea: aire entre una y la siguiente (las
+   casillas de fábrica lo traían en su margen). */
+label:has(> input[type='checkbox']:not(.switch)),
+label:has(> input[type='radio']) {
+  margin-inline-end: 0.9rem;
 }
 fieldset {
   min-width: 0;
@@ -134,7 +147,6 @@ fieldset {
   label:has(> input[type='checkbox']:not(.switch)),
   label:has(> input[type='radio']) {
     min-height: 2.25rem;
-    margin-inline-end: 0.5rem;
   }
   /* El interruptor: la diana crece sin que cambie el dibujo. */
   .switch {

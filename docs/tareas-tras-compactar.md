@@ -12,14 +12,16 @@ Hecho y desplegado después (0c962a0, esquema 93): curso de NetPractice
 `packages/ragsim`, migración 0093), unidos a mano (los dos son `extra`: fuera
 de los logros de «los cuatro cursos»; 32 logros, 1 255 XP, 9 clasificaciones).
 
-Subido sin desplegar (0612a3e): el motor de demostraciones da a cada frase su
-tiempo de lectura por idioma (`paced` en `shared/tour/Tour.tsx`).
+Hecho después: el motor de demostraciones da a cada frase su tiempo de
+lectura por idioma (`paced` en `shared/tour/Tour.tsx`, 0612a3e) y siete
+demostraciones nuevas (`focus`, `startup`, `dropout`, `piscineProgress`,
+`countdowns`, `admin`, `clicker`). Comprobar que está desplegado:
+`curl -s https://peer4u.app/api/health/db`. Los worktrees de las ramas ya
+unidas se pueden borrar (`git worktree remove` + `git worktree prune`).
 
-En marcha, un agente en worktree: las siete demostraciones que faltan (`focus`,
-`startup`, `dropout`, `piscineProgress`, `countdowns`, `admin`, `clicker`). Al
-acabar: `git merge --no-ff`, `npm run textos -- --write`, `npm run check`,
-push y despliegue desacoplado (skill `desplegar`), y `git worktree prune` de
-las ramas ya unidas.
+Sin demostración propia aún (visto por el agente): la pregunta al parar el
+Pomodoro, el editor de avatar y la ronda de inversión de la Startup, y las
+pestañas sueltas del panel de gestión.
 
 Pendiente menor de los cursos nuevos: preguntas de Not-games para NetPractice
 y RAG; contenido en francés de las unidades (sale el inglés); jscpd al 0,86 %
