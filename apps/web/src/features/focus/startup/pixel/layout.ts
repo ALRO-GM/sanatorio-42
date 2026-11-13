@@ -169,7 +169,7 @@ export function officeOf(state: StartupState, me: number, busy = true): Office {
         model: fixture.model as ModelId,
         gx,
         gy,
-        props: PROPS[fixture.model]?.(state, focus) ?? {},
+        props: { ...PROPS[fixture.model]?.(state, focus), turn: fixture.turn },
         fixture: fixture.key,
       })
     }

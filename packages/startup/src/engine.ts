@@ -36,7 +36,11 @@ import {
   canPlace,
   decorItem,
   freeSpot,
+  fixturePrice,
+  fixturesOf,
   isFixtureKey,
+  isSellableKey,
+  isTurnableKey,
   sellPrice,
   spaceOf,
   tidyDecor,
@@ -60,6 +64,10 @@ export type StartupAction =
   | { type: 'sell'; index: number }
   /** Mover lo que no es decoración (una mesa, los servidores, la pizarra…, `fixturesOf`) a (gx, gy). */
   | { type: 'move'; key: string; gx: number; gy: number }
+  /** Girar (o volver a dejar como estaba) algo ganado que está en la oficina (`isTurnableKey`). */
+  | { type: 'turn'; key: string }
+  /** Vender un mueble de las mejoras de espacio (`fixturePrice`): deja de salir en la oficina. */
+  | { type: 'sellFixture'; key: string }
   /** Cambiar el aspecto de la persona `index` de la plantilla, o el tuyo con -1 (el configurador); gratis. */
   | { type: 'avatar'; index: number; avatar: Avatar }
   /** Abrir una caja sorpresa (una por sesión del Pomodoro de 30 minutos o más). */
@@ -451,6 +459,33 @@ export function act(
         state: { ...state, moved: { ...state.moved, [action.key]: [action.gx, action.gy] } },
       }
     }
+    case 'turn': {
+      if (!isTurnableKey(action.key) || !present(state, action.key)) return { refused: 'invalid' }
+
+      return {
+        state: {
+          ...state,
+          turned: state.turned.includes(action.key)
+            ? state.turned.filter((key) => key !== action.key)
+            : [...state.turned, action.key],
+        },
+      }
+    }
+    case 'sellFixture': {
+      if (!isSellableKey(action.key) || !present(state, action.key)) return { refused: 'invalid' }
+
+      const { [action.key]: _gone, ...moved } = state.moved
+
+      return {
+        state: {
+          ...state,
+          cash: state.cash + fixturePrice(action.key),
+          moved,
+          turned: state.turned.filter((key) => key !== action.key),
+          sold: [...state.sold, action.key],
+        },
+      }
+    }
     case 'open': {
       if (boxesOf(state, sessions) === 0) return { refused: 'locked' }
 
@@ -486,6 +521,10 @@ export function act(
 }
 
 /** La decoración con una pieza más: en la primera baldosa libre (las mascotas, sueltas). */
+/** Si lo que lleva esa clave está ahora en la oficina (`fixturesOf`). */
+const present = (state: StartupState, key: string): boolean =>
+  fixturesOf(state).some((fixture) => fixture.key === key)
+
 function withPiece(state: StartupState, id: string): Placed[] {
   const at = decorItem(id)?.kind === 'pet' ? null : freeSpot(state)
 
@@ -537,6 +576,8 @@ export function parseStartup(value: unknown): StartupState {
     at: typeof raw.at === 'number' && Number.isFinite(raw.at) && raw.at >= 0 ? raw.at : null,
     decor: Array.isArray(raw.decor) ? raw.decor.flatMap(parsePlaced).slice(0, DECOR_MAX) : [],
     moved: parseMoved(raw.moved),
+    turned: parseKeys(raw.turned, isTurnableKey),
+    sold: parseKeys(raw.sold, isSellableKey),
     opened: whole(raw.opened),
     legacy: whole(raw.legacy),
   }
@@ -584,6 +625,15 @@ function parseMoved(value: unknown): StartupState['moved'] {
       .slice(0, 200)
       .map(([key, [gx, gy]]) => [key, [gx, gy] as const]),
   )
+}
+
+/** Una lista de claves: solo las que valen (`valid`), sin repetir. */
+function parseKeys(value: unknown, valid: (key: string) => boolean): string[] {
+  if (!Array.isArray(value)) return []
+
+  return [
+    ...new Set(value.filter((key): key is string => typeof key === 'string' && valid(key))),
+  ].slice(0, 50)
 }
 
 function parsePlaced(one: unknown): Placed[] {

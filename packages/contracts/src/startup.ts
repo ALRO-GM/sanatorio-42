@@ -38,6 +38,12 @@ export type StartupStateDto = {
   cash: number
   at: number | null
   decor: StartupPlaced[]
+  /** Lo que no es decoración y se ha movido a mano: su baldosa, por su clave (`desk:0`, `flag`…). */
+  moved?: Record<string, readonly [number, number]>
+  /** Lo ganado que se ha girado, por su clave. */
+  turned?: string[]
+  /** Los muebles de las mejoras de espacio vendidos (`cactus`, `coffee`…). */
+  sold?: string[]
   /** Cajas sorpresa abiertas y vueltas terminadas (nueva partida+). */
   opened: number
   legacy: number

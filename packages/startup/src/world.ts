@@ -59,7 +59,7 @@ function deskSlots(size: number): Tile[] {
  * `extra` (lo que se gana). `model` es su dibujo en la web.
  */
 export type FixtureKind = 'desk' | 'rack' | 'reception' | 'extra'
-export type Fixture = { key: string; kind: FixtureKind; model: string }
+export type Fixture = { key: string; kind: FixtureKind; model: string; turn: boolean }
 
 type Edges = Record<'back' | 'left' | 'right' | 'front', readonly Tile[]>
 
@@ -70,6 +70,12 @@ type Extra = {
   when: (state: StartupState) => boolean
   /** Dónde va solo, por orden de preferencia: la primera baldosa libre. */
   spots: (edges: Edges) => readonly Tile[]
+  /**
+   * Lo que se cobra al venderlo (`sellFixture`). Solo lo tienen los muebles
+   * que vienen con las mejoras de espacio (pedido por Alberto el 2026-11-13):
+   * lo demás sale de los hitos y no se vende.
+   */
+  price?: number
 }
 
 /**
@@ -79,8 +85,20 @@ type Extra = {
  * dónde lo ha movido cada cual.
  */
 const EXTRAS: readonly Extra[] = [
-  { key: 'cactus', model: 'cactus', when: (s) => spaceOf(s) === 0, spots: ({ left }) => left },
-  { key: 'monstera', model: 'monstera', when: (s) => spaceOf(s) > 0, spots: ({ left }) => left },
+  {
+    key: 'cactus',
+    model: 'cactus',
+    when: (s) => spaceOf(s) === 0,
+    spots: ({ left }) => left,
+    price: 30,
+  },
+  {
+    key: 'monstera',
+    model: 'monstera',
+    when: (s) => spaceOf(s) > 0,
+    spots: ({ left }) => left,
+    price: 60,
+  },
   {
     key: 'bookshelf',
     model: 'bookshelf',
@@ -112,31 +130,46 @@ const EXTRAS: readonly Extra[] = [
     when: (s) => has(s, 'global'),
     spots: ({ front, right }) => [...front, ...[...right].reverse()],
   },
-  { key: 'coffee', model: 'coffee', when: (s) => spaceOf(s) >= 1, spots: ({ left }) => left },
+  {
+    key: 'coffee',
+    model: 'coffee',
+    when: (s) => spaceOf(s) >= 1,
+    spots: ({ left }) => left,
+    price: 200,
+  },
   {
     key: 'printer',
     model: 'printer',
     when: (s) => stageOf(s) >= 4,
     spots: ({ right }) => right.slice(1),
   },
-  { key: 'cooler', model: 'cooler', when: (s) => spaceOf(s) >= 2, spots: ({ left }) => left },
+  {
+    key: 'cooler',
+    model: 'cooler',
+    when: (s) => spaceOf(s) >= 2,
+    spots: ({ left }) => left,
+    price: 400,
+  },
   {
     key: 'beanbag',
     model: 'beanbag',
     when: (s) => spaceOf(s) >= 2,
     spots: ({ right }) => right.slice(1),
+    price: 150,
   },
   {
     key: 'beanbag-2',
     model: 'beanbag',
     when: (s) => spaceOf(s) >= 3,
     spots: ({ right }) => right.slice(1),
+    price: 150,
   },
   {
     key: 'monstera-2',
     model: 'monstera',
     when: (s) => spaceOf(s) >= 3,
     spots: ({ right }) => [...right].reverse(),
+    price: 60,
   },
 ]
 
@@ -154,22 +187,38 @@ export function fixturesOf(state: StartupState): Fixture[] {
       key: `desk:${String(index)}`,
       kind: 'desk',
       model: 'workstation',
+      turn: false,
     })),
     ...Array.from({ length: rackCount(state) }, (_, index): Fixture => ({
       key: `rack:${String(index)}`,
       kind: 'rack',
       model: 'rack',
+      turn: false,
     })),
     ...(state.team.some((hire) => hire.role === 'reception')
-      ? [{ key: 'reception', kind: 'reception' as const, model: 'reception' }]
+      ? [{ key: 'reception', kind: 'reception' as const, model: 'reception', turn: false }]
       : []),
-    ...EXTRAS.filter((extra) => extra.when(state)).map((extra): Fixture => ({
-      key: extra.key,
-      kind: 'extra',
-      model: extra.model,
-    })),
+    // Lo ganado se gira (`turned`); lo de las mejoras de espacio, además, se vende (`sold`).
+    ...EXTRAS.filter((extra) => extra.when(state) && !state.sold.includes(extra.key)).map(
+      (extra): Fixture => ({
+        key: extra.key,
+        kind: 'extra',
+        model: extra.model,
+        turn: state.turned.includes(extra.key),
+      }),
+    ),
   ]
 }
+
+/** Si una clave es de algo que se puede girar: lo ganado (las mesas y los servidores, no). */
+export const isTurnableKey = (key: string): boolean => EXTRAS.some((extra) => extra.key === key)
+
+/** Lo que se cobra al vender un mueble que no es decoración; 0 si no se vende. */
+export const fixturePrice = (key: string): number =>
+  EXTRAS.find((extra) => extra.key === key)?.price ?? 0
+
+/** Si una clave es de un mueble que se puede vender (los de las mejoras de espacio). */
+export const isSellableKey = (key: string): boolean => fixturePrice(key) > 0
 
 /** Si una clave es de algo que se puede mover (aunque ahora no esté en la oficina). */
 export const isFixtureKey = (key: string): boolean =>

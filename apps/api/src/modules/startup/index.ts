@@ -123,6 +123,10 @@ const actionSchema = z.discriminatedUnion('type', [
       .min(0)
       .max(Math.max(...ROOM) - 1),
   }),
+  // Girar o vender lo que no es decoración: la clave la comprueba el motor
+  // (`isTurnableKey`, `isSellableKey`).
+  z.object({ type: z.literal('turn'), key: z.string().min(1).max(40) }),
+  z.object({ type: z.literal('sellFixture'), key: z.string().min(1).max(40) }),
   // El aspecto: cada parte la comprueba el motor contra el catálogo (`isAvatar`).
   z.object({
     type: z.literal('avatar'),

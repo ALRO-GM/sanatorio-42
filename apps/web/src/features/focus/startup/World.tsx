@@ -6,8 +6,10 @@ import {
   ROLE_RULES,
   boxesOf,
   decorItem,
+  fixturePrice,
   freeSpot,
   has,
+  isTurnableKey,
   layoutOf,
   prizeOf,
   sellPrice,
@@ -172,7 +174,7 @@ export function DecorEditor({
     ...layout.map((fixture) => ({
       target: fixture.key,
       model: fixture.model as ModelId,
-      turn: false,
+      turn: fixture.turn,
       at: fixture.at,
       label: t('startup.piece', {
         name: t(`startup.fixture.${fixture.key.replace(/[:-]\d+$/, '')}`),
@@ -277,6 +279,33 @@ export function DecorEditor({
                 <Icon name="capas" size={16} />
               </button>
             </>
+          )}
+          {index === null && isTurnableKey(selected) && (
+            <button
+              type="button"
+              className="small"
+              disabled={busy}
+              aria-label={t('startup.turn')}
+              title={t('startup.turn')}
+              onClick={() => void onAct({ type: 'turn', key: selected })}
+            >
+              <Icon name="chispa" size={16} />
+            </button>
+          )}
+          {index === null && fixturePrice(selected) > 0 && (
+            <SellButton
+              price={fixturePrice(selected)}
+              armed={selling === selected}
+              busy={busy}
+              onArm={() => {
+                setSelling(selected)
+              }}
+              onSell={() => {
+                void onAct({ type: 'sellFixture', key: selected }).then((done) => {
+                  if (done) select(null)
+                })
+              }}
+            />
           )}
           {index !== null && piece !== undefined && (
             <SellButton

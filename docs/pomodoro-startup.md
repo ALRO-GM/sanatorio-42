@@ -75,6 +75,15 @@ no añade pestañas a la navegación (`docs/interfaz.md`).
   dejar encima de la decoración ni de otra cosa movida a mano; encima de algo
   que se coloca solo, sí (eso se aparta). Lo que aún no hay en la oficina no
   se mueve, y al volver a empezar (nueva partida+) todo vuelve a su sitio.
+- **Girar y vender lo de las mejoras de espacio** (pedido por Alberto el
+  2026-11-13): lo ganado (pizarra, bandera, cafetera, pufs…) se gira como la
+  decoración (`turn`, guardado en `turned`). Los muebles que vienen con el
+  espacio (cactus, plantas, cafetera, fuente y pufs; los que tienen `price`
+  en `EXTRAS` de `world.ts`) además se venden (`sellFixture`, `fixturePrice`):
+  cactus 30, planta 60, puf 150, cafetera 200 y fuente 400. Lo vendido se
+  apunta en `sold` y deja de salir en la oficina hasta la nueva partida+. Las
+  mesas, los servidores y el mostrador no se giran ni se venden: van con la
+  plantilla y los servidores.
 - **Cajas sorpresa**: cada sesión del Pomodoro acabada de 30 minutos o más
   (`focus_sessions`, contadas por la API con `focus.longSessions`) da una
   caja. Lo que sale está decidido con semilla (`prizeOf`): casi siempre

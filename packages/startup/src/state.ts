@@ -57,6 +57,13 @@ export type StartupState = {
    * (`desk:0`, `rack:1`, `whiteboard`…). Lo que no está aquí se coloca solo.
    */
   moved: Record<string, readonly [number, number]>
+  /** Lo ganado que se ha girado (mira a la derecha), por su clave (`isTurnableKey`). */
+  turned: string[]
+  /**
+   * Los muebles de las mejoras de espacio que se han vendido (`isSellableKey`):
+   * ya no salen en la oficina hasta volver a empezar (nueva partida+).
+   */
+  sold: string[]
   /** Cajas sorpresa abiertas (se gana una por sesión de 30 minutos o más). */
   opened: number
   /** Veces que se ha terminado el edificio y vuelto a empezar (nueva partida+). */
@@ -77,6 +84,8 @@ export const EMPTY_STARTUP: StartupState = {
   at: null,
   decor: [],
   moved: {},
+  turned: [],
+  sold: [],
   opened: 0,
   legacy: 0,
 }

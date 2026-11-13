@@ -315,6 +315,73 @@ describe('recolocar toda la oficina (2026-11-09)', () => {
   })
 })
 
+describe('los muebles de las mejoras de espacio (2026-11-13)', () => {
+  const fixture = (state: StartupState, key: string) =>
+    layoutOf(state).find((one) => one.key === key)
+
+  it('se giran y se vuelven a girar; lo demás de la oficina no', () => {
+    const base = office()
+
+    expect(fixture(base, 'coffee')?.turn).toBe(false)
+
+    const turned = play(base, [{ type: 'turn', key: 'coffee' }])
+
+    expect(fixture(turned, 'coffee')?.turn).toBe(true)
+    expect(fixture(play(turned, [{ type: 'turn', key: 'coffee' }]), 'coffee')?.turn).toBe(false)
+    // Girar no lo mueve.
+    expect(fixture(turned, 'coffee')?.at).toEqual(fixture(base, 'coffee')?.at)
+    // Las mesas, lo que no hay en la oficina (el globo) o una clave inventada, no.
+    for (const key of ['desk:0', 'globe', 'sofa', '']) {
+      expect(act('ana', base, 1_000_000, { type: 'turn', key })).toEqual({ refused: 'invalid' })
+    }
+  })
+
+  it('se venden por su precio y dejan de salir hasta la nueva partida+', () => {
+    const base = play(office(), [
+      { type: 'move', key: 'cooler', gx: 0, gy: 5 },
+      { type: 'turn', key: 'cooler' },
+    ])
+    const sold = play(base, [{ type: 'sellFixture', key: 'cooler' }])
+
+    expect(sold.cash - base.cash).toBe(400)
+    expect(fixture(sold, 'cooler')).toBeUndefined()
+    expect(sold.sold).toEqual(['cooler'])
+    // Ni su baldosa ni su giro se quedan guardados.
+    expect(sold.moved).toEqual({})
+    expect(sold.turned).toEqual([])
+    // No se vende dos veces, ni lo que no viene con el espacio (la pizarra, las mesas).
+    for (const key of ['cooler', 'whiteboard', 'desk:0', 'nada']) {
+      expect(act('ana', sold, 1_000_000, { type: 'sellFixture', key })).toEqual({
+        refused: 'invalid',
+      })
+    }
+    // Lo de un espacio que aún no se tiene tampoco (la segunda planta grande sale en el 3).
+    expect(act('ana', sold, 1_000_000, { type: 'sellFixture', key: 'monstera-2' })).toEqual({
+      refused: 'invalid',
+    })
+  })
+
+  it('se guarda y se lee igual, sin claves que no valen ni repetidas', () => {
+    const state = play(office(), [
+      { type: 'turn', key: 'flag' },
+      { type: 'sellFixture', key: 'beanbag' },
+    ])
+
+    expect(parseStartup(JSON.parse(JSON.stringify(state)))).toMatchObject({
+      turned: ['flag'],
+      sold: ['beanbag'],
+    })
+    expect(
+      parseStartup({ ...state, turned: ['flag', 'flag', 'desk:0', 3], sold: ['whiteboard', null] }),
+    ).toMatchObject({ turned: ['flag'], sold: [] })
+    // Las partidas de antes, sin estos campos, se leen vacías.
+    expect(parseStartup({ ...state, turned: undefined, sold: 'cactus' })).toMatchObject({
+      turned: [],
+      sold: [],
+    })
+  })
+})
+
 describe('las cajas sorpresa', () => {
   it('una por sesión de 30 minutos o más; lo que sale está decidido de antes', () => {
     expect(act('ana', EMPTY_STARTUP, 60, { type: 'open' })).toEqual({ refused: 'locked' })
