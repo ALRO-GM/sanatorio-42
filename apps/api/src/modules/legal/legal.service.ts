@@ -10,6 +10,8 @@ import { z } from 'zod'
 
 import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
+import type { FieldCipher } from '../../core/crypto/fields.js'
+import type { SealedColumn } from '../../core/crypto/seal-existing.js'
 import type { Db } from '../../core/db/database.js'
 import { anonymizePersonalData, personalData } from '../../core/db/personal-data.js'
 import type { PersonalTable } from '../../core/db/personal-data.js'
@@ -23,12 +25,18 @@ import { isoAt } from '../../core/time.js'
  * cambia algo de lo que dice `features/legal` en la web: entonces se vuelve a
  * pedir a todo el mundo.
  */
-export const LEGAL_VERSION = '2026-11-01'
+export const LEGAL_VERSION = '2026-11-14'
 
 export type LegalServiceOptions = {
   db: Db
   /** Las tablas con datos de personas de todos los módulos (se montan antes). */
   personal: () => readonly PersonalTable[]
+  /**
+   * Las columnas cifradas de todos los módulos y con qué se abren: la descarga
+   * da a cada cual su texto, no el cifrado (`docs/cifrado.md`).
+   */
+  sealed: () => readonly SealedColumn[]
+  fields: FieldCipher
   now?: () => number
 }
 
@@ -47,6 +55,17 @@ const newAlias = (): string => `anon-${randomBytes(6).toString('hex')}`
 export function createLegalService(options: LegalServiceOptions) {
   const { db } = options
   const now = options.now ?? Date.now
+
+  /** Abre, en la descarga, las columnas que se guardan cifradas. */
+  function reveal(tables: PersonalExport['tables']): PersonalExport['tables'] {
+    for (const { table, column } of options.sealed()) {
+      for (const row of tables[table]?.rows ?? []) {
+        if (column in row) row[column] = options.fields.openOrNull(row[column])
+      }
+    }
+
+    return tables
+  }
 
   return {
     async status(actor: Actor): Promise<LegalStatus> {
@@ -126,7 +145,7 @@ export function createLegalService(options: LegalServiceOptions) {
         login: actor.login,
         exportedAt: isoAt(now()),
         legalVersion: LEGAL_VERSION,
-        tables: await personalData(db, options.personal(), { login: actor.login, userId }),
+        tables: reveal(await personalData(db, options.personal(), { login: actor.login, userId })),
       }
     },
   }

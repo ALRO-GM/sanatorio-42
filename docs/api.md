@@ -186,6 +186,8 @@ GET /me/export → todo lo tuyo, tabla a tabla, como JSON para descargar
     "usage_time": { "source": "sanatorio", "truncated": true, "rows": [ …5000 filas… ] }
   }
 }
+Las columnas que se guardan cifradas (`sealed` de cada módulo, `docs/cifrado.md`)
+salen en claro: es tu texto.
 
 POST /client-errors → `{ "message", "stack"?, "where", "version"? }` → 204: un
 fallo de la web en el navegador (una sección que no se pudo pintar, o `where:

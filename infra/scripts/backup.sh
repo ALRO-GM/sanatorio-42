@@ -8,6 +8,10 @@
 #
 #   infra/scripts/backup.sh              deja la copia en infra/backups/
 #
+# Y, si hay clave pública en infra/copias.asc, otra cifrada entera
+# (`.db.gz.gpg`, apuntada en infra/backups/ultima-cifrada): es la que se lleva
+# pull-backups.sh. Ver docs/cifrado.md.
+#
 # La copia se comprueba antes de darla por buena (`PRAGMA integrity_check` sobre
 # la copia y `gzip -t` sobre el comprimido), y la ruta de la última buena queda
 # en infra/backups/ultima: es la que `deploy.sh` restaura si hay que volver
@@ -87,6 +91,22 @@ printf '%s\n' "$file.gz" > backups/ultima
 # shellcheck disable=SC2012
 ls -1t backups/sanatorio-*.db.gz | tail -n +15 | xargs -r rm --
 echo "Copia guardada y comprobada en infra/$file.gz"
+
+# La que sale de la máquina hacia el ordenador de quien despliega
+# (pull-backups.sh) va cifrada entera, con la clave pública de copias.asc: la
+# privada no está aquí, solo en ese ordenador y en un sitio aparte
+# (docs/cifrado.md). La de arriba se queda sin cifrar entera porque es la que
+# restaura deploy.sh sin nadie delante; lo privado ya va cifrado por campos,
+# con DATA_KEY. Sin clave pública en el repo, no se hace (y pull-backups.sh
+# cifra al llegar).
+if grep -q 'BEGIN PGP PUBLIC KEY BLOCK' copias.asc 2> /dev/null; then
+  gpg --batch --yes --trust-model always --recipient-file copias.asc \
+    --encrypt -o "$file.gz.gpg" "$file.gz"
+  printf '%s\n' "$file.gz.gpg" > backups/ultima-cifrada
+  # shellcheck disable=SC2012
+  ls -1t backups/sanatorio-*.db.gz.gpg | tail -n +15 | xargs -r rm --
+  echo "Copia cifrada para sacar de aquí: infra/$file.gz.gpg"
+fi
 
 if [ -n "${BACKUP_REMOTE:-}" ] && [ "$guard_level" -ge 90 ]; then
   echo "Corte por los límites del plan: la copia no se sube a $BACKUP_REMOTE."

@@ -10,6 +10,7 @@ import { z } from 'zod'
 
 import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
+import type { FieldCipher } from '../../core/crypto/fields.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
@@ -18,6 +19,8 @@ import { isoAt } from '../../core/time.js'
 
 type HiddenServiceOptions = {
   db: Db
+  /** El motivo es una nota de moderación sobre alguien: va cifrado (`docs/cifrado.md`). */
+  fields: FieldCipher
   /** Se llama tras cada cambio: `audience.forget`, para que se note al momento. */
   changed?: () => void
   now?: () => number
@@ -55,7 +58,7 @@ export async function hiddenLogins(db: Db, pool: boolean): Promise<string[]> {
 }
 
 export function createHiddenService(options: HiddenServiceOptions) {
-  const { db } = options
+  const { db, fields } = options
   const now = options.now ?? Date.now
   const changed = options.changed ?? (() => undefined)
 
@@ -93,13 +96,15 @@ export function createHiddenService(options: HiddenServiceOptions) {
     return result.rows.map((row) => {
       const login = toText(row.login)
 
+      const reason = fields.openOrNull(row.reason)
+
       return {
         login,
         image: typeof row.image === 'string' ? row.image : null,
         group: groups.get(login) ?? null,
         fromStudents: toNumber(row.from_students) === 1,
         fromPool: toNumber(row.from_pool) === 1,
-        reason: typeof row.reason === 'string' && row.reason !== '' ? row.reason : null,
+        reason: reason === '' ? null : reason,
         by: toText(row.hidden_by),
         at: toText(row.hidden_at),
       }
@@ -204,7 +209,7 @@ export function createHiddenService(options: HiddenServiceOptions) {
           who,
           body.fromStudents ? 1 : 0,
           body.fromPool ? 1 : 0,
-          reason === '' ? null : reason,
+          reason === '' ? null : fields.seal(reason),
           actor.login,
           isoAt(now()),
         ],

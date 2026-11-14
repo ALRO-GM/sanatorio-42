@@ -36,6 +36,7 @@ import { assertAdmin } from '../../core/actor.js'
 import type { Actor } from '../../core/actor.js'
 import type { Notify, Settle } from '../../core/events.js'
 import type { DataStore } from '../../core/db/data-store.js'
+import type { FieldCipher } from '../../core/crypto/fields.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
@@ -70,6 +71,11 @@ import type { Limits } from '../../core/limits.js'
 
 export type AdminServiceOptions = {
   db: Db
+  /**
+   * Cifra lo que escribe la gente en el buzón (incidencias, sugerencias,
+   * denuncias y sus respuestas) y el motivo de un bloqueo (`docs/cifrado.md`).
+   */
+  fields: FieldCipher
   /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
   limits?: Limits
   /** Admins fijos (`ADMIN_LOGINS`): no se pueden quitar desde el panel. */
@@ -181,35 +187,35 @@ const answerSchema = z.object({
 // De fábrica, 3: se regula desde el panel (`tickets.per10Minutes` en `core/limits.ts`).
 const TICKET_WINDOW_MS = 10 * 60_000
 
-function toTicket(row: Record<string, unknown>, now: number): Ticket {
+function toTicket(row: Record<string, unknown>, now: number, fields: FieldCipher): Ticket {
   const text = (value: unknown): string | null => (typeof value === 'string' ? value : null)
   const status = toText(row.status) as TicketStatus
-  const answer = text(row.answer)
+  const answer = fields.openOrNull(row.answer)
   const createdAt = toText(row.created_at)
 
   return {
     id: toNumber(row.id),
     login: toText(row.login),
     kind: toText(row.kind) as TicketKind,
-    subject: toText(row.subject),
-    body: toText(row.body),
+    subject: fields.openOrNull(row.subject) ?? '',
+    body: fields.openOrNull(row.body) ?? '',
     target: text(row.target),
     category: text(row.category) as TicketCategory | null,
     section: text(row.section),
     reason: text(row.reason) as ReportReason | null,
     status: toText(row.status) as TicketStatus,
-    answer: text(row.answer),
+    answer,
     answeredBy: text(row.answered_by),
     createdAt: toText(row.created_at),
     answeredAt: text(row.answered_at),
     withdrawUntil: withdrawUntil({ createdAt, status, answer }, now),
-    proposal: text(row.proposal),
+    proposal: fields.openOrNull(row.proposal),
     place: placeFrom(row.place),
   }
 }
 
 export function createAdminService(options: AdminServiceOptions) {
-  const { db, fixedAdmins } = options
+  const { db, fields, fixedAdmins } = options
   const now = options.now ?? Date.now
   const notify: Notify = options.notify ?? (() => Promise.resolve())
   const settle: Settle = options.settle ?? (() => Promise.resolve())
@@ -380,7 +386,7 @@ export function createAdminService(options: AdminServiceOptions) {
 
         return {
           admin: fixedAdmins.includes(wanted) || role.rows.length > 0,
-          block: active ? { reason: toText(row.reason), until } : null,
+          block: active ? { reason: fields.openOrNull(row.reason) ?? '', until } : null,
         }
       })
     },
@@ -409,7 +415,7 @@ export function createAdminService(options: AdminServiceOptions) {
         ],
         blocks: blocks.rows.map((row) => ({
           login: toText(row.login),
-          reason: toText(row.reason),
+          reason: fields.openOrNull(row.reason) ?? '',
           until: typeof row.until === 'string' ? row.until : null,
           blockedBy: toText(row.blocked_by),
         })),
@@ -458,7 +464,7 @@ export function createAdminService(options: AdminServiceOptions) {
               VALUES (?, ?, ?, ?, ?)`,
         args: [
           change.login,
-          change.reason,
+          fields.seal(change.reason),
           change.days === undefined ? null : isoAt(now() + change.days * 24 * HOUR),
           actor.login,
           iso(),
@@ -732,8 +738,8 @@ export function createAdminService(options: AdminServiceOptions) {
         args: [
           actor.login,
           ticket.kind,
-          ticket.subject ?? (subjectFrom(ticket.body) || 'Denuncia'),
-          ticket.body,
+          fields.seal(ticket.subject ?? (subjectFrom(ticket.body) || 'Denuncia')),
+          fields.seal(ticket.body),
           ticket.target ?? null,
           ticket.category ?? null,
           ticket.section ?? null,
@@ -742,7 +748,7 @@ export function createAdminService(options: AdminServiceOptions) {
         ],
       })
 
-      return this.announce(actor, toTicket(result.rows[0] ?? {}, now()))
+      return this.announce(actor, toTicket(result.rows[0] ?? {}, now(), fields))
     },
 
     /**
@@ -777,16 +783,16 @@ export function createAdminService(options: AdminServiceOptions) {
               VALUES (?, 'idea', ?, ?, 'improvement', ?, ?, ?, ?) RETURNING *`,
         args: [
           actor.login,
-          subjectFrom(suggestion.problem),
-          suggestion.problem,
+          fields.seal(subjectFrom(suggestion.problem)),
+          fields.seal(suggestion.problem),
           place.section,
-          suggestion.proposal,
+          fields.sealOrNull(suggestion.proposal),
           JSON.stringify(place),
           iso(),
         ],
       })
 
-      return this.announce(actor, toTicket(result.rows[0] ?? {}, now()))
+      return this.announce(actor, toTicket(result.rows[0] ?? {}, now(), fields))
     },
 
     /**
@@ -846,7 +852,7 @@ export function createAdminService(options: AdminServiceOptions) {
         args: [actor.login],
       })
 
-      return result.rows.map((row) => toTicket(row, now()))
+      return result.rows.map((row) => toTicket(row, now(), fields))
     },
 
     /** El buzón entero, lo pendiente primero. */
@@ -857,7 +863,7 @@ export function createAdminService(options: AdminServiceOptions) {
         `SELECT * FROM tickets ORDER BY (status = 'open') DESC, id DESC LIMIT 200`,
       )
 
-      return result.rows.map((row) => toTicket(row, now()))
+      return result.rows.map((row) => toTicket(row, now(), fields))
     },
 
     async answerTicket(actor: Actor, id: number, input: unknown): Promise<Ticket> {
@@ -867,7 +873,7 @@ export function createAdminService(options: AdminServiceOptions) {
       const result = await db.execute({
         sql: `UPDATE tickets SET answer = ?, status = ?, answered_by = ?, answered_at = ?
               WHERE id = ? RETURNING *`,
-        args: [answer, status, actor.login, iso(), id],
+        args: [fields.seal(answer), status, actor.login, iso(), id],
       })
       const row = result.rows[0]
 
@@ -875,7 +881,7 @@ export function createAdminService(options: AdminServiceOptions) {
         throw domainError('not_found', 'Ese aviso no existe')
       }
 
-      const ticket = toTicket(row, now())
+      const ticket = toTicket(row, now(), fields)
 
       // Ya está atendido: el «mensaje nuevo» deja de contar para todo quien administra.
       await settle({ kind: 'ticket_new', ref: `ticket:${ticket.id}` })

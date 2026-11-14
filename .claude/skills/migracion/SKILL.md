@@ -22,6 +22,8 @@ desplegada ya corrió en producción; lo que haya que deshacer es otra migració
 3. Tabla con logins → `personal` en el `index.ts` del módulo (exportación y
    borrado de datos) y, si procede, en «Limpiar datos» del panel.
 4. Añadir la tabla a la lista de `tests/unit/migrations.test.ts`.
+   Columna con texto privado escrito por alguien (mensajes, notas) → se cifra
+   con `fields` y va en `sealed` del módulo (`docs/cifrado.md`).
 5. Repositorio y tests del módulo; `npm run check`.
 
 ## Comprobar sobre una copia de producción (solo lectura)

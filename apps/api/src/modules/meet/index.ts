@@ -19,6 +19,8 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
       { table: 'conversation_marks', logins: ['login'] },
       { table: 'event_alerts', logins: ['login'] },
     ],
+    // Lo que se escribe en los chats y conversaciones (`docs/cifrado.md`).
+    sealed: [{ table: 'event_messages', column: 'body' }],
     service,
     routes: (app, { session }) => {
       /** `GET /events/thread?id=&after=` → el chat de un evento en el que participas. */
@@ -130,6 +132,7 @@ export function createMeetModule(deps: MeetServiceOptions): MeetModule {
         login: 'login',
         date: { column: 'created_at', as: 'iso' },
         show: ['id', 'event_id', 'login', 'kind', 'body', 'created_at'],
+        sealed: { fields: deps.fields, columns: ['body'] },
       }),
       tableStore(deps.db, {
         id: 'conversation_marks',

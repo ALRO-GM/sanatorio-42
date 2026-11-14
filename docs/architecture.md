@@ -279,6 +279,11 @@ SQLite a través de `@libsql/client`. Las migraciones están en
 `apps/api/src/core/db/migrations/`, una por fichero, y se aplican solas al
 arrancar. Una migración desplegada no se edita: se añade otra.
 
+Lo privado que escribe la gente (mensajes, avisos, buzón, notas) va cifrado
+columna a columna con `DATA_KEY` (`core/crypto/fields.ts`): cada módulo dice
+cuáles son suyas en `sealed`, y al arrancar se cifra lo que quede en claro.
+Inventario, formato y rotación: [cifrado.md](cifrado.md).
+
 ## Contrato compartido
 
 `packages/contracts` tiene el tipo de cada respuesta. La API lo usa para tipar

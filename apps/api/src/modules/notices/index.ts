@@ -55,6 +55,8 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
         give: { from_login: ['id', 'kind', 'from_login', 'created_at'] },
       },
     ],
+    // El trozo de mensaje que lleva el aviso (`docs/cifrado.md`).
+    sealed: [{ table: 'notices', column: 'text' }],
     service,
     routes: (app, { session }) => {
       /**
@@ -109,6 +111,7 @@ export function createNoticesModule(deps: NoticesModuleDeps): NoticesModule {
         login: 'login',
         date: { column: 'updated_at', as: 'iso' },
         show: ['id', 'login', 'kind', 'ref', 'from_login', 'text', 'updated_at', 'read_at'],
+        sealed: { fields: deps.fields, columns: ['text'] },
       }),
     ],
   }

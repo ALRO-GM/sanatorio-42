@@ -16,6 +16,7 @@ import type {
 } from '@sanatorio/contracts'
 import { z } from 'zod'
 
+import type { FieldCipher } from '../../core/crypto/fields.js'
 import type { Db } from '../../core/db/database.js'
 import { toJson, toNumber, toNumberOrNull, toText, toTextOrNull } from '../../core/db/rows.js'
 import { inList, listArg } from '../../core/db/sql.js'
@@ -56,7 +57,7 @@ type Row = Record<string, unknown>
 
 const plans = z.array(z.number().int())
 
-const goalOf = (row: Row): GoalRow => ({
+const goalFrom = (row: Row, fields: FieldCipher): GoalRow => ({
   id: toNumber(row.id),
   login: toText(row.login),
   campusId: toNumber(row.campus_id),
@@ -66,31 +67,31 @@ const goalOf = (row: Row): GoalRow => ({
   targetDay: toText(row.target_day),
   targetTime: toTextOrNull(row.target_time),
   progress: toNumber(row.progress),
-  note: toTextOrNull(row.note),
+  note: fields.openOrNull(row.note),
   status: toText(row.status) as AgendaGoalStatus,
   createdAt: toText(row.created_at),
   closedAt: toTextOrNull(row.closed_at),
 })
 
-const checkpointOf = (row: Row): AgendaCheckpoint => ({
+const checkpointFrom = (row: Row, fields: FieldCipher): AgendaCheckpoint => ({
   id: toNumber(row.id),
   key: toTextOrNull(row.key) as AgendaCheckpointKey | null,
-  text: toTextOrNull(row.text),
+  text: fields.openOrNull(row.text),
   done: row.done_at !== null,
 })
 
-const entryOf = (row: Row): AgendaEntry => ({
+const entryFrom = (row: Row, fields: FieldCipher): AgendaEntry => ({
   id: toNumber(row.id),
   kind: toText(row.kind) as AgendaEntryKind,
   day: toText(row.day),
   plan: toJson(row.plan, plans) ?? [],
   outcome: toTextOrNull(row.outcome) as AgendaOutcome | null,
   problem: toTextOrNull(row.problem) as AgendaProblem | null,
-  problemOther: toTextOrNull(row.problem_other),
+  problemOther: fields.openOrNull(row.problem_other),
   solution: toTextOrNull(row.solution) as AgendaSolution | null,
-  solutionOther: toTextOrNull(row.solution_other),
+  solutionOther: fields.openOrNull(row.solution_other),
   progress: toNumberOrNull(row.progress),
-  note: toTextOrNull(row.note),
+  note: fields.openOrNull(row.note),
   updatedAt: toText(row.updated_at),
 })
 
@@ -107,7 +108,15 @@ function byGoal<T>(rows: readonly Row[], map: (row: Row) => T): Map<number, T[]>
   return grouped
 }
 
-export function createAgendaRepository(db: Db) {
+/**
+ * @param fields Lo que cada cual escribe a mano en su agenda (notas, el «Otro»
+ *   de un atasco o de una salida, sus checkpoints) va cifrado (`docs/cifrado.md`).
+ */
+export function createAgendaRepository(db: Db, fields: FieldCipher) {
+  const goalOf = (row: Row): GoalRow => goalFrom(row, fields)
+  const checkpointOf = (row: Row): AgendaCheckpoint => checkpointFrom(row, fields)
+  const entryOf = (row: Row): AgendaEntry => entryFrom(row, fields)
+
   return {
     /** Las metas de una persona: activas, o cerradas desde `closedSince`. */
     async goalsOf(login: string, closedSince: string): Promise<GoalRow[]> {
@@ -180,7 +189,7 @@ export function createAgendaRepository(db: Db) {
           goal.targetDay,
           goal.targetTime,
           goal.progress,
-          goal.note,
+          fields.sealOrNull(goal.note),
           at,
           at,
         ],
@@ -215,7 +224,7 @@ export function createAgendaRepository(db: Db) {
           change.targetDay,
           change.targetTime,
           change.progress,
-          change.note,
+          fields.sealOrNull(change.note),
           change.status,
           change.closedAt,
           at,
@@ -273,7 +282,7 @@ export function createAgendaRepository(db: Db) {
         sql: `INSERT INTO scrum_checkpoints (goal_id, login, key, text, position)
               VALUES (?, ?, ?, ?,
                 (SELECT COALESCE(MAX(position), -1) + 1 FROM scrum_checkpoints WHERE goal_id = ?))`,
-        args: [goalId, login, checkpoint.key, checkpoint.text, goalId],
+        args: [goalId, login, checkpoint.key, fields.sealOrNull(checkpoint.text), goalId],
       })
     },
 
@@ -320,11 +329,11 @@ export function createAgendaRepository(db: Db) {
           JSON.stringify(entry.plan),
           entry.outcome,
           entry.problem,
-          entry.problemOther,
+          fields.sealOrNull(entry.problemOther),
           entry.solution,
-          entry.solutionOther,
+          fields.sealOrNull(entry.solutionOther),
           entry.progress,
-          entry.note,
+          fields.sealOrNull(entry.note),
           at,
           at,
         ],

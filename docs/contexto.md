@@ -509,6 +509,10 @@ conviene agotar la sesión en otras tareas si él avisa de que va justa.
 
 Estado a 2026-10-23, tras el hallazgo M6/M7 de `revision-2026-10/seguridad-api.md`.
 
+- **Cifrado (2026-11-14, ticket #113)**. Lo privado escrito por personas va
+  cifrado por columnas con `DATA_KEY` y las copias que salen del servidor,
+  enteras con gpg: inventario, decisiones y pasos de despliegue en `cifrado.md`.
+
 - **Qué se guarda y por qué**. Dos bloques, que la descarga (`GET /me/export`)
   etiqueta con `source`: la **réplica de 42** (`users`, `project_users`,
   `corrections`, `presence`, `exam_attempts`…), que es lo que 42 ya publica al

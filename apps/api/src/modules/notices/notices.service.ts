@@ -15,6 +15,7 @@ import type { Notice, NoticeKind, Notices } from '@sanatorio/contracts'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import type { FieldCipher } from '../../core/crypto/fields.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import type { NoticeEvent } from '../../core/events.js'
@@ -24,6 +25,11 @@ import { isoAt } from '../../core/time.js'
 
 export type NoticesServiceOptions = {
   db: Db
+  /**
+   * El trozo de texto de un aviso es a veces el de un mensaje privado: va
+   * cifrado como él (`docs/cifrado.md`).
+   */
+  fields: FieldCipher
   now?: () => number
 }
 
@@ -48,7 +54,7 @@ const removeSchema = z.union([
 const saveSchema = z.object({ id: z.number().int().positive(), saved: z.boolean() })
 
 export function createNoticesService(options: NoticesServiceOptions) {
-  const { db } = options
+  const { db, fields } = options
   const now = options.now ?? Date.now
   const iso = (at = now()): string => isoAt(at)
 
@@ -74,7 +80,7 @@ export function createNoticesService(options: NoticesServiceOptions) {
       const text =
         notice.text === undefined || notice.text === null || notice.text.trim() === ''
           ? null
-          : notice.text.trim().slice(0, TEXT_MAX)
+          : fields.seal(notice.text.trim().slice(0, TEXT_MAX))
       const from = notice.from ?? null
 
       for (const login of new Set(notice.to)) {
@@ -111,7 +117,7 @@ export function createNoticesService(options: NoticesServiceOptions) {
           kind: toText(row.kind) as NoticeKind,
           ref: toText(row.ref),
           from: typeof row.from_login === 'string' ? row.from_login : null,
-          text: typeof row.text === 'string' ? row.text : null,
+          text: fields.openOrNull(row.text),
           count: toNumber(row.count),
           at: toText(row.updated_at),
           read: row.read_at !== null,

@@ -14,18 +14,12 @@
  *   vale otra vez.
  */
 
-import {
-  createCipheriv,
-  createDecipheriv,
-  createHash,
-  createHmac,
-  randomBytes,
-  timingSafeEqual,
-} from 'node:crypto'
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto'
 
 import type { SecondFactorStatus } from '@sanatorio/contracts'
 import { z } from 'zod'
 
+import { gcmOpen, gcmSeal } from '../../core/crypto/fields.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
@@ -62,12 +56,14 @@ export function createSecondFactor(options: SecondFactorOptions) {
   const key = createHash('sha256').update(`sanatorio-second-factor:${options.secret}`).digest()
   const failures = createRateLimit({ max: MAX_FAILURES, windowMs: FAILURE_WINDOW_MS, now })
 
+  // El mismo AES-256-GCM que el cifrado de campos (`core/crypto/fields.ts`),
+  // con su propio formato (`iv.etiqueta.datos`) y su clave, sacada de
+  // `SESSION_SECRET`. Ya estaba así antes de `DATA_KEY`, y esa clave tampoco
+  // está en la base ni en las copias: pasarlo al otro formato no protegería más.
   function seal(plain: Uint8Array): string {
-    const iv = randomBytes(12)
-    const cipher = createCipheriv('aes-256-gcm', key, iv)
-    const body = Buffer.concat([cipher.update(plain), cipher.final()])
+    const { iv, body, tag } = gcmSeal(key, plain)
 
-    return [iv, cipher.getAuthTag(), body].map(base64url).join('.')
+    return [iv, tag, body].map(base64url).join('.')
   }
 
   function open(sealed: string): Uint8Array | null {
@@ -76,11 +72,7 @@ export function createSecondFactor(options: SecondFactorOptions) {
     if (iv === undefined || tag === undefined || body === undefined) return null
 
     try {
-      const decipher = createDecipheriv('aes-256-gcm', key, iv)
-
-      decipher.setAuthTag(tag)
-
-      return new Uint8Array(Buffer.concat([decipher.update(body), decipher.final()]))
+      return new Uint8Array(gcmOpen(key, { iv, body, tag }))
     } catch {
       return null
     }

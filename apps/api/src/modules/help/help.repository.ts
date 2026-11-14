@@ -7,6 +7,7 @@
 
 import type { BookingStatus } from '@sanatorio/contracts'
 
+import type { FieldCipher } from '../../core/crypto/fields.js'
 import type { Db } from '../../core/db/database.js'
 import { nowIso } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
@@ -47,7 +48,7 @@ const nullableText = (value: unknown): string | null => (typeof value === 'strin
 const nullableNumber = (value: unknown): number | null =>
   value === null || value === undefined ? null : toNumber(value)
 
-function toBooking(row: Record<string, unknown>): BookingRow {
+function bookingOf(row: Record<string, unknown>, fields: FieldCipher): BookingRow {
   return {
     id: toNumber(row.id),
     campusId: toNumber(row.campus_id),
@@ -57,7 +58,7 @@ function toBooking(row: Record<string, unknown>): BookingRow {
     day: toText(row.day),
     start: toNumber(row.start_min),
     minutes: toNumber(row.minutes),
-    note: nullableText(row.note),
+    note: fields.openOrNull(row.note),
     status: toText(row.status) as BookingStatus,
     verified: toNumber(row.verified) === 1,
     helperTag: nullableText(row.helper_tag),
@@ -84,7 +85,13 @@ function toDay(row: Record<string, unknown>): DayRow {
   }
 }
 
-export function createHelpRepository(db: Db) {
+/**
+ * @param fields La nota de una reserva es un mensaje de quien pide a quien
+ *   ayuda: va cifrada (`docs/cifrado.md`).
+ */
+export function createHelpRepository(db: Db, fields: FieldCipher) {
+  const toBooking = (row: Record<string, unknown>): BookingRow => bookingOf(row, fields)
+
   async function bookings(where: string, args: (string | number)[]): Promise<BookingRow[]> {
     const result = await db.execute({
       sql: `SELECT * FROM help_bookings WHERE ${where} ORDER BY day, start_min, id`,
@@ -206,7 +213,7 @@ export function createHelpRepository(db: Db) {
           booking.day,
           booking.start,
           booking.minutes,
-          booking.note,
+          fields.sealOrNull(booking.note),
           nowIso(),
         ],
       })

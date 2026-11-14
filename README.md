@@ -113,6 +113,7 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-14 | Datos · Copias          | Lo privado que escribe la gente (mensajes, avisos, incidencias, sugerencias, denuncias, notas y motivos de moderación) se guarda cifrado en la base con AES-256-GCM y una clave (`DATA_KEY`) que no está ni en la base ni en sus copias; lo de antes se cifra solo al arrancar. Las copias que salen del servidor van cifradas enteras con gpg (la privada, solo en el ordenador de Alberto). Texto legal al día (versión 2026-11-14) ([docs/cifrado.md](docs/cifrado.md), ticket #113) |
 | 2026-11-14 | Not-games · Cursos      | Preguntas de los cursos de NetPractice (14 conceptos, 32 formas: máscaras, red y broadcast, puerta de enlace, rutas, vuelta, ruta más concreta, salida a internet, bucles, resúmenes y VLSM) y de RAG (15 conceptos, 33 formas: contexto, qué se indexa, troceado, normalizar, IDF, k1, léxica frente a semántica, RRF, presupuesto del prompt, «no lo sé», recall@k y MRR, validación, caché, API y diagnóstico por etapas), en los tres idiomas y con su Repaso; cada respuesta comprobada en el motor del curso. El banco pasa de 481 a 510 conceptos ([docs/preguntas.md](docs/preguntas.md)) |
 | 2026-11-13 | Demostraciones animadas | Siete demostraciones nuevas para lo que no tenía explicación: Pomodoro, su Startup, Abandono, Avance de la piscina (sustituyen a sus párrafos; en Abandono queda debajo la regla del fin de semana), la ventanita de Cuentas atrás (icono pequeño en su cabecera), el Panel de gestión y Code Clicker. Ya son 32 ([docs/demos.md](docs/demos.md)) |
 | 2026-11-13 | Demostraciones animadas | Las marcas de tiempo coinciden con lo que se explica: cada frase se queda el tiempo que se tarda en leerla (en cada idioma) y el ratón espera antes de la acción siguiente; los guiones se ordenan solos ([docs/demos.md](docs/demos.md)) |
@@ -473,6 +474,11 @@ sesión y presupuesto de peticiones por persona para lo que sí; respuestas con
 `no-store`; secretos fuera de git. La sección y la persona van en el hash
 (`#/expediente/jdoe`), que no llega al servidor ni a otras webs.
 
+Lo privado que escribe la gente va cifrado en la base, columna a columna
+(AES-256-GCM, con `DATA_KEY` fuera de la base y de las copias), y las copias que
+salen del servidor van cifradas enteras: inventario, rotación de la clave y qué
+pasa si se pierde, en [docs/cifrado.md](docs/cifrado.md).
+
 ## Despliegue
 
 Una máquina de Oracle Cloud (ARM A1, 4 OCPU, 24 GB de memoria y 200 GB de
@@ -510,6 +516,7 @@ app de 42, copias, mantenimiento): [docs/deploy-oracle.md](docs/deploy-oracle.md
 Copias: `infra/scripts/backup.sh` cada noche y antes de cada despliegue
 (`VACUUM INTO`, comprobada, 14 guardadas), `restore.sh` y `pull-backups.sh`
 para bajarlas a otro ordenador.
+Lo que sale de la máquina va cifrado entero con gpg ([docs/cifrado.md](docs/cifrado.md#copias)).
 
 ## Coste cero garantizado
 
@@ -651,6 +658,7 @@ moderar desde la propia denuncia y aplicación instalable (PWA).
 **Operación y calidad**
 
 - [docs/deploy-oracle.md](docs/deploy-oracle.md): despliegue, copias, límites y mantenimiento de la máquina.
+- [docs/cifrado.md](docs/cifrado.md): qué datos van cifrados y por qué, la clave (rotarla, perderla) y las copias cifradas.
 - [docs/consumo-api.md](docs/consumo-api.md): consumo de la API de 42.
 - [docs/rendimiento.md](docs/rendimiento.md): cada mejora con su antes, su después y cómo se midió.
 - [docs/tests.md](docs/tests.md): qué cubre cada test y cómo se protege producción.
