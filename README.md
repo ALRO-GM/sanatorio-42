@@ -41,8 +41,8 @@ Es un proyecto personal de [Alberto](https://github.com/ALRO-GM) (`albrodri` en
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Qué es**      | Aplicación web completa: API, web, base de datos y despliegue                                                                                        |
 | **Tecnología**  | TypeScript de punta a punta · Node 22 y Fastify 5 · React 19 y Vite · SQLite (libSQL) · Docker y Caddy                                               |
-| **Tamaño**      | 40 módulos de API con 278 rutas, 93 migraciones, 10 paquetes compartidos; 4 categorías con 22 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
-| **Calidad**     | 7 772 tests en 287 ficheros (6 745 de la API y 1 027 de la web, con 78 ficheros de pantallas; medido el 2026-11-13), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
+| **Tamaño**      | 40 módulos de API con 279 rutas, 94 migraciones, 10 paquetes compartidos; 4 categorías con 22 secciones, 3 modos de interfaz, 7 estilos y 5 idiomas    |
+| **Calidad**     | 8 532 tests en 304 ficheros (7 202 de la API y 1 330 de la web, con 83 ficheros de pantallas; medido el 2026-11-14), cobertura mínima que solo sube, sin código muerto ni duplicado, y un despliegue que no sale sin la CI en verde |
 | **Seguridad**   | Revisión completa documentada: permisos con doble cerradura, segundo factor en el panel, topes de intentos y un test que recorre todas las rutas con entradas imposibles |
 | **Datos**       | Réplica propia de 5 campus de 42 (Madrid, Málaga, Urduliz, Barcelona y París) copiada con 1 200 peticiones por hora                                   |
 | **Coste**       | 0 € al mes. La web y la máquina se cortan solas antes de pasar de la capa gratuita                                                                   |
@@ -312,7 +312,7 @@ seguridad. La base es un fichero de SQLite. Un bucle de fondo copia el campus de
 ```mermaid
 flowchart LR
   P["Navegador<br/>React 19"] -->|HTTPS| C["Caddy<br/>TLS, CSP, HSTS"]
-  C --> A["Fastify<br/>39 módulos"]
+  C --> A["Fastify<br/>40 módulos"]
   A --> D[("SQLite en WAL<br/>datos propios y réplica")]
   S["Réplica y 17 trabajos<br/>en el mismo proceso"] --> D
   S -->|"cuota 1 200/h<br/>con tres escalones"| Q["API de 42"]
@@ -636,7 +636,7 @@ ejecuta las tareas tras compactar» basta para seguir.
 - La sesión dura 12 horas y no se puede revocar antes (bloquear sí corta).
 - Las franjas que cada quien abre en 42 para corregir no se ven: haría falta un
   permiso que la aplicación no pide.
-- Textos: 3 388 en las tablas, todos en español e inglés y 3 317 en catalán,
+- Textos: 4 992 en las tablas, todos en español e inglés y 4 921 en catalán,
   euskera y francés (lo que falta es sobre todo del panel). Los mensajes de error
   de la API solo están en español; fuera de él se enseña uno genérico.
 - No hay prueba de carga ni pruebas de extremo a extremo contra la API real.
