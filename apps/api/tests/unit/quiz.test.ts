@@ -8,17 +8,23 @@ import type { QuizRoom } from '@sanatorio/contracts'
 
 import { BANK_EN } from '../../src/modules/quiz/bank/en/index.js'
 import { REVIEW_EN } from '../../src/modules/quiz/bank/en/review.js'
+import { TOPICS_EN } from '../../src/modules/quiz/bank/en/topics.js'
 import { BANK_FR } from '../../src/modules/quiz/bank/fr/index.js'
 import { REVIEW_FR } from '../../src/modules/quiz/bank/fr/review.js'
+import { toText } from '../../src/core/db/rows.js'
 import type { Concept } from '../../src/modules/quiz/bank/types.js'
+import { BANK } from '../../src/modules/quiz/bank/index.js'
 import {
   fits,
+  KEPT_PROMPTS,
+  languageOf,
   languagesOf,
   levelOf,
   orderFor,
   pickConcepts,
   pointsFor,
   seeded,
+  withPrompt,
 } from '../../src/modules/quiz/quiz.rules.js'
 import { COUNTDOWN_MS, REVEAL_MS } from '../../src/modules/quiz/quiz.service.js'
 import { actor, expectCode, MADRID, useCommunity } from '../helpers/community.js'
@@ -120,6 +126,73 @@ describe('reglas de Not-games', () => {
     )
 
     expect(new Set([ana.join(), ...others]).size).toBeGreaterThan(1)
+  })
+
+  it('el Repaso guarda las preguntas tal como salieron: la última primero, sin repetir y como mucho cinco', () => {
+    expect(withPrompt([], '¿Uno?')).toEqual(['¿Uno?'])
+    expect(withPrompt(['¿Uno?'], '¿Dos?')).toEqual(['¿Dos?', '¿Uno?'])
+    // Repetida, sube arriba sin duplicarse.
+    expect(withPrompt(['¿Dos?', '¿Uno?'], '¿Uno?')).toEqual(['¿Uno?', '¿Dos?'])
+    // Sin pregunta (otro juego que no la pasa), se queda como estaba.
+    expect(withPrompt(['¿Uno?'], null)).toEqual(['¿Uno?'])
+    expect(withPrompt([], '')).toEqual([])
+    const many = Array.from({ length: 40 }, (_, index) => `¿${String(index)}?`)
+
+    expect(withPrompt(many, '¿Nueva?')).toHaveLength(KEPT_PROMPTS)
+    expect(withPrompt(many, '¿Nueva?')[0]).toBe('¿Nueva?')
+  })
+
+  it('la temática deja solo las preguntas de ese lenguaje o herramienta (#110)', () => {
+    const all = { slugs: new Set(['42cursus-libft', 'python-module-00', 'cpp-module-00']) }
+    const pick = (language: 'any' | 'c' | 'cpp' | 'python' | 'shell' | 'git') =>
+      pickConcepts(
+        BANK,
+        [all],
+        {
+          pool: 'common',
+          kinds: 'mixed',
+          difficulty: 'rising',
+          language,
+          levels: new Map(),
+          count: 500,
+        },
+        seeded(7),
+      )
+
+    for (const language of ['c', 'cpp', 'python', 'shell', 'git'] as const) {
+      const chosen = pick(language)
+
+      expect(chosen.length, language).toBeGreaterThanOrEqual(3)
+      expect(chosen.every((each) => languageOf(each) === language)).toBe(true)
+    }
+    // Las de git y shell lo son aunque estén entre las generales o las de la piscina.
+    expect(pick('git').some((each) => each.id.startsWith('gen-'))).toBe(true)
+    expect(pick('any').length).toBeGreaterThan(pick('c').length)
+    // Sin temática (las salas de antes), de todo.
+    expect(
+      pickConcepts(
+        BANK,
+        [all],
+        { pool: 'common', kinds: 'mixed', difficulty: 'rising', levels: new Map(), count: 500 },
+        seeded(7),
+      ),
+    ).toHaveLength(pick('any').length)
+    // A quien solo ha hecho C no le sale Python aunque se pida: no hay ninguna.
+    expect(
+      pickConcepts(
+        BANK,
+        [{ slugs: new Set(['42cursus-libft']) }],
+        {
+          pool: 'common',
+          kinds: 'mixed',
+          difficulty: 'rising',
+          language: 'python',
+          levels: new Map(),
+          count: 10,
+        },
+        seeded(7),
+      ),
+    ).toEqual([])
   })
 
   it('acertar suma; fallar solo resta en la versión competitiva', () => {
@@ -541,6 +614,93 @@ describe('partidas de Not-games', () => {
     const stats = await db.execute('SELECT shown, wrong FROM quiz_stats')
 
     expect(stats.rows.map((row) => [Number(row.shown), Number(row.wrong)])).toEqual([[1, 1]])
+  })
+
+  it('lo que se deja sin contestar va al Repaso, con las preguntas tal como salieron en cada sala (#107, #108)', async () => {
+    const { quiz } = services
+    const promptOf = async (id: number, index: number): Promise<[string, string]> => {
+      const row = await db.execute({
+        sql: 'SELECT concept_id, prompt FROM quiz_rounds WHERE room_id = ? AND idx = ?',
+        args: [id, index],
+      })
+
+      return [toText(row.rows[0]?.concept_id), toText(row.rows[0]?.prompt)]
+    }
+
+    // Primera sala: ana no contesta la primera pregunta.
+    const first = await quiz.create(actor('ana'), { mode: 'ffa', pool: 'general', questions: 5 })
+
+    await quiz.start(actor('ana'), first.id)
+    const room = await begin(first.id)
+    const [concept, prompt] = await promptOf(first.id, 0)
+
+    await nextQuestion(room)
+    let review = await quiz.review(actor('ana'))
+
+    expect(review).toEqual([
+      expect.objectContaining({ conceptId: concept, misses: 1, questions: [prompt] }),
+    ])
+    await quiz.leave(actor('ana'), first.id)
+
+    // Segunda sala: el mismo concepto, preguntado de otra forma, se falla otra vez.
+    await db.execute({
+      sql: `UPDATE quiz_misses SET prompts = ? WHERE login = 'ana'`,
+      args: [JSON.stringify(['¿Otra forma de preguntarlo?', prompt])],
+    })
+    const second = await quiz.create(actor('ana'), { mode: 'ffa', pool: 'general', questions: 5 })
+
+    await quiz.start(actor('ana'), second.id)
+    await db.execute({
+      sql: 'UPDATE quiz_rounds SET concept_id = ?, prompt = ? WHERE room_id = ? AND idx = 0',
+      args: [concept, prompt, second.id],
+    })
+    const playing = await begin(second.id)
+
+    await quiz.answer(actor('ana'), second.id, { question: 0, option: await wrongOf(playing) })
+    review = await quiz.review(actor('ana'))
+    expect(review.find((item) => item.conceptId === concept)).toMatchObject({
+      misses: 2,
+      questions: [prompt, '¿Otra forma de preguntarlo?'],
+    })
+
+    // Los fallos de antes de guardar las preguntas traen una del concepto; y el tema, traducido.
+    await db.execute(`UPDATE quiz_misses SET prompts = NULL WHERE login = 'ana'`)
+    const english = await quiz.review({ ...actor('ana'), lang: 'en' })
+    const item = english.find((each) => each.conceptId === concept)
+
+    expect(item?.questions).toHaveLength(1)
+    expect(item?.questions[0]?.length).toBeGreaterThan(5)
+    expect(item?.topic).toBe(TOPICS_EN[BANK.find((each) => each.id === concept)?.topic ?? ''])
+  })
+
+  it('la temática se elige al crear la sala y se valida (#110)', async () => {
+    const { quiz } = services
+    const room = await quiz.create(actor('ana'), {
+      mode: 'ffa',
+      pool: 'general',
+      language: 'git',
+      questions: 5,
+    })
+
+    expect(room.settings.language).toBe('git')
+    await quiz.start(actor('ana'), room.id)
+    const rounds = await db.execute({
+      sql: 'SELECT concept_id FROM quiz_rounds WHERE room_id = ?',
+      args: [room.id],
+    })
+    const ids = rounds.rows.map((row) => toText(row.concept_id))
+
+    expect(ids.length).toBeGreaterThanOrEqual(3)
+    expect(ids.every((id) => BANK.find((each) => each.id === id)?.topic === 'git')).toBe(true)
+    await quiz.leave(actor('ana'), room.id)
+
+    // Sin temática, de todo; una que no existe no vale.
+    expect((await quiz.create(actor('leo'), { mode: 'ffa' })).settings.language).toBe('any')
+    await expectCode(quiz.create(actor('eva'), { mode: 'ffa', language: 'rust' }), 'invalid_input')
+    await expectCode(
+      quiz.create(actor('eva'), { mode: 'ffa', language: 'x'.repeat(10_000) }),
+      'invalid_input',
+    )
   })
 
   it('borra las salas que nadie empezó en dos horas', async () => {

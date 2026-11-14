@@ -99,6 +99,7 @@ import { seatUsageSchema } from './0091-seat-usage.js'
 import { unlockAnnouncementsSchema } from './0090-unlock-announcements.js'
 import { netCourseSchema } from './0092-net-course.js'
 import { ragCourseSchema } from './0093-rag-course.js'
+import { quizMissPromptsSchema } from './0094-quiz-miss-prompts.js'
 import type { Migration } from './types.js'
 
 export const MIGRATIONS: readonly Migration[] = [
@@ -195,6 +196,7 @@ export const MIGRATIONS: readonly Migration[] = [
   seatUsageSchema,
   netCourseSchema,
   ragCourseSchema,
+  quizMissPromptsSchema,
 ]
 
 /** Versión más alta que existe en el código. */

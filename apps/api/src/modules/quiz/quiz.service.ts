@@ -27,8 +27,16 @@ import { createLocks } from '../../core/lock.js'
 import { parse } from '../../core/validation.js'
 import type { Concept, ReviewEntry } from './bank/types.js'
 import type { PlayerRow, QuizRepository, RoomRow, RoundRow } from './quiz.repository.js'
-import { localizeRound, localizeText, reviewIn } from './bank/localize.js'
-import { buildRound, levelOf, LIVES, orderFor, pickConcepts, pointsFor } from './quiz.rules.js'
+import { localizeRound, localizeText, localizeTopic, reviewIn } from './bank/localize.js'
+import {
+  buildRound,
+  languageSchema,
+  levelOf,
+  LIVES,
+  orderFor,
+  pickConcepts,
+  pointsFor,
+} from './quiz.rules.js'
 import { isoAt } from '../../core/time.js'
 import { roomAccess } from './room-access.js'
 import type { RoomAccess } from './room-access.js'
@@ -70,6 +78,7 @@ const settingsSchema = z
     pool: z.enum(['common', 'general']).default('common'),
     kinds: z.enum(['quick', 'long', 'mixed']).default('mixed'),
     difficulty: z.enum(['easy', 'medium', 'hard', 'rising']).default('rising'),
+    language: languageSchema,
     questions: z.number().int().min(5).max(60).default(10),
     minCircle: z.number().int().min(0).max(6).nullable().default(null),
   })
@@ -155,9 +164,11 @@ export function createQuizService(options: QuizServiceOptions) {
 
         if (!everyone && t < deadline) return room
 
-        // Se cierra: quien no contestó, en supervivencia, pierde una vida.
+        // Se cierra: quien no contestó, en supervivencia, pierde una vida; y
+        // a todos les va al Repaso como no acertada (#107), para que la estudien.
         for (const player of players) {
           if (answers.some((a) => a.login === player.login)) continue
+          await quiz.remember(player.login, round.conceptId, false, isoAt(t), round.prompt)
           if (room.settings.mode === 'survival') {
             const lives = Math.max(0, (player.lives ?? LIVES) - 1)
 
@@ -550,7 +561,7 @@ export function createQuizService(options: QuizServiceOptions) {
         if (concepts.length < MIN_QUESTIONS) {
           throw domainError(
             'conflict',
-            'No hay preguntas suficientes que os valgan a todos: probad solo con lo general',
+            'No hay preguntas suficientes que os valgan a todos: probad con otra temática o solo con lo general',
           )
         }
 
@@ -619,15 +630,18 @@ export function createQuizService(options: QuizServiceOptions) {
 
         // Solo la primera respuesta cuenta para el Repaso: repetir la petición
         // no suma fallos ni aciertos.
-        if (counted) await quiz.remember(actor.login, round.conceptId, correct, isoAt(t))
+        if (counted) {
+          await quiz.remember(actor.login, round.conceptId, correct, isoAt(t), round.prompt)
+        }
 
         return viewOf(actor, room)
       })
     },
 
     /**
-     * El Repaso de quien pregunta: lo que ha fallado, con qué es y un ejemplo.
-     * Primero lo que aún no ha acertado después, y lo más reciente antes.
+     * El Repaso de quien pregunta: lo que ha fallado o dejado sin contestar,
+     * con qué es, un ejemplo y las preguntas tal como le salieron, de todas
+     * las salas. Primero lo que aún no ha acertado después, y lo más reciente antes.
      */
     async review(actor: Actor): Promise<QuizReviewItem[]> {
       const concepts = new Map(bank.map((concept) => [concept.id, concept]))
@@ -641,12 +655,15 @@ export function createQuizService(options: QuizServiceOptions) {
         // Un concepto que ya no está en el banco no se puede repasar.
         if (concept === undefined || entry === undefined) continue
 
+        // Los fallos de antes de guardar las preguntas, con una de las del concepto.
+        const asked = miss.prompts.length > 0 ? miss.prompts : [concept.forms[0]?.ask[0] ?? '']
+
         items.push({
           conceptId: concept.id,
-          topic: concept.topic,
+          topic: localizeTopic(concept.topic, lang),
           ...entry,
           why: localizeText(concept.id, concept.why, lang),
-          question: localizeText(concept.id, concept.forms[0]?.ask[0] ?? '', lang),
+          questions: asked.map((prompt) => localizeText(concept.id, prompt, lang)),
           misses: miss.misses,
           lastMissedAt: miss.lastMissedAt,
           mastered: miss.lastRightAt !== null && miss.lastRightAt >= miss.lastMissedAt,

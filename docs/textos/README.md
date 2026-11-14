@@ -26,7 +26,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [gestion](gestion.md) | 750 | 0 | 71 | 71 | 71 |
 | [guardia](guardia.md) | 80 | 0 | 0 | 0 | 0 |
 | [legal](legal.md) | 86 | 0 | 0 | 0 | 0 |
-| [notgames](notgames.md) | 258 | 0 | 0 | 0 | 0 |
+| [notgames](notgames.md) | 269 | 0 | 0 | 0 | 0 |
 | [pizarras](pizarras.md) | 38 | 0 | 0 | 0 | 0 |
 | [red](red.md) | 228 | 0 | 0 | 0 | 0 |
 | [sala-de-espera](sala-de-espera.md) | 47 | 0 | 0 | 0 | 0 |

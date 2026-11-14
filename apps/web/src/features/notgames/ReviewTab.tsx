@@ -9,9 +9,10 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { CodeText } from '../../shared/ui/CodeText'
 
 /**
- * El Repaso: lo que has fallado en Not-games (preguntas y ajedrez), cada
- * concepto con qué es, un ejemplo y la pregunta tal como salió. Lo que
- * acertaste después queda aparte, como superado.
+ * El Repaso: lo que has fallado o dejado sin contestar en Not-games
+ * (preguntas y ajedrez, de todas las salas), cada concepto con qué es, un
+ * ejemplo y las preguntas tal como te salieron. Lo que acertaste después
+ * queda aparte, como superado.
  */
 export function ReviewTab() {
   const { t, lang } = useI18n()
@@ -81,9 +82,14 @@ function ReviewCard({ item }: { item: QuizReviewItem }) {
       <pre className="quiz-code">{item.example}</pre>
       <details>
         <summary>{t('notgames.review.question')}</summary>
-        <p className="hint">
-          <CodeText text={item.question} />
-        </p>
+        {/* Un concepto se pregunta de muchas formas: todas las que te salieron (#108). */}
+        <ul className="hint quiz-review-questions">
+          {item.questions.map((question) => (
+            <li key={question}>
+              <CodeText text={question} />
+            </li>
+          ))}
+        </ul>
         <p>
           <CodeText text={item.why} />
         </p>

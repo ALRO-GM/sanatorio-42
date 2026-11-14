@@ -15,7 +15,9 @@ import { BANK_EN } from '../../src/modules/quiz/bank/en/index.js'
 import { REVIEW_EN } from '../../src/modules/quiz/bank/en/review.js'
 import { BANK_FR } from '../../src/modules/quiz/bank/fr/index.js'
 import { REVIEW_FR } from '../../src/modules/quiz/bank/fr/review.js'
-import { localizeText, reviewIn } from '../../src/modules/quiz/bank/localize.js'
+import { localizeText, localizeTopic, reviewIn } from '../../src/modules/quiz/bank/localize.js'
+import { TOPICS_EN } from '../../src/modules/quiz/bank/en/topics.js'
+import { TOPICS_FR } from '../../src/modules/quiz/bank/fr/topics.js'
 import type { ConceptText, ReviewEntry } from '../../src/modules/quiz/bank/types.js'
 import {
   buildRound,
@@ -76,6 +78,18 @@ const LANGS = [
 const questions = (text: string): number => (text.replace(/`[^`]*`/g, '').match(/\?/g) ?? []).length
 
 describe.each(LANGS)('banco de preguntas en %s', (lang, bank, review) => {
+  it('cada tema del banco (la etiqueta del Repaso) está traducido, y nada más (#90)', () => {
+    const table = { en: TOPICS_EN, fr: TOPICS_FR }[lang]
+    const topics = [...new Set(BANK.map((concept) => concept.topic))]
+
+    expect(topics.filter((topic) => table[topic] === undefined)).toEqual([])
+    expect(Object.keys(table).filter((topic) => !topics.includes(topic))).toEqual([])
+    expect(localizeTopic('memoria', lang)).toBe(table.memoria)
+    // En español, tal cual; y un tema que no está en la tabla, también.
+    expect(localizeTopic('memoria', 'es')).toBe('memoria')
+    expect(localizeTopic('no-existe', lang)).toBe('no-existe')
+  })
+
   it('está todo el banco, y nada más', () => {
     const ids = BANK.map((concept) => concept.id)
 

@@ -93,6 +93,8 @@ de datos.
 | Terapia y Pizarras | Todo | S | Son quedar |
 | Pestañas | Not-games, Curso de git, Curso de shell, Curso de Docker, Curso de Kubernetes, Curso de NetPractice y Curso de RAG (en Aprender) | N | Aprender jugando: no hace falta para pedir ni dar ayuda. En el simplificado, Aprender es solo el Pomodoro |
 | Not-games | Salas, crear sala, partida y marcador | N | La sección en sí |
+| Not-games | En la lista, «Entrar» en cualquier sala con sitio (de preguntas o de ajedrez) y, primero, las tuyas con «Estás dentro» | N | #109 (2026-11-14): no se sabía cómo entrar en una sala ya creada. No es un bloque nuevo: el botón de cada tarjeta |
+| Not-games | Temática al crear una sala (C, C++, Python, shell, git o de todo), junto a la dificultad, y en la línea de ajustes de la sala | N | #110 (2026-11-14): un campo más del formulario de crear, para las dos clases de sala; nada nuevo en la pantalla |
 | Curso de git | Camino, animación, teoría y terminal | N | Aprender jugando; desde el 2026-10-29, su propia pestaña de Aprender (antes, de Not-games) |
 | Curso de git | Pruebas de grupo (sala, misiones, origin común) | N | Va con el curso: después del test previo de cada prueba |
 | Curso de shell | Camino por niveles, unidad (teoría, ejemplo, prueba), jefes contrarreloj | N | Como el curso de git: su propia pestaña de Aprender |
@@ -102,8 +104,8 @@ de datos.
 | Curso de RAG | Camino por niveles con la tubería y la guía de construcción arriba, unidad (teoría, ejemplo, prueba en un banco de pruebas) y jefes contrarreloj | N | Pedido el 2026-11-13: sección propia de Aprender, junto a los demás cursos (no un bloque: es un curso entero) y en el mismo modo que ellos. Importancia media: es para aprender, no hace falta para pedir ni dar ayuda. No sugiere ningún curso antes |
 | Perfil | Certificados de los cursos de shell, de Docker, de Kubernetes, de NetPractice y de RAG (jefes finales superados), en la tarjeta del perfil | S | Lo ganado se enseña donde está el resto de lo tuyo; si no hay ninguno, no ocupa nada |
 | Toda la web | Aviso para quien entra desde un campus que aún no se copia (#92) | S | Se ve una vez, arriba, y se cierra: explica por qué ve datos de otro campus |
-| Not-games | Repaso: lo fallado con definición y ejemplo | N | Para estudiar después de jugar |
-| Not-games | Ajedrez: tablero, relojes, pregunta encima del tablero, estilos de tablero, sonido | N | Un juego más de la sección |
+| Not-games | Repaso: lo fallado o sin contestar, con definición, ejemplo y las preguntas tal como te salieron en todas las salas | N | Para estudiar después de jugar (#107, #108, 2026-11-14) |
+| Not-games | Ajedrez: tablero, relojes, pregunta encima del tablero, estilos de tablero, sonido; en la sala de espera, sin colores (se sortean al empezar, #95) | N | Un juego más de la sección |
 | Aprender y menú de la cuenta | Modo concentración (Pomodoro) | S | Para todos: concentrarse no es «de datos» |
 | Pomodoro | Pantalla completa con «en concentración · no molestar» y la pregunta al acabar (motivos, diez segundos, seguir con felicitación) | S | Es el propio Pomodoro: ayuda a no rendirse a la primera (#80) |
 | Pomodoro | «Tus estadísticas» (pestaña de su ventana): periodo, días, horas, paradas y motivos, y la media del tramo elegido de quienes lo usan | N | Son cifras: el simplificado no las enseña (#80) |
@@ -180,7 +182,7 @@ Revisado el 2026-10-17 sobre la demostración, en escritorio y móvil; mejoras h
 | Red | 3 | 3 | 3 | Grafo rápido, ficha de cada persona, flechas por sentido | — (2026-10-22: en móvil el grafo va antes que los filtros; 2026-10-24: la escala de la endogamia, de 0 a 100, junto al total y la lista; 2026-10-26: «Personas, como mucho» llega a 1 500, sin «sin límite», y bajo el grafo se dice que se ven las más activas, también en Asientos) |
 | Clústeres | 4 | 4 | 4 | Plano fiel, leyenda, resaltar a tu círculo o proyecto | — (el clic central tiene su aviso bajo el plano y la ficha del puesto enlaza al expediente) |
 | Exámenes | 4 | 4 | 4 | Aviso «en vivo» en la pestaña; notas al momento; demostración | — (2026-10-22: el detalle por intento, solo en el modo de datos; cada examen en vivo va con su nombre; cuentas atrás, botón de refrescar y estado de cada cual, en el mismo bloque) |
-| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Preguntas solo en español (2026-10-22: creando una sala, las abiertas se ven al lado) |
+| Not-games | 4 | 4 | 4 | Modos explicados al elegir; cuenta atrás con la hora del servidor; el porqué de cada respuesta | Los motivos para no poder entrar, solo en español (fuera, uno genérico) (2026-10-22: creando una sala, las abiertas se ven al lado; 2026-11-14: «Entrar» en cada sala con sitio, temática y Repaso con las preguntas tal como salieron, también las sin contestar) |
 | Buzón | 5 | 4 | 4 | Número rojo en la cabecera; avisos llevan a su sitio | — (2026-10-22: la pestaña de conversaciones lleva su número de sin leer) |
 | Personalizar | 4 | 5 | 4 | Un estudio: la web en pequeño que se ordena arrastrando, y el estilo, el orden y los ajustes al lado (2026-10-25) | Probar con gente si se descubre el asa sin la línea de ayuda |
 | Agenda | 4 | 4 | 4 | Todo se elige de listas; los checkpoints de fábrica salen del tipo de proyecto; el sprint se ve enmarcado (2026-10-25, recién hecha) | Probarla con gente: ¿faltan atascos o checkpoints en las listas? |

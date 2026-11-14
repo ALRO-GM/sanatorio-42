@@ -5,7 +5,9 @@
  * modo.
  */
 
-import type { QuizDifficulty, QuizKinds, QuizPool } from '@sanatorio/contracts'
+import type { QuizDifficulty, QuizKinds, QuizLanguage, QuizPool } from '@sanatorio/contracts'
+
+import { z } from 'zod'
 
 import type { Concept, ConceptKind } from './bank/types.js'
 
@@ -46,6 +48,21 @@ export function languagesOf(slugs: ReadonlySet<string>): Set<'c' | 'python' | 'c
 /** `true` si el concepto no pide nada: sale a cualquiera. */
 const isGeneral = (concept: Concept): boolean =>
   concept.needs.projects === undefined && concept.needs.lang === undefined
+
+/**
+ * De qué lenguaje o herramienta es un concepto, para la temática de una sala
+ * (#110). Lo que va de git o de shell lo es esté en el fichero que esté (las
+ * preguntas generales y la piscina también tienen); lo demás, el de su fichero.
+ */
+export function languageOf(concept: Concept): Exclude<QuizLanguage, 'any'> | null {
+  if (concept.topic === 'git') return 'git'
+  if (concept.topic === 'shell') return 'shell'
+
+  return concept.language ?? null
+}
+
+/** La temática que llega al crear una sala (de preguntas o de ajedrez). */
+export const languageSchema = z.enum(['any', 'c', 'cpp', 'python', 'shell', 'git']).default('any')
 
 /** `true` si a esa persona le puede salir ese concepto. */
 export function fits(concept: Concept, learner: Learner): boolean {
@@ -189,6 +206,8 @@ type PoolOptions = {
   pool: QuizPool
   kinds: QuizKinds
   difficulty: QuizDifficulty
+  /** Temática: solo ese lenguaje o herramienta. Sin ella, de todo. */
+  language?: QuizLanguage | undefined
   /** La dificultad de ahora de cada concepto (`levelOf`). */
   levels: ReadonlyMap<string, number>
   count: number
@@ -203,7 +222,7 @@ const LEVELS: Record<Exclude<QuizDifficulty, 'rising'>, readonly number[]> = {
 
 /**
  * Los conceptos de una partida: los que les pueden salir a **todos** los que
- * juegan (o solo los generales), del tipo y la dificultad elegidos, sin
+ * juegan (o solo los generales), del tipo, la temática y la dificultad elegidos, sin
  * repetir mientras haya. Si la dificultad deja muy pocos, se completa con los
  * más cercanos. En `rising`, ordenados de fáciles a difíciles.
  */
@@ -218,6 +237,9 @@ export function pickConcepts(
     (concept) =>
       (options.pool === 'general' ? isGeneral(concept) : true) &&
       (options.kinds === 'mixed' || concept.kind === options.kinds) &&
+      (options.language === undefined ||
+        options.language === 'any' ||
+        languageOf(concept) === options.language) &&
       learners.every((learner) => fits(concept, learner)),
   )
   const range = options.difficulty === 'rising' ? null : LEVELS[options.difficulty]
@@ -232,6 +254,19 @@ export function pickConcepts(
   const chosen = [...shuffled(wanted, random), ...rest].slice(0, options.count)
 
   return options.difficulty === 'rising' ? chosen.sort((a, b) => level(a) - level(b)) : chosen
+}
+
+/** Preguntas distintas que se guardan de cada concepto fallado, para el Repaso. */
+export const KEPT_PROMPTS = 5
+
+/**
+ * Las preguntas de un concepto fallado tras fallar otra vez con `prompt`: la
+ * última primero, sin repetir y solo las `KEPT_PROMPTS` más recientes.
+ */
+export function withPrompt(previous: readonly string[], prompt: string | null): string[] {
+  const all = prompt === null || prompt === '' ? previous : [prompt, ...previous]
+
+  return [...new Set(all)].slice(0, KEPT_PROMPTS)
 }
 
 /**

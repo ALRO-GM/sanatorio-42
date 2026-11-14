@@ -4,6 +4,7 @@ import type { SyntheticEvent } from 'react'
 import type {
   QuizDifficulty,
   QuizKinds,
+  QuizLanguage,
   QuizLobby,
   QuizMode,
   QuizPool,
@@ -27,13 +28,14 @@ import { RoomView } from './RoomView'
 import { ChessTour } from './ChessTour'
 import { ReviewTab } from './ReviewTab'
 import { TurnRoomView } from './TurnRoomView'
-import { settingsText } from './settings-text'
+import { settingsText, turnSettingsText } from './settings-text'
 import { usePoolAllows } from '../../shared/pool'
 
 const MODES: readonly QuizMode[] = ['duel', 'teams', 'ffa', 'survival']
 const KINDS: readonly QuizKinds[] = ['mixed', 'quick', 'long']
 const DIFFICULTIES: readonly QuizDifficulty[] = ['rising', 'easy', 'medium', 'hard']
 const POOLS: readonly QuizPool[] = ['common', 'general']
+const LANGUAGES: readonly QuizLanguage[] = ['any', 'c', 'cpp', 'python', 'shell', 'git']
 const GAMES = ['quiz', 'chess'] as const
 const MINUTES: readonly TurnSettings['minutes'][] = [3, 5, 10, 15]
 
@@ -109,10 +111,11 @@ function Rooms() {
   const rooms = useAsync(async () => {
     const [quiz, turns] = await Promise.all([api.getQuizRooms(), api.getTurnRooms()])
 
+    // Primero aquellas en las que ya estás: es adonde se vuelve.
     return [
       ...quiz.map((lobby) => ({ kind: 'quiz' as const, lobby })),
       ...turns.map((lobby) => ({ kind: 'turn' as const, lobby })),
-    ]
+    ].sort((a, b) => Number(b.lobby.joined) - Number(a.lobby.joined))
   }, [])
   const [creating, setCreating] = useState(false)
   const { reload } = rooms
@@ -174,57 +177,79 @@ function RoomCard({ lobby }: { lobby: QuizLobby }) {
   const { t } = useI18n()
 
   return (
-    <li className="card quiz-room-card">
-      <span>
-        <strong>{t(`notgames.mode.${lobby.settings.mode}`)}</strong>
-        <small>{settingsText(t, lobby.settings)}</small>
-        <small>{t('notgames.hostAndPlayers', { host: lobby.host, n: lobby.players })}</small>
-      </span>
-      {/* Dentro se elige equipo: aquí solo se abre (antes decía «Entrar» y no entraba). */}
-      <a className="pill" href={notGamesHref(lobby.id)}>
-        {t('notgames.open')}
-      </a>
-    </li>
+    <LobbyCard
+      lobby={lobby}
+      title={t(`notgames.mode.${lobby.settings.mode}`)}
+      details={settingsText(t, lobby.settings)}
+      href={notGamesHref(lobby.id)}
+      // En equipos, sin decir equipo: la API te pone en el que tiene menos gente.
+      join={() => api.joinQuizRoom(lobby.id)}
+      full={lobby.settings.mode === 'duel' && lobby.players >= 2}
+    />
   )
 }
 
 function TurnCard({ lobby }: { lobby: TurnLobby }) {
   const { t } = useI18n()
-  const joining = useAction()
-  // Con plaza libre, «Entrar» te sienta en la sala de verdad: antes solo la
-  // abría, y quien la creó no veía llegar a nadie hasta que se pulsaba otra vez.
-  const canJoin = !lobby.joined && lobby.status === 'lobby' && lobby.players < 2
 
   return (
-    <li className="card quiz-room-card">
+    <LobbyCard
+      lobby={lobby}
+      title={t(`notgames.game.${lobby.settings.game}`)}
+      details={turnSettingsText(t, lobby.settings)}
+      href={turnGameHref(lobby.id)}
+      join={() => api.joinTurnRoom(lobby.id)}
+      full={lobby.players >= 2}
+    />
+  )
+}
+
+type LobbyCardProps = {
+  lobby: QuizLobby | TurnLobby
+  title: string
+  details: string
+  href: string
+  join: () => Promise<unknown>
+  full: boolean
+}
+
+/**
+ * Una sala de la lista. Si hay sitio, «Entrar» te sienta en ella y te lleva
+ * dentro, sea de preguntas o de ajedrez (#109: no se sabía cómo entrar en una
+ * ya creada; en las de preguntas solo se podía abrir). Si ya estás, o está
+ * llena o jugando, «Abrir» la enseña.
+ */
+function LobbyCard({ lobby, title, details, href, join, full }: LobbyCardProps) {
+  const { t } = useI18n()
+  const joining = useAction()
+  const canJoin = !lobby.joined && lobby.status === 'lobby' && !full
+
+  return (
+    <li className={`card quiz-room-card ${lobby.joined ? 'mine' : ''}`}>
       <span>
-        <strong>{t(`notgames.game.${lobby.settings.game}`)}</strong>
-        <small>
-          {t('notgames.minutesN', { n: lobby.settings.minutes })} ·{' '}
-          {t(`notgames.pool.${lobby.settings.pool}`)}
-          {lobby.settings.minCircle === null
-            ? ''
-            : ` · ${t('notgames.fromCircle', { n: lobby.settings.minCircle })}`}
-        </small>
+        <strong>
+          {title}
+          {lobby.joined && <span className="chip">{t('notgames.inside')}</span>}
+          {lobby.status === 'playing' && <span className="chip">{t('notgames.playing')}</span>}
+        </strong>
+        <small>{details}</small>
         <small>{t('notgames.hostAndPlayers', { host: lobby.host, n: lobby.players })}</small>
       </span>
       {canJoin ? (
         <button
           type="button"
-          className="pill"
+          className="primary small"
           disabled={joining.busy}
           onClick={() => {
-            void joining
-              .run(() => api.joinTurnRoom(lobby.id))
-              .then((joined) => {
-                if (joined) window.location.hash = turnGameHref(lobby.id)
-              })
+            void joining.run(join).then((joined) => {
+              if (joined) window.location.hash = href
+            })
           }}
         >
           {t('common.join')}
         </button>
       ) : (
-        <a className="pill" href={turnGameHref(lobby.id)}>
+        <a className="pill" href={href}>
           {t('notgames.open')}
         </a>
       )}
@@ -241,6 +266,7 @@ function CreateRoom({ onCancel }: { onCancel: () => void }) {
     pool: 'common',
     kinds: 'mixed',
     difficulty: 'rising',
+    language: 'any',
     questions: 10,
     minCircle: null,
   })
@@ -261,6 +287,7 @@ function CreateRoom({ onCancel }: { onCancel: () => void }) {
           minutes,
           pool: settings.pool,
           kinds: settings.kinds,
+          language: settings.language ?? 'any',
           minCircle: settings.minCircle,
         })
 
@@ -366,6 +393,21 @@ function CreateRoom({ onCancel }: { onCancel: () => void }) {
             {KINDS.map((kinds) => (
               <option key={kinds} value={kinds}>
                 {t(`notgames.kinds.${kinds}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          {t('notgames.language')}
+          <select
+            value={settings.language ?? 'any'}
+            onChange={(event) => {
+              change({ language: event.target.value as QuizLanguage })
+            }}
+          >
+            {LANGUAGES.map((language) => (
+              <option key={language} value={language}>
+                {t(`notgames.language.${language}`)}
               </option>
             ))}
           </select>

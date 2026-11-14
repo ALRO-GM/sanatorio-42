@@ -13,8 +13,10 @@
 import type { Lang } from '../../../core/actor.js'
 import { BANK_EN } from './en/index.js'
 import { REVIEW_EN } from './en/review.js'
+import { TOPICS_EN } from './en/topics.js'
 import { BANK_FR } from './fr/index.js'
 import { REVIEW_FR } from './fr/review.js'
+import { TOPICS_FR } from './fr/topics.js'
 import { BANK } from './index.js'
 import type { Concept, ConceptText, ReviewEntry } from './types.js'
 
@@ -127,4 +129,14 @@ export function reviewIn(
   const fallback = lang === 'es' ? undefined : REVIEW_EN[conceptId]
 
   return (lang === 'fr' ? REVIEW_FR[conceptId] : undefined) ?? fallback ?? spanish?.[conceptId]
+}
+
+const TOPICS: Record<Exclude<Lang, 'es'>, Readonly<Record<string, string>>> = {
+  en: TOPICS_EN,
+  fr: TOPICS_FR,
+}
+
+/** El tema de un concepto (`memoria`, `redes`…) en el idioma pedido; si falta, el español. */
+export function localizeTopic(topic: string, lang: Lang): string {
+  return lang === 'es' ? topic : (TOPICS[lang][topic] ?? topic)
 }

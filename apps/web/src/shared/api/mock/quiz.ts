@@ -132,7 +132,7 @@ const REVIEW_SAMPLES: QuizReviewItem[] = [
     example:
       'int *f(void) { int n = 42; return &n; } ← mal. Bien: int *p = malloc(sizeof(int)); *p = 42; return p;',
     why: 'n vive en la pila de f; al volver, esa memoria se reutiliza y el puntero ya no vale.',
-    question: '¿Qué falla en esta función?',
+    questions: ['¿Qué falla en esta función?', '¿Qué pasa al usar el puntero que devuelve f?'],
     misses: 2,
     lastMissedAt: new Date(Date.now() - 86_400_000).toISOString(),
     mastered: false,
@@ -145,13 +145,32 @@ const REVIEW_SAMPLES: QuizReviewItem[] = [
       'Entre tus ficheros y el commit está el índice (staging): git add elige qué cambios entran en el próximo commit. git status enseña qué está en cada sitio.',
     example: 'git add src/ft_split.c → solo ese fichero entra en el commit siguiente.',
     why: 'El índice es la lista de lo que entrará en el próximo commit.',
-    question: '¿Para qué sirve `git add fichero`?',
+    questions: ['¿Para qué sirve `git add fichero`?'],
     misses: 1,
     lastMissedAt: new Date(Date.now() - 3 * 86_400_000).toISOString(),
     mastered: true,
   },
 ]
 let nextId = 1
+
+/** Apunta en el Repaso una pregunta fallada o sin contestar (las de ejemplo traen su porqué como definición). */
+function remember(round: Sample): void {
+  const key = round.prompt
+  const before = missed.get(key)
+
+  missed.set(key, {
+    conceptId: key,
+    topic: 'Not-games',
+    title: round.prompt,
+    definition: round.why,
+    example: round.code ?? round.options[round.answer] ?? '',
+    why: round.why,
+    questions: [round.prompt],
+    misses: (before?.misses ?? 0) + 1,
+    lastMissedAt: new Date().toISOString(),
+    mastered: false,
+  })
+}
 
 const fresh = (login: string, team: QuizTeam | null): Player => ({
   login,
@@ -216,8 +235,12 @@ function advance(room: MockRoom): void {
       const everyone = active.every((p) => answers.some((a) => a.login === p.login))
 
       if (!everyone && t < round.endsAt + 1000) return
-      for (const p of active)
-        if (!answers.some((a) => a.login === p.login)) score(room, p.login, null)
+      for (const p of active) {
+        if (answers.some((a) => a.login === p.login)) continue
+        score(room, p.login, null)
+        // Como la API: lo que se deja sin contestar también va al Repaso.
+        if (p.login === ME.login) remember(round)
+      }
       room.phase = 'reveal'
       room.until = Math.min(t, round.endsAt + 1000) + REVEAL
       continue
@@ -476,24 +499,8 @@ export const quizMock: Pick<
 
       answers.push({ login: ME.login, option, correct })
       score(room, ME.login, correct)
-      // Como la API: lo fallado va al Repaso (las de ejemplo traen su porqué como definición).
-      if (!correct) {
-        const key = round.prompt
-        const before = missed.get(key)
-
-        missed.set(key, {
-          conceptId: key,
-          topic: 'Not-games',
-          title: round.prompt,
-          definition: round.why,
-          example: round.code ?? round.options[round.answer] ?? '',
-          why: round.why,
-          question: round.prompt,
-          misses: (before?.misses ?? 0) + 1,
-          lastMissedAt: new Date().toISOString(),
-          mastered: false,
-        })
-      }
+      // Como la API: lo fallado va al Repaso.
+      if (!correct) remember(round)
     }
 
     return view(room)
