@@ -3,8 +3,9 @@
 Pedido en el buzón (#113, 2026-11): «problemas legales con los mensajes:
 revisar cómo guardarlos cifrados, investigar qué exige la ley». Esto es el
 resultado de la revisión (2026-11-14). No es asesoría jurídica: es lo que dice
-el texto de las normas aplicado a lo que hace hoy el código. **No se ha
-cambiado nada**: las medidas de abajo esperan la decisión de Alberto.
+el texto de las normas aplicado a lo que hace hoy el código. Alberto decidió
+el mismo día cifrar lo privado: hechos los puntos 1 y 3 del plan (copias y
+campos de la base, [cifrado.md](cifrado.md)); el 2 (plazo) sigue sin decidir.
 
 ## Qué se guarda
 
@@ -70,7 +71,7 @@ los dos puntos flojos son las copias fuera del servidor y el plazo.
   sin cifrar). **Es el sitio por donde más fácil se escaparían los mensajes**:
   un portátil perdido con 30 copias de la base.
 
-## Plan propuesto (pendiente de decisión de Alberto)
+## Plan propuesto (1 y 3 hechos el 2026-11-14; el 2, sin decidir)
 
 De más barato y útil a menos:
 

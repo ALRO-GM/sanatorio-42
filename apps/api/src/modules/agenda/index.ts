@@ -9,6 +9,7 @@ import type { FastifyInstance } from 'fastify'
 import type { Db } from '../../core/db/database.js'
 import { idParam } from '../../core/http/params.js'
 import type { AppModule, RouteContext } from '../../core/module.js'
+import type { FieldCipher } from '../../core/crypto/fields.js'
 import { createAgendaRepository } from './agenda.repository.js'
 import { createAgendaService } from './agenda.service.js'
 import type { AgendaService, AgendaServiceOptions } from './agenda.service.js'
@@ -105,10 +106,10 @@ function registerAgendaRoutes(
 }
 
 export function createAgendaModule(
-  deps: Omit<AgendaServiceOptions, 'repository'> & { db: Db },
+  deps: Omit<AgendaServiceOptions, 'repository'> & { db: Db; fields: FieldCipher },
 ): AgendaModule {
-  const { db, ...rest } = deps
-  const service = createAgendaService({ ...rest, repository: createAgendaRepository(db) })
+  const { db, fields, ...rest } = deps
+  const service = createAgendaService({ ...rest, repository: createAgendaRepository(db, fields) })
 
   return {
     name: 'agenda',
@@ -116,6 +117,14 @@ export function createAgendaModule(
       { table: 'scrum_goals', logins: ['login'] },
       { table: 'scrum_checkpoints', logins: ['login'] },
       { table: 'scrum_entries', logins: ['login'] },
+    ],
+    // Lo escrito a mano (`docs/cifrado.md`); lo elegido de las listas, no.
+    sealed: [
+      { table: 'scrum_goals', column: 'note' },
+      { table: 'scrum_checkpoints', column: 'text' },
+      { table: 'scrum_entries', column: 'problem_other' },
+      { table: 'scrum_entries', column: 'solution_other' },
+      { table: 'scrum_entries', column: 'note' },
     ],
     service,
     routes: (app, context) => {

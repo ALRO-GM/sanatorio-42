@@ -55,6 +55,7 @@ git clone <url-del-repositorio> /opt/sanatorio
 cd /opt/sanatorio/infra
 cp .env.example .env && chmod 600 .env
 nano .env                      # dominio, credenciales de 42 y SESSION_SECRET
+                               # y DATA_KEY (openssl rand -base64 32; sin ella no arranca)
 docker compose up -d --build
 ```
 
@@ -223,6 +224,13 @@ el ordenador estaba apagado, la trae al encenderlo. Ver si va:
 `journalctl --user -u sanatorio-copias`. El bucket con rclone queda como
 alternativa, sin configurar.
 
+**Cifradas enteras (desde el 2026-11-14)**: con la clave pública de
+`infra/copias.asc`, `backup.sh` deja además una `.db.gz.gpg` (apuntada en
+`infra/backups/ultima-cifrada`) y `pull-backups.sh` se trae esa; si el servidor
+aún no la hace, cifra al llegar, y también las que ya había. La privada solo la
+tiene Alberto. Cómo crear las claves, abrir una copia y por qué la del servidor
+no va cifrada entera: [cifrado.md](cifrado.md#copias).
+
 Lo que importa de la copia es lo propio (guardias, XP, grupos, dudas,
 pizarras). La réplica de 42 se puede volver a bajar.
 
@@ -237,6 +245,8 @@ pizarras). La réplica de 42 se puede volver a bajar.
 | Cambiar una variable          | editar `.env` y `docker compose up -d`                |
 
 Si se cambia `SESSION_SECRET`, todas las sesiones abiertas dejan de valer.
+`DATA_KEY` no se cambia sin más: lo privado de la base va cifrado con ella;
+para rotarla, y qué pasa si se pierde, [cifrado.md](cifrado.md).
 
 ## Otras webs en la misma máquina
 

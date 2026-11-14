@@ -16,6 +16,7 @@ import type {
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import type { FieldCipher } from '../../core/crypto/fields.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
@@ -57,6 +58,8 @@ const markSchema = z.object({
 
 type ConversationsOptions = {
   db: Db
+  /** El texto de los mensajes va cifrado: el último de cada conversación se abre aquí. */
+  fields: FieldCipher
   replica: ReplicaRepository
   boards: BoardsService
   therapy: TherapyService
@@ -91,7 +94,7 @@ export function peerOf(id: string, me: string): string | null {
 }
 
 export function createConversations(options: ConversationsOptions) {
-  const { db, replica, boards, therapy, help, notify, now } = options
+  const { db, fields, replica, boards, therapy, help, notify, now } = options
   const iso = (at = now()): string => isoAt(at)
   const marks = (count: number): string => Array.from({ length: count }, () => '?').join(', ')
 
@@ -263,7 +266,7 @@ export function createConversations(options: ConversationsOptions) {
           const projectId =
             mark?.project_id === null || mark === undefined ? null : toNumber(mark.project_id)
           const project = projectId === null ? undefined : projects.get(projectId)
-          const body = typeof last?.body === 'string' ? last.body : null
+          const body = fields.openOrNull(last?.body)
 
           return {
             id,

@@ -82,6 +82,11 @@ cambia también la skill que la repite.
   esperar usa `quota.defer`, que le da turno en la cola si no hay cuota.
 - API: un cambio de esquema es una migración nueva en
   `src/core/db/migrations/`; las existentes no se editan.
+- API: el texto privado que escribe una persona (mensajes, notas, lo que manda
+  al buzón) se guarda cifrado con `fields` (`core/crypto/fields.ts`) y su
+  columna va en `sealed` del módulo; el inventario y el porqué de cada columna,
+  en `docs/cifrado.md` (un test fija la lista). Sin `DATA_KEY`, producción no
+  arranca: no lo hagas opcional.
 - Web: **los textos solo viven en las tablas** de `shared/i18n/textos/*.csv`
   (una por tema; clave, contexto, español, inglés, catalán, euskera y francés). Los
   componentes no llevan texto escrito: usan `t('clave')`. Cada texto nuevo o

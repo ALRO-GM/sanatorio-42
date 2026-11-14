@@ -14,6 +14,8 @@ import { createEventBus } from '../core/events.js'
 import type { FortyTwoSecretStatus, LimitLevel } from '@sanatorio/contracts'
 
 import type { EventBus, Notify } from '../core/events.js'
+import { devFieldCipher } from '../core/crypto/fields.js'
+import type { FieldCipher } from '../core/crypto/fields.js'
 import type { AppModule } from '../core/module.js'
 import type { FortyTwoClient } from '../integrations/forty-two/client.js'
 import { createAdminModule } from '../modules/admin/index.js'
@@ -114,6 +116,11 @@ type CompositionConfig = {
   photos?: PhotoStore
   /** Secreto del servidor (`SESSION_SECRET`): firma la cookie del panel y cifra el segundo factor. */
   secret?: string
+  /**
+   * Cifrado de los campos privados (`DATA_KEY`, `docs/cifrado.md`). Sin él, el
+   * de desarrollo: lo usan los tests y los comandos de `cli/` en local.
+   */
+  fields?: FieldCipher
   /** Webhook de Slack del staff (`SLACK_WEBHOOK_URL`) para los avisos del edificio. */
   slack?: SlackPoster | null
   /** Commit desplegado (`GIT_SHA`), o vacío en local. */
@@ -197,6 +204,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const events = createEventBus()
   const clock = config.now === undefined ? {} : { now: config.now }
   const now = config.now ?? Date.now
+  const fields = config.fields ?? devFieldCipher
   // Lo que se monta después y otros preguntan antes: se conecta con
   // `late.wire()` al final. Nadie lo usa mientras se construye.
   const late = createLate<{
@@ -306,6 +314,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const broadcasts = createBroadcastsModule({ db, ...clock })
   const notices = createNoticesModule({
     db,
+    fields,
     events,
     quota: replica.quota,
     onPulse: presence.beat,
@@ -374,6 +383,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
 
   const help = createHelpModule({
     ...common,
+    fields,
     limits,
     agenda: replica.agenda,
     xp: profile.xp,
@@ -424,6 +434,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   // Nada de esto pide a 42.
   const agenda = createAgendaModule({
     db,
+    fields,
     limits,
     audience,
     projectsOf: (login) => replica.repository.projectsOf(login, true),
@@ -493,6 +504,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
 
   const pool = createPoolModule({
     db,
+    fields,
     isAdmin: async (login) => (await admin.service.accessOf(login)).admin,
     hiddenChanged: () => {
       audience.forget()
@@ -502,6 +514,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
 
   const meet = createMeetModule({
     db,
+    fields,
     limits,
     documents: staff.service,
     calendar: calendar.service,
@@ -518,6 +531,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   })
   const admin = createAdminModule({
     db,
+    fields,
     limits,
     fixedAdmins: config.admins ?? [],
     fortyTwoRemaining: () => client.hourlyRemaining(),
@@ -562,6 +576,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
   const legal = createLegalModule({
     db,
     personal: () => late.get('modules').flatMap((module) => module.personal ?? []),
+    sealed: () => late.get('modules').flatMap((module) => module.sealed ?? []),
+    fields,
     ...clock,
   })
 

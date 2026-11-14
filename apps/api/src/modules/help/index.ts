@@ -11,6 +11,7 @@ import type { AttendanceService } from '../attendance/index.js'
 import type { XpService } from '../profile/index.js'
 import type { Agenda, ReplicaRepository } from '../replica/index.js'
 import { createHelpRepository } from './help.repository.js'
+import type { FieldCipher } from '../../core/crypto/fields.js'
 import { registerHelpRoutes } from './help.routes.js'
 import { createHelpService } from './help.service.js'
 import type { Commitments, HelpService } from './help.service.js'
@@ -19,6 +20,8 @@ import type { Limits } from '../../core/limits.js'
 
 type HelpModuleDeps = {
   db: Db
+  /** Cifra la nota de las reservas (`docs/cifrado.md`). */
+  fields: FieldCipher
   /** Quién ve a quién (`docs/piscineros.md`). */
   audience?: Audience
   replica: ReplicaRepository
@@ -39,7 +42,7 @@ export type HelpModule = AppModule & { service: HelpService }
 
 export function createHelpModule(deps: HelpModuleDeps): HelpModule {
   const service = createHelpService({
-    help: createHelpRepository(deps.db),
+    help: createHelpRepository(deps.db, deps.fields),
     replica: deps.replica,
     agenda: deps.agenda,
     xp: deps.xp,
@@ -104,6 +107,8 @@ export function createHelpModule(deps: HelpModuleDeps): HelpModule {
       // quién fue (la web tampoco lo enseña), solo que pasó y cuándo.
       { table: 'help_blocks', logins: ['blocker', 'blocked'], give: { blocked: ['created_at'] } },
     ],
+    // La nota de quien pide ayuda (`docs/cifrado.md`).
+    sealed: [{ table: 'help_bookings', column: 'note' }],
     service,
     routes: (app, context) => {
       registerHelpRoutes(app, context, service)

@@ -500,6 +500,7 @@ Detalle: [rendimiento.md](rendimiento.md#9-cargas-largas-2026-11-02).
 | «Aplasta bugs», minijuego de 30 s con récord en el navegador, en la pantalla de mantenimiento y en la de servidor caído; durante un despliegue la portada guardada arranca y lo enseña en vez de una página en blanco (#104) | Todos | `features/maintenance/BugSquash.tsx`, `public/sw.js` |
 | Privacidad y condiciones (`#/privacidad`), también sin sesión: responsable y correo de contacto, quién puede entrar, datos de 42 y de aquí, base legal (consentimiento e interés legítimo), quién lo ve y proveedores, plazos, seguridad, derechos, cómo no salir en la web y normas | Todos | `features/legal/LegalPage.tsx` |
 | Con sesión: cuándo aceptaste, descargar todos tus datos, anonimizar la cuenta escribiendo tu login | Todos | `LegalPage.tsx`, `AnonymizeAccount.tsx` |
+| Por dentro: lo privado que escribes (mensajes, avisos, incidencias, sugerencias, denuncias, notas de reservas y de la agenda, motivos de moderación) se guarda cifrado en la base y en las copias que salen del servidor; se ve igual en la web y la descarga lo trae en claro ([cifrado.md](cifrado.md)) | Todos | `api: core/crypto/fields.ts` |
 
 ## Panel de gestión
 

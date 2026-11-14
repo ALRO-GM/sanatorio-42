@@ -517,6 +517,15 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
         )
       })
     },
+    // Lo que se escribe en el buzón y el motivo de un bloqueo (`docs/cifrado.md`).
+    // `user_blocks` no tiene `rowid`: su fila se encuentra por el login.
+    sealed: [
+      { table: 'tickets', column: 'subject' },
+      { table: 'tickets', column: 'body' },
+      { table: 'tickets', column: 'proposal' },
+      { table: 'tickets', column: 'answer' },
+      { table: 'user_blocks', column: 'reason', key: 'login' },
+    ],
     stores: [
       tableStore(deps.db, {
         id: 'traffic',
@@ -531,6 +540,7 @@ export function createAdminModule(deps: AdminModuleDeps): AdminModule {
         login: 'login',
         date: { column: 'created_at', as: 'iso' },
         show: ['id', 'login', 'kind', 'subject', 'status', 'created_at'],
+        sealed: { fields: deps.fields, columns: ['subject'] },
       }),
     ],
     jobs: [

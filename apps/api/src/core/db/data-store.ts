@@ -7,6 +7,7 @@
  * que existen.
  */
 
+import type { FieldCipher } from '../crypto/fields.js'
 import type { Db } from './database.js'
 import { toNumber } from './rows.js'
 
@@ -50,6 +51,11 @@ type TableStoreOptions = {
   date: { column: string; as: 'iso' | 'day' | 'seconds' }
   /** Las columnas que se enseñan en la muestra: las que dicen qué es cada fila. */
   show: readonly string[]
+  /**
+   * Columnas de `show` que van cifradas (`core/crypto/fields.ts`): quien va a
+   * borrar ve el texto, no el cifrado.
+   */
+  sealed?: { fields: FieldCipher; columns: readonly string[] }
   /** Tablas que cuelgan de esta: sus filas se van con las de aquí. */
   children?: readonly { table: string; key: string; parent: string }[]
 }
@@ -106,7 +112,10 @@ export function tableStore(db: Db, options: TableStoreOptions): DataStore {
         columns: [...options.show],
         rows: result.rows.map((row) =>
           options.show.map((column) => {
-            const value = row[column]
+            const value =
+              options.sealed?.columns.includes(column) === true
+                ? options.sealed.fields.openOrNull(row[column])
+                : row[column]
 
             if (typeof value === 'number') return value
             // Lo que no sea texto ni número (un nulo, un binario) no se enseña.

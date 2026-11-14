@@ -11,6 +11,7 @@
 
 import type { FastifyInstance } from 'fastify'
 
+import type { SealedColumn } from './crypto/seal-existing.js'
 import type { DataStore } from './db/data-store.js'
 import type { PersonalTable } from './db/personal-data.js'
 import type { SessionReader } from './session.js'
@@ -58,6 +59,12 @@ export type AppModule = {
    * recorre el esquema y avisa de la columna que falte.
    */
   readonly personal?: readonly PersonalTable[]
+  /**
+   * Las columnas del módulo que se guardan cifradas (`core/crypto/fields.ts`,
+   * `docs/cifrado.md`). Al arrancar se cifra lo que quede en claro en ellas, y
+   * la descarga de datos (`GET /me/export`) las da descifradas a su dueño.
+   */
+  readonly sealed?: readonly SealedColumn[]
   /** Arranca el trabajo de fondo, si lo tiene. Solo lo llama `main.ts`. */
   readonly start?: () => void
   /** Para el trabajo de fondo y espera a que termine lo que esté a medias. */

@@ -121,9 +121,10 @@ con el commit donde volver a verlo, está en
 | 2026-11-14 | Pomodoro                | Las estadísticas (las tuyas y las del panel) se miran también entre dos fechas elegidas a mano, además de hoy, semana, mes y total (#80) |
 | 2026-11-14 | Mantenimiento           | «Aplasta bugs», un minijuego de 30 s para la espera, en la pantalla de mantenimiento y en la de «no se puede conectar»; durante un despliegue la web guardada arranca y lo enseña en vez de una página en blanco (#104, [docs/mantenimiento.md](docs/mantenimiento.md)) |
 | 2026-11-14 | Code Clicker · Campus   | Code Clicker con cifras más grandes bajo el contador, en la tienda y en las estadísticas (#111) y textos sin género («asume la cartera de Evaluaciones», «Exterminio», «el vecindario»…) (#116); el aviso para otros campus pide 10 personas para añadirlo y 50 para el idioma (#92) |
-| 2026-11-14 | Privacidad              | Revisión de lo que exige la ley para los mensajes (RGPD y LOPDGDD): no obliga a cifrarlos en reposo; plan propuesto, pendiente de decidir ([docs/privacidad-mensajes.md](docs/privacidad-mensajes.md), #113) |
+| 2026-11-14 | Privacidad              | Revisión de lo que exige la ley para los mensajes (RGPD y LOPDGDD): no obliga a cifrarlos en reposo, pero Alberto decidió cifrar lo privado y las copias que salen del servidor ([docs/privacidad-mensajes.md](docs/privacidad-mensajes.md), [docs/cifrado.md](docs/cifrado.md), #113) |
 | 2026-11-14 | Campus · Clústeres     | Al marcar un puesto roto se dice qué falla (el ordenador o la pantalla, el teclado o el ratón); el aviso llega por fin al staff (antes solo tachaba el puesto) y, al resolverlo, el puesto vuelve a estar libre. Quien aprobó un proyecto cuenta con cualquiera de sus ids (`push_swap`, `42cursus-push_swap`, `42next-push_swap`) y aunque se haya vuelto a apuntar: los seniors de Inception y compañía ya salen (#82, #99; [docs/api.md](docs/api.md)) |
 | 2026-11-14 | Exámenes               | El equipo vacío que 42 abre al cerrar un intento ya no tapa la nota (el 75 que no salía) ni cuenta como intento; las cuentas incluyen a toda la gente del 42cursus del campus, no solo a quien tenía proyectos copiados; opciones a la derecha, comparar dos kickoffs, black hole por círculo en cifras y en %, y para quien administra, quién se fue y quién lo tiene más cerca (#117, #81; [docs/api.md](docs/api.md)) |
+| 2026-11-14 | Datos · Copias          | Lo privado que escribe la gente (mensajes, avisos, incidencias, sugerencias, denuncias, notas y motivos de moderación) se guarda cifrado en la base con AES-256-GCM y una clave (`DATA_KEY`) que no está ni en la base ni en sus copias; lo de antes se cifra solo al arrancar. Las copias que salen del servidor van cifradas enteras con gpg (la privada, solo en el ordenador de Alberto). Texto legal al día (versión 2026-11-14) ([docs/cifrado.md](docs/cifrado.md), ticket #113) |
 | 2026-11-14 | Not-games · Cursos      | Preguntas de los cursos de NetPractice (14 conceptos, 32 formas: máscaras, red y broadcast, puerta de enlace, rutas, vuelta, ruta más concreta, salida a internet, bucles, resúmenes y VLSM) y de RAG (15 conceptos, 33 formas: contexto, qué se indexa, troceado, normalizar, IDF, k1, léxica frente a semántica, RRF, presupuesto del prompt, «no lo sé», recall@k y MRR, validación, caché, API y diagnóstico por etapas), en los tres idiomas y con su Repaso; cada respuesta comprobada en el motor del curso. El banco pasa de 481 a 510 conceptos ([docs/preguntas.md](docs/preguntas.md)) |
 | 2026-11-13 | Demostraciones animadas | Siete demostraciones nuevas para lo que no tenía explicación: Pomodoro, su Startup, Abandono, Avance de la piscina (sustituyen a sus párrafos; en Abandono queda debajo la regla del fin de semana), la ventanita de Cuentas atrás (icono pequeño en su cabecera), el Panel de gestión y Code Clicker. Ya son 32 ([docs/demos.md](docs/demos.md)) |
 | 2026-11-13 | Demostraciones animadas | Las marcas de tiempo coinciden con lo que se explica: cada frase se queda el tiempo que se tarda en leerla (en cada idioma) y el ratón espera antes de la acción siguiente; los guiones se ordenan solos ([docs/demos.md](docs/demos.md)) |
@@ -485,6 +486,11 @@ sesión y presupuesto de peticiones por persona para lo que sí; respuestas con
 `no-store`; secretos fuera de git. La sección y la persona van en el hash
 (`#/expediente/jdoe`), que no llega al servidor ni a otras webs.
 
+Lo privado que escribe la gente va cifrado en la base, columna a columna
+(AES-256-GCM, con `DATA_KEY` fuera de la base y de las copias), y las copias que
+salen del servidor van cifradas enteras: inventario, rotación de la clave y qué
+pasa si se pierde, en [docs/cifrado.md](docs/cifrado.md).
+
 ## Despliegue
 
 Una máquina de Oracle Cloud (ARM A1, 4 OCPU, 24 GB de memoria y 200 GB de
@@ -522,6 +528,7 @@ app de 42, copias, mantenimiento): [docs/deploy-oracle.md](docs/deploy-oracle.md
 Copias: `infra/scripts/backup.sh` cada noche y antes de cada despliegue
 (`VACUUM INTO`, comprobada, 14 guardadas), `restore.sh` y `pull-backups.sh`
 para bajarlas a otro ordenador.
+Lo que sale de la máquina va cifrado entero con gpg ([docs/cifrado.md](docs/cifrado.md#copias)).
 
 ## Coste cero garantizado
 
@@ -663,6 +670,7 @@ moderar desde la propia denuncia y aplicación instalable (PWA).
 **Operación y calidad**
 
 - [docs/deploy-oracle.md](docs/deploy-oracle.md): despliegue, copias, límites y mantenimiento de la máquina.
+- [docs/cifrado.md](docs/cifrado.md): qué datos van cifrados y por qué, la clave (rotarla, perderla) y las copias cifradas.
 - [docs/consumo-api.md](docs/consumo-api.md): consumo de la API de 42.
 - [docs/rendimiento.md](docs/rendimiento.md): cada mejora con su antes, su después y cómo se midió.
 - [docs/tests.md](docs/tests.md): qué cubre cada test y cómo se protege producción.

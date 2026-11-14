@@ -22,6 +22,8 @@ import { assertSchemaIsCurrent, closeDatabase, openDatabase } from '../core/db/d
 import type { Db } from '../core/db/database.js'
 import type { SessionUser } from '../core/session.js'
 import { registerStatic } from '../core/http/static.js'
+import { fieldCipherFromEnv } from '../core/crypto/fields.js'
+import { sealExisting } from '../core/crypto/seal-existing.js'
 import type { AppModule } from '../core/module.js'
 import { createApiClient } from '../integrations/forty-two/create-client.js'
 import { secretsFromEnv } from '../integrations/forty-two/secrets.js'
@@ -97,6 +99,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     },
   })
 
+  const fields = fieldCipherFromEnv(env)
   const { services, modules: domainModules } = compose(
     db,
     createApiClient(env, fetchImpl, secrets),
@@ -110,6 +113,7 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
       }),
       photos: diskPhotoStore(photoDirOf(env.DATABASE_URL)),
       secret: env.SESSION_SECRET,
+      fields,
       version: env.GIT_SHA,
       ...(env.GUARD_LEVEL_FILE === ''
         ? {}
@@ -163,6 +167,15 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
   })
 
   const modules: AppModule[] = [auth, ...domainModules]
+
+  // Antes de atender a nadie: lo que quede en claro (o con una clave anterior)
+  // en las columnas cifradas se cifra con la de ahora (`docs/cifrado.md`). Si
+  // hay algo de una clave que no está, falla aquí y no arranca.
+  const sealed = await sealExisting(
+    db,
+    fields,
+    modules.flatMap((module) => module.sealed ?? []),
+  )
   /** Temporizadores de los trabajos periódicos, para pararlos al cerrar. */
   const timers: NodeJS.Timeout[] = []
 
@@ -202,6 +215,10 @@ export async function buildApp(options: BuildOptions = {}): Promise<BuiltApp> {
     // sin registrar cada ruta dos veces.
     rewriteUrl: (request) => stripApiPrefix(request.url ?? '/'),
   })
+
+  // Una línea, a `warn` para que quede en el registro de producción: es la
+  // prueba de que la primera vez (o tras rotar la clave) se cifró todo.
+  if (Object.keys(sealed).length > 0) app.log.warn({ sealed }, 'cifrado al arrancar')
 
   const routes: { method: string; url: string }[] = []
 

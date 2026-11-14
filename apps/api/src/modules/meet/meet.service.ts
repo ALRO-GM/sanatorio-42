@@ -37,6 +37,7 @@ import type { Actor } from '../../core/actor.js'
 import { NO_POOL, seesFor } from '../../core/audience.js'
 import type { Audience } from '../../core/audience.js'
 import type { Notify } from '../../core/events.js'
+import type { FieldCipher } from '../../core/crypto/fields.js'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { domainError } from '../../core/errors.js'
@@ -69,6 +70,8 @@ import type { Limits } from '../../core/limits.js'
 
 export type MeetServiceOptions = {
   db: Db
+  /** Cifra el texto de los mensajes (`body`) en la base (`docs/cifrado.md`). */
+  fields: FieldCipher
   /** Topes regulables desde el panel (`core/limits.ts`). Sin ellos, los de fábrica. */
   limits?: Limits
   calendar: CalendarService
@@ -152,7 +155,7 @@ const reportSchema = z.object({
 })
 
 export function createMeetService(options: MeetServiceOptions) {
-  const { db, calendar, boards, help, attendance, therapy, replica } = options
+  const { db, fields, calendar, boards, help, attendance, therapy, replica } = options
   const now = options.now ?? Date.now
   const notify: Notify = options.notify ?? (() => Promise.resolve())
   const audience = options.audience ?? NO_POOL
@@ -349,6 +352,7 @@ export function createMeetService(options: MeetServiceOptions) {
 
   const conversations = createConversations({
     db,
+    fields,
     replica,
     boards,
     therapy,
@@ -401,7 +405,7 @@ export function createMeetService(options: MeetServiceOptions) {
           kind: toText(row.kind) as MeetMessage['kind'],
           minutes: row.minutes === null ? null : toNumber(row.minutes),
           reason: typeof row.reason === 'string' ? (row.reason as MeetReason) : null,
-          body: typeof row.body === 'string' ? row.body : null,
+          body: fields.openOrNull(row.body),
           at: toText(row.created_at),
         })),
       }
@@ -442,7 +446,7 @@ export function createMeetService(options: MeetServiceOptions) {
           message.kind,
           message.kind === 'late' ? (message.minutes ?? null) : null,
           message.kind === 'late' || message.kind === 'absent' ? (message.reason ?? null) : null,
-          message.body === undefined || message.body === '' ? null : message.body,
+          message.body === undefined || message.body === '' ? null : fields.seal(message.body),
           isoAt(now()),
         ],
       })
@@ -494,7 +498,7 @@ export function createMeetService(options: MeetServiceOptions) {
         eventId: toText(row.event_id),
         login: toText(row.login),
         kind: toText(row.kind),
-        body: typeof row.body === 'string' ? row.body : null,
+        body: fields.openOrNull(row.body),
         at: toText(row.created_at),
       }))
     },

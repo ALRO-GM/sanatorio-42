@@ -4,6 +4,7 @@
  * `docs/piscineros.md` y `docs/personas-ocultas.md`.
  */
 
+import type { FieldCipher } from '../../core/crypto/fields.js'
 import type { Db } from '../../core/db/database.js'
 import type { AppModule } from '../../core/module.js'
 import { given } from '../../core/options.js'
@@ -14,6 +15,8 @@ import type { PoolService } from './pool.service.js'
 
 type PoolDeps = {
   db: Db
+  /** Cifra el motivo de ocultar a alguien (`docs/cifrado.md`). */
+  fields: FieldCipher
   isAdmin: (login: string) => Promise<boolean>
   /** Tras cambiar los ocultos: olvida lo leído (`audience.forget`). */
   hiddenChanged?: () => void
@@ -33,6 +36,7 @@ export function createPoolModule(deps: PoolDeps): PoolModule {
 
   const hidden = createHiddenService({
     db: deps.db,
+    fields: deps.fields,
     ...given({ changed: deps.hiddenChanged, now: deps.now }),
   })
 
@@ -52,6 +56,7 @@ export function createPoolModule(deps: PoolDeps): PoolModule {
         },
       },
     ],
+    sealed: [{ table: 'hidden_people', column: 'reason' }],
     routes: (app, { session }) => {
       /** `GET /pool/notice` → `PoolNotice`, sin sesión: el aviso de la piscina cerrada. */
       app.get('/pool/notice', async (_request, reply) => {

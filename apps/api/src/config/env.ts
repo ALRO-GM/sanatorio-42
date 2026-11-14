@@ -11,6 +11,7 @@
 
 import { z } from 'zod'
 
+import { fieldCipherFromEnv } from '../core/crypto/fields.js'
 import { isTimeZone, parseNightWindow } from '../core/night-window.js'
 
 const envSchema = z.object({
@@ -107,6 +108,25 @@ const envSchema = z.object({
    * esta clave es lo único que impide suplantar a alguien.
    */
   SESSION_SECRET: z.string().min(32, 'SESSION_SECRET debe tener al menos 32 caracteres'),
+
+  /**
+   * Clave del cifrado de campos (`core/crypto/fields.ts`, `docs/cifrado.md`):
+   * 32 bytes en base64 (`openssl rand -base64 32`). Cifra en la base lo privado
+   * que escribe la gente (mensajes, avisos, incidencias, notas). Vive aquí y no
+   * en la base: una copia de la base sin esta clave no deja leer nada de eso.
+   *
+   * Obligatoria en producción. Vacía en desarrollo y tests, se usa una clave
+   * fija de pruebas. Si se pierde, lo cifrado no se recupera.
+   */
+  DATA_KEY: z.string().default(''),
+  /**
+   * Claves anteriores, separadas por comas, solo para leer. Al rotar: la nueva
+   * en `DATA_KEY` y la vieja aquí; al arrancar se vuelve a cifrar todo con la
+   * nueva y después esta se puede vaciar.
+   */
+  DATA_KEY_PREVIOUS: z.string().default(''),
+  /** `production` en la imagen de Docker (`infra/docker/Dockerfile`). */
+  NODE_ENV: z.string().default(''),
 
   // --- Base de datos ------------------------------------------------------
   /**
@@ -381,6 +401,16 @@ export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
       'DATABASE_URL apunta a un servidor libSQL (`libsql://`) pero DATABASE_AUTH_TOKEN está vacía.',
     )
   }
+
+  // Sin clave, la app cifraría con la de pruebas, que es pública: en producción
+  // no se arranca, para no mezclar en la base datos con una clave sin valor.
+  if (parsed.NODE_ENV === 'production' && parsed.DATA_KEY.trim() === '') {
+    throw new Error(
+      'Falta DATA_KEY (openssl rand -base64 32 en infra/.env): sin ella, en producción no se arranca. Ver docs/cifrado.md.',
+    )
+  }
+  // Una clave mal copiada se descubre aquí y no al cifrar el primer mensaje.
+  fieldCipherFromEnv(parsed)
 
   return Object.freeze({
     ...parsed,
