@@ -59,9 +59,13 @@ export type MapSeat = {
    * Si alguien ha avisado de que no funciona (vale una semana): quién y
    * cuándo. Un puesto roto no se propone para una terapia. `by` es `null`
    * si quien avisó no sale con nombre para quien mira (otro mundo, oculto).
+   * `kind` dice qué falla, el ordenador o un periférico (#82), si se sabe.
    */
-  broken: { by: string | null; at: string } | null
+  broken: { by: string | null; at: string; kind: SeatProblem | null } | null
 }
+
+/** Qué falla en un puesto roto: el ordenador o la pantalla, el teclado o el ratón (#82). */
+export type SeatProblem = 'computer' | 'peripheral'
 
 export type MapCluster = {
   /** Prefijo del puesto (`c1`). */

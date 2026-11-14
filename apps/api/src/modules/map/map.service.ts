@@ -19,6 +19,7 @@ import type {
   Peer,
   PersonCard,
   SeatDuty,
+  SeatProblem,
   TitleId,
 } from '@sanatorio/contracts'
 import { z } from 'zod'
@@ -53,6 +54,16 @@ export type MapServiceOptions = {
   online?: () => Promise<Set<string>>
   /** Los puestos que no funcionan. Sin esto, ninguno lo está. */
   broken?: BrokenSeats
+  /**
+   * Qué falla en cada puesto con aviso abierto al staff desde `since` (ISO),
+   * por puesto: el ordenador o un periférico (#82). Lo sabe `facility`.
+   */
+  problemsOf?: (campusId: number, since: string) => Promise<Map<string, SeatProblem>>
+  /**
+   * Pasa al staff el aviso de un puesto roto hecho desde el mapa (#82): antes
+   * solo tachaba el puesto y nadie que pudiera arreglarlo se enteraba.
+   */
+  toStaff?: (actor: Actor, host: string, problem: SeatProblem) => Promise<void>
   /** El círculo en que va cada persona, sin preguntar a 42. */
   circlesOf?: (logins: readonly string[]) => Promise<Map<string, number>>
   /** Quién de esos ha terminado el common core (del cálculo del Avance, sin esperar). */
@@ -76,6 +87,14 @@ const loginSchema = z
   .toLowerCase()
   .regex(/^[a-z0-9-]{1,40}$/, 'login no válido')
 
+/**
+ * Lo que se dice al avisar desde el mapa: qué falla. Sin decirlo, el
+ * ordenador, que es lo que se entendía antes por «no funciona».
+ */
+const problemSchema = z
+  .object({ kind: z.enum(['computer', 'peripheral']).default('computer') })
+  .default({ kind: 'computer' })
+
 /** Proyectos en curso que se enseñan de cada persona, como mucho. */
 const MAX_PROJECTS = 4
 
@@ -97,28 +116,46 @@ export function createMapService(options: MapServiceOptions) {
     return name
   }
 
+  /**
+   * Avisa de que un puesto no funciona: sale tachado en el mapa una semana y
+   * no se propone para una terapia.
+   *
+   * @throws {DomainError} `invalid_input` si el nombre no es de un puesto;
+   *   `conflict` si ya tiene demasiados avisos puestos.
+   */
+  async function reportBroken(actor: Actor, host: unknown): Promise<void> {
+    const name = seatHost(host)
+
+    const mine = (await options.broken?.countBy(actor.login, brokenSince())) ?? 0
+    const most = await limits.of('brokenSeats.active', actor.login)
+
+    if (mine >= most) {
+      throw domainError(
+        'conflict',
+        `Ya tienes ${most} puestos marcados como rotos esta semana: es el máximo por persona (no hay límite por clúster)`,
+      )
+    }
+
+    await options.broken?.report(actor.campusId, name, actor.login, isoAt(now()))
+  }
+
   return {
+    /** Tacha el puesto, sin más: lo usa `facility` al recibir un aviso del ordenador. */
+    reportBroken,
+
     /**
-     * Avisa de que un puesto no funciona: sale tachado en el mapa una semana y
-     * no se propone para una terapia.
+     * El aviso del botón del mapa: tacha el puesto (como `reportBroken`) y se
+     * lo pasa al staff diciendo si falla el ordenador o un periférico (#82).
      *
-     * @throws {DomainError} `invalid_input` si el nombre no es de un puesto;
-     *   `conflict` si ya tiene demasiados avisos puestos.
+     * @throws {DomainError} los de `reportBroken`, e `invalid_input` si `kind`
+     *   no es `computer` ni `peripheral`.
      */
-    async reportBroken(actor: Actor, host: unknown): Promise<void> {
+    async reportProblem(actor: Actor, host: unknown, input: unknown): Promise<void> {
+      const { kind } = parse(problemSchema, input ?? undefined)
       const name = seatHost(host)
 
-      const mine = (await options.broken?.countBy(actor.login, brokenSince())) ?? 0
-      const most = await limits.of('brokenSeats.active', actor.login)
-
-      if (mine >= most) {
-        throw domainError(
-          'conflict',
-          `Ya tienes ${most} puestos marcados como rotos esta semana: es el máximo por persona (no hay límite por clúster)`,
-        )
-      }
-
-      await options.broken?.report(actor.campusId, name, actor.login, isoAt(now()))
+      await reportBroken(actor, name)
+      await options.toStaff?.(actor, name, kind)
     },
 
     /** Ya funciona: cualquiera que esté delante puede decirlo. */
@@ -190,6 +227,9 @@ export function createMapService(options: MapServiceOptions) {
       }
 
       const since = isoAt(now() - LOCATION_MAX_AGE_MS)
+      const problems =
+        (await options.problemsOf?.(actor.campusId, brokenSince())) ??
+        new Map<string, SeatProblem>()
       const [known, everyone, reservations, online, broken, sees, shown, pool] = await Promise.all([
         replica.knownSeats(actor.campusId),
         replica.presenceIn(actor.campusId, since),
@@ -210,10 +250,17 @@ export function createMapService(options: MapServiceOptions) {
       const present = everyone.filter((person) => named(person.login))
       // Quién avisó de un puesto roto sale con la misma regla: si no, el aviso
       // enseñaría a alguien del otro mundo o a alguien oculto.
-      const reportOf = (
-        report: { by: string; at: string } | undefined,
-      ): { by: string | null; at: string } | null =>
-        report === undefined ? null : { by: named(report.by) ? report.by : null, at: report.at }
+      const reportOf = (host: string): MapSeat['broken'] => {
+        const report = broken.get(host)
+
+        return report === undefined
+          ? null
+          : {
+              by: named(report.by) ? report.by : null,
+              at: report.at,
+              kind: problems.get(host) ?? null,
+            }
+      }
       const taken = everyone.filter((person) => !named(person.login))
 
       // De guardia = disponible y sentado. Misma regla que en la lista.
@@ -248,7 +295,7 @@ export function createMapService(options: MapServiceOptions) {
           occupant: null,
           taken: false,
           reservation: null,
-          broken: reportOf(broken.get(host)),
+          broken: reportOf(host),
         }
 
         seats.set(host, seat)

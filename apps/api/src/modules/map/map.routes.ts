@@ -42,9 +42,12 @@ export function registerMapRoutes(
     return reply.send(await map.forCampus(await session.actor(request)))
   })
 
-  /** `POST /map/seats/:host/broken` → ese puesto no funciona (vale una semana). 204. */
+  /**
+   * `POST /map/seats/:host/broken` (`{ kind?: 'computer' | 'peripheral' }`) →
+   * ese puesto no funciona (vale una semana) y el staff recibe el aviso. 204.
+   */
   app.post<{ Params: { host: string } }>('/map/seats/:host/broken', async (request, reply) => {
-    await map.reportBroken(await session.actor(request), request.params.host)
+    await map.reportProblem(await session.actor(request), request.params.host, request.body)
 
     return reply.code(204).send()
   })

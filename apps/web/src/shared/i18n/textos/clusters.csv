@@ -51,6 +51,9 @@ map.legend.broken,Leyenda: ordenador averiado,No funciona (avisado esta semana),
 map.fixed,Botón: el ordenador ya funciona,Ya funciona,It works now,Ja funciona,Badabil jada,Ça remarche
 map.reportBroken,Botón: avisar de que un ordenador no funciona,Avisar de que no funciona,Report it is not working,Avisa que no funciona,Ez dabilela abisatu,Signaler une panne
 map.seatBroken,Etiqueta: ordenador averiado,No funciona,Not working,No funciona,Ez dabil,En panne
+map.broken.computer,"Etiqueta de un puesto roto (#82): falla el ordenador",No funciona el ordenador,The computer is not working,No funciona l'ordinador,Ordenagailuak ez du funtzionatzen,L'ordinateur est en panne
+map.broken.peripheral,"Etiqueta de un puesto roto (#82): falla la pantalla, el teclado o el ratón","Falla la pantalla, el teclado o el ratón","The screen, keyboard or mouse is not working","Falla la pantalla, el teclat o el ratolí","Pantailak, teklatuak edo saguak huts egiten du","L'écran, le clavier ou la souris est en panne"
+map.whatFails,"Pregunta al avisar de un puesto roto desde el mapa, antes de elegir el ordenador o un periférico (#82)",¿Qué falla?,What is not working?,Què falla?,Zerk huts egiten du?,Qu'est-ce qui ne marche pas ?
 map.finishedMine,Cuánta gente cerca aprobó tu proyecto,Aprobaron tu proyecto: {n},Passed your project: {n},Han aprovat el teu projecte: {n},Zure proiektua gainditu dute: {n},Ont validé ton projet : {n}
 clusters.title,Título de la página del mapa,Clústeres del campus,Campus clusters,Clústers del campus,Campuseko klusterrak,Clusters du campus
 clusters.count.one,Cuánta gente sentada tiene la web abierta (una),Con Peer4U abierto: {online} de {occupied} persona sentada,With Peer4U open: {online} of {occupied} person seated,Amb Peer4U obert: {online} de {occupied} persona asseguda,Peer4U irekita dutenak: eserita dagoen {occupied} pertsonatik {online},Avec Peer4U ouvert : {online} sur {occupied} poste occupé

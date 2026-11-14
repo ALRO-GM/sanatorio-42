@@ -91,7 +91,13 @@ export function projectUser(
     project: {
       id: options.projectId ?? 10,
       name: options.projectName ?? 'ft_printf',
-      slug: options.slug ?? 'ft_printf',
+      // Cada id con su slug: con el mismo, serían el mismo proyecto con dos ids
+      // (`sameProject` de la réplica, #99).
+      slug:
+        options.slug ??
+        (options.projectId === undefined || options.projectId === 10
+          ? 'ft_printf'
+          : `project-${String(options.projectId)}`),
     },
     user: apiUser(login, options.user),
   }

@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-71 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+84 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -78,3 +78,16 @@ Generado desde `apps/web/src/shared/i18n/textos/examenes.csv` con
 | `exams.progressLabel` | Examen en vivo: nombre accesible de la barra de progreso (la nota de hoy sobre 100) | features/exams/ExamsPage | Nota de hoy de {login} sobre 100 | Today's mark for {login} out of 100 | Nota d'avui de {login} sobre 100 | {login}(r)en gaurko nota 100etik | Note du jour de {login} sur 100 |
 | `exams.lastTitle` | Examen en vivo: etiqueta de la tarjeta del último examen acabado (sus resultados) | features/exams/ExamsPage | Último examen | Last exam | Últim examen | Azken azterketa | Dernier examen |
 | `exams.lastNobody` | Último examen acabado: nadie del campus entró | features/exams/ExamsPage | Nadie de tu campus entró en este examen. | Nobody from your campus took this exam. | Ningú del teu campus va entrar a aquest examen. | Zure campuseko inor ez zen azterketa honetan sartu. | Personne de ton campus n'a passé cet examen. |
+| `exams.options` | Estadísticas: nombre del panel de opciones de la derecha (para lectores de pantalla) | features/exams/ExamStatsPanel | Opciones de las estadísticas | Statistics options | Opcions de les estadístiques | Estatistiken aukerak | Options des statistiques |
+| `exams.compare.title` | Estadísticas, modo de datos: comparar dos kickoffs una al lado de la otra (#81) | features/exams/ExamStatsPanel | Comparar dos kickoffs | Compare two kickoffs | Compara dues kickoffs | Bi kickoff alderatu | Comparer deux kick-offs |
+| `exams.compare.first` | Estadísticas, modo de datos: selector de la primera kickoff que se compara | features/exams/ExamStatsPanel | Primera | First | Primera | Lehena | Première |
+| `exams.compare.second` | Estadísticas, modo de datos: selector de la segunda kickoff que se compara | features/exams/ExamStatsPanel | Segunda | Second | Segona | Bigarrena | Deuxième |
+| `exams.compare.none` | Estadísticas, modo de datos: opción de no elegir kickoff para comparar | features/exams/ExamStatsPanel | Ninguna | None | Cap | Bat ere ez | Aucune |
+| `exams.compare.column.one` | Cabecera de la columna de una kickoff en la comparación: {month} es el mes, {n} la gente (una) | features/exams/ExamStatsPanel | {month} · {n} persona | {month} · {n} person | {month} · {n} persona | {month} · {n} pertsona | {month} · {n} personne |
+| `exams.compare.column.many` | Cabecera de la columna de una kickoff en la comparación: {month} es el mes, {n} la gente (varias) | features/exams/ExamStatsPanel | {month} · {n} personas | {month} · {n} people | {month} · {n} persones | {month} · {n} pertsona | {month} · {n} personnes |
+| `exams.blackhole.title` | Estadísticas, modo de datos: tarjeta con el porcentaje de gente que el black hole se tragó en cada círculo (#81) | features/exams/ExamStatsPanel | Black hole por círculo | Black hole by circle | Black hole per cercle | Black hole zirkuluka | Black hole par cercle |
+| `exams.blackhole.line` | Black hole por círculo: {absorbed} es a cuánta gente se tragó en ese círculo, {reached} cuánta llegó a él | features/exams/ExamStatsPanel | {absorbed} de {reached} que llegaron | {absorbed} of {reached} who got there | {absorbed} de {reached} que hi van arribar | {absorbed}, iritsi ziren {reached}etatik | {absorbed} sur {reached} ayant atteint ce cercle |
+| `exams.blackhole.history` | Estadísticas, solo para quien administra: tarjeta con quién se fue por el black hole y quién lo tiene cerca (#81) | features/exams/ExamStatsPanel | Historial del black hole | Black hole history | Historial del black hole | Black hole-aren historia | Historique du black hole |
+| `exams.blackhole.absorbed` | Historial del black hole: pestaña de la gente a la que ya se tragó, lo más reciente primero | features/exams/ExamStatsPanel | Se fueron | Gone | Se'n van anar | Joan ziren | Départs |
+| `exams.blackhole.closest` | Historial del black hole: pestaña de quien sigue y tiene la fecha de black hole más cerca | features/exams/ExamStatsPanel | Lo tienen más cerca | Closest to it | El tenen més a prop | Gertuen dutenak | Les plus proches |
+| `exams.blackhole.nobody` | Historial del black hole: nadie en la lista con lo elegido | features/exams/ExamStatsPanel | Nadie con lo que has elegido. | Nobody with what you chose. | Ningú amb el que has triat. | Inor ez aukeratutakoarekin. | Personne avec ce que tu as choisi. |

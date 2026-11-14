@@ -37,10 +37,14 @@ export function ProjectMap({
           <ClusterMapView
             map={data}
             spotlight={spotlight}
-            onBroken={(host, broken) => {
+            onBroken={(host, problem) => {
               // Si falla, se dice (antes se callaba y parecía que no hacía nada).
               void marking
-                .run(() => (broken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host)))
+                .run(() =>
+                  problem === null
+                    ? api.clearBrokenSeat(host)
+                    : api.reportBrokenSeat(host, problem),
+                )
                 .then((done) => (done ? reload() : undefined))
             }}
           />

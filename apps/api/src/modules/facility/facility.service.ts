@@ -6,7 +6,7 @@
  * llegan también a su canal.
  */
 
-import type { FacilityCategory, FacilityReport } from '@sanatorio/contracts'
+import type { FacilityCategory, FacilityReport, SeatProblem } from '@sanatorio/contracts'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
@@ -70,6 +70,11 @@ type FacilityOptions = {
    * del ordenador o de sus periféricos lo pide. Si no es un puesto, no hace nada.
    */
   markBroken?: (actor: Actor, host: string) => Promise<void>
+  /**
+   * Quita la marca de roto de un puesto: al resolver un aviso del ordenador o
+   * de sus periféricos, el puesto vuelve a estar libre en el mapa.
+   */
+  fixed?: (campusId: number, host: string) => Promise<void>
   /** Manda el aviso al canal de Slack del staff, si lo hay. */
   slack?: ((text: string) => Promise<void>) | null
   now?: () => number
@@ -108,12 +113,40 @@ export function createFacilityService(options: FacilityOptions) {
 
   async function resolve(id: number, by: string): Promise<void> {
     const result = await db.execute({
-      sql: 'UPDATE facility_reports SET resolved_at = ?, resolved_by = ? WHERE id = ? AND resolved_at IS NULL',
+      sql: `UPDATE facility_reports SET resolved_at = ?, resolved_by = ?
+            WHERE id = ? AND resolved_at IS NULL
+            RETURNING campus_id, category, place`,
       args: [isoAt(now()), by, id],
     })
+    const row = result.rows[0]
 
-    if (result.rowsAffected === 0)
-      throw domainError('not_found', 'Ese aviso no existe o ya está resuelto')
+    if (row === undefined) throw domainError('not_found', 'Ese aviso no existe o ya está resuelto')
+
+    // Arreglado el ordenador, el puesto deja de salir tachado en el mapa (#82).
+    if (row.category === 'computer' || row.category === 'peripheral') {
+      await options.fixed?.(toNumber(row.campus_id), toText(row.place).toLowerCase())
+    }
+  }
+
+  /** Guarda el aviso y lo manda a Slack. Devuelve su id. */
+  async function save(
+    actor: Actor,
+    category: FacilityCategory,
+    where: string,
+    note: string | undefined,
+  ): Promise<number> {
+    const inserted = await db.execute({
+      sql: `INSERT INTO facility_reports (campus_id, login, category, place, note, created_at)
+            VALUES (?, ?, ?, ?, ?, ?) RETURNING id`,
+      args: [actor.campusId, actor.login, category, where, note ?? null, isoAt(now())],
+    })
+
+    // Al canal del staff, si lo hay. No se espera: Slack no retrasa a nadie.
+    void options.slack?.(
+      `*${LABEL[category]}* en ${where}${note === undefined || note === '' ? '' : `: ${note}`} (avisa ${actor.login})`,
+    )
+
+    return toNumber(inserted.rows[0]?.id)
   }
 
   return {
@@ -141,12 +174,7 @@ export function createFacilityService(options: FacilityOptions) {
         throw domainError('invalid_input', 'Di dónde es: no estás sentado en ningún puesto')
       }
 
-      const inserted = await db.execute({
-        sql: `INSERT INTO facility_reports (campus_id, login, category, place, note, created_at)
-              VALUES (?, ?, ?, ?, ?, ?) RETURNING id`,
-        args: [actor.campusId, actor.login, category, where, note ?? null, isoAt(now())],
-      })
-      const id = toNumber(inserted.rows[0]?.id)
+      const id = await save(actor, category, where, note)
 
       // Un ordenador o sus periféricos que fallan: el puesto sale tachado en el
       // mapa (#82), para que nadie se siente en él ni se proponga para una terapia.
@@ -154,13 +182,38 @@ export function createFacilityService(options: FacilityOptions) {
         await options.markBroken?.(actor, where).catch(() => undefined)
       }
 
-      // Al canal del staff, si lo hay. No se espera: Slack no retrasa a nadie.
-      void options.slack?.(
-        `*${LABEL[category]}* en ${where}${note === undefined || note === '' ? '' : `: ${note}`} (avisa ${actor.login})`,
-      )
-
       return (
         (await list(null)).find((report) => report.id === id) ?? rowOf({ id, login: actor.login })
+      )
+    },
+
+    /**
+     * El aviso de un puesto roto hecho desde el mapa (#82), que ya lo ha
+     * tachado: aquí solo llega al staff. No cuenta en el tope diario: el mapa
+     * tiene el suyo (`brokenSeats.active`).
+     */
+    async fromMap(actor: Actor, host: string, problem: SeatProblem): Promise<void> {
+      await save(actor, problem, host, undefined)
+    },
+
+    /**
+     * Qué falla en cada puesto con un aviso abierto del ordenador o de sus
+     * periféricos desde `since` (ISO): el último aviso de cada puesto manda.
+     */
+    async seatProblems(campusId: number, since: string): Promise<Map<string, SeatProblem>> {
+      const result = await db.execute({
+        sql: `SELECT lower(place) AS host, category FROM facility_reports
+              WHERE campus_id = ? AND resolved_at IS NULL AND created_at >= ?
+                AND category IN ('computer', 'peripheral')
+              ORDER BY id`,
+        args: [campusId, since],
+      })
+
+      return new Map(
+        result.rows.map((row) => [
+          toText(row.host),
+          row.category === 'peripheral' ? 'peripheral' : 'computer',
+        ]),
       )
     },
 

@@ -80,7 +80,10 @@ export function parisMap(projectId?: number): ClusterMap {
           row,
           seat,
           taken,
-          broken: !busy && seed % 97 === 0 ? { by: 'mock', at: new Date().toISOString() } : null,
+          broken:
+            !busy && seed % 97 === 0
+              ? { by: 'mock', at: new Date().toISOString(), kind: 'computer' }
+              : null,
           reservation: null,
           occupant:
             busy && !taken

@@ -1,12 +1,16 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  BLACKHOLE_LIST_MAX,
+  blackholeByCircle,
+  blackholeLists,
   circleDurations,
   examMeta,
   examPeople,
   examStat,
   kickoffsOf,
   selectPeople,
+  sessionResult,
 } from '../../src/modules/exams/exams.rules.js'
 import type { ExamPerson, MemberRow, PlanRow } from '../../src/modules/exams/exams.rules.js'
 
@@ -68,6 +72,22 @@ describe('estadísticas de exámenes', () => {
     expect(stat.avgAttempts).toBe(3.5)
   })
 
+  it('un equipo abierto y vacío no es un intento: no corre la cuenta (#117)', () => {
+    const open = { userId: 2, projectId: 1, mark: null, validated: null, at: '2026-11-12T12:14' }
+    const stat = examStat(exam, [
+      attempt(2, '2026-11-12T12:00', 75, false),
+      // 42 lo abre nada más cerrar el anterior, para la vez siguiente.
+      open,
+      attempt(2, '2026-11-14T12:00', 100, true),
+    ])
+
+    // Aprueba al 2.º intento, no al 3.º; y nadie hizo un 3.º.
+    expect(stat).toMatchObject({ people: 1, passed: 1, attemptsToPass: [0, 1] })
+    expect(stat.byAttempt.map((one) => one.attempt)).toEqual([1, 2])
+    // Solo con el abierto, la persona no tiene intentos (cuenta por su fila, si la hay).
+    expect(examStat(exam, [open])).toMatchObject({ people: 0, byAttempt: [] })
+  })
+
   it('sin nada, ni aprobados ni intentos', () => {
     expect(examStat(exam, [])).toMatchObject({
       people: 0,
@@ -112,6 +132,8 @@ const circles = {
     [22, 2],
   ]),
 }
+const NOW = Date.parse('2026-11-14T12:00:00Z')
+const DAY = 86_400_000
 const member = (userId: number, extra: Partial<MemberRow> = {}): MemberRow => ({
   userId,
   login: `p${userId}`,
@@ -119,6 +141,7 @@ const member = (userId: number, extra: Partial<MemberRow> = {}): MemberRow => ({
   beginAt: null,
   track: null,
   ranks: null,
+  cursus: null,
   ...extra,
 })
 const row = (userId: number, projectId: number, extra: Partial<PlanRow> = {}): PlanRow => ({
@@ -138,6 +161,9 @@ const person = (extra: Partial<ExamPerson>): ExamPerson => ({
   start: null,
   ranks: null,
   projectCircle: null,
+  status: 'unknown',
+  endAt: null,
+  blackholedAt: null,
   ...extra,
 })
 
@@ -164,6 +190,7 @@ describe('kickoffs y planes', () => {
       ],
       circles,
       examUsers: new Set([5]),
+      now: NOW,
     })
 
     expect(people.map((one) => [one.userId, one.kickoff, one.track])).toEqual([
@@ -182,6 +209,7 @@ describe('kickoffs y planes', () => {
       rows: [row(1, 20, { createdAt: '2026-01-01T00:00:00Z', slug: 'python-module-00' })],
       circles,
       examUsers: new Set(),
+      now: NOW,
     })
 
     expect(one?.track).toBe('classic')
@@ -207,5 +235,159 @@ describe('kickoffs y planes', () => {
       selectPeople(people, { track: 'all', kickoffs: ['2025-10'] }).map((p) => p.userId),
     ).toEqual([1, 2])
     expect(selectPeople(people, { track: 'classic', kickoffs: ['2030-01'] })).toEqual([])
+  })
+})
+
+describe('lo que sacó alguien en una sesión de examen (#117)', () => {
+  const closed = (mark: number, validated: boolean, projectId = 1) => ({
+    projectId,
+    mark,
+    validated,
+  })
+  const open = (mark: number | null = null, projectId = 1) => ({
+    projectId,
+    mark,
+    validated: null,
+  })
+
+  it('un 75 cerrado no lo tapa el equipo vacío que 42 abre después', () => {
+    expect(sessionResult([closed(75, false), open()])).toEqual({
+      projectId: 1,
+      mark: 75,
+      passed: false,
+      closed: true,
+    })
+  })
+
+  it('sin cerrar aún, cuenta el abierto con la nota que lleve', () => {
+    expect(sessionResult([open(50)])).toEqual({
+      projectId: 1,
+      mark: 50,
+      passed: false,
+      closed: false,
+    })
+    expect(sessionResult([open()])).toMatchObject({ mark: null, closed: false })
+  })
+
+  it('sin intentos, nada', () => {
+    expect(sessionResult([])).toBeUndefined()
+  })
+
+  it('con varios cerrados, la mejor nota y aprobado si alguno aprobó; manda el examen del último', () => {
+    expect(sessionResult([closed(25, false, 1), closed(100, true, 2), open(null, 3)])).toEqual({
+      projectId: 2,
+      mark: 100,
+      passed: true,
+      closed: true,
+    })
+  })
+
+  it('muchos intentos raros a la vez no rompen la cuenta', () => {
+    const many = Array.from({ length: 5_000 }, (_, index) =>
+      index % 2 === 0 ? open(index % 7 === 0 ? null : 10) : closed(index % 101, false),
+    )
+
+    expect(sessionResult(many)).toMatchObject({ mark: 100, passed: false, closed: true })
+  })
+})
+
+describe('el black hole por círculos y su historial (#81)', () => {
+  /** Su 42cursus: echado hace `daysAgo` días, o activo con la fecha en `daysAhead`. */
+  const cursus = (
+    extra: Partial<NonNullable<MemberRow['cursus']>> = {},
+  ): NonNullable<MemberRow['cursus']> => ({
+    beginAt: '2025-10-06T08:00:00Z',
+    endAt: null,
+    blackholedAt: null,
+    grade: 'Cadet',
+    active: true,
+    alumni: false,
+    ...extra,
+  })
+  const gone = (daysAgo: number) =>
+    cursus({ endAt: new Date(NOW - daysAgo * DAY).toISOString(), active: false })
+  const soon = (daysAhead: number) =>
+    cursus({ blackholedAt: new Date(NOW + daysAhead * DAY).toISOString() })
+
+  it('quien solo tiene su 42cursus sale, con su kickoff y cómo acabó', () => {
+    const people = examPeople({
+      members: [
+        // Ni entró en la web ni tiene proyectos copiados: antes no salía.
+        member(1, { cursus: gone(60), ranks: ['2025-10-20'], track: 'classic' }),
+        member(2, { cursus: soon(10) }),
+        // Echado hace poco: aún puede ser un error del staff, no se sabe.
+        member(3, { cursus: gone(5) }),
+        member(4),
+      ],
+      rows: [],
+      circles,
+      examUsers: new Set(),
+      now: NOW,
+    })
+
+    expect(people.map((one) => [one.userId, one.kickoff, one.status])).toEqual([
+      [1, '2025-10', 'blackholed'],
+      [2, '2025-10', 'active'],
+      [3, '2025-10', 'unknown'],
+    ])
+  })
+
+  it('cuenta en cada círculo quién llegó y a quién se tragó, sin la gente en duda', () => {
+    const stats = blackholeByCircle([
+      person({ userId: 1, status: 'blackholed', ranks: [] }),
+      person({ userId: 2, status: 'blackholed', projectCircle: 2 }),
+      person({ userId: 3, status: 'active', ranks: ['a', 'b', 'c'] }),
+      person({ userId: 4, status: 'finished' }),
+      person({ userId: 5, status: 'unknown', projectCircle: 1 }),
+      // Sin ningún proyecto del common core: se quedó en el 0.
+      person({ userId: 6, status: 'blackholed' }),
+    ])
+
+    expect(stats[0]).toEqual({ circle: 0, reached: 5, absorbed: 2 })
+    expect(stats[2]).toEqual({ circle: 2, reached: 3, absorbed: 1 })
+    expect(stats[3]).toEqual({ circle: 3, reached: 2, absorbed: 0 })
+    expect(stats.at(-1)).toEqual({ circle: 6, reached: 1, absorbed: 0 })
+  })
+
+  it('sin nadie de quien se sepa, ningún círculo', () => {
+    expect(blackholeByCircle([])).toEqual([])
+    expect(blackholeByCircle([person({ status: 'unknown', projectCircle: 3 })])).toEqual([])
+    expect(blackholeLists([], NOW)).toEqual({ absorbed: [], closest: [] })
+  })
+
+  it('el historial: lo más reciente primero; los más cercanos, solo con la fecha por llegar', () => {
+    const lists = blackholeLists(
+      [
+        person({ login: 'viejo', status: 'blackholed', endAt: '2025-01-01T00:00:00Z' }),
+        person({ login: 'nuevo', status: 'blackholed', endAt: '2026-09-01T00:00:00Z' }),
+        person({ login: 'lejos', status: 'active', blackholedAt: '2027-05-01T00:00:00Z' }),
+        person({ login: 'cerca', status: 'active', blackholedAt: '2026-11-20T00:00:00Z' }),
+        // Fecha ya pasada y sigue: la fecha de 42 no dice nada (días extra).
+        person({ login: 'pasada', status: 'active', blackholedAt: '2026-01-01T00:00:00Z' }),
+        person({ login: 'duda', status: 'unknown', blackholedAt: '2026-12-01T00:00:00Z' }),
+      ],
+      NOW,
+    )
+
+    expect(lists.absorbed.map((one) => one.login)).toEqual(['nuevo', 'viejo'])
+    expect(lists.closest.map((one) => one.login)).toEqual(['cerca', 'lejos'])
+  })
+
+  it('con muchísima gente, cada lista se corta y las cuentas no se rompen', () => {
+    const many = Array.from({ length: 5_000 }, (_, index) =>
+      person({
+        userId: index,
+        login: `p${String(index)}`,
+        status: index % 2 === 0 ? 'blackholed' : 'active',
+        endAt: new Date(NOW - index * DAY).toISOString(),
+        blackholedAt: new Date(NOW + (index + 1) * DAY).toISOString(),
+        projectCircle: index % 7,
+      }),
+    )
+    const lists = blackholeLists(many, NOW)
+
+    expect(lists.absorbed).toHaveLength(BLACKHOLE_LIST_MAX)
+    expect(lists.closest[0]?.login).toBe('p1')
+    expect(blackholeByCircle(many)[0]).toMatchObject({ reached: 5_000 })
   })
 })

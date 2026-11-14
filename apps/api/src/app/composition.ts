@@ -366,6 +366,9 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     focusOf,
     titleOf: (login) => profile.xp.titleOf(login),
     broken: createBrokenSeats(db),
+    // `facility` se monta más abajo; se le pregunta al servir o al avisar (#82).
+    problemsOf: (campusId, since) => facility.service.seatProblems(campusId, since),
+    toStaff: (actor, host, problem) => facility.service.fromMap(actor, host, problem),
     ...clock,
   })
 
@@ -483,6 +486,7 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     seatOf: presence.seatOf,
     slack: config.slack ?? null,
     markBroken: (actor, host) => map.service.reportBroken(actor, host),
+    fixed: (campusId, host) => createBrokenSeats(db).clear(campusId, host),
     staffActive: (id) => staff.service.active(id),
     ...clock,
   })

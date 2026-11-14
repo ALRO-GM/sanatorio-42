@@ -48,6 +48,36 @@ const BATCH_SIZE = 400
 /** La nota de quien lo hace todo, bonus incluidos. */
 const PERFECT_MARK = 125
 
+/**
+ * El slug de un proyecto sin la marca de su versión (#99 del buzón): en 42, el
+ * mismo proyecto tiene varias ids según el cursus o el plan (`push_swap`,
+ * `42cursus-push_swap` y `42next-push_swap`). Los exámenes de los dos planes
+ * no son el mismo (uno en C y otro en Python): `42next-exam-rank-*` se queda
+ * como está.
+ */
+const baseSlug = (column: string): string =>
+  `(CASE WHEN ${column} LIKE '42cursus-%' THEN substr(${column}, 10)
+         WHEN ${column} LIKE '42next-%' AND ${column} NOT LIKE '42next-exam-rank-%'
+           THEN substr(${column}, 8)
+         ELSE ${column} END)`
+
+/**
+ * Condición SQL: `column` es uno de esos proyectos o el mismo con otra id
+ * (`baseSlug`). Va con un argumento, `listArg(ids)`.
+ */
+const sameProject = (column: string): string =>
+  `${column} IN (SELECT twin.id FROM projects mine
+                 JOIN projects twin
+                   ON twin.id = mine.id OR ${baseSlug('twin.slug')} = ${baseSlug('mine.slug')}
+                 WHERE ${inList('mine.id')})`
+
+/**
+ * Condición SQL: la fila `pu` está aprobada. Vale `validated` aunque la fila
+ * diga `in_progress`: quien aprobó y se apunta otra vez (para subir la nota)
+ * sigue habiéndolo aprobado (#99; en Madrid, unas 7 700 filas así).
+ */
+const PASSED = '(COALESCE(pu.validated, 0) = 1)'
+
 /** Id del 42cursus en 42: el common core y lo que viene después. */
 const CORE_CURSUS_ID = 21
 
@@ -413,7 +443,8 @@ export function createReplicaRepository(db: Db) {
 
     /**
      * La mejor nota con la que cada una de esas personas aprobó alguno de esos
-     * proyectos. Quien no aprobó ninguno no sale.
+     * proyectos, con cualquiera de sus ids (`sameProject`) y aunque se haya
+     * vuelto a apuntar (`PASSED`). Quien no aprobó ninguno no sale.
      */
     async bestMarksIn(
       logins: readonly string[],
@@ -428,8 +459,8 @@ export function createReplicaRepository(db: Db) {
               FROM users u
               JOIN project_users pu ON pu.user_id = u.id
               WHERE ${inList('u.login')}
-                AND ${inList('pu.project_id')}
-                AND pu.status = 'finished' AND pu.validated = 1 AND pu.final_mark IS NOT NULL
+                AND ${sameProject('pu.project_id')}
+                AND ${PASSED} AND pu.final_mark IS NOT NULL
               GROUP BY u.login`,
         args: [listArg(logins), listArg(projectIds)],
       })
@@ -537,9 +568,12 @@ export function createReplicaRepository(db: Db) {
      * solo los accionables:
      *
      * - quien lo está haciendo (`in_progress`) y sigue activo en 42, y
-     * - quien lo aprobó (`finished` y validado) **y** está de guardia: disponible
-     *   y con puesto. Un especialista fuera de turno no aporta a la lista, y en
+     * - quien lo aprobó (validado, aunque se haya vuelto a apuntar) **y** está
+     *   de guardia: disponible y con puesto. Un especialista fuera de turno no aporta a la lista, y en
      *   proyectos comunes son cientos.
+     *
+     * El proyecto cuenta con todas sus ids (`sameProject`, #99): quien aprobó
+     * `push_swap` sabe de `42cursus-push_swap`.
      *
      * El puesto solo se cree si la foto del campus es posterior a
      * `presenceSince`; si no, sale `null` antes que afirmar algo viejo.
@@ -558,7 +592,7 @@ export function createReplicaRepository(db: Db) {
                      u.image                    AS image,
                      pr.host                    AS location,
                      COALESCE(a.available, 0)   AS available,
-                     pu.status                  AS status,
+                     CASE WHEN ${PASSED} THEN 'finished' ELSE pu.status END AS status,
                      pu.final_mark              AS mark,
                      COALESCE(pf.pre_review, 0) AS pre_review
               FROM project_users pu
@@ -567,22 +601,22 @@ export function createReplicaRepository(db: Db) {
               LEFT JOIN presence pr   ON pr.user_id = u.id AND pr.seen_at >= ?
               LEFT JOIN availability a ON a.login = u.login
               LEFT JOIN profiles pf    ON pf.login = u.login
-              WHERE pu.project_id = ?
+              WHERE ${sameProject('pu.project_id')}
                 AND u.login <> ?
                 AND ${audienceWhere(params.pool === true)}
                 AND (
-                  (pu.status = 'in_progress' AND u.active = 1)
-                  OR (pu.status = 'finished' AND pu.validated = 1
-                      AND a.available = 1 AND pr.host IS NOT NULL)
+                  (pu.status = 'in_progress' AND NOT ${PASSED} AND u.active = 1)
+                  OR (${PASSED} AND a.available = 1 AND pr.host IS NOT NULL)
                 )
               ORDER BY (pr.host IS NOT NULL AND COALESCE(a.available, 0) = 1) DESC,
                        (pr.host IS NOT NULL) DESC,
+                       ${PASSED} DESC,
                        pu.updated_at_42 DESC
               LIMIT ?`,
         args: [
           params.campusId,
           params.presenceSince,
-          params.projectId,
+          listArg([params.projectId]),
           params.excludeLogin ?? '',
           params.campusId,
           params.limit ?? 300,

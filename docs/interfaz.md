@@ -126,6 +126,7 @@ de datos.
 | Panel de gestión | Pestaña Mantenimiento: ponerlo y quitarlo, mensaje y hora prevista; mientras dura, franja arriba para quien administra y pantalla «No disponible» con cuenta atrás para el resto (`docs/mantenimiento.md`) | Admins | La pantalla del resto no es una sección: sustituye a toda la web |
 | Panel de gestión | Pestaña Límites (2026-11-09): los topes por persona con lo de fábrica, lo de todo el mundo y, eligiendo a alguien con el buscador de personas, lo suyo; cambiar o volver a lo de fábrica (`docs/limites.md`) | Admins | Pestaña propia y no bloque de Permisos: son trece topes con su tabla, y valen también para todo el mundo |
 | Clústeres | Avisar de un problema (edificio u ordenador) | N | Al lado del plano, donde se ve el puesto |
+| Clústeres | Al marcar un puesto roto, «¿Qué falla?»: el ordenador o un periférico, en la misma línea bajo el plano; el puesto dice luego qué falla (#82) | N | Un bloque dentro del aviso de puesto que ya había: el staff no arregla igual una cosa que otra, y antes el aviso del mapa no le llegaba |
 | Cabecera | Burbuja de sugerencias: se arrastra hasta un sitio (o se pulsa), panel con dónde, el problema y tu propuesta; va al buzón de incidencias como mejora con el sitio (`docs/sugerencias.md`) | S | Contar que algo no se entiende es justo para quien se pierde; pequeña y sin abrir nada hasta que se usa |
 | Pestañas | Clasificaciones (en Campus; en el código, `estadisticas`) | N | Clasificaciones: el simplificado no enseña rankings |
 | Estadísticas | Cifras del campus y clasificación de cada sección, con fotos | N | La sección en sí |
@@ -161,6 +162,9 @@ de datos.
 | Exámenes | Cuánto se tarda en cada círculo | D | Estadística |
 | Exámenes | Filtros de plan (C o Python), exámenes (C, Nexus o los dos) y kickoffs; un rango por fila con C y Nexus juntos (#81) | N | Es lo que se viene a mirar |
 | Exámenes | Cada intento (nota mediana, aprobados, personas); en qué intento se aprueba, los 3 primeros y el resto al desplegar | D | Detalle (2026-10-25: sin tabla de kickoffs ni black hole, que no eran de fiar). Desde el 2026-11-01, los dos desgloses (cada intento y la cola de «en qué intento») salen plegados en todos los modos, pedido por Alberto |
+| Exámenes | Filtros en un panel a la derecha y las cifras a la izquierda (`ChartWithRail`); comparar dos kickoffs con dos `StepPicker` y una tabla, una columna por kickoff (#81) | D | Pedido en el buzón (#81, 2026-11): comparar kickoffs es lo más detallado, así que va en el modo de datos |
+| Exámenes | Black hole por círculo, en cifras y en % (#81) | D | La regla de 2026-10-25 quitaba el black hole porque la fecha de 42 no es de fiar; ahora cuenta lo que 42 hace al echar a alguien (`docs/blackhole.md`), que sí lo es. Sin nombres |
+| Exámenes | Historial del black hole (quién se fue y quién lo tiene más cerca), en dos pestañas | D | Solo quien administra (#81): lleva nombres y fechas de cada cual, y no es algo que el resto del campus tenga por qué ver |
 | Pie | Idioma y «Más ajustes» (abre Personalizar: modo, tema, texto, daltonismo, zen) | S | Accesibilidad |
 | Bienvenida | Seis pasos (siete con la Red y los clústeres, que salen solo si el modo elegido en el primero los enseña): saludo con el modo, perfil, Peer to peer, disponible, Proyectos con Sprints y Pizarras, y el calendario con los ajustes | S | No presentar lo que no va a salir; de diez pasos a seis o siete (2026-11); los textos dicen que el modo y el tema están en «Más ajustes», no sueltos en el pie |
 | Pie | Campus | N | Casi nadie cambia de campus |

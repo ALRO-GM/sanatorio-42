@@ -33,7 +33,9 @@ import {
   examineeStatus,
   expectedExamSlug,
   liveRefreshPlan,
+  sessionResult,
 } from './exams.rules.js'
+import type { SessionAttempt } from './exams.rules.js'
 import { isoAt } from '../../core/time.js'
 
 /** Hasta cuánto antes se enseña el siguiente examen. */
@@ -468,7 +470,7 @@ export function createExamsLive(options: ExamsLiveOptions) {
     },
   }
 
-  /** El último intento de cada una de esas personas durante el examen (de `since` a `until`). */
+  /** Lo que sacó cada una de esas personas durante el examen (de `since` a `until`). */
   async function latestAttempts(
     logins: readonly string[],
     since: string,
@@ -486,16 +488,27 @@ export function createExamsLive(options: ExamsLiveOptions) {
             ORDER BY a.at`,
       args: [JSON.stringify(logins), since, until],
     })
+    const byLogin = new Map<string, SessionAttempt[]>()
 
-    // Por orden de fecha: el último pisa a los anteriores.
     for (const row of result.rows) {
-      found.set(toText(row.login), {
-        projectId: toNumber(row.project_id),
-        mark: row.mark === null ? null : toNumber(row.mark),
-        passed: row.validated !== null && toNumber(row.validated) === 1,
-        // Cerrado: 42 ya dijo si valía o no (un intento abierto aún no lo dice).
-        closed: row.validated !== null,
-      })
+      const login = toText(row.login)
+
+      byLogin.set(login, [
+        ...(byLogin.get(login) ?? []),
+        {
+          projectId: toNumber(row.project_id),
+          mark: row.mark === null ? null : toNumber(row.mark),
+          // Abierto, aún no lo dice: `null`.
+          validated: row.validated === null ? null : toNumber(row.validated) === 1,
+        },
+      ])
+    }
+
+    // Un equipo vacío abierto después de cerrar no tapa la nota (`sessionResult`).
+    for (const [login, attempts] of byLogin) {
+      const outcome = sessionResult(attempts)
+
+      if (outcome !== undefined) found.set(login, outcome)
     }
 
     return found

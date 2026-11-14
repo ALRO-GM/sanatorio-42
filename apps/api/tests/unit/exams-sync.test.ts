@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { actor, MADRID, useCommunity } from '../helpers/community.js'
+import { actor, expectCode, MADRID, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
 import { projectUser } from '../helpers/fixtures.js'
 
@@ -82,6 +82,51 @@ describe('exámenes', () => {
     ]) {
       await expect(services.exams.stats(actor('eva'), bad)).rejects.toThrow()
     }
+  })
+
+  it('cuenta a quien solo tiene su 42cursus y, a quien administra, le da el historial del black hole (#81)', async () => {
+    const { replica } = services.repositories
+    const day = 86_400_000
+    const now = community.clock.now()
+    const iso = (ms: number): string => new Date(ms).toISOString()
+
+    await replica.ingestProjectUsers(
+      [examRow('ana', [[100, true, '2026-01-01T10:00:00Z']])],
+      MADRID,
+    )
+    // Dos que 42 no ha mandado con el campus ni tienen proyectos copiados: una
+    // se fue hace dos meses; la otra sigue, con la fecha en diez días.
+    for (const [id, login, endAt, blackholedAt, active] of [
+      [7001, 'ida', iso(now - 60 * day), null, 0],
+      [7002, 'cerca', null, iso(now + 10 * day), 1],
+    ] as const) {
+      await community.db.execute({
+        sql: `INSERT INTO core_cursus
+                (user_id, login, campus_id, begin_at, end_at, blackholed_at, grade, active, updated_at)
+              VALUES (?, ?, ?, '2025-10-06T08:00:00Z', ?, ?, 'Cadet', ?, ?)`,
+        args: [id, login, MADRID, endAt, blackholedAt, active, iso(now)],
+      })
+    }
+
+    const stats = await services.exams.stats(actor('eva'))
+
+    // Antes, sin proyectos copiados, no contaban.
+    expect(stats.people).toBe(3)
+    expect(stats.kickoffs).toContainEqual({ month: '2025-10', classic: 2, next: 0 })
+    expect(stats.blackhole[0]).toEqual({ circle: 0, reached: 2, absorbed: 1 })
+
+    // Con nombres: solo quien administra.
+    await expectCode(services.exams.blackholeList(actor('eva')), 'forbidden')
+
+    const list = await services.exams.blackholeList(actor('eva', { admin: true }), {
+      kickoffs: '2025-10',
+    })
+
+    expect(list.absorbed.map((one) => one.login)).toEqual(['ida'])
+    expect(list.closest.map((one) => one.login)).toEqual(['cerca'])
+    await expect(
+      services.exams.blackholeList(actor('eva', { admin: true }), { track: 'pascal' }),
+    ).rejects.toThrow()
   })
 
   it('la copia de fondo baja los intentos antiguos página a página, y para al acabar', async () => {

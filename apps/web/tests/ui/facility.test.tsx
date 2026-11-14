@@ -1,4 +1,4 @@
-import { cleanup, screen } from '@testing-library/react'
+import { cleanup, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -54,9 +54,24 @@ describe('un ordenador que no funciona', () => {
 
     await user.click(must(free[0], 'un puesto libre'))
     await user.click(screen.getByRole('button', { name: text('map.reportBroken') }))
+    // Se pregunta qué falla (#82): el ordenador o un periférico.
+    const what = screen.getByRole('group', { name: text('map.whatFails') })
+
+    await user.click(
+      within(what).getByRole('button', { name: text('facility.category.peripheral') }),
+    )
+    expect(
+      await screen.findByText(
+        text('map.broken.peripheral'),
+        { selector: 'span' },
+        { timeout: 5000 },
+      ),
+    ).toBeTruthy()
     expect(
       await screen.findByRole('button', { name: text('map.fixed') }, { timeout: 5000 }),
     ).toBeTruthy()
+    // Y le llega al staff, con lo que falla.
+    expect((await api.getStaffFacility())[0]).toMatchObject({ category: 'peripheral' })
     await user.click(screen.getByRole('button', { name: text('map.fixed') }))
     expect(
       await screen.findByRole('button', { name: text('map.reportBroken') }, { timeout: 5000 }),

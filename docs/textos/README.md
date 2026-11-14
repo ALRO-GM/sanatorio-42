@@ -11,7 +11,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [avisos](avisos.md) | 54 | 0 | 0 | 0 | 0 |
 | [buzon](buzon.md) | 142 | 0 | 0 | 0 | 0 |
 | [calendario](calendario.md) | 105 | 0 | 0 | 0 | 0 |
-| [clusters](clusters.md) | 82 | 0 | 0 | 0 | 0 |
+| [clusters](clusters.md) | 85 | 0 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 0 |
 | [comun](comun.md) | 534 | 0 | 0 | 0 | 0 |
 | [curso-docker](curso-docker.md) | 33 | 0 | 0 | 0 | 0 |
@@ -21,7 +21,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [curso-shell](curso-shell.md) | 66 | 0 | 0 | 0 | 0 |
 | [demos](demos.md) | 372 | 0 | 0 | 0 | 0 |
 | [estadisticas](estadisticas.md) | 219 | 0 | 0 | 0 | 0 |
-| [examenes](examenes.md) | 71 | 0 | 0 | 0 | 0 |
+| [examenes](examenes.md) | 84 | 0 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 264 | 0 | 0 | 0 | 0 |
 | [gestion](gestion.md) | 750 | 0 | 71 | 71 | 71 |
 | [guardia](guardia.md) | 80 | 0 | 0 | 0 | 0 |

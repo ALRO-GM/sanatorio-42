@@ -18,6 +18,7 @@ import {
   brokenSeats,
 } from './state'
 import { closeStaffSession } from './staff'
+import { reportSeatProblem } from './facility'
 import { piscineProjects } from './piscine'
 import { poolMocking } from './pool'
 
@@ -126,9 +127,10 @@ export const peersMock: Pick<
 
     return buildMap()
   },
-  async reportBrokenSeat(host) {
+  async reportBrokenSeat(host, kind) {
     await delay(80)
-    brokenSeats.set(host.toLowerCase(), { by: ME.login, at: new Date().toISOString() })
+    brokenSeats.set(host.toLowerCase(), { by: ME.login, at: new Date().toISOString(), kind })
+    reportSeatProblem(host, kind)
   },
 
   async clearBrokenSeat(host) {

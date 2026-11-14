@@ -292,6 +292,7 @@ Lo que va fuera de la página (temporizador, pantalla completa, sonido) está en
 | Los piscineros siguen en el plano (la sala tal cual), pero un estudiante no ve su foto | N | Estudiantes | `ClusterMapView.tsx` |
 | «N de M personas tienen Peer4U abierto» | D | Todos `[clusters.online]` | `ClustersPage.tsx` |
 | Marcar o desmarcar un puesto roto | N | Todos `[clusters.broken]` | `ClustersPage.tsx` |
+| Al marcarlo, decir qué falla (el ordenador o la pantalla, el teclado o el ratón): el aviso llega al staff y, al resolverlo, el puesto vuelve a estar libre (#82) | N | Todos `[clusters.broken]` | `ClusterMapView.tsx`, `map.service.ts`, `facility.service.ts` |
 | Avisar al staff de un problema del edificio: qué, dónde (tu puesto si no se dice) y nota | N | Todos `[clusters.report]` | `features/facility/FacilityForm.tsx` |
 | Mapa de calor: horas de uso de cada ordenador por periodo | N | Todos | `SeatHeatCard.tsx` |
 | Demostración | N | Todos | `ClustersTour.tsx` |
@@ -353,6 +354,9 @@ Detalle: [blackhole.md](blackhole.md).
 | «En vivo» en la pestaña Campus y en Exámenes mientras hay examen | S | Todos | `app/Nav.tsx` |
 | Estadísticas de cada Exam Rank, con filtros de plan, exámenes y kickoffs | N | Todos `[examenes.stats]` | `ExamStatsPanel.tsx` |
 | Detalle de cada intento y días por círculo, plegados hasta pulsar | D | Todos `[examenes.stats]` | `ExamStatsPanel.tsx` |
+| Opciones en un panel a la derecha; comparar dos kickoffs una al lado de la otra (aprobados en cifras y %, intentos de media) (#81) | D | Todos `[examenes.stats]` | `ExamStatsPanel.tsx` |
+| Black hole por círculo: de quien llegó a cada círculo, a cuánta gente se tragó en él, en cifras y en % (por lo que 42 hizo al echarla, `docs/blackhole.md`) (#81) | D | Todos `[examenes.stats]` | `ExamStatsPanel.tsx`, `exams.rules.ts` |
+| Historial del black hole de la selección: quién se fue (lo más reciente primero) y quién lo tiene más cerca (#81) | D | Admins | `ExamStatsPanel.tsx`, `GET /admin/exams/blackhole` |
 | Elegir exámenes de estudiantes o de piscineros | N | Solo la vista sin límites del dueño | `ExamsPage.tsx` |
 | Demostración | N | Todos | `ExamsTour.tsx` |
 

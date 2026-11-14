@@ -1382,6 +1382,19 @@ resaltado). Cada `occupant` lleva `online`: `true` si tiene Sanatorio abierto.
 POST /map/seats/:host/broken → 204: ese puesto no funciona (se ve así una
 semana). DELETE /map/seats/:host/broken → 204: ya funciona.
 
+- Cuerpo opcional `{ kind: 'computer' | 'peripheral' }`: qué falla, el
+  ordenador o la pantalla, el teclado o el ratón (#82). Sin él, `computer`;
+  otro valor, `400`. El aviso llega también al staff como un aviso del
+  edificio (`facility_reports`, sin contar en su tope diario).
+- En el plano, `broken` de cada puesto es `{ by, at, kind }`; `kind` sale del
+  último aviso al staff de ese puesto aún sin resolver (`null` si no lo hay).
+- Resolver en `/admin/facility` o `/staff/facility` un aviso del ordenador o de
+  sus periféricos quita la marca de roto de ese puesto.
+- Quien aprobó un proyecto lo aprobó con cualquiera de sus ids (`push_swap`,
+  `42cursus-push_swap`, `42next-push_swap`; los exámenes de C y de Python no
+  se mezclan) y aunque se haya vuelto a apuntar (`validated` sin `finished`):
+  así cuentan `finishedMine` y los seniors de `GET /projects/:id/peers` (#99).
+
 - "Abierto" es haber pedido `GET /pulse` en los últimos 6 minutos: es lo único
   que toda pestaña pregunta de fondo, y se anota como mucho una vez por minuto.
 
@@ -2440,10 +2453,28 @@ DELETE /admin/hidden/:login     → HiddenPerson[]: la vuelve a enseñar (solo a
 
 ```
 GET  /exams/stats?track=all|classic|next&kickoffs=AAAA-MM,…  → ExamStats. Por plan y kickoff.
+     (Un intento es un equipo cerrado: el vacío que 42 abre al cerrar otro no cuenta, #117.
+     Para comparar dos kickoffs, la web la pide una vez por cada una.)
+GET  /admin/exams/blackhole?track=…&kickoffs=…  → ExamBlackholeList. Solo quien administra (#81).
 GET  /exams/live          → LiveExam. El examen en marcha en tu campus o el siguiente (24 h).
 POST /exams/live/refresh  → LiveExam. Lo mismo, pidiendo antes lo nuevo a 42 si toca.
 ```
 
+- La gente del campus es quien consta en él (`campus_members`) **o** tiene en
+  él su 42cursus (`core_cursus`); su kickoff sale de su inicio en la web, si
+  no del de su 42cursus y, si no, de su primer proyecto (#81: antes quien no
+  tenía proyectos copiados ni había entrado en la web no contaba).
+- `blackhole` (`CircleBlackhole[]`): de la selección, por círculo, cuánta gente
+  llegó (`reached`) y a cuánta se tragó en él (`absorbed`). Cuenta el estado
+  de `docs/blackhole.md` (lo que 42 hace al echar a alguien, no la fecha);
+  quien está en duda no entra. Quien terminó llegó a todos; sin proyectos del
+  common core, se está en el 0. Sin nombres: lo ve todo el mundo.
+- `GET /admin/exams/blackhole`: la misma selección (`track`, `kickoffs`, los
+  mismos `400`), con nombres: `absorbed`, a quién se tragó (lo más reciente
+  primero, por `end_at`), y `closest`, quien sigue con la fecha de black hole
+  de 42 por llegar (lo más cercano primero). Como mucho 300 en cada lista.
+  Solo quien administra (`assertAdmin` y el candado de `/admin/…`), porque
+  lleva nombres y fechas de cada cual.
 - `track`: el plan de la gente (`classic`, el core en C; `next`, el core en
   Python). `kickoffs`: meses de las kickoffs reales del campus (como en
   `/stats/ranking`), separados por comas; sin él,

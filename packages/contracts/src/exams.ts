@@ -53,7 +53,35 @@ export type ExamStats = {
   people: number
   /** Todas las kickoffs del campus, de la más reciente a la más antigua, para elegir. */
   kickoffs: ExamKickoff[]
+  /** A cuánta gente de la selección se tragó el black hole en cada círculo (#81). */
+  blackhole: CircleBlackhole[]
 }
+
+/**
+ * El black hole en un círculo, de la gente de la selección de la que se sabe
+ * cómo acabó (`docs/blackhole.md`; quien está en duda no cuenta): cuántas
+ * personas llegaron a ese círculo y a cuántas se tragó en él.
+ */
+export type CircleBlackhole = { circle: number; reached: number; absorbed: number }
+
+/** Alguien en el historial del black hole (`GET /admin/exams/blackhole`). */
+export type BlackholePerson = {
+  login: string
+  image: string | null
+  track: 'classic' | 'next'
+  /** Su kickoff (`AAAA-MM`), si se sabe. */
+  kickoff: string | null
+  /** El círculo en que va o en que se quedó. */
+  circle: number
+  /** Cuándo se lo tragó (`absorbed`) o cuándo le llega la fecha de 42 (`closest`). ISO. */
+  at: string
+}
+
+/**
+ * `GET /admin/exams/blackhole`: solo para quien administra (#81). Quién se ha
+ * ido por el black hole, lo más reciente primero, y quién lo tiene más cerca.
+ */
+export type ExamBlackholeList = { absorbed: BlackholePerson[]; closest: BlackholePerson[] }
 
 /** Alguien apuntado a un examen que está en marcha. */
 export type LiveExaminee = {
