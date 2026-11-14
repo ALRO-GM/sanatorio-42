@@ -121,6 +121,14 @@ un índice que no deje leer el texto.
 - **Guárdala también fuera del servidor** (el gestor de contraseñas de Alberto
   y una copia en papel o en un USB aparte), y **nunca** junto a las copias.
 
+- **Dónde está ahora** (decidido por Alberto el 2026-11-14: prefiere poder
+  recuperarla a lo más seguro): además de `infra/.env`, en el servidor en
+  `~/claves/peer4u-data-key` (fuera de `/opt/sanatorio`, así que no entra en
+  las copias ni en los despliegues) y en su ordenador en
+  `~/claves/peer4u-data-key.txt`, las dos solo legibles por su dueño. Quien
+  tenga una copia de la base y uno de esos dos ficheros puede leer lo cifrado:
+  las copias que salen del servidor van además cifradas con gpg.
+
 ### Rotar la clave
 
 1. Genera la nueva: `openssl rand -base64 32`.
