@@ -10,6 +10,8 @@
 import { ALGORITHMS } from './algorithms.js'
 import { C_BASICS } from './c-basics.js'
 import { COURSES } from './courses.js'
+import { COURSE_NET } from './course-net.js'
+import { COURSE_RAG } from './course-rag.js'
 import { CPP } from './cpp.js'
 import { GIT } from './git.js'
 import { GENERAL } from './general.js'
@@ -48,6 +50,8 @@ export const BANK: readonly Concept[] = [
   ...PYTHON,
   ...GIT,
   ...COURSES,
+  ...COURSE_NET,
+  ...COURSE_RAG,
   ...PISCINE_SHELL,
   ...PISCINE_C00_C03,
   ...PISCINE_C04_C07,

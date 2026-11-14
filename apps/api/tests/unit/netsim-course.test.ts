@@ -326,6 +326,6 @@ describe('curso de NetPractice: forma del camino', () => {
         }
       }
     expect(unitIn(unit('net-octets'), 'ca').title).toBe(unit('net-octets').es.title)
-    expect(unitIn(unit('net-octets'), 'fr').title).toBe(unit('net-octets').en.title)
+    expect(unitIn(unit('net-octets'), 'fr').title).toBe(unit('net-octets').fr?.title)
   })
 })

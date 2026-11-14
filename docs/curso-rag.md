@@ -330,6 +330,20 @@ y API HTTP.
   banco de pruebas (`Bench.tsx`) y la demostración (`RagCourseTour.tsx`).
   Estilos en `styles/ragcourse.css`, con las variables del tema.
 
+## Preguntas en Not-games
+
+15 conceptos generales (`needs: {}`) en
+`apps/api/src/modules/quiz/bank/course-rag.ts`, con inglés, francés y Repaso:
+buscar antes de responder, qué se indexa, el corte que parte la respuesta,
+normalizar, IDF y k1 (principiante); léxica, semántica o híbrida, RRF,
+presupuesto del prompt, «no lo sé» (intermedio); recall@k, MRR y precisión,
+afinar sin mirar la prueba, caché, API y diagnóstico por etapas (avanzado).
+La mala principal de cada uno es el error típico de su unidad y lo afirmado
+se comprobó con el motor (`ask`, `judge`, `evaluate`, `buildPrompt`, `rrf`,
+`runWorkload`, `handle`). No se pregunta lo que solo vale para el juguete
+(sus embeddings a mano, el corpus de Colmena): solo lo que también pasa en un
+RAG de verdad.
+
 ## Lo que el simulador hace distinto de un RAG de verdad
 
 - Los embeddings son una lista de conceptos hecha a mano, no un modelo: lo
@@ -342,10 +356,15 @@ y API HTTP.
 - El corpus tiene 15 documentos y unas decenas de trozos: las cifras se
   mueven a saltos, y por eso cada objetivo sale de ejecutar su solución.
 
+## Francés
+
+El francés vive aparte, en `packages/ragsim/src/course/fr/` (un fichero por nivel
+y los bloques con su pieza), por id de unidad; `course/index.ts` lo une a `es` y
+`en`. Lo que no se traduce: el código, las cifras, las frases del corpus (en
+castellano en todos los idiomas) y los nombres de los mandos. Lo comprueba
+`apps/api/tests/unit/netragcourse-fr.test.ts`.
+
 ## Dudas abiertas
 
 - Las estrellas por comprobaciones son nuevas (`tryGoals`): el margen (una de
   más) es a ojo y se ajustará viendo cómo se juega.
-- No hay preguntas del curso en Not-games todavía (la pieza 7 de la plantilla
-  de explicación): el error típico de cada unidad ya está escrito para hacerlas.
-- El contenido está en castellano e inglés; en francés sale el inglés.

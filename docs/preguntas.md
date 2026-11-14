@@ -85,6 +85,16 @@ motor de git), y entran 3 de los otros cursos en `courses.ts`
 (`review-courses.ts`). Total: 481. Las tablas de abajo siguen siendo las del
 2026-11-01.
 
+2026-11-14: entran las preguntas de los cursos de NetPractice
+(`course-net.ts`, 14 conceptos y 32 formas, tema `redes`) y de RAG
+(`course-rag.ts`, 15 conceptos y 33 formas, tema `rag`), generales y con su
+Repaso (`review-courses.ts`) en los tres idiomas. Las de NetPractice no
+repiten las del proyecto de 42 (`network.ts`, con `needs.projects`):
+preguntan por lo de cada unidad y por los mensajes del simulador. Cada
+respuesta se comprobó en el motor del curso (`packages/netsim`,
+`packages/ragsim`) y las cuentas de direcciones, también con `ipaddress` de
+Python. Total: 510.
+
 Abajo, por tema y por proyecto (el primer slug de `needs.projects`; en la
 piscina y en los CPP, el módulo donde se ve). Para rehacerlas, agrupa `BANK`
 por `topic` y por ese slug.

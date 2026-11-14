@@ -11,6 +11,8 @@ import type { ConceptText } from '../types.js'
 import { ALGORITHMS_FR } from './algorithms.js'
 import { C_BASICS_FR } from './c-basics.js'
 import { COURSES_FR } from './courses.js'
+import { COURSE_NET_FR } from './course-net.js'
+import { COURSE_RAG_FR } from './course-rag.js'
 import { CPP_FR } from './cpp.js'
 import { GENERAL_FR } from './general.js'
 import { GIT_FR } from './git.js'
@@ -30,6 +32,8 @@ export const BANK_FR: Readonly<Record<string, ConceptText>> = {
   ...PYTHON_FR,
   ...GIT_FR,
   ...COURSES_FR,
+  ...COURSE_NET_FR,
+  ...COURSE_RAG_FR,
   ...PISCINE_SHELL_FR,
   ...PISCINE_C00_C03_FR,
   ...PISCINE_C04_C07_FR,

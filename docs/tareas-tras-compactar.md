@@ -1,5 +1,14 @@
 # Tareas tras compactar (2026-11-01)
 
+## Sesión del 2026-11-14 (sin push ni despliegue sin permiso de Alberto)
+
+- [x] Producción en 6865a72, esquema 93, sana; `main` igual que `origin/main`.
+- [x] Worktrees de las ramas ya unidas borrados (las ramas se conservan).
+- [x] `npm run check` en verde (con Node 22: el shell no interactivo coge el
+  Node 18 del sistema si no se pone `~/.local/node/node-v22.23.3-linux-x64/bin` en el PATH).
+- [x] Preguntas de Not-games de NetPractice (14) y RAG (15), con inglés, francés y Repaso (`bank/course-net.ts`, `course-rag.ts`; banco: 510; sin commit).
+- [x] Francés de las unidades de NetPractice y RAG (en `course/fr/` de cada motor, test `netragcourse-fr`; sin commit).
+
 ## Tanda del 2026-11-13 (push y despliegue autorizados)
 
 Hecho y subido: muebles de las mejoras de espacio que se giran y se venden

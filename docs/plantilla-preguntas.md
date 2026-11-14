@@ -1,7 +1,8 @@
 # Plantilla para escribir preguntas
 
 Cómo se escribe una pregunta de conocimiento para el banco de Not-games, sea
-de un proyecto de 42, de un curso (shell, git, Docker, Kubernetes) o general.
+de un proyecto de 42, de un curso (shell, git, Docker, Kubernetes, NetPractice,
+RAG) o general.
 Complementa el criterio de coherencia de [preguntas.md](preguntas.md) (lo que
 ya comprueban los tests) con las reglas de enunciado, de opciones, de dónde
 salen las malas y de cómo se varía una pregunta para que no se aprenda de
@@ -166,7 +167,9 @@ nada:
   corta el efecto de quedarse con la mala.
 - La **pregunta de un curso** va en el banco como cualquier otra: general
   (`needs: {}`) y con el `id` empezando por el del curso (`shell-…`,
-  `git-…`, `docker-…`, `k8s-…`), con su entrada de Repaso (`review-*.ts`).
+  `git-…`, `docker-…`, `k8s-…`, `net-…`, `rag-…`), con su entrada de Repaso
+  (`review-*.ts`). Las de NetPractice y RAG van en `course-net.ts` y
+  `course-rag.ts`.
 - Las traducciones (`bank/en/`, `bank/fr/`) llevan las mismas formas, en el
   mismo orden y cantidad, como hoy.
 

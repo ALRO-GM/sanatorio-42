@@ -66,6 +66,11 @@ síntoma literal** (el mensaje que da el simulador) y el contraste, dentro del
 límite de palabras de su nivel (130, 100 y 80; un test lo comprueba en
 castellano y en inglés).
 
+El francés vive aparte, en `packages/netsim/src/course/fr/` (un fichero por nivel
+y los bloques), por id de unidad; `course/index.ts` lo une a `es` y `en`.
+`apps/api/tests/unit/netragcourse-fr.test.ts` comprueba que cada unidad lo tiene,
+con la forma del inglés y las mismas IP y prefijos.
+
 - **El ejemplo lo ejecuta el motor.** Empieza por la pregunta de predicción
   («Antes de verlo: si leo tuviera 192.168.2.20, ¿dónde moriría el paquete de
   ana?»). En un esquema, al pulsar «Lanzar el paquete» se ve la red **con el
@@ -241,5 +246,17 @@ tiene además su clasificación en Campus → Clasificaciones.
   terminal). Contarlas en el servidor pediría una llamada por comprobación.
 - Los límites de los jefes y las estimaciones son de partida: se ajustarán con
   `course_times` (curso `net`).
-- No hay francés en las unidades (se enseña el inglés) ni preguntas del curso
-  en Not-games todavía.
+
+## Preguntas en Not-games
+
+14 conceptos generales (`needs: {}`) en
+`apps/api/src/modules/quiz/bank/course-net.ts`, con inglés, francés y Repaso,
+repartidos por los tres niveles: dirección de red, máscaras válidas, cuántas
+caben, direcciones que no se dan, el switch, la puerta de enlace
+(principiante); destino de una ruta, ida y vuelta, ruta más concreta, salida
+a internet (intermedio); máscara demasiado ancha, resumir rutas, bucles y
+VLSM (avanzado). La mala principal de cada uno es el error típico de su
+unidad y lo afirmado se comprobó con el motor (`subnetOf`, `parseMask`,
+`parseDest`, `ping`). No repiten las del proyecto NetPractice de 42
+(`network.ts`). Como el simulador no hace NAT, la pregunta de direcciones
+privadas lo dice en el enunciado («muere al entrar en internet»).

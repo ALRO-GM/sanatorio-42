@@ -423,7 +423,3 @@ export const BLOCKS: Block[] = [
     jobs: ['backend', 'devops', 'ml'],
   },
 ]
-
-export function blockOf(n: number): Block | undefined {
-  return BLOCKS.find((block) => block.n === n)
-}

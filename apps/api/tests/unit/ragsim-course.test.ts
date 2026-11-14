@@ -382,7 +382,7 @@ describe('curso de RAG: forma del camino', () => {
         }
       }
     expect(unitIn(unit('rag-why'), 'ca').title).toBe(unit('rag-why').es.title)
-    expect(unitIn(unit('rag-why'), 'fr').title).toBe(unit('rag-why').en.title)
+    expect(unitIn(unit('rag-why'), 'fr').title).toBe(unit('rag-why').fr?.title)
   })
 
   it('cada bloque dice qué pieza de tu RAG ya puedes escribir, sin dar la solución', () => {

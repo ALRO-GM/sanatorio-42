@@ -4,9 +4,11 @@ import { courseText } from '@sanatorio/course'
 
 import { ADVANCED } from './advanced.js'
 import { BEGINNER } from './beginner.js'
+import { BLOCKS as BLOCKS_ES_EN } from './blocks.js'
 import { solutionOf } from './check.js'
+import { BLOCKS_FR, UNITS_FR } from './fr/index.js'
 import { INTERMEDIATE } from './intermediate.js'
-import type { Tier, Unit, UnitDef, UnitText } from './types.js'
+import type { Block, Tier, Unit, UnitDef, UnitText } from './types.js'
 
 /**
  * La solución de cada unidad se calcula la primera vez que se pide (hay que
@@ -21,13 +23,28 @@ function withSolution(unit: UnitDef): Unit {
   }) as Unit
 }
 
-export const UNITS: Unit[] = [...BEGINNER, ...INTERMEDIATE, ...ADVANCED].map(withSolution)
+/** El francés de algo, si lo hay (con `exactOptionalPropertyTypes`, un `undefined` no vale). */
+const frOf = <T>(fr: T | undefined): { fr?: T } => (fr === undefined ? {} : { fr })
+
+/** Las unidades con su francés: los textos de cada idioma se escriben aparte (`fr/`). */
+export const UNITS: Unit[] = [...BEGINNER, ...INTERMEDIATE, ...ADVANCED]
+  .map((unit) => ({ ...unit, ...frOf(UNITS_FR[unit.id]) }))
+  .map(withSolution)
+
+export const BLOCKS: Block[] = BLOCKS_ES_EN.map((block) => ({
+  ...block,
+  ...frOf(BLOCKS_FR[block.n]),
+}))
+
+export function blockOf(n: number): Block | undefined {
+  return BLOCKS.find((block) => block.n === n)
+}
 
 export function unitOf(id: string): Unit | undefined {
   return UNITS.find((unit) => unit.id === id)
 }
 
-/** Los textos de una unidad en ese idioma (inglés para `en` y `fr`; si no, castellano). */
+/** Los textos de una unidad en ese idioma (el francés, si lo tiene; si no, el inglés; y el castellano para el resto). */
 export function unitIn(unit: UnitDef, lang: string): UnitText {
   return courseText(unit, lang)
 }
@@ -41,7 +58,6 @@ export const FINALS: Record<Tier, string> = {
 
 export const TIERS: readonly Tier[] = ['beginner', 'intermediate', 'advanced']
 
-export { BLOCKS, blockOf } from './blocks.js'
 export { estimateOf, estimateOfBlock, estimateOfCourse, estimateOfTier } from './estimate.js'
 export {
   accepts,
