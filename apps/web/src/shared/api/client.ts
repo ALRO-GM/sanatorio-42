@@ -101,7 +101,7 @@ export const realApi: Api = {
     ),
   getExamBlackhole: ({ track, kickoffs }) =>
     getJson(
-      `/admin/exams/blackhole?track=${track}${kickoffs.length === 0 ? '' : `&kickoffs=${kickoffs.join(',')}`}`,
+      `/exams/blackhole?track=${track}${kickoffs.length === 0 ? '' : `&kickoffs=${kickoffs.join(',')}`}`,
     ),
   getLiveExam: (world) => getJson(`/exams/live${worldQuery(world)}`),
   refreshLiveExam: (world) => sendJson('POST', `/exams/live/refresh${worldQuery(world)}`),

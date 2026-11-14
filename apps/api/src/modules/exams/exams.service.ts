@@ -10,7 +10,8 @@ import type { ExamBlackholeList, ExamQuery, ExamStats } from '@sanatorio/contrac
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
-import { assertAdmin } from '../../core/actor.js'
+import { NO_POOL, seesFor } from '../../core/audience.js'
+import type { Audience } from '../../core/audience.js'
 import { parse } from '../../core/validation.js'
 import type { Curriculum } from '../replica/index.js'
 import type { ExamsRepository } from './exams.repository.js'
@@ -32,6 +33,8 @@ type ExamsServiceOptions = {
   exams: ExamsRepository
   sync: Pick<ExamsSync, 'progress'>
   curriculum: Pick<Curriculum, 'circles'>
+  /** Quién ve a quién: el historial del black hole no enseña piscineros ni ocultos. */
+  audience?: Audience
   now?: () => number
 }
 
@@ -63,6 +66,7 @@ export function createExamsService({
   exams,
   sync,
   curriculum,
+  audience = NO_POOL,
   now = Date.now,
 }: ExamsServiceOptions) {
   // Un agregado por campus que cambia despacio: dos visitas a la vez comparten
@@ -134,19 +138,17 @@ export function createExamsService({
     },
 
     /**
-     * El historial del black hole de la misma selección (#81): con nombres, así
-     * que solo para quien administra. Quién se fue no es algo que el resto del
-     * campus tenga por qué ver, y la fecha de quien lo tiene cerca, menos.
-     *
-     * @throws {DomainError} `forbidden` si quien pregunta no administra.
+     * El historial del black hole de la misma selección (#81): quién se fue y
+     * quién lo tiene más cerca, con nombres. Para cualquiera con sesión
+     * (decidido por Alberto el 2026-11-14): solo enseña lo que la réplica ya
+     * copia de 42 (login, foto, círculo y fechas de su 42cursus). No salen
+     * piscineros ni ocultos para quien mira (`seesFor`), ni quien se anonimizó.
      */
     async blackholeList(actor: Actor, input: unknown = {}): Promise<ExamBlackholeList> {
-      assertAdmin(actor)
-
       const query: ExamQuery = parse(querySchema, input)
-      const data = await snapshot(actor.campusId)
+      const [data, sees] = await Promise.all([snapshot(actor.campusId), seesFor(audience, actor)])
 
-      return blackholeLists(selectPeople(data.people, query), now())
+      return blackholeLists(selectPeople(data.people, query), now(), sees)
     },
   }
 }

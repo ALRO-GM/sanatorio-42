@@ -175,8 +175,8 @@ describe('Estadísticas de exámenes', () => {
     expect(screen.queryByRole('combobox', { name: text('exams.compare.first') })).toBeNull()
   }, 30_000)
 
-  it('en el modo de datos sale el black hole de cada círculo, en cifras y en % (#81)', async () => {
-    await openExams()
+  it('en el modo normal sale el black hole de cada círculo, en cifras y en % (#81)', async () => {
+    await openApp('#/examenes')
 
     const card = must(
       (await screen.findByText(text('exams.blackhole.title'), {}, WAIT)).closest('article'),
@@ -187,44 +187,64 @@ describe('Estadísticas de exámenes', () => {
     expect(within(card).getAllByText(pattern('exams.blackhole.line')).length).toBeGreaterThan(0)
   }, 30_000)
 
-  it('quien administra ve el historial: quién se fue y quién lo tiene más cerca (#81)', async () => {
+  it('en el modo normal, el historial: quién se fue y quién lo tiene más cerca (#81)', async () => {
     const user = userEvent.setup()
 
-    await openExams()
+    await openApp('#/examenes')
 
     const tabs = await screen.findByRole('tablist', { name: text('exams.blackhole.history') }, WAIT)
     const panel = (): HTMLElement => screen.getByRole('tabpanel')
+    const gone = await within(panel()).findByRole('link', { name: 'segfault' }, WAIT)
 
-    expect(await within(panel()).findByRole('link', { name: 'tvelasco' }, WAIT)).toBeTruthy()
+    // Cada nombre lleva a su perfil.
+    expect(gone.getAttribute('href')).toBe('#/expediente/segfault')
     await user.click(within(tabs).getByRole('tab', { name: text('exams.blackhole.closest') }))
-    expect(await within(panel()).findByRole('link', { name: 'amolina' }, WAIT)).toBeTruthy()
-    expect(within(panel()).queryByRole('link', { name: 'tvelasco' })).toBeNull()
+    expect(await within(panel()).findByRole('link', { name: 'racecond' }, WAIT)).toBeTruthy()
+    expect(within(panel()).queryByRole('link', { name: 'segfault' })).toBeNull()
   }, 30_000)
 
-  it('quien no administra no ve el historial ni lo pide', async () => {
+  it('quien no administra también ve el historial (decidido por Alberto, 2026-11-14)', async () => {
     const profile = await api.getProfile()
 
     vi.spyOn(api, 'getProfile').mockResolvedValue({ ...profile, admin: false })
     const history = vi.spyOn(api, 'getExamBlackhole')
 
-    await openExams()
-    await screen.findByText(text('exams.blackhole.title'), {}, WAIT)
-    await settle(300)
+    await openApp('#/examenes')
+    await screen.findByRole('tablist', { name: text('exams.blackhole.history') }, WAIT)
 
-    expect(screen.queryByRole('tablist', { name: text('exams.blackhole.history') })).toBeNull()
-    expect(history).not.toHaveBeenCalled()
+    expect(history).toHaveBeenCalled()
+    expect(await screen.findByRole('link', { name: 'segfault' }, WAIT)).toBeTruthy()
+  }, 30_000)
+
+  it('con la lista llena (300) se pintan todas, sin cortarse ni romperse', async () => {
+    const many = Array.from({ length: 300 }, (_, index) => ({
+      login: `bug${String(index)}`,
+      image: null,
+      track: 'classic' as const,
+      kickoff: null,
+      circle: index % 7,
+      at: new Date(Date.UTC(2026, 0, 1) + index * 86_400_000).toISOString(),
+    }))
+
+    vi.spyOn(api, 'getExamBlackhole').mockResolvedValue({ absorbed: many, closest: [] })
+    await openApp('#/examenes')
+
+    const panel = await screen.findByRole('tabpanel', {}, WAIT)
+
+    await within(panel).findByRole('link', { name: 'bug299' }, WAIT)
+    expect(within(panel).getAllByRole('link')).toHaveLength(300)
   }, 30_000)
 
   it('si falla el historial, se dice; sin nadie con lo elegido, también', async () => {
     const history = vi.spyOn(api, 'getExamBlackhole').mockRejectedValue(new Error('caído'))
 
-    await openExams()
+    await openApp('#/examenes')
     await screen.findByRole('tablist', { name: text('exams.blackhole.history') }, WAIT)
     expect(await within(screen.getByRole('tabpanel')).findByRole('alert', {}, WAIT)).toBeTruthy()
 
     cleanup()
     history.mockResolvedValue({ absorbed: [], closest: [] })
-    await openExams()
+    await openApp('#/examenes')
     expect(await screen.findByText(text('exams.blackhole.nobody'), {}, WAIT)).toBeTruthy()
   }, 30_000)
 })

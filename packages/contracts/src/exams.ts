@@ -64,7 +64,7 @@ export type ExamStats = {
  */
 export type CircleBlackhole = { circle: number; reached: number; absorbed: number }
 
-/** Alguien en el historial del black hole (`GET /admin/exams/blackhole`). */
+/** Alguien en el historial del black hole (`GET /exams/blackhole`). */
 export type BlackholePerson = {
   login: string
   image: string | null
@@ -78,8 +78,10 @@ export type BlackholePerson = {
 }
 
 /**
- * `GET /admin/exams/blackhole`: solo para quien administra (#81). Quién se ha
- * ido por el black hole, lo más reciente primero, y quién lo tiene más cerca.
+ * `GET /exams/blackhole` (#81): para cualquiera con sesión desde el 2026-11-14
+ * (antes, solo quien administraba). Quién se ha ido por el black hole, lo más
+ * reciente primero, y quién lo tiene más cerca. Sin piscineros, ocultos ni
+ * cuentas anonimizadas.
  */
 export type ExamBlackholeList = { absorbed: BlackholePerson[]; closest: BlackholePerson[] }
 

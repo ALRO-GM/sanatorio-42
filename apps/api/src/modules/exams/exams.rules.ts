@@ -450,15 +450,26 @@ export function blackholeByCircle(people: readonly ExamPerson[]): CircleBlackhol
 export const BLACKHOLE_LIST_MAX = 300
 
 /**
- * El historial del black hole (#81; solo para quien administra): a quién se
- * tragó, lo más reciente primero, y quién lo tiene más cerca (la fecha de 42,
- * aún por llegar, de quien sigue), lo más cercano primero. Cada lista, como
- * mucho `BLACKHOLE_LIST_MAX`.
+ * Quien anonimizó su cuenta lleva un alias `anon-…` (`legal.service.ts`): no
+ * sale con nombre en ninguna lista del black hole, aunque cuente en las cifras.
+ */
+const isAnonymized = (login: string): boolean => login.toLowerCase().startsWith('anon-')
+
+/**
+ * El historial del black hole (#81; para cualquiera con sesión desde el
+ * 2026-11-14, decidido por Alberto): a quién se tragó, lo más reciente
+ * primero, y quién lo tiene más cerca (la fecha de 42, aún por llegar, de
+ * quien sigue), lo más cercano primero. Cada lista, como mucho
+ * `BLACKHOLE_LIST_MAX`, contada después de quitar a quien no sale (`shown`:
+ * piscineros y ocultos, `core/audience.ts`; y a quien se anonimizó), para
+ * que la lista no se quede corta por gente que no se enseña.
  */
 export function blackholeLists(
-  people: readonly ExamPerson[],
+  everyone: readonly ExamPerson[],
   now: number,
+  shown: (login: string) => boolean = () => true,
 ): { absorbed: BlackholePerson[]; closest: BlackholePerson[] } {
+  const people = everyone.filter((person) => !isAnonymized(person.login) && shown(person.login))
   const entry = (person: ExamPerson, at: string): BlackholePerson => ({
     login: person.login,
     image: person.image,

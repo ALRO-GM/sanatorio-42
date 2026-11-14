@@ -168,7 +168,10 @@ const BLACKHOLE = [
 
 const DAY = 86_400_000
 
-/** Gente inventada para el historial del black hole (solo lo ve quien administra). */
+/**
+ * Gente inventada para el historial del black hole (lo ve todo el mundo, también
+ * en la demostración pública): logins de broma, que no pueden ser de nadie real.
+ */
 function blackholePeople(
   logins: readonly string[],
   at: (index: number) => number,
@@ -200,11 +203,11 @@ export const examsMock: Pick<
 
     return {
       absorbed: blackholePeople(
-        ['tvelasco', 'nramos', 'icuesta', 'bpardo'],
+        ['segfault', 'nullptr', 'leakyfd', 'offbyone'],
         (index) => Date.now() - (index + 1) * 23 * DAY,
       ),
       closest: blackholePeople(
-        ['amolina', 'jsegura', 'cprieto'],
+        ['racecond', 'deadlock', 'zombieproc'],
         (index) => Date.now() + (index + 1) * 4 * DAY,
       ),
     }

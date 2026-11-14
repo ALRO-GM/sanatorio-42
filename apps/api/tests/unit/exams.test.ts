@@ -390,4 +390,29 @@ describe('el black hole por círculos y su historial (#81)', () => {
     expect(lists.closest[0]?.login).toBe('p1')
     expect(blackholeByCircle(many)[0]).toMatchObject({ reached: 5_000 })
   })
+
+  it('sin cuentas anonimizadas ni quien no se ve, y el tope se cuenta después de quitarlas', () => {
+    const gone = (login: string, index: number): ExamPerson =>
+      person({
+        userId: index,
+        login,
+        status: 'blackholed',
+        endAt: new Date(NOW - index * DAY).toISOString(),
+      })
+    // Los más recientes son de quien no puede salir: aun así, la lista se llena.
+    const hiddenFirst = [
+      ...Array.from({ length: 50 }, (_, index) => gone(`anon-${String(index)}`, index)),
+      ...Array.from({ length: 50 }, (_, index) => gone(`pisci${String(index)}`, 50 + index)),
+      ...Array.from({ length: BLACKHOLE_LIST_MAX + 10 }, (_, index) =>
+        gone(`p${String(index)}`, 100 + index),
+      ),
+    ]
+    const lists = blackholeLists(hiddenFirst, NOW, (login) => !login.startsWith('pisci'))
+
+    expect(lists.absorbed).toHaveLength(BLACKHOLE_LIST_MAX)
+    expect(lists.absorbed[0]?.login).toBe('p0')
+    expect(lists.absorbed.some((one) => /^(anon-|pisci)/.test(one.login))).toBe(false)
+    // Un alias en mayúsculas tampoco se cuela.
+    expect(blackholeLists([gone('ANON-ab12', 1)], NOW).absorbed).toEqual([])
+  })
 })

@@ -355,8 +355,8 @@ Detalle: [blackhole.md](blackhole.md).
 | Estadísticas de cada Exam Rank, con filtros de plan, exámenes y kickoffs | N | Todos `[examenes.stats]` | `ExamStatsPanel.tsx` |
 | Detalle de cada intento y días por círculo, plegados hasta pulsar | D | Todos `[examenes.stats]` | `ExamStatsPanel.tsx` |
 | Opciones en un panel a la derecha; comparar dos kickoffs una al lado de la otra (aprobados en cifras y %, intentos de media) (#81) | D | Todos `[examenes.stats]` | `ExamStatsPanel.tsx` |
-| Black hole por círculo: de quien llegó a cada círculo, a cuánta gente se tragó en él, en cifras y en % (por lo que 42 hizo al echarla, `docs/blackhole.md`) (#81) | D | Todos `[examenes.stats]` | `ExamStatsPanel.tsx`, `exams.rules.ts` |
-| Historial del black hole de la selección: quién se fue (lo más reciente primero) y quién lo tiene más cerca (#81) | D | Admins | `ExamStatsPanel.tsx`, `GET /admin/exams/blackhole` |
+| Black hole por círculo: de quien llegó a cada círculo, a cuánta gente se tragó en él, en cifras y en % (por lo que 42 hizo al echarla, `docs/blackhole.md`) (#81; desde el modo normal desde el 2026-11-14) | N | Todos `[examenes.stats]` | `ExamStatsPanel.tsx`, `exams.rules.ts` |
+| Historial del black hole de la selección: quién se fue (lo más reciente primero) y quién lo tiene más cerca, con enlace al perfil; sin cuentas anonimizadas, piscineros ni ocultos (#81; para todo el mundo desde el 2026-11-14, decidido por Alberto) | N | Todos `[examenes.stats]` | `ExamStatsPanel.tsx`, `GET /exams/blackhole` |
 | Elegir exámenes de estudiantes o de piscineros | N | Solo la vista sin límites del dueño | `ExamsPage.tsx` |
 | Demostración | N | Todos | `ExamsTour.tsx` |
 
