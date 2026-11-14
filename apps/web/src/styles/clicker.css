@@ -175,7 +175,10 @@
 }
 .cc-cps {
   color: var(--cc-dim);
-  font-size: 0.85rem;
+  /* Las cifras de debajo del contador, un poco más grandes (#111 del buzón):
+     a 0.85rem costaba leerlas de un vistazo. */
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
 }
 .cc-key {
   position: relative;
@@ -352,7 +355,9 @@
 }
 .cc-stats dd {
   margin: 0;
+  font-size: 1.05rem;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
   text-align: right;
 }
 .cc-recompile {
@@ -511,6 +516,11 @@
   font-size: 0.86rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.cc-building small {
+  /* El precio de cada edificio, legible (#111). */
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
 }
 .cc-building small.can {
   color: #6fe3a0;
@@ -991,7 +1001,7 @@ dialog.cc-pill-dialog h3::before {
 .cc-level {
   position: relative;
   width: min(250px, 84%);
-  height: 17px;
+  height: 20px;
   margin-top: 0.35rem;
   border: 1px solid var(--cc-line);
   border-radius: 9px;
@@ -1015,8 +1025,9 @@ dialog.cc-pill-dialog h3::before {
 .cc-level b {
   position: relative;
   display: block;
-  font-size: 0.75rem;
-  line-height: 15px;
+  /* Nivel y siguiente, un punto más grandes (#111). */
+  font-size: 0.82rem;
+  line-height: 18px;
   text-shadow: 0 1px 3px #000;
 }
 .cc-keywrap {

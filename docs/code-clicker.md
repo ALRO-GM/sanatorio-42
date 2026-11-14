@@ -183,6 +183,14 @@ dentro del juego: fuera no se ven, así que se pierden.
 
 ## Noticias y café
 
+Los textos no dan por hecho el género de nadie (#116 del buzón, 2026-11-14):
+nada de «nombrado ministro», «los expertos», «los vecinos» o «nosotros»; en su
+lugar, «asume la cartera de Evaluaciones», «quienes saben de esto», «el
+vecindario», «este servidor». Los logros que eran una persona pasan a ser lo que
+hace («Exterminio», «Entomología», «Revisión on-call», «Maintainer», «Callo de
+programar»). Lo que es de cosas («bug aplastado», «patito becario», que es un
+pato) se queda. `tests/clicker-inclusive.test.ts` vigila que no vuelvan.
+
 El rótulo de noticias va en grande, como el de un informativo, con una raya que
 dice cuánto falta para la siguiente (unos veinte segundos). Salen barajadas y no
 se repite ninguna hasta haberlas dado todas. Hay una tanda por época de la

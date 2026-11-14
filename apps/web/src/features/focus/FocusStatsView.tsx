@@ -4,15 +4,37 @@ import type { FocusStatsQuery } from '../../shared/api/types'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { durationText } from '../../shared/time'
+import { DateFields } from '../../shared/ui/PeriodPicker'
 import { StepPicker } from '../../shared/ui/StepPicker'
 
-/** Los periodos que se pueden mirar (#80 del buzón): hoy, semana, mes y total. */
-export const PERIODS = ['day', 'week', 'month', 'total'] as const
+/**
+ * Los periodos que se pueden mirar (#80 del buzón): hoy, semana, mes, total y
+ * «Fechas…», dos fechas a mano (la API ya admitía cualquier `from`–`to`).
+ */
+const PERIODS = ['day', 'week', 'month', 'total', 'custom'] as const
 
-export type FocusPeriod = (typeof PERIODS)[number]
+type FocusPeriod = (typeof PERIODS)[number]
+
+/** El periodo elegido y, con «Fechas…», las dos fechas (`YYYY-MM-DD`, vacías hasta que se digan). */
+export type FocusRange = { period: FocusPeriod; from: string; to: string }
 
 /** Días que cubre cada periodo, contando hoy; el total no tiene principio. */
-const SPAN: Record<FocusPeriod, number | null> = { day: 1, week: 7, month: 30, total: null }
+const SPAN: Record<Exclude<FocusPeriod, 'custom'>, number | null> = {
+  day: 1,
+  week: 7,
+  month: 30,
+  total: null,
+}
+/** Mientras «Fechas…» no tiene las dos, se ve lo del mes: nunca una zona en blanco. */
+const UNTIL_DATES: Exclude<FocusPeriod, 'custom'> = 'month'
+const DAY = /^\d{4}-\d{2}-\d{2}$/
+
+/** Una fecha `YYYY-MM-DD` que existe (el 30 de febrero no): la API rechazaría la otra. */
+function isDay(text: string): boolean {
+  const ms = DAY.test(text) ? Date.parse(`${text}T00:00:00Z`) : Number.NaN
+
+  return !Number.isNaN(ms) && new Date(ms).toISOString().slice(0, 10) === text
+}
 const DAY_MS = 86_400_000
 const W = 640
 const H = 150
@@ -21,43 +43,66 @@ const PAD = 22
 /**
  * Lo que se pide a la API para un periodo, en los días de quien mira: la API
  * los corta con `offset` (los minutos que esta zona va por delante de UTC).
+ * Con «Fechas…», las dos que se han dicho, en orden aunque se escriban al revés.
  */
 export function periodQuery(
-  period: FocusPeriod,
+  range: FocusRange,
   segment: { low: number; high: number },
   at = Date.now(),
 ): FocusStatsQuery {
   const offset = -new Date(at).getTimezoneOffset()
   const local = (ms: number): string => new Date(ms + offset * 60_000).toISOString().slice(0, 10)
-  const span = SPAN[period]
+  const base = { offset, low: segment.low, high: segment.high }
+
+  if (range.period === 'custom' && isDay(range.from) && isDay(range.to)) {
+    return range.from <= range.to
+      ? { ...base, from: range.from, to: range.to }
+      : { ...base, from: range.to, to: range.from }
+  }
+
+  const span = SPAN[range.period === 'custom' ? UNTIL_DATES : range.period]
 
   return {
+    ...base,
     to: local(at),
-    offset,
-    low: segment.low,
-    high: segment.high,
     ...(span === null ? {} : { from: local(at - (span - 1) * DAY_MS) }),
   }
 }
 
-/** El selector de periodo: hoy, la semana, el mes o todo (`StepPicker`, el de toda la web). */
+/**
+ * El selector de periodo: hoy, la semana, el mes, todo o unas fechas
+ * (`StepPicker`, el de toda la web, y los campos de fecha de `PeriodPicker`).
+ */
 export function PeriodPicker({
   value,
   onChange,
 }: {
-  value: FocusPeriod
-  onChange: (next: FocusPeriod) => void
+  value: FocusRange
+  onChange: (next: FocusRange) => void
 }) {
   const { t } = useI18n()
 
   return (
-    <StepPicker
-      options={PERIODS}
-      value={value}
-      onChange={onChange}
-      label={t('focus.stats.period')}
-      text={(option) => t(`focus.period.${option}`)}
-    />
+    <>
+      <StepPicker
+        options={PERIODS}
+        value={value.period}
+        onChange={(period) => {
+          onChange({ ...value, period })
+        }}
+        label={t('focus.stats.period')}
+        text={(option) => t(`focus.period.${option}`)}
+      />
+      {value.period === 'custom' && (
+        <DateFields
+          from={value.from}
+          to={value.to}
+          onDates={(from, to) => {
+            onChange({ ...value, from, to })
+          }}
+        />
+      )}
+    </>
   )
 }
 

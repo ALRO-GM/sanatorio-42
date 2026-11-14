@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { Login } from '../features/auth/Login'
+import { BugSquash } from '../features/maintenance/BugSquash'
 import { MaintenanceScreen } from '../features/maintenance/MaintenanceScreen'
 import { LegalPage } from '../features/legal/LegalPage'
 import { useAuth } from '../features/auth/useAuth'
@@ -129,6 +130,9 @@ function StudentApp() {
         <button type="button" className="primary" onClick={reloadPage}>
           {t('app.retry')}
         </button>
+        {/* Lo normal es que sea un despliegue y vuelva en un minuto: mientras,
+            un minijuego que no necesita la API (#104 del buzón). */}
+        <BugSquash />
       </main>
     )
   }

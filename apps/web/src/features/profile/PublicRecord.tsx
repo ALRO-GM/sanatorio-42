@@ -4,7 +4,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useBorrowedStyle } from '../../shared/theme'
 import { themeOf } from '../../themes'
 import { useI18n } from '../../shared/i18n'
-import { Avatar } from '../../shared/ui/Avatar'
+import { RecordPhoto } from './RecordPhoto'
 import { TitleBanner } from '../../shared/ui/TitleBanner'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Achievements } from './Achievements'
@@ -65,7 +65,7 @@ export function PublicRecord({ login, me }: { login: string; me: string }) {
         {/* El banner del título que luce: lo eligió al elegir el título. */}
         <TitleBanner title={title} />
         <div className="record-head">
-          <Avatar login={data.login} image={data.image} size={72} />
+          <RecordPhoto login={data.login} image={data.image} />
           <div className="record-name">
             <span className="record-login">
               <strong>{data.login}</strong>

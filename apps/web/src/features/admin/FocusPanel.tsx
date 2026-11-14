@@ -5,7 +5,7 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { Async } from '../../shared/ui/Async'
 import { FocusCharts, FocusFigureCards, PeriodPicker, periodQuery } from '../focus/FocusStatsView'
-import type { FocusPeriod } from '../focus/FocusStatsView'
+import type { FocusRange } from '../focus/FocusStatsView'
 import { EVERYONE, SegmentSlider } from '../../shared/ui/SegmentSlider'
 
 /**
@@ -16,11 +16,11 @@ import { EVERYONE, SegmentSlider } from '../../shared/ui/SegmentSlider'
  */
 export function FocusPanel() {
   const { t } = useI18n()
-  const [period, setPeriod] = useState<FocusPeriod>('month')
+  const [period, setPeriod] = useState<FocusRange>({ period: 'month', from: '', to: '' })
   const [segment, setSegment] = useState(EVERYONE)
   const focus = useAsync(
     () => api.getAdminFocusStats(periodQuery(period, segment)),
-    [period, segment.low, segment.high],
+    [period.period, period.from, period.to, segment.low, segment.high],
   )
 
   return (

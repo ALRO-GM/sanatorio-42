@@ -7,6 +7,7 @@ import { Meter } from '../network/Meter'
 import { VerdictStats } from '../network/VerdictStats'
 import { networkHref } from '../../shared/links'
 import { Icon } from '../../shared/ui/Icon'
+import { PersonLink } from '../../shared/ui/PersonLink'
 
 /** Con cuántas personas se resume tu red. */
 const SHOWN = 5
@@ -80,7 +81,8 @@ export function NetworkCard({ me }: { me: string }) {
                 <ul className="net-rows static">
                   {partners.slice(0, SHOWN).map((partner) => (
                     <li key={partner.login}>
-                      <span className="net-row-name">{partner.login}</span>
+                      {/* Cada nombre lleva a su perfil (#102 del buzón). */}
+                      <PersonLink login={partner.login} className="net-row-name record-link" />
                       <span className="net-row-count" title={t('net.gaveGot')}>
                         {partner.gave} → · ← {partner.got}
                       </span>

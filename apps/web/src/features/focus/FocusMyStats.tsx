@@ -6,7 +6,7 @@ import { useI18n } from '../../shared/i18n'
 import { Async } from '../../shared/ui/Async'
 import { EVERYONE, SegmentSlider } from '../../shared/ui/SegmentSlider'
 import { FocusCharts, FocusFigureCards, PeriodPicker, periodQuery } from './FocusStatsView'
-import type { FocusPeriod } from './FocusStatsView'
+import type { FocusRange } from './FocusStatsView'
 
 /**
  * Tus estadísticas del Pomodoro (#80 del buzón): cuánto, qué días y a qué
@@ -17,11 +17,11 @@ import type { FocusPeriod } from './FocusStatsView'
  */
 export function FocusMyStats() {
   const { t } = useI18n()
-  const [period, setPeriod] = useState<FocusPeriod>('week')
+  const [period, setPeriod] = useState<FocusRange>({ period: 'week', from: '', to: '' })
   const [band, setBand] = useState(EVERYONE)
   const mine = useAsync(
     () => api.getMyFocusStats(periodQuery(period, band)),
-    [period, band.low, band.high],
+    [period.period, period.from, period.to, band.low, band.high],
   )
 
   return (

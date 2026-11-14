@@ -73,6 +73,17 @@ async function page(request) {
 
     if (response.ok) await cache.put(key, response.clone())
 
+    // Mientras se despliega, la app no está y Caddy contesta 502/503/504 sin
+    // nada dentro: una página en blanco. Con la portada guardada, la web
+    // arranca igual, ve que la API no responde y enseña su pantalla de espera
+    // con el minijuego (#104 del buzón). El mantenimiento puesto desde el panel
+    // no pasa por aquí: ahí la portada sí llega (`200`).
+    if (response.status >= 502 && response.status <= 504) {
+      const saved = await cache.match(key)
+
+      if (saved !== undefined) return saved
+    }
+
     return response
   } catch (error) {
     const saved = await cache.match(key)

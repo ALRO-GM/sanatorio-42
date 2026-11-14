@@ -6,6 +6,15 @@ import { useI18n } from '../../shared/i18n'
 
 const SEEN_KEY = 'sanatorio_other_campus_seen'
 
+/**
+ * Cuántas personas más de un campus hacen falta para copiar sus datos, y
+ * cuántas para traducir la web a su idioma (#92 del buzón: 10 y 50; antes,
+ * cinco y diez). Copiar un campus gasta cuota de 42 y una traducción, horas:
+ * con menos gente no compensa.
+ */
+const PEOPLE_FOR_DATA = 10
+const PEOPLE_FOR_LANGUAGE = 50
+
 const seen = (campusId: number): boolean => {
   try {
     return localStorage.getItem(SEEN_KEY) === String(campusId)
@@ -16,11 +25,11 @@ const seen = (campusId: number): boolean => {
 
 /**
  * Para quien entra desde un campus que aún no se copia (#92): lo que ve es de
- * otro campus, y si se juntan cinco personas más del suyo lo añadimos; con
- * diez, también su idioma. Se cierra y no vuelve a salir para ese campus.
+ * otro campus, y si se juntan diez personas más del suyo lo añadimos; con
+ * cincuenta, también su idioma. Se cierra y no vuelve a salir para ese campus.
  */
 export function OtherCampusNotice({ campusId }: { campusId: number }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   // Es informativo: mientras carga o si falla, el aviso no sale (no hay nada que arreglar).
   const campuses = useAsync(() => api.getCampuses(), [])
   const [closed, setClosed] = useState(() => seen(campusId))
@@ -32,9 +41,10 @@ export function OtherCampusNotice({ campusId }: { campusId: number }) {
   return (
     <aside className="notice other-campus" role="status">
       <p>
-        {t('campus.other', {
+        {tn('campus.other', PEOPLE_FOR_DATA, {
           campus: mine.name,
           tracked: tracked.map((campus) => campus.name).join(', '),
+          language: PEOPLE_FOR_LANGUAGE,
         })}
       </p>
       <button

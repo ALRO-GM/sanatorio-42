@@ -68,6 +68,9 @@ de datos.
 | Expediente | Estado de salud (pace y black hole) | S | Afecta a la vida académica |
 | Expediente | «Compararte en Avance», en el estado de salud | N | El Avance sale desde el normal: en el simplificado llevaría a una pestaña que no se ve (2026-11) |
 | Expediente | Horas validadas (descarga para el staff) | N | Se usa de tarde en tarde |
+| Perfil | Foto de la cabecera que se pulsa para verla en grande, en el tuyo y en el de los demás (#105) | S | No es un bloque nuevo: la misma foto se vuelve botón, y sin foto no hay botón. Ventana común (`Modal`) |
+| Perfil | Los nombres de «Con quién más» en tu red llevan a su perfil (#102) | D | Ya estaban, solo pasan a ser enlaces (`PersonLink`, con su ficha al pasar), en el modo en que ya salían |
+| Pizarras y Sprints | «Abrir en el calendario» en la tarjeta: abre el calendario con su ficha (#76) | S | Un enlace, no un bloque; en los grupos solo si estás dentro (tu calendario no trae los demás) |
 | Expediente | Cómo se gana XP (y cuánta llevas): se abre al pulsar el número del nivel | S (cerrado) | Detalle, a un clic de donde se mira |
 | Expediente | Título y banner: desplegable con el activo a la vista; cada título trae su banner, que se ve también en tu perfil público y en tu ficha | S (cerrado) | Lo tuyo, sin ocupar sitio fijo |
 | Expediente | Tu red de correcciones, logros y reacciones, clasificación | N | Es reconocimiento, no utilidad |
@@ -109,6 +112,7 @@ de datos.
 | Aprender y menú de la cuenta | Modo concentración (Pomodoro) | S | Para todos: concentrarse no es «de datos» |
 | Pomodoro | Pantalla completa con «en concentración · no molestar» y la pregunta al acabar (motivos, diez segundos, seguir con felicitación) | S | Es el propio Pomodoro: ayuda a no rendirse a la primera (#80) |
 | Pomodoro | «Tus estadísticas» (pestaña de su ventana): periodo, días, horas, paradas y motivos, y la media del tramo elegido de quienes lo usan | N | Son cifras: el simplificado no las enseña (#80) |
+| Pomodoro | «Fechas…» en el periodo de las estadísticas (las tuyas y las del panel): dos fechas a mano | N | Una opción más del mismo selector (`StepPicker`), con los campos de fecha de `PeriodPicker` (#80) |
 | Pomodoro | «Startup» (pestaña de su ventana): con los minutos de concentración se construye una empresa, del garaje al control global, con ranking; y la escena en pequeño en la pantalla completa (`docs/pomodoro-startup.md`) | N | Es un juego de motivación con cifras: desde el normal, como las estadísticas (pedido por Alberto, 2026-10-27) |
 | Panel de gestión | Pestaña Pomodoro: uso por días y horas, paradas, motivos y tramo de gente | Admins | Solo de quien administra (#80) |
 | Panel de gestión | Pestaña Piscina: quién entra y el aviso para piscineros con la piscina cerrada (`docs/piscineros.md`) | Admins | Solo de quien administra |
@@ -161,6 +165,7 @@ de datos.
 | Bienvenida | Seis pasos (siete con la Red y los clústeres, que salen solo si el modo elegido en el primero los enseña): saludo con el modo, perfil, Peer to peer, disponible, Proyectos con Sprints y Pizarras, y el calendario con los ajustes | S | No presentar lo que no va a salir; de diez pasos a seis o siete (2026-11); los textos dicen que el modo y el tema están en «Más ajustes», no sueltos en el pie |
 | Pie | Campus | N | Casi nadie cambia de campus |
 | Pie | «Puestos actualizados hace N min» | D | Dato técnico |
+| Mantenimiento y servidor caído | «Aplasta bugs», minijuego de 30 s bajo el mensaje (#104) | S | Solo sale cuando la web no se puede usar: no quita sitio a nada y hace la espera más corta. Sin API: todo en el navegador |
 
 Una sección que no toca en el modo elegido sigue abriéndose por su dirección
 (un enlace de un aviso, por ejemplo): solo deja de salir en las pestañas.

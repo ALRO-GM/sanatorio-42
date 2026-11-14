@@ -8,6 +8,7 @@ import { loadMaintenance } from '../../shared/maintenance'
 import { CountdownClock } from '../../shared/ui/CountdownClock'
 import { Icon } from '../../shared/ui/Icon'
 import { Logo } from '../../shared/ui/Logo'
+import { BugSquash } from './BugSquash'
 
 /** Cada cuánto se vuelve a mirar si ya ha acabado: al acabar, la web vuelve sola. */
 const CHECK_MS = 30_000
@@ -67,6 +68,8 @@ export function MaintenanceScreen({
             </button>
           )}
         </div>
+        {/* Para la espera, algo que hacer (#104 del buzón). */}
+        <BugSquash />
       </div>
     </main>
   )

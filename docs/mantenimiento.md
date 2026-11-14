@@ -52,6 +52,32 @@ en el futuro y a menos de una semana.
 
 Rutas en [api.md](api.md#modo-mantenimiento-modulesadminmaintenancets).
 
+## Mientras tanto, un minijuego (#104)
+
+Pedido en el buzón: durante los despliegues (y en el mantenimiento) solo salía
+un mensaje. Ahora, debajo, **«Aplasta bugs»** (`features/maintenance/BugSquash.tsx`,
+cuentas en `bugsquash.ts`): treinta segundos, un tablero de nueve casillas y
+un bug que salta de una a otra cada vez más deprisa; cada clic en él suma. El
+récord se guarda en el navegador. No pide nada a la API ni a otro sitio, y las
+casillas son botones (se juega con el teclado).
+
+Sale en dos sitios:
+
+- **La pantalla de mantenimiento** de arriba.
+- **«No se puede conectar con el servidor»** (`app/App.tsx`), que es lo que se
+  ve mientras se despliega: la app se reinicia y Caddy contesta 502/503/504
+  sin nada dentro. Para que eso no sea una página en blanco, el service worker
+  (`public/sw.js`) sirve entonces la portada guardada; la web arranca con los
+  trozos que ya tiene, ve que la API no responde y enseña esta pantalla con el
+  juego. Con el botón «Volver a probar», o al recargar, se entra en cuanto la
+  app vuelve.
+
+Quien entra por primera vez justo durante un despliegue (sin portada guardada)
+sigue viendo el error de Caddy. Una página estática servida por Caddy
+(`handle_errors`) lo cubriría, pero necesitaría montar una carpeta en el
+contenedor de Caddy y repetir los textos fuera de las tablas: se deja para
+cuando haga falta.
+
 ## Límites
 
 - El corte del plan (`service_stopped`, al 90 % y al 95 %) es otra cosa y va

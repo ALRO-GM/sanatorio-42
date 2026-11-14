@@ -100,6 +100,74 @@
   gap: 0.6rem;
 }
 
+/* «Aplasta bugs» (#104): el minijuego de la espera. Sin tarjeta dentro de la
+   tarjeta: una raya arriba lo separa, y las casillas son botones sin borde
+   propio, con el fondo del tema. */
+.bugsquash {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.bugsquash h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  font-size: 1.05rem;
+}
+.bugsquash-score {
+  margin: 0;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.bugsquash-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  width: min(15rem, 100%);
+}
+.bugsquash-cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.bugsquash-cell:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+.bugsquash-cell.bug {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+  cursor: pointer;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .bugsquash-cell.bug .icon {
+    animation: bugsquash-wiggle 0.4s ease-in-out infinite alternate;
+  }
+}
+@keyframes bugsquash-wiggle {
+  from {
+    transform: rotate(-12deg);
+  }
+  to {
+    transform: rotate(12deg);
+  }
+}
+/* En la pantalla de «no se puede conectar», que no es una tarjeta. */
+main.center > .bugsquash {
+  width: min(22rem, 100%);
+  margin-top: 1.25rem;
+}
+
 /* La franja que ve quien administra mientras dura. */
 .maintenance-banner {
   display: flex;
