@@ -4,7 +4,15 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { daysBetween, deadlinesFor, originOf, paceOn, stepsFor } from '../src/shared/pace'
+import {
+  bonusOf,
+  climbOf,
+  daysBetween,
+  deadlinesFor,
+  originOf,
+  paceOn,
+  stepsFor,
+} from '../src/shared/pace'
 
 // Un caso real, contrastado con la intra: pace 15 y el círculo 3 vence el 11 de
 // noviembre de 2026. La intra da el fin del common core el 27 de agosto de 2027.
@@ -77,5 +85,45 @@ describe('pace', () => {
   it('cuenta días enteros entre dos momentos', () => {
     expect(daysBetween(noon('2026-05-18'), ORIGIN)).toBe(9)
     expect(daysBetween(noon('2026-05-27'), noon('2026-05-20'))).toBe(-7)
+  })
+})
+
+describe('días de bonus (#87)', () => {
+  it('son lo que el día cero se retrasa respecto al inicio', () => {
+    // Día cero el 27 de mayo; empezó el 18: nueve días de bonus.
+    expect(bonusOf({ startedAt: '2026-05-18T12:00:00', declared: REF })).toBe(9)
+  })
+
+  it('sin pace anotado o sin inicio, no se sabe', () => {
+    expect(bonusOf({ startedAt: '2026-05-18T12:00:00', declared: null })).toBeNull()
+    expect(bonusOf({ startedAt: null, declared: REF })).toBeNull()
+    expect(bonusOf({ startedAt: '2026-05-18T12:00:00', declared: { ...REF, pace: 7 } })).toBeNull()
+  })
+
+  it('un día cero de antes del inicio (un plazo raro) no da días negativos', () => {
+    expect(bonusOf({ startedAt: '2026-08-01T12:00:00', declared: REF })).toBe(0)
+  })
+})
+
+describe('subir de pace (#106)', () => {
+  it('es el plazo del pace siguiente para el círculo de después', () => {
+    // A pace 15 en el círculo 3 el 12 de octubre: el 12 del círculo 4 vence el día 211.
+    const climb = climbOf(ORIGIN, 3, 15, noon('2026-10-12'))
+
+    expect(climb?.pace).toBe(12)
+    expect(climb?.circle).toBe(4)
+    expect(ymd(climb?.date ?? new Date(0))).toBe('2026-12-24')
+    expect(climb?.daysLeft).toBe(73)
+  })
+
+  it('el último día del plazo aún vale; al siguiente, se mira el círculo de después', () => {
+    expect(climbOf(ORIGIN, 3, 15, noon('2026-12-24'))?.daysLeft).toBe(0)
+    expect(climbOf(ORIGIN, 3, 15, noon('2026-12-25'))?.circle).toBe(5)
+  })
+
+  it('a pace 8, o sin ningún plazo a tiempo, no hay a dónde subir', () => {
+    expect(climbOf(ORIGIN, 3, 8, noon('2026-10-12'))).toBeNull()
+    expect(climbOf(ORIGIN, 6, 15, noon('2026-10-12'))).toBeNull()
+    expect(climbOf(ORIGIN, 3, 15, noon('2030-01-01'))).toBeNull()
   })
 })

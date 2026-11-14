@@ -24,6 +24,7 @@ import { PeriodPicker } from '../../shared/ui/PeriodPicker'
 import { PoolOnly } from '../../shared/ui/PoolOnly'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { readProgressPreset } from '../../shared/links'
+import { bonusOf } from '../../shared/pace'
 import { PERIODS, periodOf } from '../../shared/period'
 import type { Period } from '../../shared/period'
 import { MONTH, ProgressChart } from './ProgressChart'
@@ -42,7 +43,7 @@ const MONTHS_KEY = 'sanatorio_progress_months'
 const MEASURES: readonly ProgressMeasure[] = ['circles', 'hours']
 /** La forma de las líneas, guardada: a saltos o continua. */
 const SHAPE_KEY = 'sanatorio_progress_shape'
-const SHAPES: readonly LineShape[] = ['steps', 'smooth']
+const SHAPES: readonly LineShape[] = ['steps', 'straight', 'smooth']
 /** Lo de «a mano» antes de tocarlo: los dos años del pace más lento. */
 const DEFAULT_MONTHS = { from: '0', to: '24' }
 
@@ -189,10 +190,14 @@ export function ProgressPage({ me, image = null }: { me: string; image?: string 
   const [paces, setPaces] = useState(preset?.paces ?? true)
   // Los percentiles 25 y 75 de cada media, como un tramo: de entrada, no.
   const [quartiles, setQuartiles] = useState(false)
-  const [shape, setShape] = useState<LineShape>(() =>
-    stored(SHAPE_KEY) === 'smooth' ? 'smooth' : 'steps',
+  const [shape, setShape] = useState<LineShape>(
+    () => SHAPES.find((each) => each === stored(SHAPE_KEY)) ?? 'steps',
   )
   const [mine] = useState(preset?.me ?? true)
+  // Tus días de bonus, de tu health check: las líneas de pace empiezan en tu
+  // día cero, como los plazos que te enseña (#87 del buzón). Sin pace anotado, 0.
+  const health = useAsync(() => api.getHealth(), [])
+  const paceShift = mine && health.data !== undefined ? (bonusOf(health.data) ?? 0) : 0
   const [range, setRange] = useState<Period>(
     () => rangeOf(preset?.range) ?? rangeOf(stored(RANGE_KEY)) ?? '24',
   )
@@ -290,6 +295,7 @@ export function ProgressPage({ me, image = null }: { me: string; image?: string 
                 span={spanOf(range, months)}
                 mine={mine}
                 shape={shape}
+                paceShift={paceShift}
               />
             </>
           )
@@ -365,6 +371,9 @@ export function ProgressPage({ me, image = null }: { me: string; image?: string 
             />{' '}
             {t('stats.progress.paces')}
           </label>
+          {paces && paceShift > 0 && (
+            <p className="hint">{tn('stats.progress.paceShift', paceShift)}</p>
+          )}
           <label className="progress-toggle">
             <input
               type="checkbox"

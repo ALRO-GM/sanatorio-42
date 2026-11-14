@@ -62,6 +62,7 @@ Sin el permiso, a un piscinero la portada solo le da la bienvenida.
 | Certificados del curso de RAG | S | Con certificados `[ragcourse]` | `MyRagCertificates` en `shared/course/Certificates.tsx` |
 | Descargar las horas validadas (CSV con código de verificación) | N | Todos `[expediente.hours]` | `HoursReport.tsx` |
 | Health check: pace, cuándo caerías a cada pace, black hole, calculadora «si termino tal día»; la primera vez pregunta pace y fecha | S | Todos `[expediente.health]` | `HealthCard.tsx` (bloque `health`) |
+| Health check: «Actualizar pace y plazo» arriba, en la cabecera; hasta qué día terminar para subir de pace | S | Todos `[expediente.health]` | `HealthCard.tsx`, `shared/pace.ts` (`climbOf`) |
 | Compararte en Avance desde el health check | N | Todos `[avance]` | `progressHref` |
 | Tu red de correcciones en pequeño | N | Todos `[expediente.network]` | `NetworkCard.tsx` (bloque `network`) |
 | Logros y reacciones recibidas | N | Todos `[expediente.achievements]` | `Achievements.tsx` (bloque `achievements`) |
@@ -309,6 +310,7 @@ Detalle: [asientos.md](asientos.md).
 | --- | --- | --- | --- |
 | La respuesta en una frase: cuántas semanas vas por delante o por detrás de la media | N | Estudiantes | `features/stats/progressAnswer.ts` |
 | Gráfica por círculos o por horas: tu línea, medias por plan, población (terminado, en curso, black hole) y campus, paces y cuartiles, zoom; en el móvil, tocar marca un punto y arrastrar recorre la línea con ajuste fino | N | Estudiantes | `ProgressPage.tsx`, `ProgressChart.tsx` |
+| Forma de las líneas: a saltos, recta o suave (por las esquinas, sin quedarse horizontal en cada punto); las líneas de pace empiezan en tu día cero (días de bonus) y, a saltos, van en escalera por sus plazos, como dice el health check | N | Estudiantes | `ProgressChart.tsx`, `progressTrace.ts` |
 | «Ver a fondo»: quién cuenta, campus, todos juntos (abierto de fábrica en datos) | N | Estudiantes | `ProgressPage.tsx` |
 | Comparar con hasta 5 personas y «los más rápidos» | N | Todos `[avance.compare]` | `ProgressCompare.tsx` |
 | Quién va más rápido: por círculo o %, plan, kickoff, rangos; tu fila fija. Las kickoffs son las reales de cada campus (los días con muchas entradas); quien entró a destiempo va con la anterior a su entrada | N | Estudiantes | `ProgressRanking.tsx` |
@@ -323,6 +325,8 @@ Detalle: [blackhole.md](blackhole.md).
 | --- | --- | --- | --- |
 | Grafo de burbujas de quién ha corregido a quién; de entrada, tu red del último año. Con más de 150 burbujas solo se pintan las uniones más fuertes (1,5 por burbuja; las de quien eliges, todas) | N | Todos | `features/network/ForceGraph.tsx` |
 | Unos filtros que no dejan a nadie vuelven solos a la vista de partida con un aviso; si tu red sale vacía (aún sin correcciones, o viendo la web como piscinero), la de partida es la del campus | N | Todos | `NetworkPage.tsx` |
+| Unas fechas puestas a mano no se cambian solas: no se pide nada mientras se teclea el año y, si no dejan a nadie, se dice y se quedan | N | Todos | `NetworkPage.tsx`, `dates.ts` |
+| En un monitor muy ancho, la red usa la pantalla entera | N | Todos | `styles/network.css` |
 | En la vista de piscinero sin límites, de partida la red de toda la piscina en curso o la última, desde su primer día | N | Dueño | `NetworkPage.tsx`, `pool.service.ts` |
 | Filtros: campus (uno, varios, todos), meses en una línea que se arrastra, proyecto, mínimos por pareja y persona, cuántas personas, veredicto, solo mutuas, solo de dentro | N | Todos | `NetworkPage.tsx`, `Timeline.tsx` |
 | Color por comunidad, endogamia, suspensos dados o recibidos, promoción, balance, origen o campus | N | Todos | `NetworkPage.tsx` |

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { monotonePath } from '../src/features/stats/progressTrace'
+import { corners, monotonePath, pacePoints, smoothPath } from '../src/features/stats/progressTrace'
 
 /** La forma «continua y suave» del Avance: una curva que no baja ni se pasa. */
 
@@ -63,5 +63,112 @@ describe('monotonePath', () => {
         expect(value).toBeLessThanOrEqual(high)
       }
     }
+  })
+})
+
+/** Una línea a escalones como las del Avance: puntos cada 15 días y los hitos dentro. */
+const STEPS: [number, number][] = [
+  [0, 0],
+  [15, 0],
+  [30, 0],
+  [40, 20],
+  [45, 20],
+  [60, 20],
+  [70, 50],
+  [75, 50],
+]
+
+describe('corners (#115)', () => {
+  it('se queda con el día en que llega a cada valor y con el último punto', () => {
+    expect(corners(STEPS)).toEqual([
+      [0, 0],
+      [40, 20],
+      [70, 50],
+      [75, 50],
+    ])
+  })
+
+  it('sin puntos, nada; con uno, ese', () => {
+    expect(corners([])).toEqual([])
+    expect(corners([[3, 4]])).toEqual([[3, 4]])
+  })
+
+  it('una línea quieta se queda en sus dos extremos', () => {
+    expect(
+      corners([
+        [0, 7],
+        [10, 7],
+        [20, 7],
+      ]),
+    ).toEqual([
+      [0, 7],
+      [20, 7],
+    ])
+  })
+})
+
+describe('smoothPath (#115)', () => {
+  it('no sale tumbada de cada punto: la tangente de una esquina no es cero', () => {
+    const all = pairs(smoothPath(STEPS))
+
+    // M, C(c1, c2, punto) por tramo: el segundo control del primer tramo y el
+    // primero del segundo rodean la esquina (40, 20) y no están a su altura.
+    expect(all[3]).toEqual([40, 20])
+    expect(all[2]?.[1]).not.toBeCloseTo(20)
+    expect(all[4]?.[1]).not.toBeCloseTo(20)
+  })
+
+  it('el llano del final va recto', () => {
+    expect(smoothPath(STEPS).endsWith('L75.0,50.0')).toBe(true)
+  })
+
+  it('vacía sin puntos y sin números raros con muchos', () => {
+    expect(smoothPath([])).toBe('')
+    let value = 0
+    const many = Array.from({ length: 5000 }, (_, day): [number, number] => {
+      // Una línea que sube a ratos y a ratos se queda quieta, como cualquiera.
+      if (day % 37 === 0) value += (day % 5) + 0.5
+
+      return [day, value]
+    })
+
+    expect(smoothPath(many)).not.toMatch(/NaN|Infinity/)
+  })
+})
+
+describe('pacePoints (#87)', () => {
+  const PACE: [number, number][] = [
+    [0, 0],
+    [10, 14],
+    [30, 28],
+  ]
+
+  it('sin días de bonus ni saltos, la línea de la API tal cual', () => {
+    expect(pacePoints(PACE, 0, false)).toEqual(PACE)
+  })
+
+  it('con días de bonus, empieza más tarde', () => {
+    expect(pacePoints(PACE, 5, false)).toEqual([
+      [0, 0],
+      [5, 0],
+      [15, 14],
+      [35, 28],
+    ])
+  })
+
+  it('a saltos, sube el día de cada plazo', () => {
+    expect(pacePoints(PACE, 5, true)).toEqual([
+      [0, 0],
+      [5, 0],
+      [15, 0],
+      [15, 14],
+      [35, 14],
+      [35, 28],
+    ])
+  })
+
+  it('sin puntos, como mucho el arranque desde el día 0', () => {
+    expect(pacePoints([], 9, true)).toEqual([[0, 0]])
+    expect(pacePoints([], 0, true)).toEqual([])
   })
 })

@@ -9,6 +9,7 @@ import userEvent from '@testing-library/user-event'
 import es from 'virtual:textos/es'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { api } from '../../src/shared/api'
 import { must } from './must'
 import { openApp } from './render'
 
@@ -196,5 +197,70 @@ describe('Avance: la forma de las líneas', () => {
       within(group).getByRole('button', { name: text('stats.progress.shape.steps') }),
     )
     expect(mine()).not.toContain('C')
+  })
+
+  it('recta (#115): sin curvas y con menos puntos que a saltos', async () => {
+    const user = userEvent.setup()
+    const mine = (): string =>
+      chartCard().querySelector('[data-series="me"] .progress-line')?.getAttribute('d') ?? ''
+
+    await openApp('#/avance')
+    await ready()
+    const group = screen.getByRole('group', { name: text('stats.progress.shape') })
+    const steps = (mine().match(/L/g) ?? []).length
+
+    await user.click(
+      within(group).getByRole('button', { name: text('stats.progress.shape.straight') }),
+    )
+    expect(mine()).not.toContain('C')
+    // De esquina a esquina: sin los dos puntos de cada escalón.
+    expect((mine().match(/L/g) ?? []).length).toBeLessThan(steps)
+    expect(localStorage.getItem('sanatorio_progress_shape')).toBe('straight')
+  })
+})
+
+describe('Avance: los paces cuadran con tu estado de salud (#87)', () => {
+  /** La línea de un pace: su trazo. */
+  const paceLine = (): string =>
+    chartCard().querySelector('.progress-pace path')?.getAttribute('d') ?? ''
+
+  it('a saltos, cada pace es una escalera que sube el día de su plazo', async () => {
+    await openApp('#/avance')
+    await ready()
+    const points = (paceLine().match(/-?[\d.]+,-?[\d.]+/g) ?? []).map((pair) => pair.split(','))
+
+    // En una escalera, cada punto comparte x o y con el anterior.
+    expect(points.length).toBeGreaterThan(4)
+    points.slice(1).forEach(([x, y], index) => {
+      const [px, py] = points[index] ?? []
+
+      expect(x === px || y === py).toBe(true)
+    })
+  })
+
+  it('con tus días de bonus, las líneas empiezan más tarde y se dice', async () => {
+    const health = await api.getHealth()
+
+    // Empezaste hace 146 días; con este plazo de pace 12, tu día cero cae 20 después.
+    vi.spyOn(api, 'getHealth').mockResolvedValue({
+      ...health,
+      declared: {
+        pace: 12,
+        circle: 3,
+        deadline: new Date(Date.parse(health.startedAt ?? '') + 154 * 86_400_000)
+          .toISOString()
+          .slice(0, 10),
+        updatedAt: new Date().toISOString(),
+      },
+    })
+    await openApp('#/avance')
+    await ready()
+    expect(await screen.findByText(/^Las líneas de pace empiezan \d+ días más tarde/)).toBeTruthy()
+  })
+
+  it('sin pace anotado, ni se mueven ni se dice nada', async () => {
+    await openApp('#/avance')
+    await ready()
+    expect(screen.queryByText(/^Las líneas de pace empiezan/)).toBeNull()
   })
 })

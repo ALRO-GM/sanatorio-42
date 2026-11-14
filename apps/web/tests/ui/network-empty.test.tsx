@@ -65,6 +65,49 @@ describe('Red sin resultados', () => {
     ).toBe(false)
   }, 20_000)
 
+  it('correcciones: unas fechas a mano sin nadie se quedan puestas (#114)', async () => {
+    const getNetwork = api.getNetwork.bind(api)
+    const asked: (string | undefined)[] = []
+
+    // En 2014 no hay nadie; lo demás, como siempre.
+    vi.spyOn(api, 'getNetwork').mockImplementation(async (params) => {
+      asked.push(params.from)
+      const graph = await getNetwork(params)
+
+      return params.from?.startsWith('2014') === true
+        ? { ...graph, nodes: [], links: [], topPairs: [] }
+        : graph
+    })
+    await openApp('#/red', { detail: 'datos' })
+    await waitFor(
+      () => {
+        expect(document.querySelector('canvas.force-graph')).not.toBeNull()
+      },
+      { timeout: 5000 },
+    )
+    const period = screen.getByRole<HTMLSelectElement>('combobox', {
+      name: text('common.period'),
+    })
+
+    fireEvent.change(period, { target: { value: 'custom' } })
+    const from = await screen.findByLabelText<HTMLInputElement>(text('common.from'))
+
+    // Mientras se teclea el año, no se pide nada con él, pero se ve lo escrito.
+    fireEvent.change(from, { target: { value: '0002-01-01' } })
+    await settle(500)
+    expect(asked.some((day) => day?.startsWith('000') === true)).toBe(false)
+    expect(from.value).toBe('0002-01-01')
+    fireEvent.change(from, { target: { value: '2014-01-01' } })
+    // Sin nadie (de partida, tu red): se dice, y las fechas y el periodo siguen como se pusieron.
+    expect(await screen.findByText(text('net.emptyPerson'), {}, { timeout: 3000 })).toBeTruthy()
+    await settle(900)
+    expect(screen.queryByText(text('net.resetEmpty'))).toBeNull()
+    expect(
+      screen.getByRole<HTMLSelectElement>('combobox', { name: text('common.period') }).value,
+    ).toBe('custom')
+    expect(screen.getByLabelText<HTMLInputElement>(text('common.from')).value).toBe('2014-01-01')
+  }, 20_000)
+
   it('correcciones: si tu red sale vacía, se ve la del campus', async () => {
     const getNetwork = api.getNetwork.bind(api)
     const asked: (string | undefined)[] = []
