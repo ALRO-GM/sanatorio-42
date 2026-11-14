@@ -151,6 +151,8 @@ ya copia de 42 (login, foto, plan, kickoff, círculo y fechas del 42cursus). En
 el historial no sale quien se anonimizó (`anon-…`), ningún piscinero ni quien
 está oculto para quien mira (`core/audience.ts`); el tope de 300 se cuenta
 después de quitarlos. En las cifras sí cuentan: no llevan nombres.
+Quien se anonimizó en Peer4U pero sigue en la réplica con su login de 42 sí
+sale (nada une las dos cuentas): Alberto decidió el 2026-11-14 no ocultarlo.
 
 ## La gráfica: varias líneas a la vez
 

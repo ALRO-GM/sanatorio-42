@@ -24,8 +24,8 @@
 - [x] Guardia de límites: el 95 % para todas las webs de la máquina, 4 OCPU, disco en GiB.
 - [ ] Alberto: guardar `DATA_KEY` aparte; crear la clave gpg de las copias (`infra/copias.asc`).
 - [ ] Responder cada ticket desde el panel (respuestas en el informe de la sesión).
-- [ ] Decidir: plazo de los mensajes (punto 2 de `docs/privacidad-mensajes.md`); ocultar en el
-  black hole a quien se anonimizó (hoy no hay registro que lo una con la réplica).
+- [x] Decidido por Alberto (2026-11-14): sin plazo para borrar mensajes viejos y la lista del
+  black hole no se oculta (tampoco a quien se anonimizó).
 
 ## Tanda del 2026-11-13 (push y despliegue autorizados)
 
