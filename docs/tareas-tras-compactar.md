@@ -9,6 +9,24 @@
 - [x] Preguntas de Not-games de NetPractice (14) y RAG (15), con inglés, francés y Repaso (`bank/course-net.ts`, `course-rag.ts`; banco: 510; sin commit).
 - [x] Francés de las unidades de NetPractice y RAG (en `course/fr/` de cada motor, test `netragcourse-fr`; sin commit).
 
+- [x] Desplegado d693170 (francés y preguntas de NetPractice y RAG).
+- [x] **Mensajes de la burbuja (pedido por Alberto el 2026-11-14; commits y despliegue autorizados, sin coautoría)**:
+  revisar si son reales y arreglar bugs, mejoras pequeñas y grandes. Cuatro agentes en
+  worktrees (migraciones reservadas): Not-games y ajedrez (0094: #85 #86 #88 #89 #90 #95
+  #107 #108 #109 #110), clústeres y exámenes (0095: #81 #82 #99 #117), red, avance y pace
+  (0096: #87 #94 #106 #112 #114 #115), perfil, clicker y varios (0097: #76 #80 #91 #92
+  con 10 y 50 personas, #102 #104 #105 #111 #113 #116 #118). #93 (modo terminal) no se hace.
+  Al acabar: unir, check, un push, un despliegue y respuestas a cada ticket desde el panel
+  (la base de producción no se escribe por SSH).
+  Hecho y unido el 2026-11-14 (los agentes se cortaron con un apagón y se relanzaron).
+- [x] Cifrado de lo privado en la base (`DATA_KEY`, `docs/cifrado.md`) y de las copias (gpg).
+- [x] Black hole de Exámenes para todo el mundo (`GET /exams/blackhole`, modo normal).
+- [x] Guardia de límites: el 95 % para todas las webs de la máquina, 4 OCPU, disco en GiB.
+- [ ] Alberto: guardar `DATA_KEY` aparte; crear la clave gpg de las copias (`infra/copias.asc`).
+- [ ] Responder cada ticket desde el panel (respuestas en el informe de la sesión).
+- [ ] Decidir: plazo de los mensajes (punto 2 de `docs/privacidad-mensajes.md`); ocultar en el
+  black hole a quien se anonimizó (hoy no hay registro que lo una con la réplica).
+
 ## Tanda del 2026-11-13 (push y despliegue autorizados)
 
 Hecho y subido: muebles de las mejoras de espacio que se giran y se venden
