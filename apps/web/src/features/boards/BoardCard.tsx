@@ -11,6 +11,8 @@ import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { useConfirm } from '../../shared/ui/useConfirm'
 import { BoardForm } from './BoardForm'
 import { dayKey, hhmm } from '../../shared/day'
+import { calendarHref } from '../../shared/links'
+import { Icon } from '../../shared/ui/Icon'
 
 type BoardCardProps = {
   board: BoardView
@@ -112,6 +114,13 @@ export function BoardCard({ board, featured, onChange }: BoardCardProps) {
           >
             {full ? t('cal.full') : t('cal.join')}
           </button>
+        )}
+        {/* Al calendario con su ficha abierta: allí se ve junto a lo demás que
+            tienes ese día y también se apunta uno (#76 del buzón). */}
+        {!past && (
+          <a className="link" href={calendarHref(`board:${board.id}`)}>
+            <Icon name="calendario" size={14} /> {t('cal.openInCalendar')}
+          </a>
         )}
         {/* Quien modera puede retirar la de otra persona, pero no cambiarla. */}
         {!past && !board.mine && board.canCancel && (

@@ -52,6 +52,7 @@ Sin el permiso, a un piscinero la portada solo le da la bienvenida.
 | Funcionalidad | Modo | Quién | Dónde |
 | --- | --- | --- | --- |
 | Tarjeta: foto, login, título, nivel, barra de XP, siguiente título, enlace a la intra | S | Todos | `features/profile/Expediente.tsx` (bloque `record`) |
+| La foto de la tarjeta se pulsa para verla en grande, también en el perfil de los demás (#105) | S | Todos | `RecordPhoto.tsx` |
 | Cómo se gana XP y cuánta llevas de cada cosa (al pulsar el nivel) | S | Todos | `LevelButton.tsx` |
 | Elegir título; cada título trae su banner, que ven los demás | S | Todos | `TitlePicker.tsx` |
 | Títulos de los cursos: cada logro de los cursos conseguido es un título con el banner de su curso (patrón por curso, color por nivel) | S | Con logros de los cursos | `TitlePicker.tsx`, `shared/ui/TitleBanner.tsx`, `styles/banners.css` ([cursos-logros.md](cursos-logros.md)) |
@@ -64,6 +65,7 @@ Sin el permiso, a un piscinero la portada solo le da la bienvenida.
 | Health check: pace, cuándo caerías a cada pace, black hole, calculadora «si termino tal día»; la primera vez pregunta pace y fecha | S | Todos `[expediente.health]` | `HealthCard.tsx` (bloque `health`) |
 | Compararte en Avance desde el health check | N | Todos `[avance]` | `progressHref` |
 | Tu red de correcciones en pequeño | N | Todos `[expediente.network]` | `NetworkCard.tsx` (bloque `network`) |
+| En «Con quién más» de esa red, cada nombre lleva a su perfil (#102) | D | Todos `[expediente.network]` | `NetworkCard.tsx` (`PersonLink`) |
 | Logros y reacciones recibidas | N | Todos `[expediente.achievements]` | `Achievements.tsx` (bloque `achievements`) |
 | Logros de los cursos: primer punto, cada certificado y todos los jefes con tres estrellas de cada curso (en git, pruebas de grupo y jefe final), y empezar, terminar y terminar en el orden sugerido los cuatro; el curso de NetPractice tiene los suyos (primer punto, certificados y jefes), fuera del orden sugerido; cada uno da su XP una vez (de 10 a 100; 1 255 en total), que cuenta para el nivel | N | Todos `[expediente.achievements]` | `Achievements.tsx`, `modules/courses`, `COURSE_XP` en `xp.rules.ts` ([cursos-logros.md](cursos-logros.md)) |
 | Celebración de lo desbloqueado: ventana con el banner nuevo, lo conseguido, la XP y «Lucirlo ahora», al abrir la web y tras cada punto superado de un curso; una vez por cosa en cualquier dispositivo, sin ventanas por lo que ya se tenía | S | Con un logro de los cursos, un título de nivel o el de maestro nuevos | `features/unlocks/UnlockCelebration.tsx`, `shared/unlocks.ts`, `GET /me/unlocks` ([cursos-logros.md](cursos-logros.md)) |
@@ -137,6 +139,7 @@ Detalle: [agenda.md](agenda.md).
 | Unirse con el % que llevas, salirse, copiar los logins | S | Todos | `GroupCard.tsx` |
 | Chat del grupo | S | Miembros | `GroupCard.tsx` |
 | Tablero del sprint | S | Miembros `[agenda.sprint]` | `shared/agenda/SprintBoardView.tsx` |
+| «Abrir en el calendario», con la próxima sesión abierta (#76) | S | Miembros, con sesiones por delante | `GroupCard.tsx` (`calendarHref`) |
 | Editar, cerrar y avisar una vez a quien hace el proyecto | S | Quien lo abrió | `GroupCard.tsx` |
 | Retirar el grupo de otra persona | S | Quien modera | `GroupCard.tsx` |
 | Demostración | S | Todos | `TherapyTour.tsx` |
@@ -149,6 +152,7 @@ Detalle: [agenda.md](agenda.md).
 | Proponer o editar una: título, tema, lugar, fecha (62 días vista como mucho), plazas, horario, descripción | S | Todos | `BoardForm.tsx` |
 | Apuntarse (solo antes de que empiece) o salirse; aviso si está llena; denunciar | S | Todos | `BoardCard.tsx` |
 | Editar o cancelar | S | Quien la organiza | `BoardCard.tsx` |
+| «Abrir en el calendario», con su ficha abierta, desde la que también se apunta una (#76) | S | Todos, si no ha pasado | `BoardCard.tsx` (`calendarHref`) |
 | Retirar la de otra persona | S | Quien modera | `BoardCard.tsx` |
 | Demostración | S | Todos | `BoardsTour.tsx` |
 
@@ -267,6 +271,7 @@ No pide puesto en el clúster ni haber hecho otro curso. Detalle: [curso-rag.md]
 | Qué pestañas siguen a la vista y qué avisos pasan (correcciones, eventos, mensajes, guardia, buzón) | S | Todos | `FocusPage.tsx` |
 | Pestañas Startup y Estadísticas | N | Todos | `FocusPage.tsx` |
 | Tus estadísticas: días, horas, paradas y motivos, «quise parar y seguí», y la media del tramo de gente elegido | N | Todos `[focus.stats]` | `FocusMyStats.tsx`, `FocusStatsView.tsx` |
+| Periodo de las estadísticas (las tuyas y las del panel): hoy, semana, mes, total o «Fechas…», dos fechas a mano (#80) | N | Todos `[focus.stats]` | `PeriodPicker` en `FocusStatsView.tsx` |
 | Startup: con los minutos de concentración se construye una empresa en una oficina viva en píxeles (gente que programa, va a por café o charla; personal y mascotas); dinero, productos, edificio con sótano y azotea, contratar, oficina que se recoloca entera (mesas, servidores y muebles incluidos), decoración que se coloca y se vende, muebles de las mejoras de espacio que se giran y se venden, cajas sorpresa, personajes chibi que se configuran parte a parte (tú y la plantilla), mudanza, nueva partida+ y visitar la oficina de quien sale en la clasificación | N | Todos | `focus/startup/StartupPanel.tsx`, `World.tsx`, `Avatars.tsx` |
 
 Lo que va fuera de la página (temporizador, pantalla completa, sonido) está en
@@ -386,6 +391,7 @@ Pedido por Alberto el 2026-11-06 ([abandono.md](abandono.md)). Solo quien admini
 | Instalar como aplicación (icono de bandeja con flecha): solo si el navegador lo permite y aún no está instalada; en Safari de iPhone y iPad explica cómo hacerlo desde Compartir. Iconos PNG, manifest con `id` y `scope` y etiquetas de iOS para instalarla en cualquier dispositivo | S | Todos | `app/InstallButton.tsx`, `shared/install.ts`, `public/manifest.webmanifest` |
 | Buzón con el número de sin leer | S | Todos `[mailbox]` | `features/notices/Mailbox.tsx` |
 | Categorías y, debajo, secciones de la abierta (en el móvil, barra fija abajo) | S | Todos | `app/Nav.tsx` |
+| Con ratón, si las categorías o las secciones no caben pasan a otra fila en vez de salirse de la pantalla, en todos los estilos; con el dedo se deslizan (#118) | S | Todos | `styles/system.css` |
 
 ## Menú de la cuenta
 
@@ -482,6 +488,7 @@ Detalle: [rendimiento.md](rendimiento.md#9-cargas-largas-2026-11-02).
 | Portada pública por idioma (`/es/`, `/en/`, `/ca/`, `/eu/`, `/fr/`): qué es Peer4U, qué ofrece y preguntas frecuentes, en HTML sin JavaScript para los buscadores; lleva a entrar en su idioma (`/?lang=…`). La pantalla de entrada enlaza a la de su idioma («Qué es Peer4U»). Con `robots.txt` y `sitemap.xml` ([seo.md](seo.md)) | Todos | `tools/portada.ts` |
 | Servidor caído, con reintentar | Todos | `app/App.tsx` |
 | Pantalla de mantenimiento con cuenta atrás y entrada discreta para admins | Quien no administra | `features/maintenance/MaintenanceScreen.tsx` |
+| «Aplasta bugs», minijuego de 30 s con récord en el navegador, en la pantalla de mantenimiento y en la de servidor caído; durante un despliegue la portada guardada arranca y lo enseña en vez de una página en blanco (#104) | Todos | `features/maintenance/BugSquash.tsx`, `public/sw.js` |
 | Privacidad y condiciones (`#/privacidad`), también sin sesión: responsable y correo de contacto, quién puede entrar, datos de 42 y de aquí, base legal (consentimiento e interés legítimo), quién lo ve y proveedores, plazos, seguridad, derechos, cómo no salir en la web y normas | Todos | `features/legal/LegalPage.tsx` |
 | Con sesión: cuándo aceptaste, descargar todos tus datos, anonimizar la cuenta escribiendo tu login | Todos | `LegalPage.tsx`, `AnonymizeAccount.tsx` |
 

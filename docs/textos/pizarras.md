@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/pizarras.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-38 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+39 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -19,6 +19,7 @@ Generado desde `apps/web/src/shared/i18n/textos/pizarras.csv` con
 | `cal.seats.one` | Plazas ocupadas y totales (una) | features/boards/BoardCard | {taken} de {capacity} plaza | {taken} of {capacity} seat | {taken} de {capacity} plaça | {capacity} plazatik {taken} | Places : {taken} sur {capacity} |
 | `cal.seats.many` | Plazas ocupadas y totales (varias) | features/boards/BoardCard | {taken} de {capacity} plazas | {taken} of {capacity} seats | {taken} de {capacity} places | {capacity} plazatik {taken} | Places : {taken} sur {capacity} |
 | `cal.join` | Botón para apuntarse | features/boards/BoardCard, features/boards/BoardsTour | Apuntarme | Join | Apunta-m'hi | Eman izena | M'inscrire |
+| `cal.openInCalendar` | Enlace en la tarjeta de una pizarra o de un grupo de sprint: abre el calendario con su ficha abierta, desde la que también te apuntas | features/boards/BoardCard, features/therapy/GroupCard | Abrir en el calendario | Open in the calendar | Obre al calendari | Ireki egutegian | Ouvrir dans le calendrier |
 | `cal.upcoming` | Lista de las próximas pizarras con plaza (sin día elegido) | features/boards/BoardsCalendar | Próximas pizarras con plaza | Upcoming whiteboards with seats | Properes pissarres amb lloc | Leku libreko hurrengo arbelak | Prochains tableaux blancs avec des places |
 | `cal.pastTitle` | Pizarras: encabezado de las ya pasadas del mes que se ve, debajo de las próximas | features/boards/BoardsCalendar | Ya pasadas | Already held | Ja passades | Dagoeneko eginak | Déjà passés |
 | `cal.upcomingEmpty` | No hay pizarras próximas con plaza | features/boards/BoardsCalendar | No hay pizarras con plaza en los próximos dos meses. ¿Propones tú una? | No whiteboards with seats in the next two months. Want to propose one? | No hi ha pissarres amb lloc als propers dos mesos. En proposes una? | Ez dago leku libreko arbelik hurrengo bi hilabeteetan. Zuk proposatu nahi duzu bat? | Aucun tableau blanc avec des places dans les deux prochains mois. Tu en proposes un ? |

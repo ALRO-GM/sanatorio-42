@@ -113,6 +113,13 @@ con el commit donde volver a verlo, está en
 
 | Fecha      | Dónde                  | Qué cambió                                                                                                   |
 | ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| 2026-11-14 | Cabecera                | Con ratón, las secciones de la segunda fila pasan a otra línea si no caben, como ya hacían las categorías: en los estilos de letra ancha las últimas se salían de la pantalla (#118) |
+| 2026-11-14 | Perfil                  | La foto de la cabecera del perfil (el tuyo y el de los demás) se pulsa para verla en grande (#105), y los nombres de «Con quién más» en la red llevan a su perfil (#102) |
+| 2026-11-14 | Pizarras · Sprints      | «Abrir en el calendario» en cada pizarra por venir y en los grupos en los que estás: el calendario se abre con su ficha, desde la que también te apuntas (#76) |
+| 2026-11-14 | Pomodoro                | Las estadísticas (las tuyas y las del panel) se miran también entre dos fechas elegidas a mano, además de hoy, semana, mes y total (#80) |
+| 2026-11-14 | Mantenimiento           | «Aplasta bugs», un minijuego de 30 s para la espera, en la pantalla de mantenimiento y en la de «no se puede conectar»; durante un despliegue la web guardada arranca y lo enseña en vez de una página en blanco (#104, [docs/mantenimiento.md](docs/mantenimiento.md)) |
+| 2026-11-14 | Code Clicker · Campus   | Code Clicker con cifras más grandes bajo el contador, en la tienda y en las estadísticas (#111) y textos sin género («asume la cartera de Evaluaciones», «Exterminio», «el vecindario»…) (#116); el aviso para otros campus pide 10 personas para añadirlo y 50 para el idioma (#92) |
+| 2026-11-14 | Privacidad              | Revisión de lo que exige la ley para los mensajes (RGPD y LOPDGDD): no obliga a cifrarlos en reposo; plan propuesto, pendiente de decidir ([docs/privacidad-mensajes.md](docs/privacidad-mensajes.md), #113) |
 | 2026-11-14 | Not-games · Cursos      | Preguntas de los cursos de NetPractice (14 conceptos, 32 formas: máscaras, red y broadcast, puerta de enlace, rutas, vuelta, ruta más concreta, salida a internet, bucles, resúmenes y VLSM) y de RAG (15 conceptos, 33 formas: contexto, qué se indexa, troceado, normalizar, IDF, k1, léxica frente a semántica, RRF, presupuesto del prompt, «no lo sé», recall@k y MRR, validación, caché, API y diagnóstico por etapas), en los tres idiomas y con su Repaso; cada respuesta comprobada en el motor del curso. El banco pasa de 481 a 510 conceptos ([docs/preguntas.md](docs/preguntas.md)) |
 | 2026-11-13 | Demostraciones animadas | Siete demostraciones nuevas para lo que no tenía explicación: Pomodoro, su Startup, Abandono, Avance de la piscina (sustituyen a sus párrafos; en Abandono queda debajo la regla del fin de semana), la ventanita de Cuentas atrás (icono pequeño en su cabecera), el Panel de gestión y Code Clicker. Ya son 32 ([docs/demos.md](docs/demos.md)) |
 | 2026-11-13 | Demostraciones animadas | Las marcas de tiempo coinciden con lo que se explica: cada frase se queda el tiempo que se tarda en leerla (en cada idioma) y el ratón espera antes de la acción siguiente; los guiones se ordenan solos ([docs/demos.md](docs/demos.md)) |
@@ -347,6 +354,7 @@ Decisiones que lo definen:
   quien lo pide (aunque nunca haya entrado) deja de salir. Estudiantes y
   piscineros no se ven entre sí. El texto legal se apoya en el consentimiento de
   quien entra y en el interés legítimo para lo que la intra ya enseña a la red.
+  Qué exige la ley para los mensajes y qué se propone: [docs/privacidad-mensajes.md](docs/privacidad-mensajes.md).
 
 ## Módulos de la API
 

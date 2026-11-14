@@ -816,9 +816,13 @@ dialog::backdrop {
 
 /* Con ratón no hay forma cómoda de deslizar las pestañas de lado, y la barra de
    desplazamiento va escondida: si no caben, pasan a otra fila en vez de
-   quedarse fuera. En pantalla táctil siguen en una fila y se deslizan. */
+   quedarse fuera. Vale para las dos filas: en los estilos de letra ancha
+   (terminal, bichota) las últimas secciones se salían de la pantalla y solo se
+   llegaba a ellas con Mayús + rueda (#118). En pantalla táctil siguen en una
+   fila y se deslizan con el dedo. */
 @media (hover: hover) and (pointer: fine) {
-  .tabs {
+  .tabs,
+  .subtabs {
     flex-wrap: wrap;
     overflow-x: visible;
   }

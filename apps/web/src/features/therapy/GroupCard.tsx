@@ -16,6 +16,7 @@ import { shortDay, today } from './days'
 import { GroupForm } from './GroupForm'
 import { Icon } from '../../shared/ui/Icon'
 import { Slider } from '../../shared/ui/RangeSlider'
+import { calendarHref } from '../../shared/links'
 
 type GroupCardProps = {
   group: GroupView
@@ -226,6 +227,14 @@ export function GroupCard({ group, projects, onChange, me }: GroupCardProps) {
         </button>
       )}
       {group.joined && board && <SprintBoardView groupId={group.id} me={me} />}
+      {/* Al calendario, con la próxima sesión abierta (#76 del buzón). El
+          calendario es el tuyo: solo trae los grupos en los que estás, así que el
+          enlace sale al estar dentro y con alguna sesión por delante. */}
+      {group.joined && group.dates.some((day) => day >= now) && (
+        <a className="link" href={calendarHref(`therapy:${group.id}`)}>
+          <Icon name="calendario" /> {t('cal.openInCalendar')}
+        </a>
+      )}
 
       <div className="actions">
         {group.joined ? (

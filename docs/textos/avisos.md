@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/avisos.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-44 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+54 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -18,6 +18,16 @@ Generado desde `apps/web/src/shared/i18n/textos/avisos.csv` con
 | `maint.banner.title` | Franja arriba de la web, solo para quien administra, mientras hay mantenimiento | features/maintenance/MaintenanceBanner | Mantenimiento activado. | Maintenance mode is on. | Manteniment activat. | Mantentze-modua aktibatuta. | Mode maintenance activé. |
 | `maint.banner.body` | Franja de mantenimiento para quien administra: qué ve el resto | features/maintenance/MaintenanceBanner | Solo quien administra ve la web; el resto ve la pantalla de mantenimiento. | Only admins can see the site; everyone else gets the maintenance screen. | Només qui administra veu la web; la resta veu la pantalla de manteniment. | Administratzaileek bakarrik ikusten dute webgunea; besteek mantentze-pantaila ikusten dute. | Seules les personnes qui administrent voient le site ; les autres voient l'écran de maintenance. |
 | `maint.banner.go` | Franja de mantenimiento: botón que abre el panel de gestión | features/maintenance/MaintenanceBanner | Ir al panel | Go to the panel | Anar al panell | Panelera joan | Aller au panneau |
+| `bugsquash.title` | Minijuego de la pantalla de mantenimiento y de «no se puede conectar» (mientras la web no está): título | features/maintenance/BugSquash | Mientras tanto: aplasta bugs | Meanwhile: squash some bugs | Mentrestant: aixafa bugs | Bitartean: zapaldu bug batzuk | En attendant : écrase des bugs |
+| `bugsquash.hint` | Minijuego «Aplasta bugs»: cómo se juega (antes de empezar) | features/maintenance/BugSquash | Tienes 30 segundos: pulsa el bug antes de que salte a otra casilla. | You have 30 seconds: hit the bug before it jumps to another square. | Tens 30 segons: prem el bug abans que salti a una altra casella. | 30 segundo dituzu: sakatu bug-a beste lauki batera jauzi egin aurretik. | Tu as 30 secondes : clique sur le bug avant qu'il saute dans une autre case. |
+| `bugsquash.playing` | Minijuego «Aplasta bugs»: marcador mientras se juega; {n} aplastados, {s} segundos que quedan | features/maintenance/BugSquash | Aplastados: {n} · Quedan {s} s | Squashed: {n} · {s} s left | Aixafats: {n} · Queden {s} s | Zapalduak: {n} · {s} s geratzen dira | Écrasés : {n} · Reste {s} s |
+| `bugsquash.over` | Minijuego «Aplasta bugs»: al acabar la partida; {n} es cuántos se aplastaron | features/maintenance/BugSquash | ¡Tiempo! Has aplastado {n}. Ni la Moulinette es tan rápida. | Time! You squashed {n}. Not even the Moulinette is that quick. | Temps! N'has aixafat {n}. Ni la Moulinette és tan ràpida. | Denbora! {n} zapaldu dituzu. Moulinette bera ere ez da hain azkarra. | Temps écoulé ! Tu en as écrasé {n}. Même la Moulinette n'est pas aussi rapide. |
+| `bugsquash.best` | Minijuego «Aplasta bugs»: récord guardado en este navegador; {n} es la cifra | features/maintenance/BugSquash | Récord: {n} | Best: {n} | Rècord: {n} | Errekorra: {n} | Record : {n} |
+| `bugsquash.board` | Minijuego «Aplasta bugs»: nombre accesible del tablero de casillas | features/maintenance/BugSquash | Tablero | Board | Tauler | Taula | Plateau |
+| `bugsquash.bug` | Minijuego «Aplasta bugs»: nombre accesible de la casilla donde está el bug (pulsarla lo aplasta) | features/maintenance/BugSquash | Aplastar el bug | Squash the bug | Aixafar el bug | Zapaldu bug-a | Écraser le bug |
+| `bugsquash.empty` | Minijuego «Aplasta bugs»: nombre accesible de una casilla sin bug | features/maintenance/BugSquash | Casilla vacía | Empty square | Casella buida | Lauki hutsa | Case vide |
+| `bugsquash.start` | Minijuego «Aplasta bugs»: botón para empezar | features/maintenance/BugSquash | Empezar | Start | Comença | Hasi | Commencer |
+| `bugsquash.again` | Minijuego «Aplasta bugs»: botón para jugar otra partida | features/maintenance/BugSquash | Otra partida | Play again | Una altra partida | Beste partida bat | Rejouer |
 | `countdown.days` | Cuenta atrás: abreviatura de días («2 d 04:12:09») | shared/ui/CountdownClock | d | d | d | e | j |
 | `countdown.day` | Campo de fecha de una cuenta atrás | features/admin/AdminTour, features/countdowns/CountdownsTour, shared/ui/DayTimeFields | Día | Day | Dia | Eguna | Jour |
 | `countdown.time` | Campo de hora de una cuenta atrás | features/admin/AdminTour, features/countdowns/CountdownsTour, shared/ui/DayTimeFields | Hora | Time | Hora | Ordua | Heure |

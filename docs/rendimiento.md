@@ -164,6 +164,9 @@ se baje cuando se usa y se quede en el PC.
   la red (así cada despliegue se estrena al momento) y, sin red, sirve la
   última guardada. Las portadas públicas (`/es/`…, [seo.md](seo.md)) también
   se revalidan con `ETag`, pero el service worker no las toca: no son la web.
+  Si la red contesta 502, 503 o 504 (la app no está: un despliegue), también
+  sirve la guardada: la web arranca, ve que la API no responde y enseña la
+  pantalla de espera con el minijuego (#104, [mantenimiento.md](mantenimiento.md)).
 - **Sonidos del Pomodoro** (`sounds/`): un año, con `Range` (el navegador los
   pide por trozos y vuelve al principio sin bajarlos otra vez). El service worker
   no los toca. Un sonido que cambie tiene que cambiar de nombre.

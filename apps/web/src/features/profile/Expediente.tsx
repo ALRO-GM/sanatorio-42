@@ -6,7 +6,7 @@ import { useI18n } from '../../shared/i18n'
 import { intraHref } from '../../shared/links'
 import { Show } from '../../shared/detail'
 import { Blocks } from '../../shared/layout/Blocks'
-import { Avatar } from '../../shared/ui/Avatar'
+import { RecordPhoto } from './RecordPhoto'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { TitleBanner } from '../../shared/ui/TitleBanner'
 import { Achievements } from './Achievements'
@@ -67,7 +67,7 @@ export function Expediente({ me, profile }: ExpedienteProps) {
               <article className="card record">
                 <TitleBanner title={title} />
                 <div className="record-head">
-                  <Avatar login={me.login} image={me.image} size={72} />
+                  <RecordPhoto login={me.login} image={me.image} />
                   <div className="record-name">
                     <strong>{me.login}</strong>
                     <span className="record-title">{titleText(t, title, hacks, master)}</span>

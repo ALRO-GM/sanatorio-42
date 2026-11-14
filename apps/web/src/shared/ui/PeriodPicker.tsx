@@ -3,6 +3,9 @@ import { PERIODS } from '../period'
 import type { Period } from '../period'
 import { StepPicker } from './StepPicker'
 
+/** Lo vacío no pone tope al otro campo. */
+const limitOf = (other: string): string | undefined => (other === '' ? undefined : other)
+
 type PeriodPickerProps = {
   value: Period
   onChange: (next: Period) => void
@@ -50,7 +53,6 @@ export function PeriodPicker({
       : period === 'custom'
         ? t(months ? 'period.customMonths' : 'period.custom')
         : tn('period.last', Number(period))
-  const limit = (other: string): string | undefined => (other === '' ? undefined : other)
 
   return (
     <>
@@ -69,7 +71,7 @@ export function PeriodPicker({
               type="number"
               inputMode="numeric"
               min={0}
-              max={limit(to)}
+              max={limitOf(to)}
               step={1}
               value={from}
               onChange={(event) => {
@@ -93,32 +95,51 @@ export function PeriodPicker({
           </label>
         </div>
       )}
-      {value === 'custom' && !months && (
-        <div className="net-dates">
-          <label>
-            {t('common.from')}
-            <input
-              type="date"
-              value={from}
-              max={limit(to)}
-              onChange={(event) => {
-                onDates(event.target.value, to)
-              }}
-            />
-          </label>
-          <label>
-            {t('common.to')}
-            <input
-              type="date"
-              value={to}
-              min={limit(from)}
-              onChange={(event) => {
-                onDates(from, event.target.value)
-              }}
-            />
-          </label>
-        </div>
-      )}
+      {value === 'custom' && !months && <DateFields from={from} to={to} onDates={onDates} />}
     </>
+  )
+}
+
+/**
+ * Los dos campos de fecha de «Fechas…» (desde y hasta, `YYYY-MM-DD`), cada uno
+ * con el otro de tope. Sueltos para los selectores con periodos propios (el del
+ * Pomodoro), que no son los de `PERIODS`.
+ */
+export function DateFields({
+  from,
+  to,
+  onDates,
+}: {
+  from: string
+  to: string
+  onDates: (from: string, to: string) => void
+}) {
+  const { t } = useI18n()
+
+  return (
+    <div className="net-dates">
+      <label>
+        {t('common.from')}
+        <input
+          type="date"
+          value={from}
+          max={limitOf(to)}
+          onChange={(event) => {
+            onDates(event.target.value, to)
+          }}
+        />
+      </label>
+      <label>
+        {t('common.to')}
+        <input
+          type="date"
+          value={to}
+          min={limitOf(from)}
+          onChange={(event) => {
+            onDates(from, event.target.value)
+          }}
+        />
+      </label>
+    </div>
   )
 }
