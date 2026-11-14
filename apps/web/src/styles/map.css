@@ -289,6 +289,13 @@ button.seat:focus-visible {
 .seat-host {
   font-weight: 700;
 }
+/* Qué falla en un puesto (#82): la pregunta y sus dos respuestas, en una fila que se parte en el móvil. */
+.seat-problem {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
 .seat-reservation {
   display: inline-flex;
   align-items: center;

@@ -111,8 +111,8 @@ export function levelFor(xp: number): Expediente['xp'] {
 export const invitedGroups = new Map<number, number>()
 
 /** Puestos que alguien ha dicho que no funcionan (uno de muestra). */
-export const brokenSeats = new Map<string, { by: string; at: string }>([
-  ['c1r5s8', { by: 'rsoto', at: new Date().toISOString() }],
+export const brokenSeats = new Map<string, NonNullable<MapSeat['broken']>>([
+  ['c1r5s8', { by: 'rsoto', at: new Date().toISOString(), kind: 'peripheral' }],
 ])
 
 export function groupView(group: StoredGroup): GroupView {

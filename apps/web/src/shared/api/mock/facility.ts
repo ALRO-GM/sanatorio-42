@@ -3,7 +3,7 @@
  * desde la web; los ven el panel y la página del staff.
  */
 
-import type { FacilityReport } from '@sanatorio/contracts'
+import type { FacilityReport, SeatProblem } from '@sanatorio/contracts'
 
 import { ME } from './data'
 import { delay, fail } from './state'
@@ -31,6 +31,22 @@ function resolve(id: number, by: string): void {
   if (report === undefined) throw fail(404, 'Ese aviso no existe o ya está resuelto')
   report.resolvedAt = new Date().toISOString()
   report.resolvedBy = by
+}
+
+/** El aviso de un puesto roto hecho desde el mapa, que también llega al staff (#82). */
+export function reportSeatProblem(host: string, kind: SeatProblem): void {
+  reports.unshift({
+    id: nextId++,
+    campusId: 22,
+    campusName: 'Madrid',
+    login: ME.login,
+    category: kind,
+    place: host.toLowerCase(),
+    note: null,
+    createdAt: new Date().toISOString(),
+    resolvedAt: null,
+    resolvedBy: null,
+  })
 }
 
 export const facilityMock: Pick<

@@ -385,3 +385,7 @@ export function createStatsModule(deps: {
     },
   }
 }
+
+// El estado de alguien en el common core (`docs/blackhole.md`): lo usan las
+// estadísticas de exámenes para el black hole de cada círculo (#81).
+export { coreStatusOf } from './blackhole.rules.js'

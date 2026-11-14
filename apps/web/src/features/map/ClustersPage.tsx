@@ -74,11 +74,13 @@ export function ClustersPage({ me }: { me: string }) {
                 onBroken={
                   !broken
                     ? undefined
-                    : (host, isBroken) => {
+                    : (host, problem) => {
                         // Si falla, se dice (antes se callaba y parecía que no hacía nada).
                         void marking
                           .run(() =>
-                            isBroken ? api.reportBrokenSeat(host) : api.clearBrokenSeat(host),
+                            problem === null
+                              ? api.clearBrokenSeat(host)
+                              : api.reportBrokenSeat(host, problem),
                           )
                           .then((done) => (done ? map.reload() : undefined))
                       }

@@ -112,6 +112,7 @@ import type {
   ClusterMap,
   ExamQuery,
   ExamStats,
+  ExamBlackholeList,
   LiveExam,
   Consumption,
   CurrentUser,
@@ -167,6 +168,7 @@ import type {
   NetworkStrictest,
   SeatGraph,
   SeatHeat,
+  SeatProblem,
   SeatWeightsPreview,
   SeatWeightsState,
   Notices,
@@ -300,6 +302,8 @@ export type Api = {
   getCampusMap: () => Promise<ClusterMap>
   /** Estadísticas de los exámenes, los círculos y el black hole del campus, por plan y kickoff. */
   getExamStats: (query: ExamQuery) => Promise<ExamStats>
+  /** Solo quien administra: a quién se tragó el black hole y quién lo tiene cerca (#81). */
+  getExamBlackhole: (query: ExamQuery) => Promise<ExamBlackholeList>
   /**
    * El examen que hay ahora en el campus (o el siguiente, en las próximas 24 h).
    * `world`: el de estudiantes o el de piscineros; solo lo atiende la API en la
@@ -308,8 +312,11 @@ export type Api = {
   getLiveExam: (world?: ExamWorld) => Promise<LiveExam>
   /** Lo mismo, pidiendo antes lo nuevo a 42 (uno por minuto para todo el campus). */
   refreshLiveExam: (world?: ExamWorld) => Promise<LiveExam>
-  /** Ese puesto no funciona (vale una semana), o ya funciona. */
-  reportBrokenSeat: (host: string) => Promise<void>
+  /**
+   * Ese puesto no funciona (vale una semana): el ordenador o un periférico; el
+   * aviso llega también al staff (#82). O ya funciona.
+   */
+  reportBrokenSeat: (host: string, kind: SeatProblem) => Promise<void>
   clearBrokenSeat: (host: string) => Promise<void>
   /** Todas tus conversaciones, con lo que has apuntado de cada una. */
   getConversations: () => Promise<Conversations>

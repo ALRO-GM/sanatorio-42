@@ -1,7 +1,13 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, FocusEvent, MouseEvent, RefObject } from 'react'
 
-import type { ClusterMap, MapCluster, MapSeat, SeatReservation } from '@sanatorio/contracts'
+import type {
+  ClusterMap,
+  MapCluster,
+  MapSeat,
+  SeatProblem,
+  SeatReservation,
+} from '@sanatorio/contracts'
 
 import { shows, useDetail } from '../../shared/detail'
 import { useI18n } from '../../shared/i18n'
@@ -55,8 +61,11 @@ type ClusterMapViewProps = {
   legend?: readonly LegendItem[]
   /** Si viene, se resalta a esta gente y se apaga al resto (los filtros de una lista). */
   spotlight?: ReadonlySet<string> | null
-  /** Si viene, en un puesto libre se puede avisar de que no funciona, o de que ya sí. */
-  onBroken?: ((host: string, broken: boolean) => void) | undefined
+  /**
+   * Si viene, en un puesto libre se puede avisar de que no funciona (qué falla:
+   * el ordenador o un periférico, #82) o, con `null`, de que ya sí.
+   */
+  onBroken?: ((host: string, problem: SeatProblem | null) => void) | undefined
 }
 
 /** Las opciones de hacia dónde se ve el plano, en el orden de los botones. */
@@ -138,9 +147,16 @@ function seatLabel(seat: MapSeat, t: Translate, reserved: boolean): string {
   }
 
   if (reserved) parts.push(t('map.seatReserved'))
-  if (seat.broken !== null && seat.occupant === null && !seat.taken) parts.push(t('map.seatBroken'))
+  if (seat.broken !== null && seat.occupant === null && !seat.taken) parts.push(brokenText(seat, t))
 
   return parts.join(' · ')
+}
+
+/** Qué le pasa a un puesto roto: qué falla, si se sabe (#82). */
+function brokenText(seat: MapSeat, t: Translate): string {
+  const kind = seat.broken?.kind ?? null
+
+  return kind === null ? t('map.seatBroken') : t(`map.broken.${kind}`)
 }
 
 /**
@@ -685,30 +701,12 @@ export function ClusterMapView({
       )}
       {/* Un puesto libre no tiene ficha: lo suyo se dice debajo del plano. */}
       {open !== null && openTaken === null && (
-        <div className="seat-detail" role="status">
-          <strong className="seat-host" title={open.host}>
-            {seatName(open.host, t)}
-          </strong>
-          <span>
-            {open.taken
-              ? t('map.seatTaken')
-              : open.broken === null
-                ? t('map.seatFree')
-                : t('map.seatBroken')}
-          </span>
-          {openReservation !== null && <ReservationNote reservation={openReservation} />}
-          {onBroken !== undefined && !open.taken && (
-            <button
-              type="button"
-              className="pill"
-              onClick={() => {
-                onBroken(open.host, open.broken === null)
-              }}
-            >
-              {open.broken === null ? t('map.reportBroken') : t('map.fixed')}
-            </button>
-          )}
-        </div>
+        <FreeSeatDetail
+          key={open.host}
+          seat={open}
+          reservation={openReservation}
+          onBroken={onBroken}
+        />
       )}
 
       {/* La colocación se ajusta una vez y se olvida: plegada, debajo del plano. */}
@@ -753,6 +751,85 @@ export function ClusterMapView({
     </div>
   )
 }
+
+/**
+ * Lo que se dice de un puesto libre debajo del plano: libre o roto, su reserva
+ * y, si se puede, avisar de qué falla (el ordenador o un periférico, #82) o de
+ * que ya funciona.
+ */
+function FreeSeatDetail({
+  seat,
+  reservation,
+  onBroken,
+}: {
+  seat: MapSeat
+  reservation: SeatReservation | null
+  onBroken: ClusterMapViewProps['onBroken']
+}) {
+  const { t } = useI18n()
+  // Al pulsar «avisar» se pregunta qué falla: el staff no arregla igual una
+  // cosa que otra.
+  const [asking, setAsking] = useState(false)
+
+  return (
+    <div className="seat-detail" role="status">
+      <strong className="seat-host" title={seat.host}>
+        {seatName(seat.host, t)}
+      </strong>
+      <span>
+        {seat.taken
+          ? t('map.seatTaken')
+          : seat.broken === null
+            ? t('map.seatFree')
+            : brokenText(seat, t)}
+      </span>
+      {reservation !== null && <ReservationNote reservation={reservation} />}
+      {onBroken !== undefined && !seat.taken && seat.broken !== null && (
+        <button
+          type="button"
+          className="pill"
+          onClick={() => {
+            onBroken(seat.host, null)
+          }}
+        >
+          {t('map.fixed')}
+        </button>
+      )}
+      {onBroken !== undefined && !seat.taken && seat.broken === null && !asking && (
+        <button
+          type="button"
+          className="pill"
+          onClick={() => {
+            setAsking(true)
+          }}
+        >
+          {t('map.reportBroken')}
+        </button>
+      )}
+      {onBroken !== undefined && !seat.taken && seat.broken === null && asking && (
+        <span className="seat-problem" role="group" aria-label={t('map.whatFails')}>
+          <span>{t('map.whatFails')}</span>
+          {PROBLEMS.map((problem) => (
+            <button
+              key={problem}
+              type="button"
+              className="pill"
+              onClick={() => {
+                setAsking(false)
+                onBroken(seat.host, problem)
+              }}
+            >
+              {t(`facility.category.${problem}`)}
+            </button>
+          ))}
+        </span>
+      )}
+    </div>
+  )
+}
+
+/** Lo que puede fallar en un puesto, en el orden en que se ofrece. */
+const PROBLEMS: readonly SeatProblem[] = ['computer', 'peripheral']
 
 /** Para qué proyecto y cuándo está reservado un puesto. */
 function ReservationNote({ reservation }: { reservation: SeatReservation }) {

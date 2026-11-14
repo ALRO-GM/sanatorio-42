@@ -630,6 +630,49 @@ describe('el examen en vivo', () => {
     expect(calls.users).toBe(0)
   })
 
+  it('el equipo vacío que 42 abre tras cerrar no tapa el 75 del examen (#117)', async () => {
+    // Así pasó el 2026-11-12 en Exam Rank 04 · 42next: cerrado con 75 al acabar
+    // y, un cuarto de hora después, un equipo nuevo, bloqueado y sin nota.
+    await createReplicaRepository(db).ingestProjectUsers(
+      [
+        {
+          ...projectUser('ana', {
+            ...RANK_02,
+            status: 'in_progress',
+            finalMark: 75,
+            updatedAt: '2026-10-22T10:14:00.000Z',
+          }),
+          teams: [
+            {
+              id: 9002,
+              final_mark: 75,
+              'validated?': false,
+              created_at: '2026-10-22T07:00:00.000Z',
+              closed_at: '2026-10-22T07:30:00.000Z',
+            },
+            {
+              id: 9003,
+              final_mark: null,
+              'validated?': null,
+              'locked?': true,
+              'closed?': false,
+              created_at: '2026-10-22T10:14:00.000Z',
+              updated_at: '2026-10-22T10:14:00.000Z',
+            },
+          ],
+        },
+      ],
+      MADRID,
+    )
+    clock = Date.parse(END) + 2 * 60 * MINUTE
+
+    const ana = (await build().live(actor('eva'))).last?.groups
+      .flatMap((group) => group.people)
+      .find((person) => person.login === 'ana')
+
+    expect(ana).toMatchObject({ status: 'failed', mark: 75 })
+  })
+
   it('recién acabado, el reloj de fondo pide las notas; pasada media hora y ya mirado tras el cierre, no', async () => {
     clock = Date.parse(END) + 10 * MINUTE
     await build().tick([MADRID])

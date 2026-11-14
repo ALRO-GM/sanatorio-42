@@ -99,9 +99,14 @@ export const realApi: Api = {
     getJson(
       `/exams/stats?track=${track}${kickoffs.length === 0 ? '' : `&kickoffs=${kickoffs.join(',')}`}`,
     ),
+  getExamBlackhole: ({ track, kickoffs }) =>
+    getJson(
+      `/admin/exams/blackhole?track=${track}${kickoffs.length === 0 ? '' : `&kickoffs=${kickoffs.join(',')}`}`,
+    ),
   getLiveExam: (world) => getJson(`/exams/live${worldQuery(world)}`),
   refreshLiveExam: (world) => sendJson('POST', `/exams/live/refresh${worldQuery(world)}`),
-  reportBrokenSeat: (host) => send('POST', `/map/seats/${encodeURIComponent(host)}/broken`),
+  reportBrokenSeat: (host, kind) =>
+    send('POST', `/map/seats/${encodeURIComponent(host)}/broken`, { kind }),
   clearBrokenSeat: (host) => send('DELETE', `/map/seats/${encodeURIComponent(host)}/broken`),
   getConversations: () => getJson('/conversations'),
   markConversation: (change) => sendJson('PUT', '/conversations/mark', change),

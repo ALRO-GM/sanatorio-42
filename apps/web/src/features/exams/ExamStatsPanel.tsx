@@ -1,6 +1,13 @@
 import { useRef, useState } from 'react'
 
-import type { ExamFamily, ExamKickoff, ExamStat, ExamStats, ExamTrack } from '@sanatorio/contracts'
+import type {
+  BlackholePerson,
+  ExamFamily,
+  ExamKickoff,
+  ExamStat,
+  ExamStats,
+  ExamTrack,
+} from '@sanatorio/contracts'
 
 import { api } from '../../shared/api'
 import { Show } from '../../shared/detail'
@@ -8,10 +15,17 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import type { Translate } from '../../shared/i18n'
+import { recordHref } from '../../shared/links'
+import { ChartWithRail } from '../../shared/ui/ChartWithRail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PillGroup } from '../../shared/ui/PillGroup'
+import { StepPicker } from '../../shared/ui/StepPicker'
 
 /** Qué exámenes se ven: los de C, los de Nexus o los dos, uno al lado del otro. */
 type FamilyFilter = ExamFamily | 'both'
+
+/** Las dos kickoffs (`AAAA-MM`) que se comparan; '' si aún no se ha elegido. */
+type Pair = readonly [string, string]
 
 const TRACKS: readonly ExamTrack[] = ['all', 'classic', 'next']
 const FAMILIES: readonly FamilyFilter[] = ['classic', 'next', 'both']
@@ -64,13 +78,21 @@ function Choice<T extends string>(props: {
  * Las estadísticas de exámenes del campus (#81 del buzón): se elige el plan de
  * la gente (C o Python), qué exámenes (los de C, los de Nexus o los dos, el
  * mismo rango en la misma fila) y una o varias kickoffs. Debajo, la duración
- * de los círculos. El black hole no sale: la fecha que da 42 no es de fiar.
+ * de los círculos y a cuánta gente se tragó el black hole en cada uno (lo que
+ * 42 hizo al echarla, no su fecha, que no es de fiar: `docs/blackhole.md`);
+ * con nombres, solo para quien administra.
+ *
+ * Las opciones van en un panel a la derecha y las cifras a la izquierda
+ * (`docs/interfaz.md`, «Gráficas con opciones»); en el modo de datos, además,
+ * se comparan dos kickoffs una al lado de la otra (#81).
  */
 export function ExamStatsPanel() {
   const { t, tn } = useI18n()
   const [track, setTrack] = useState<ExamTrack>('all')
   const [family, setFamily] = useState<FamilyFilter>('both')
   const [kickoffs, setKickoffs] = useState<string[]>([])
+  // Las dos kickoffs que se comparan (modo de datos); '' es ninguna.
+  const [pair, setPair] = useState<Pair>(['', ''])
   const stats = useAsync(() => api.getExamStats({ track, kickoffs }), [track, kickoffs.join(',')])
   // Al cambiar de filtro, `useAsync` se vacía hasta la respuesta: se siguen
   // enseñando las cifras anteriores para que los botones no desaparezcan.
@@ -100,7 +122,19 @@ export function ExamStatsPanel() {
               })}
             </p>
           )}
-          <div className="exam-filters">
+          <ChartWithRail
+            framed={false}
+            railLabel={t('exams.options')}
+            chart={
+              <>
+                <p className="hint">{tn('exams.selection', data.people)}</p>
+                <Show from="datos">
+                  <KickoffCompare track={track} family={family} pair={pair} />
+                </Show>
+                <ExamPairs exams={data.exams} family={family} />
+              </>
+            }
+          >
             <Choice
               label={t('exams.trackFilter')}
               options={TRACKS}
@@ -124,10 +158,15 @@ export function ExamStatsPanel() {
                 setKickoffs([])
               }}
             />
-          </div>
-          <p className="hint">{tn('exams.selection', data.people)}</p>
-          <ExamPairs exams={data.exams} family={family} />
+            <Show from="datos">
+              <ComparePickers kickoffs={data.kickoffs} pair={pair} onChange={setPair} />
+            </Show>
+          </ChartWithRail>
           <Circles data={data} />
+          <BlackholeCircles data={data} />
+          <Show from="datos">
+            <BlackholeHistory track={track} kickoffs={kickoffs} />
+          </Show>
         </>
       )}
     </>
@@ -330,5 +369,226 @@ function Circles({ data }: { data: ExamStats }) {
         </ul>
       </article>
     </Show>
+  )
+}
+
+/** Los dos selectores de las kickoffs que se comparan, de la más reciente a la más antigua. */
+function ComparePickers(props: {
+  kickoffs: readonly ExamKickoff[]
+  pair: Pair
+  onChange: (pair: Pair) => void
+}) {
+  const { t } = useI18n()
+  const month = useMonth()
+  const options = ['', ...props.kickoffs.map((kickoff) => kickoff.month)]
+  const text = (value: string): string => (value === '' ? t('exams.compare.none') : month(value))
+
+  return (
+    <fieldset className="exam-compare-pick">
+      <legend>{t('exams.compare.title')}</legend>
+      <StepPicker
+        label={t('exams.compare.first')}
+        options={options}
+        value={props.pair[0]}
+        onChange={(next) => {
+          props.onChange([next, props.pair[1]])
+        }}
+        text={text}
+      />
+      <StepPicker
+        label={t('exams.compare.second')}
+        options={options}
+        value={props.pair[1]}
+        onChange={(next) => {
+          props.onChange([props.pair[0], next])
+        }}
+        text={text}
+      />
+    </fieldset>
+  )
+}
+
+/** «12 de 40 · 30 %», o «—» si nadie lo ha intentado. */
+function passLine(t: Translate, exam: ExamStat | undefined): string {
+  return exam === undefined || exam.people === 0
+    ? '—'
+    : t('exams.people', {
+        passed: exam.passed,
+        people: exam.people,
+        pct: pctOf(t, exam.passed, exam.people),
+      })
+}
+
+/**
+ * Dos kickoffs una al lado de la otra (#81): de cada examen, cuánta gente de
+ * cada una lo aprobó (en cifras y en %) y con cuántos intentos de media. Usa
+ * la misma ruta que el resto, una vez por kickoff.
+ */
+function KickoffCompare(props: { track: ExamTrack; family: FamilyFilter; pair: Pair }) {
+  const { t, tn } = useI18n()
+  const month = useMonth()
+  const [first, second] = props.pair
+  const ready = first !== '' && second !== '' && first !== second
+  const both = useAsync(
+    () =>
+      ready
+        ? Promise.all([
+            api.getExamStats({ track: props.track, kickoffs: [first] }),
+            api.getExamStats({ track: props.track, kickoffs: [second] }),
+          ])
+        : Promise.resolve(null),
+    [props.track, first, second],
+  )
+
+  if (!ready) return null
+  if (both.error !== null) return <ErrorNote error={both.error} retry />
+  if (both.data === undefined || both.data === null) {
+    return <p className="estado">{t('app.loading')}</p>
+  }
+
+  const [left, right] = both.data
+  const families: ExamFamily[] = props.family === 'both' ? ['classic', 'next'] : [props.family]
+  const key = (exam: ExamStat): string => `${exam.family}:${String(exam.rank)}`
+  const names = new Map(
+    [...left.exams, ...right.exams]
+      .filter((exam) => families.includes(exam.family))
+      .map((exam) => [key(exam), exam]),
+  )
+  const rows = [...names.values()].sort(
+    (a, b) => (a.rank ?? Infinity) - (b.rank ?? Infinity) || a.family.localeCompare(b.family),
+  )
+  const avg = (exam: ExamStat | undefined): string =>
+    exam?.avgAttempts === null || exam === undefined
+      ? '—'
+      : tn('exams.avg', Math.round(exam.avgAttempts * 10) / 10)
+
+  return (
+    <div className="exam-compare">
+      <table>
+        <caption>{t('exams.compare.title')}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{t('exams.familyFilter')}</th>
+            <th scope="col">{tn('exams.compare.column', left.people, { month: month(first) })}</th>
+            <th scope="col">
+              {tn('exams.compare.column', right.people, { month: month(second) })}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((exam) => {
+            const a = left.exams.find((one) => key(one) === key(exam))
+            const b = right.exams.find((one) => key(one) === key(exam))
+
+            return (
+              <tr key={key(exam)}>
+                <th scope="row">{exam.name}</th>
+                <td>
+                  {passLine(t, a)}
+                  <small className="hint">{avg(a)}</small>
+                </td>
+                <td>
+                  {passLine(t, b)}
+                  <small className="hint">{avg(b)}</small>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+/**
+ * A cuánta gente se tragó el black hole en cada círculo (#81), de quien llegó
+ * a él: en cifras y en %. Sin nombres, así que lo ve todo el mundo.
+ */
+function BlackholeCircles({ data }: { data: ExamStats }) {
+  const { t } = useI18n()
+
+  if (data.blackhole.length === 0) return null
+
+  return (
+    <Show from="datos">
+      <article className="card">
+        <span className="eyebrow">{t('exams.blackhole.title')}</span>
+        <ul className="rows">
+          {data.blackhole.map((row) => (
+            <li key={row.circle} className="row">
+              <span>{t('graph.circle', { n: row.circle })}</span>
+              <strong>{pctOf(t, row.absorbed, row.reached)}</strong>
+              <small className="hint">
+                {t('exams.blackhole.line', { absorbed: row.absorbed, reached: row.reached })}
+              </small>
+            </li>
+          ))}
+        </ul>
+      </article>
+    </Show>
+  )
+}
+
+/** Las dos listas del historial del black hole. */
+const BLACKHOLE_TABS = ['absorbed', 'closest'] as const
+
+/**
+ * El historial del black hole de la selección (#81): a quién se tragó y quién
+ * lo tiene más cerca. Lleva nombres y fechas de cada cual: solo para quien
+ * administra (la API lo rechaza a los demás, y aquí ni se pide).
+ */
+function BlackholeHistory({ track, kickoffs }: { track: ExamTrack; kickoffs: readonly string[] }) {
+  const profile = useAsync(() => api.getProfile(), [])
+
+  if (profile.data?.admin !== true) return null
+
+  return <BlackholeLists track={track} kickoffs={kickoffs} />
+}
+
+function BlackholeLists({ track, kickoffs }: { track: ExamTrack; kickoffs: readonly string[] }) {
+  const { t } = useI18n()
+  const { date } = useFormat()
+  const month = useMonth()
+  const [tab, setTab] = useState<(typeof BLACKHOLE_TABS)[number]>('absorbed')
+  const lists = useAsync(
+    () => api.getExamBlackhole({ track, kickoffs: [...kickoffs] }),
+    [track, kickoffs.join(',')],
+  )
+  const shown: readonly BlackholePerson[] = lists.data?.[tab] ?? []
+
+  return (
+    <article className="card">
+      <span className="eyebrow">{t('exams.blackhole.history')}</span>
+      <PillGroup
+        kind="tabs"
+        id="exam-blackhole"
+        options={BLACKHOLE_TABS}
+        value={tab}
+        onChange={setTab}
+        label={t('exams.blackhole.history')}
+        text={(option) => t(`exams.blackhole.${option}`)}
+      />
+      <div id={`exam-blackhole-panel-${tab}`} role="tabpanel">
+        <ErrorNote error={lists.error} retry />
+        {lists.data === undefined && lists.loading && <p className="estado">{t('app.loading')}</p>}
+        {lists.data !== undefined && shown.length === 0 && (
+          <p className="estado">{t('exams.blackhole.nobody')}</p>
+        )}
+        {shown.length > 0 && (
+          <ul className="rows">
+            {shown.map((person) => (
+              <li key={person.login} className="row">
+                <a href={recordHref(person.login)}>{person.login}</a>
+                <span>
+                  {t('graph.circle', { n: person.circle })} · {t(`exams.plan.${person.track}`)}
+                  {person.kickoff === null ? '' : ` · ${month(person.kickoff)}`}
+                </span>
+                <small className="hint">{date(person.at, 'medium')}</small>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </article>
   )
 }

@@ -1696,6 +1696,53 @@ dialog.layout-dialog.focus-dialog.wide {
   color: var(--accent-text);
   font-size: 0.85rem;
 }
+/* En el panel de opciones (que ya se desplaza solo), la lista de kickoffs se
+   abre en su sitio: flotando, el panel la cortaría. */
+.progress-rail .exam-kickoff-list {
+  position: static;
+  box-shadow: none;
+}
+.progress-rail .exam-kickoff-select summary {
+  min-width: 0;
+}
+.exam-compare-pick {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+.exam-compare-pick legend {
+  padding: 0;
+  margin-bottom: 0.3rem;
+}
+/* Dos kickoffs una al lado de la otra (#81): se desliza de lado en el móvil. */
+.exam-compare {
+  overflow-x: auto;
+  margin: 0.4rem 0 0.8rem;
+}
+.exam-compare table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+.exam-compare caption {
+  text-align: start;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+.exam-compare th,
+.exam-compare td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  text-align: start;
+  vertical-align: top;
+}
+.exam-compare td small {
+  display: block;
+}
 
 /* Examen en vivo: quien sigue dentro aún no tiene nota (42 la da al cerrar). */
 .exam-mark.pending {

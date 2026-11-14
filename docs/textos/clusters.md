@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-82 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+85 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -59,6 +59,9 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `map.fixed` | Botón: el ordenador ya funciona | features/map/ClusterMapView, features/map/ClustersTour | Ya funciona | It works now | Ja funciona | Badabil jada | Ça remarche |
 | `map.reportBroken` | Botón: avisar de que un ordenador no funciona | features/map/ClusterMapView, features/map/ClustersTour | Avisar de que no funciona | Report it is not working | Avisa que no funciona | Ez dabilela abisatu | Signaler une panne |
 | `map.seatBroken` | Etiqueta: ordenador averiado | features/map/ClusterMapView, features/map/ClustersTour | No funciona | Not working | No funciona | Ez dabil | En panne |
+| `map.broken.computer` | Etiqueta de un puesto roto (#82): falla el ordenador | features/map/ClusterMapView | No funciona el ordenador | The computer is not working | No funciona l'ordinador | Ordenagailuak ez du funtzionatzen | L'ordinateur est en panne |
+| `map.broken.peripheral` | Etiqueta de un puesto roto (#82): falla la pantalla, el teclado o el ratón | features/map/ClusterMapView | Falla la pantalla, el teclado o el ratón | The screen, keyboard or mouse is not working | Falla la pantalla, el teclat o el ratolí | Pantailak, teklatuak edo saguak huts egiten du | L'écran, le clavier ou la souris est en panne |
+| `map.whatFails` | Pregunta al avisar de un puesto roto desde el mapa, antes de elegir el ordenador o un periférico (#82) | features/map/ClusterMapView | ¿Qué falla? | What is not working? | Què falla? | Zerk huts egiten du? | Qu'est-ce qui ne marche pas ? |
 | `map.finishedMine` | Cuánta gente cerca aprobó tu proyecto | features/map/ClusterMapView, features/map/SeatHoverCard | Aprobaron tu proyecto: {n} | Passed your project: {n} | Han aprovat el teu projecte: {n} | Zure proiektua gainditu dute: {n} | Ont validé ton projet : {n} |
 | `clusters.title` | Título de la página del mapa | features/map/ClustersPage | Clústeres del campus | Campus clusters | Clústers del campus | Campuseko klusterrak | Clusters du campus |
 | `clusters.count.one` | Cuánta gente sentada tiene la web abierta (una) | features/map/ClustersPage | Con Peer4U abierto: {online} de {occupied} persona sentada | With Peer4U open: {online} of {occupied} person seated | Amb Peer4U obert: {online} de {occupied} persona asseguda | Peer4U irekita dutenak: eserita dagoen {occupied} pertsonatik {online} | Avec Peer4U ouvert : {online} sur {occupied} poste occupé |
@@ -81,11 +84,11 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `facility.by` | Lista de avisos: quién y cuándo | features/facility/FacilityList | Avisó {login} · {when} | Reported by {login} · {when} | Avisat per {login} · {when} | {login}(e)k jakinarazia · {when} | Signalé par {login} · {when} |
 | `facility.resolvedBy` | Lista de avisos: quién lo resolvió y cuándo | features/facility/FacilityList | resuelto por {by} · {when} | resolved by {by} · {when} | resolt per {by} · {when} | {by}(e)k konponduta · {when} | résolu par {by} · {when} |
 | `facility.resolve` | Lista de avisos: darlo por resuelto | features/facility/FacilityList | Marcar como resuelto | Mark as resolved | Marca com a resolt | Markatu konponduta bezala | Marquer comme résolu |
-| `facility.category.computer` | Tipo de problema: el ordenador | features/facility/FacilityForm, features/facility/FacilityList | Ordenador | Computer | Ordinador | Ordenagailua | Ordinateur |
-| `facility.category.peripheral` | Tipo de problema: pantalla, teclado o ratón | features/facility/FacilityForm, features/facility/FacilityList | Pantalla, teclado o ratón | Screen, keyboard or mouse | Pantalla, teclat o ratolí | Pantaila, teklatua edo sagua | Écran, clavier ou souris |
-| `facility.category.network` | Tipo de problema: la red o el wifi | features/facility/FacilityForm, features/facility/FacilityList | Red o wifi | Network or wifi | Xarxa o wifi | Sarea edo wifia | Réseau ou wifi |
-| `facility.category.toilets` | Tipo de problema: los baños | features/facility/FacilityForm, features/facility/FacilityList | Baños | Toilets | Lavabos | Komunak | Toilettes |
-| `facility.category.temperature` | Tipo de problema: frío o calor | features/facility/FacilityForm, features/facility/FacilityList | Temperatura | Temperature | Temperatura | Tenperatura | Température |
-| `facility.category.light` | Tipo de problema: la luz | features/facility/FacilityForm, features/facility/FacilityList | Luz | Light | Llum | Argia | Éclairage |
-| `facility.category.cleaning` | Tipo de problema: limpieza | features/facility/FacilityForm, features/facility/FacilityList | Limpieza | Cleaning | Neteja | Garbiketa | Ménage |
-| `facility.category.other` | Tipo de problema: otro | features/facility/FacilityForm, features/facility/FacilityList | Otro | Other | Altre | Bestelakoa | Autre |
+| `facility.category.computer` | Tipo de problema: el ordenador | features/facility/FacilityForm, features/facility/FacilityList, features/map/ClusterMapView | Ordenador | Computer | Ordinador | Ordenagailua | Ordinateur |
+| `facility.category.peripheral` | Tipo de problema: pantalla, teclado o ratón | features/facility/FacilityForm, features/facility/FacilityList, features/map/ClusterMapView | Pantalla, teclado o ratón | Screen, keyboard or mouse | Pantalla, teclat o ratolí | Pantaila, teklatua edo sagua | Écran, clavier ou souris |
+| `facility.category.network` | Tipo de problema: la red o el wifi | features/facility/FacilityForm, features/facility/FacilityList, features/map/ClusterMapView | Red o wifi | Network or wifi | Xarxa o wifi | Sarea edo wifia | Réseau ou wifi |
+| `facility.category.toilets` | Tipo de problema: los baños | features/facility/FacilityForm, features/facility/FacilityList, features/map/ClusterMapView | Baños | Toilets | Lavabos | Komunak | Toilettes |
+| `facility.category.temperature` | Tipo de problema: frío o calor | features/facility/FacilityForm, features/facility/FacilityList, features/map/ClusterMapView | Temperatura | Temperature | Temperatura | Tenperatura | Température |
+| `facility.category.light` | Tipo de problema: la luz | features/facility/FacilityForm, features/facility/FacilityList, features/map/ClusterMapView | Luz | Light | Llum | Argia | Éclairage |
+| `facility.category.cleaning` | Tipo de problema: limpieza | features/facility/FacilityForm, features/facility/FacilityList, features/map/ClusterMapView | Limpieza | Cleaning | Neteja | Garbiketa | Ménage |
+| `facility.category.other` | Tipo de problema: otro | features/facility/FacilityForm, features/facility/FacilityList, features/map/ClusterMapView | Otro | Other | Altre | Bestelakoa | Autre |

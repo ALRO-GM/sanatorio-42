@@ -38,6 +38,15 @@ function parseDates(value: unknown): string[] {
 const triState = (value: unknown): boolean | null =>
   value === null || value === undefined ? null : toNumber(value) === 1
 
+/**
+ * La gente de un campus (#81 del buzón): quien consta en él (`campus_members`)
+ * **o** tiene en él su 42cursus (`core_cursus`). Antes solo valía lo primero, y
+ * quien 42 no había llegado a mandar con el campus no salía en las cuentas.
+ * Va con dos argumentos: el campus, dos veces.
+ */
+const CAMPUS_PEOPLE = `(SELECT user_id FROM campus_members WHERE campus_id = ?
+                       UNION SELECT user_id FROM core_cursus WHERE campus_id = ?)`
+
 export function createExamsRepository(db: Db) {
   return {
     /** Los exámenes que se conocen, por nombre. `pool`: los de la piscina. */
@@ -153,9 +162,8 @@ export function createExamsRepository(db: Db) {
       const result = await db.execute({
         sql: `SELECT a.user_id, a.project_id, a.mark, a.validated, a.at FROM exam_attempts a
               JOIN projects p ON p.id = a.project_id
-              JOIN campus_members cm ON cm.user_id = a.user_id AND cm.campus_id = ?
-              WHERE ${EXAM_PROJECT}`,
-        args: [campusId],
+              WHERE a.user_id IN ${CAMPUS_PEOPLE} AND ${EXAM_PROJECT}`,
+        args: [campusId, campusId],
       })
 
       return result.rows.map((row) => ({
@@ -172,9 +180,8 @@ export function createExamsRepository(db: Db) {
       const result = await db.execute({
         sql: `SELECT pu.user_id, pu.project_id, pu.validated, pu.occurrence FROM project_users pu
               JOIN projects p ON p.id = pu.project_id
-              JOIN campus_members cm ON cm.user_id = pu.user_id AND cm.campus_id = ?
-              WHERE ${EXAM_PROJECT}`,
-        args: [campusId],
+              WHERE pu.user_id IN ${CAMPUS_PEOPLE} AND ${EXAM_PROJECT}`,
+        args: [campusId, campusId],
       })
 
       return result.rows.map((row) => ({
@@ -186,28 +193,45 @@ export function createExamsRepository(db: Db) {
     },
 
     /**
-     * Toda la gente de un campus, con lo que se sepa de su cursus: inicio y
-     * black hole (de quien ha entrado en la web) y plan e hitos (de quien se
-     * le han mirado). Antes solo salía quien tenía los hitos.
+     * Toda la gente de un campus (`CAMPUS_PEOPLE`), con lo que se sepa de su
+     * cursus: inicio (de quien ha entrado en la web o, si no, de su 42cursus),
+     * plan e hitos (de quien se le han mirado) y cómo acabó (su 42cursus, para
+     * el black hole). Quien solo está en el 42cursus sale con el login de allí.
      */
     async members(campusId: number): Promise<MemberRow[]> {
       const result = await db.execute({
-        sql: `SELECT u.id, u.login, u.image, ul.begin_at, ut.track, ut.ranks
-              FROM campus_members cm
-              JOIN users u ON u.id = cm.user_id
-              LEFT JOIN user_levels ul ON ul.login = u.login
-              LEFT JOIN user_tracks ut ON ut.login = u.login
-              WHERE cm.campus_id = ?`,
-        args: [campusId],
+        sql: `SELECT m.user_id AS id, COALESCE(u.login, cc.login) AS login, u.image,
+                     ul.begin_at, ut.track, ut.ranks,
+                     cc.user_id AS cc_user, cc.begin_at AS cc_begin, cc.end_at, cc.blackholed_at,
+                     cc.grade, cc.active, cc.alumni
+              FROM ${CAMPUS_PEOPLE} m
+              LEFT JOIN users u        ON u.id = m.user_id
+              LEFT JOIN core_cursus cc ON cc.user_id = m.user_id
+              LEFT JOIN user_levels ul ON ul.login = COALESCE(u.login, cc.login)
+              LEFT JOIN user_tracks ut ON ut.login = COALESCE(u.login, cc.login)
+              WHERE COALESCE(u.login, cc.login) IS NOT NULL`,
+        args: [campusId, campusId],
       })
+      const textOf = (value: unknown): string | null => (typeof value === 'string' ? value : null)
 
       return result.rows.map((row) => ({
         userId: toNumber(row.id),
         login: toText(row.login),
-        image: typeof row.image === 'string' ? row.image : null,
-        beginAt: typeof row.begin_at === 'string' ? row.begin_at : null,
+        image: textOf(row.image),
+        beginAt: textOf(row.begin_at),
         track: row.track === 'classic' || row.track === 'next' ? row.track : null,
         ranks: row.track === null || row.track === undefined ? null : parseDates(row.ranks),
+        cursus:
+          row.cc_user === null || row.cc_user === undefined
+            ? null
+            : {
+                beginAt: textOf(row.cc_begin),
+                endAt: textOf(row.end_at),
+                blackholedAt: textOf(row.blackholed_at),
+                grade: textOf(row.grade),
+                active: triState(row.active),
+                alumni: toNumber(row.alumni ?? 0) === 1,
+              },
       }))
     },
 
@@ -220,11 +244,11 @@ export function createExamsRepository(db: Db) {
       const result = await db.execute({
         sql: `SELECT pu.user_id, pu.project_id, pu.created_at_42, pu.updated_at_42, p.slug
               FROM project_users pu
-              JOIN campus_members cm ON cm.user_id = pu.user_id AND cm.campus_id = ?
               JOIN projects p ON p.id = pu.project_id
-              WHERE ${inList('pu.project_id')}
-                 OR p.slug LIKE 'python-module%' OR p.slug LIKE '42next-%'`,
-        args: [campusId, listArg(ids)],
+              WHERE pu.user_id IN ${CAMPUS_PEOPLE}
+                AND (${inList('pu.project_id')}
+                     OR p.slug LIKE 'python-module%' OR p.slug LIKE '42next-%')`,
+        args: [campusId, campusId, listArg(ids)],
       })
 
       return result.rows.map((row) => ({

@@ -6,15 +6,24 @@
  * lo leído se guarda un rato por campus y cada filtro se calcula encima.
  */
 
-import type { ExamQuery, ExamStats } from '@sanatorio/contracts'
+import type { ExamBlackholeList, ExamQuery, ExamStats } from '@sanatorio/contracts'
 import { z } from 'zod'
 
 import type { Actor } from '../../core/actor.js'
+import { assertAdmin } from '../../core/actor.js'
 import { parse } from '../../core/validation.js'
 import type { Curriculum } from '../replica/index.js'
 import type { ExamsRepository } from './exams.repository.js'
 import type { AttemptRow, ExamPerson, OccurrenceRow } from './exams.rules.js'
-import { circleDurations, examPeople, examStat, kickoffsOf, selectPeople } from './exams.rules.js'
+import {
+  blackholeByCircle,
+  blackholeLists,
+  circleDurations,
+  examPeople,
+  examStat,
+  kickoffsOf,
+  selectPeople,
+} from './exams.rules.js'
 import type { ExamsSync } from './exams.sync.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
 import { isoAt } from '../../core/time.js'
@@ -81,7 +90,7 @@ export function createExamsService({
       projects,
       attempts,
       occurrences,
-      people: examPeople({ members, rows, circles: { classic, next }, examUsers }),
+      people: examPeople({ members, rows, circles: { classic, next }, examUsers, now: now() }),
     }
   }
 
@@ -119,7 +128,25 @@ export function createExamsService({
         query,
         people: chosen.length,
         kickoffs: kickoffsOf(data.people),
+        // En cifras, sin nombres: lo ve todo el mundo.
+        blackhole: blackholeByCircle(chosen),
       }
+    },
+
+    /**
+     * El historial del black hole de la misma selección (#81): con nombres, así
+     * que solo para quien administra. Quién se fue no es algo que el resto del
+     * campus tenga por qué ver, y la fecha de quien lo tiene cerca, menos.
+     *
+     * @throws {DomainError} `forbidden` si quien pregunta no administra.
+     */
+    async blackholeList(actor: Actor, input: unknown = {}): Promise<ExamBlackholeList> {
+      assertAdmin(actor)
+
+      const query: ExamQuery = parse(querySchema, input)
+      const data = await snapshot(actor.campusId)
+
+      return blackholeLists(selectPeople(data.people, query), now())
     },
   }
 }

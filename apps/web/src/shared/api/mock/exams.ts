@@ -11,6 +11,8 @@
  */
 
 import type {
+  BlackholePerson,
+  ExamBlackholeList,
   ExamKickoff,
   ExamQuery,
   ExamStat,
@@ -153,7 +155,61 @@ function piscineNow(manual: boolean): LiveExam {
   }
 }
 
-export const examsMock: Pick<Api, 'getExamStats' | 'getLiveExam' | 'refreshLiveExam'> = {
+/** Llegan a cada círculo y se quedan en él, de cada 336 (a escala, como los círculos). */
+const BLACKHOLE = [
+  { circle: 0, reached: 336, absorbed: 41 },
+  { circle: 1, reached: 287, absorbed: 33 },
+  { circle: 2, reached: 231, absorbed: 27 },
+  { circle: 3, reached: 162, absorbed: 12 },
+  { circle: 4, reached: 98, absorbed: 6 },
+  { circle: 5, reached: 54, absorbed: 2 },
+  { circle: 6, reached: 21, absorbed: 0 },
+]
+
+const DAY = 86_400_000
+
+/** Gente inventada para el historial del black hole (solo lo ve quien administra). */
+function blackholePeople(
+  logins: readonly string[],
+  at: (index: number) => number,
+): BlackholePerson[] {
+  return logins.map((login, index) => ({
+    login,
+    image: null,
+    track: index % 3 === 0 ? 'next' : 'classic',
+    kickoff: KICKOFFS[index % KICKOFFS.length]?.month ?? null,
+    circle: index % 4,
+    at: iso(at(index)),
+  }))
+}
+
+/** Qué kickoffs entran en lo elegido (todas, sin elegir ninguna). */
+const chosenKickoffs = (query: ExamQuery): ExamKickoff[] =>
+  KICKOFFS.filter(
+    (kickoff) => query.kickoffs.length === 0 || query.kickoffs.includes(kickoff.month),
+  )
+
+export const examsMock: Pick<
+  Api,
+  'getExamStats' | 'getLiveExam' | 'refreshLiveExam' | 'getExamBlackhole'
+> = {
+  async getExamBlackhole(query: ExamQuery): Promise<ExamBlackholeList> {
+    await delay(150)
+
+    if (chosenKickoffs(query).length === 0) return { absorbed: [], closest: [] }
+
+    return {
+      absorbed: blackholePeople(
+        ['tvelasco', 'nramos', 'icuesta', 'bpardo'],
+        (index) => Date.now() - (index + 1) * 23 * DAY,
+      ),
+      closest: blackholePeople(
+        ['amolina', 'jsegura', 'cprieto'],
+        (index) => Date.now() + (index + 1) * 4 * DAY,
+      ),
+    }
+  },
+
   async getLiveExam(world) {
     await delay(120)
 
@@ -169,9 +225,7 @@ export const examsMock: Pick<Api, 'getExamStats' | 'getLiveExam' | 'refreshLiveE
   async getExamStats(query: ExamQuery): Promise<ExamStats> {
     await delay(150)
 
-    const chosen = KICKOFFS.filter(
-      (kickoff) => query.kickoffs.length === 0 || query.kickoffs.includes(kickoff.month),
-    )
+    const chosen = chosenKickoffs(query)
     const count = (list: readonly ExamKickoff[], family: 'classic' | 'next'): number =>
       query.track !== 'all' && query.track !== family
         ? 0
@@ -237,6 +291,14 @@ export const examsMock: Pick<Api, 'getExamStats' | 'getLiveExam' | 'refreshLiveE
       query,
       people,
       kickoffs: KICKOFFS,
+      blackhole:
+        people === 0
+          ? []
+          : BLACKHOLE.map((row) => ({
+              circle: row.circle,
+              reached: scale(row.reached),
+              absorbed: scale(row.absorbed),
+            })).filter((row) => row.reached > 0),
     }
   },
 }

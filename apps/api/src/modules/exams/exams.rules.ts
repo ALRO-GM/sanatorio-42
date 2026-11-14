@@ -4,7 +4,10 @@
  */
 
 import type {
+  BlackholePerson,
+  CircleBlackhole,
   CircleDuration,
+  CoreStatus,
   ExamFamily,
   ExamKickoff,
   ExamQuery,
@@ -15,6 +18,7 @@ import type {
 
 import { localMoment, monthOf } from '../../core/time.js'
 import { kickoffMonths } from '../../core/kickoffs.js'
+import { coreStatusOf } from '../stats/index.js'
 
 /** Un intento guardado: quién, de qué examen, con qué nota y cuándo. */
 export type AttemptRow = {
@@ -69,7 +73,10 @@ export function examStat(
   const byUser = new Map<number, AttemptRow[]>()
 
   for (const attempt of attempts) {
-    if (attempt.projectId !== project.id) continue
+    // Solo los cerrados son intentos: 42 abre un equipo vacío para la siguiente
+    // vez nada más cerrar uno, y contarlo corría la cuenta de intentos (#117:
+    // en la réplica había 807 así, sin nota ni resultado).
+    if (attempt.projectId !== project.id || attempt.validated === null) continue
 
     byUser.set(attempt.userId, [...(byUser.get(attempt.userId) ?? []), attempt])
   }
@@ -210,6 +217,15 @@ export type MemberRow = {
   /** Su plan y las fechas de cada círculo validado, si se le han mirado; `null` si no. */
   track: Track | null
   ranks: string[] | null
+  /** Su 42cursus (`core_cursus`), si está copiado: cuándo empezó y cómo acabó. */
+  cursus: {
+    beginAt: string | null
+    endAt: string | null
+    blackholedAt: string | null
+    grade: string | null
+    active: boolean | null
+    alumni: boolean
+  } | null
 }
 
 /** Un proyecto del common core (o de Python) de alguien. */
@@ -235,6 +251,15 @@ export type ExamPerson = {
   ranks: string[] | null
   /** El círculo más alto en el que tiene algún proyecto, para quien no tiene `ranks`. */
   projectCircle: number | null
+  /**
+   * Cómo va en el common core (`docs/blackhole.md`): `blackholed` es que se lo
+   * tragó el black hole; `unknown`, que no se sabe seguro.
+   */
+  status: CoreStatus
+  /** Cuándo se lo tragó (`end_at` del 42cursus), si se sabe. ISO. */
+  endAt: string | null
+  /** La fecha de black hole que da 42, si la hay. ISO. */
+  blackholedAt: string | null
 }
 
 const LAST_CIRCLE = 6
@@ -266,15 +291,18 @@ export function examPeople(input: {
   rows: readonly PlanRow[]
   circles: Record<Track, ReadonlyMap<number, number>>
   examUsers: ReadonlySet<number>
+  /** Ahora (ms), para saber si el black hole ya se lo tragó. */
+  now: number
 }): ExamPerson[] {
   const byUser = new Map<
     number,
-    { first: number; python: boolean; reached: Record<Track, number> }
+    { first: number; last: number; python: boolean; reached: Record<Track, number> }
   >()
 
   for (const row of input.rows) {
     const entry = byUser.get(row.userId) ?? {
       first: Infinity,
+      last: -Infinity,
       python: false,
       reached: { classic: -1, next: -1 },
     }
@@ -285,6 +313,8 @@ export function examPeople(input: {
     if ((classic !== undefined || next !== undefined) && created !== null) {
       entry.first = Math.min(entry.first, created)
     }
+    // Lo último que hizo: apuntarse a algo (como `stats`, `docs/blackhole.md`).
+    entry.last = Math.max(entry.last, msOf(row.createdAt) ?? -Infinity)
     if (classic !== undefined) entry.reached.classic = Math.max(entry.reached.classic, classic)
     if (next !== undefined) entry.reached.next = Math.max(entry.reached.next, next)
     entry.python ||= nextSlug(row.slug)
@@ -295,11 +325,30 @@ export function examPeople(input: {
     const entry = byUser.get(member.userId)
     const track: Track = member.track ?? (entry?.python === true ? 'next' : 'classic')
     const first = entry !== undefined && Number.isFinite(entry.first) ? entry.first : null
-    const start = msOf(member.beginAt) ?? first
+    // Sin entrar en la web, la fecha de su 42cursus: antes se deducía del primer
+    // proyecto, y quien no tenía ninguno copiado no salía (#81).
+    const start = msOf(member.beginAt) ?? msOf(member.cursus?.beginAt ?? null) ?? first
 
     if (start === null && !input.examUsers.has(member.userId)) return []
 
     const reached = entry?.reached[track] ?? -1
+    const cursus = member.cursus
+    // Si cerró el common core no importa aquí: solo se cuenta el black hole.
+    const status =
+      cursus === null
+        ? 'unknown'
+        : coreStatusOf(
+            {
+              grade: cursus.grade,
+              endAt: msOf(cursus.endAt),
+              blackholedAt: msOf(cursus.blackholedAt),
+              active: cursus.active,
+              alumni: cursus.alumni,
+              lastActivity: entry !== undefined && Number.isFinite(entry.last) ? entry.last : null,
+              closedCore: false,
+            },
+            input.now,
+          )
 
     return [
       {
@@ -312,6 +361,9 @@ export function examPeople(input: {
         start,
         ranks: member.ranks,
         projectCircle: reached < 0 ? null : Math.min(LAST_CIRCLE, reached),
+        status,
+        endAt: cursus?.endAt ?? null,
+        blackholedAt: cursus?.blackholedAt ?? null,
       },
     ]
   })
@@ -353,6 +405,87 @@ export function selectPeople(people: readonly ExamPerson[], query: ExamQuery): E
       (query.track === 'all' || person.track === query.track) &&
       (kickoffs.size === 0 || (person.kickoff !== null && kickoffs.has(person.kickoff))),
   )
+}
+
+/**
+ * El círculo en que va alguien (o en que se quedó): el siguiente al último
+ * rango validado o, sin los rangos mirados, el más alto con algún proyecto.
+ * Sin ningún proyecto del common core (la réplica los copia todos), el 0.
+ */
+function circleOf(person: Pick<ExamPerson, 'ranks' | 'projectCircle'>): number {
+  return person.ranks === null
+    ? (person.projectCircle ?? 0)
+    : Math.min(LAST_CIRCLE, person.ranks.length)
+}
+
+/**
+ * El black hole por círculos (#81): de la gente de la que se sabe cómo acabó,
+ * cuántas personas llegaron a cada círculo y a cuántas se tragó en él. Quien
+ * terminó llegó a todos; quien sigue o se fue, hasta el suyo. Quien está en
+ * duda (`unknown`) no cuenta: inflaría o vaciaría el porcentaje.
+ */
+export function blackholeByCircle(people: readonly ExamPerson[]): CircleBlackhole[] {
+  const rows = Array.from({ length: LAST_CIRCLE + 1 }, (_, circle) => ({
+    circle,
+    reached: 0,
+    absorbed: 0,
+  }))
+
+  for (const person of people) {
+    if (person.status === 'unknown') continue
+
+    const circle = person.status === 'finished' ? LAST_CIRCLE : circleOf(person)
+
+    for (const row of rows.slice(0, circle + 1)) row.reached += 1
+
+    const at = rows[circle]
+
+    if (person.status === 'blackholed' && at !== undefined) at.absorbed += 1
+  }
+
+  return rows.filter((row) => row.reached > 0)
+}
+
+/** Lo más largo que sale cada lista del historial del black hole. */
+export const BLACKHOLE_LIST_MAX = 300
+
+/**
+ * El historial del black hole (#81; solo para quien administra): a quién se
+ * tragó, lo más reciente primero, y quién lo tiene más cerca (la fecha de 42,
+ * aún por llegar, de quien sigue), lo más cercano primero. Cada lista, como
+ * mucho `BLACKHOLE_LIST_MAX`.
+ */
+export function blackholeLists(
+  people: readonly ExamPerson[],
+  now: number,
+): { absorbed: BlackholePerson[]; closest: BlackholePerson[] } {
+  const entry = (person: ExamPerson, at: string): BlackholePerson => ({
+    login: person.login,
+    image: person.image,
+    track: person.track,
+    kickoff: person.kickoff,
+    circle: circleOf(person),
+    at,
+  })
+  const absorbed = people.flatMap((person) =>
+    person.status === 'blackholed' && person.endAt !== null ? [entry(person, person.endAt)] : [],
+  )
+  const closest = people.flatMap((person) => {
+    const at = msOf(person.blackholedAt)
+
+    return person.status === 'active' && person.blackholedAt !== null && at !== null && at > now
+      ? [entry(person, person.blackholedAt)]
+      : []
+  })
+
+  return {
+    absorbed: absorbed
+      .sort((a, b) => Date.parse(b.at) - Date.parse(a.at))
+      .slice(0, BLACKHOLE_LIST_MAX),
+    closest: closest
+      .sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
+      .slice(0, BLACKHOLE_LIST_MAX),
+  }
 }
 
 /** Con el examen en marcha, cada cuánto se vuelven a pedir solas la lista y las notas. */
@@ -428,6 +561,37 @@ export function expectedExamSlug(
   const rank = `exam-rank-0${String(Math.min(LAST_EXAM_CIRCLE, circle))}`
 
   return track === 'next' ? `42next-${rank}` : rank
+}
+
+/** Un intento de alguien en una sesión de examen, en orden de fecha. */
+export type SessionAttempt = { projectId: number; mark: number | null; validated: boolean | null }
+
+/**
+ * Lo que sacó alguien en una sesión de examen, de sus intentos en ella.
+ *
+ * Al cerrar un intento, 42 abre enseguida otro equipo vacío (sin nota) para la
+ * vez siguiente. Antes mandaba el último de la sesión, y ese vacío tapaba la
+ * nota de verdad: quien sacó un 75 salía sin nota (#117). Ahora, si hay algún
+ * intento cerrado, cuentan solo los cerrados; si no, el que esté abierto. La
+ * nota es la mejor de los que cuentan.
+ */
+export function sessionResult(
+  attempts: readonly SessionAttempt[],
+): { projectId: number; mark: number | null; passed: boolean; closed: boolean } | undefined {
+  const closed = attempts.filter((attempt) => attempt.validated !== null)
+  const counted = closed.length > 0 ? closed : attempts
+  const last = counted.at(-1)
+
+  if (last === undefined) return undefined
+
+  const marks = counted.flatMap((attempt) => (attempt.mark === null ? [] : [attempt.mark]))
+
+  return {
+    projectId: last.projectId,
+    mark: marks.length === 0 ? null : Math.max(...marks),
+    passed: counted.some((attempt) => attempt.validated === true),
+    closed: last.validated !== null,
+  }
 }
 
 /** La fila de alguien en un examen (`project_users`), tal como está en la réplica. */

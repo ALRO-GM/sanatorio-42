@@ -192,6 +192,75 @@ describe('réplica', () => {
       expect(peer?.location).toBeNull()
     })
 
+    it('el mismo proyecto con otra id cuenta (#99); el examen de otro plan, no', async () => {
+      const twin = (login: string, projectId: number, slug: string, status = 'finished') =>
+        projectUser(login, { projectId, slug, projectName: 'push_swap', status })
+
+      await replica.ingestProjectUsers(
+        [
+          twin('yo', 1471, '42cursus-push_swap', 'in_progress'),
+          // Lo aprobó en la versión de antes (`push_swap`) o en la del plan nuevo.
+          twin('vieja', 27, 'push_swap'),
+          twin('nueva', 2687, '42next-push_swap'),
+          // Lo está haciendo con otra id: también es un peer.
+          twin('peer', 2687, '42next-push_swap', 'in_progress'),
+          projectUser('c', { projectId: 1322, slug: 'exam-rank-04', status: 'finished' }),
+          projectUser('py', { projectId: 2710, slug: '42next-exam-rank-04', status: 'finished' }),
+        ],
+        MADRID,
+      )
+      await onDuty('vieja', 'c1r1s1')
+
+      expect(await replica.bestMarksIn(['vieja', 'nueva', 'peer', 'yo'], [1471])).toEqual(
+        new Map([
+          ['vieja', 100],
+          ['nueva', 100],
+        ]),
+      )
+      const peers = (await replica.findPeers({ ...query, projectId: 1471 })).map(
+        (peer) => `${peer.login}:${peer.status}`,
+      )
+
+      // Primero quien está de guardia; `nueva` no lo está y, como senior, no sale.
+      expect(peers[0]).toBe('vieja:finished')
+      expect(peers.slice(1).sort()).toEqual(['peer:in_progress', 'yo:in_progress'])
+      // El Exam Rank 04 en C no es el de Python.
+      expect(await replica.bestMarksIn(['c', 'py'], [2710])).toEqual(new Map([['py', 100]]))
+    })
+
+    it('quien aprobó y se volvió a apuntar sigue habiéndolo aprobado (#99)', async () => {
+      await replica.ingestProjectUsers(
+        [
+          projectUser('guru', {
+            projectId: 1983,
+            slug: 'inception',
+            status: 'in_progress',
+            validated: true,
+            finalMark: 125,
+          }),
+          // Aún sin nota ni resultado: no lo ha aprobado.
+          projectUser('nadie', { projectId: 1983, slug: 'inception', validated: null }),
+        ],
+        MADRID,
+      )
+      await onDuty('guru', 'c1r2s3')
+
+      expect(await replica.bestMarksIn(['guru', 'nadie'], [1983])).toEqual(new Map([['guru', 125]]))
+      expect(await replica.findPeers({ ...query, projectId: 1983 })).toMatchObject([
+        { login: 'guru', status: 'finished', perfect: true },
+        { login: 'nadie', status: 'in_progress' },
+      ])
+    })
+
+    it('sin proyectos o sin gente, nadie; ids que no existen, tampoco', async () => {
+      await replica.ingestProjectUsers([projectUser('jdoe', { status: 'finished' })], MADRID)
+
+      expect(await replica.bestMarksIn(['jdoe'], [])).toEqual(new Map())
+      expect(await replica.bestMarksIn([], [10])).toEqual(new Map())
+      expect(await replica.bestMarksIn(['jdoe'], [999_999, -1])).toEqual(new Map())
+      expect(await replica.findPeers({ ...query, projectId: 999_999 })).toEqual([])
+    })
+
     it('cuenta a todo el campus en el proyecto, no solo a los accionables', async () => {
       await replica.ingestProjectUsers(
         [projectUser('mgomez'), projectUser('jdoe', { status: 'finished' })],

@@ -55,6 +55,79 @@ describe('avisos del edificio', () => {
     expect(await broken()).toEqual(['c1r2s4'])
   })
 
+  describe('desde el mapa (#82)', () => {
+    /** Lo que dice el mapa de un puesto roto, visto por `leo`. */
+    const brokenOf = async (host: string) =>
+      (await services.map.forCampus(actor('leo'))).clusters
+        .flatMap((cluster) => cluster.seats)
+        .find((one) => one.host === host)?.broken
+
+    beforeEach(async () => {
+      // Con alguien a cada lado, los puestos de en medio salen en el plano.
+      await seat({ eva: 'c1r1s1', leo: 'c1r1s5' })
+      await services.repositories.replica.setState(`delta:${MADRID}`, {
+        cursor: new Date(community.clock.now()).toISOString(),
+        at: community.clock.now(),
+      })
+    })
+
+    it('dice qué falla, llega al staff y, resuelto, el puesto vuelve a estar libre', async () => {
+      const { map, facility } = services
+
+      await map.reportProblem(actor('ana'), 'C1R1S2', { kind: 'peripheral' })
+      await map.reportProblem(actor('ana'), 'c1r1s3', { kind: 'computer' })
+
+      expect(await brokenOf('c1r1s2')).toMatchObject({ by: 'ana', kind: 'peripheral' })
+      expect(await brokenOf('c1r1s3')).toMatchObject({ kind: 'computer' })
+
+      const staff = await facility.forStaff()
+
+      expect(staff.map((report) => [report.category, report.place])).toEqual([
+        ['computer', 'c1r1s3'],
+        ['peripheral', 'c1r1s2'],
+      ])
+      await facility.resolveAsStaff('bocal', staff[1]?.id ?? 0)
+      expect(await brokenOf('c1r1s2')).toBeNull()
+      expect(await brokenOf('c1r1s3')).not.toBeNull()
+    })
+
+    it('sin decir qué falla, el ordenador; lo de antes del aviso, sin saberlo, sale sin tipo', async () => {
+      const { map } = services
+
+      await map.reportProblem(actor('ana'), 'c1r1s2', undefined)
+      await map.reportProblem(actor('ana'), 'c1r1s3', null)
+      await map.reportBroken(actor('ana'), 'c1r1s4')
+
+      expect(await brokenOf('c1r1s2')).toMatchObject({ kind: 'computer' })
+      expect(await brokenOf('c1r1s3')).toMatchObject({ kind: 'computer' })
+      expect(await brokenOf('c1r1s4')).toMatchObject({ kind: null })
+    })
+
+    it('lo que no es un tipo ni un puesto no se guarda ni llega al staff', async () => {
+      const { map, facility } = services
+
+      await expectCode(map.reportProblem(actor('ana'), 'c1r1s2', { kind: 'fire' }), 'invalid_input')
+      await expectCode(map.reportProblem(actor('ana'), 'c1r1s2', 'peripheral'), 'invalid_input')
+      await expectCode(
+        map.reportProblem(actor('ana'), `c1r1s${'9'.repeat(10_000)}`, { kind: 'computer' }),
+        'invalid_input',
+      )
+      await expectCode(map.reportProblem(actor('ana'), '../x', {}), 'invalid_input')
+      expect(await facility.forStaff()).toEqual([])
+      expect(await brokenOf('c1r1s2')).toBeNull()
+    })
+
+    it('quien no administra no lo resuelve, y el puesto sigue tachado', async () => {
+      const { map, facility } = services
+
+      await map.reportProblem(actor('ana'), 'c1r1s2', { kind: 'computer' })
+      const [report] = await facility.forStaff()
+
+      await expectCode(facility.resolveAsAdmin(actor('leo'), report?.id ?? 0), 'forbidden')
+      expect(await brokenOf('c1r1s2')).toMatchObject({ kind: 'computer' })
+    })
+  })
+
   it('sin puesto hay que decir dónde; «otro» necesita una nota', async () => {
     const { facility } = services
 

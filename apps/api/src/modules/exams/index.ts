@@ -125,6 +125,17 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
       })
 
       /**
+       * `GET /admin/exams/blackhole?track=…&kickoffs=…` → a quién se tragó el
+       * black hole y quién lo tiene más cerca (#81). Solo quien administra:
+       * lleva nombres y fechas de cada cual.
+       */
+      app.get('/admin/exams/blackhole', async (request, reply) => {
+        reply.header('Cache-Control', 'private, max-age=300')
+
+        return reply.send(await service.blackholeList(await session.actor(request), request.query))
+      })
+
+      /**
        * `GET /exams/live` → el examen que hay ahora en tu campus (o el siguiente
        * de hoy): quién está apuntado, qué examen hace y su última nota.
        */

@@ -18,6 +18,8 @@ type FacilityDeps = {
   seatOf: (campusId: number, login: string) => Promise<string | null>
   slack?: ((text: string) => Promise<void>) | null
   markBroken?: (actor: Actor, host: string) => Promise<void>
+  /** Quita la marca de roto de un puesto al resolver su aviso. */
+  fixed?: (campusId: number, host: string) => Promise<void>
   /** Si una cuenta de staff sigue teniendo acceso. */
   staffActive: (id: number) => Promise<boolean>
   /** Topes regulables desde el panel (`core/limits.ts`). */
@@ -32,7 +34,12 @@ export function createFacilityModule(deps: FacilityDeps): FacilityModule {
     db: deps.db,
     seatOf: deps.seatOf,
     slack: deps.slack ?? null,
-    ...given({ markBroken: deps.markBroken, limits: deps.limits, now: deps.now }),
+    ...given({
+      markBroken: deps.markBroken,
+      fixed: deps.fixed,
+      limits: deps.limits,
+      now: deps.now,
+    }),
   })
   const report = (id: string): number => idParam(id, 'El aviso')
 
