@@ -7,7 +7,9 @@
 #   - Al 90 %: solo entra quien administra la web. Se para todo lo que corre sin
 #     que nadie lo pida: actualizaciones automáticas, snaps, el agente de Oracle,
 #     la subida de copias. La web deja de hablar con 42 y de lanzar sus trabajos.
-#   - Al 95 %: se paran los contenedores. No entra nadie; solo queda el SSH.
+#   - Al 95 %: se paran todos los contenedores de la máquina, no solo los de
+#     esta web: el tráfico es de la máquina entera (img, ragputin, webar…) y
+#     cualquiera de ellas podría pasarlo. No entra nadie; solo queda el SSH.
 #
 # La web ya aplica los dos cortes con el tráfico que ella cuenta
 # (`modules/admin/budget.rules.ts`). Esta guardia es la segunda barrera y no
@@ -24,10 +26,14 @@
 #
 #   - Tráfico de salida: 10 TB al mes (mes natural, UTC). Cortes a 9 y 9,5 TB.
 #   - Cómputo ARM (A1): 3 000 horas de OCPU y 18 000 de GB al mes. Una máquina
-#     encendida todo el mes gasta 744 por OCPU y por GB: como mucho 3 OCPU y
-#     21 GB para no pasar del 90 %. Se comprueba y se avisa; parar contenedores
-#     no ahorra cómputo, así que por esto no se para nada.
-#   - Disco: 200 GB entre todos los volúmenes. Aviso por encima de 180 GB.
+#     encendida todo el mes (31 días, 744 h) gasta 744 por OCPU y por GB. Con
+#     4 OCPU son 2 976 h: no se puede pasar del límite, por mucho que se use la
+#     CPU (Oracle cuenta horas de máquina encendida, no uso), así que se
+#     admiten las 4 (decidido por Alberto el 2026-11-14). La memoria se
+#     queda en 21 GB como mucho. Se comprueba y se avisa; parar contenedores no
+#     ahorra cómputo, así que por esto no se para nada.
+#   - Disco: 200 GB entre todos los volúmenes (Oracle cuenta en GiB). Aviso
+#     por encima de 180.
 #
 # Lo que sigue saliendo aun con todo cortado, porque sin ello no se podría
 # entrar a arreglarlo: el SSH, la renovación de la dirección de red (DHCP) y
@@ -37,7 +43,7 @@ set -eu
 LIMIT_BYTES=${EGRESS_LIMIT_BYTES:-10000000000000}
 ADMIN_ONLY_PERCENT=90
 STOP_PERCENT=95
-MAX_OCPUS=3
+MAX_OCPUS=4
 MAX_MEMORY_GB=21
 MAX_DISK_GB=180
 
@@ -46,6 +52,7 @@ COMPOSE_DIR=${GUARD_COMPOSE_DIR:-/opt/sanatorio/infra}
 # Para las pruebas: de dónde se lee el contador y qué se ejecuta en vez de lo real.
 TX_FILE=${GUARD_TX_FILE:-}
 COMPOSE=${GUARD_COMPOSE:-docker compose}
+DOCKER=${GUARD_DOCKER:-docker}
 SYSTEMCTL=${GUARD_SYSTEMCTL:-systemctl}
 # Donde la web lee lo que dice la guardia: dentro del volumen de datos de la app.
 LEVEL_FILE=${GUARD_LEVEL_FILE:-}
@@ -79,6 +86,8 @@ mkdir -p "$STATE_DIR"
 state="$STATE_DIR/egress"
 level_state="$STATE_DIR/level"
 quieted="$STATE_DIR/quieted"
+# Los contenedores que paró el corte del 95 %, para arrancar solo esos después.
+stopped="$STATE_DIR/stopped"
 
 # Para y bloquea unas unidades. Las que estaban en marcha se apuntan, para
 # arrancar después solo esas. Se repite en cada pasada mientras dure el corte,
@@ -164,9 +173,16 @@ fi
 
 if [ "$level" -ge "$STOP_PERCENT" ]; then
   if [ "$previous" -lt "$STOP_PERCENT" ]; then
-    log "CORTE AL $STOP_PERCENT %: tráfico de $month al $percent %. Se paran los contenedores hasta el mes que viene."
-    (cd "$COMPOSE_DIR" && $COMPOSE stop)
+    log "CORTE AL $STOP_PERCENT %: tráfico de $month al $percent %. Se paran todos los contenedores hasta el mes que viene."
+    (cd "$COMPOSE_DIR" && $COMPOSE stop) || true
   fi
+  # Todo lo demás que corra en la máquina (las otras webs). Se repite en cada
+  # pasada por si algo lo vuelve a arrancar (una política de reinicio, a mano).
+  for id in $($DOCKER ps -q); do
+    name=$($DOCKER inspect -f '{{ .Name }}' "$id" | sed 's#^/##')
+    grep -qx "$name" "$stopped" 2> /dev/null || echo "$name" >> "$stopped"
+    $DOCKER stop "$id" > /dev/null 2>&1 || true
+  done
   quiet "$STOP_UNITS"
 fi
 
@@ -175,7 +191,13 @@ if [ "$level" -eq 0 ] && [ "$previous" -ne 0 ]; then
   log "Límite renovado ($month, $percent %). Se levanta el corte."
   rm -f "$LEVEL_FILE"
   wake
-  [ "$previous" -lt "$STOP_PERCENT" ] || (cd "$COMPOSE_DIR" && $COMPOSE start)
+  [ "$previous" -lt "$STOP_PERCENT" ] || (cd "$COMPOSE_DIR" && $COMPOSE start) || true
+  if [ -f "$stopped" ]; then
+    while read -r name; do
+      $DOCKER start "$name" > /dev/null 2>&1 || true
+    done < "$stopped"
+    rm -f "$stopped"
+  fi
 fi
 
 echo "$level" > "$level_state"
@@ -189,6 +211,7 @@ if [ -z "${GUARD_TX_FILE:-}" ]; then
     [ "$memory" -le "$MAX_MEMORY_GB" ] || log "AVISO: $memory GB de memoria; más de $MAX_MEMORY_GB pasan del 90 % gratuito."
   fi
 
-  disk=$(lsblk -bdno SIZE,TYPE | awk '$2 == "disk" { sum += $1 } END { printf "%d", sum / 1000000000 }')
+  # En GiB, como cuenta Oracle: un volumen de «200 GB» son 214 GB decimales.
+  disk=$(lsblk -bdno SIZE,TYPE | awk '$2 == "disk" { sum += $1 } END { printf "%d", sum / 1073741824 }')
   [ "$disk" -le "$MAX_DISK_GB" ] || log "AVISO: $disk GB de disco; más de $MAX_DISK_GB pasan del 90 % de los 200 GB gratuitos."
 fi

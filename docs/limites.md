@@ -63,7 +63,7 @@ Medido el 2026-11-09 buscando topes, cuotas y máximos en `apps/api/src`.
 | --- | --- | --- | --- |
 | Corte del plan al 90 % (solo quien administra) y al 95 % (nadie) | 90 % / 95 % | `admin/budget.rules.ts` (`STOP_SHARE`, `HARD_STOP_SHARE`), `app/build-app.ts` (`guardLevelFrom`), `infra/scripts/limits-guard.sh` | Pasarse se cobra. Regla de `AGENTS.md`: ni regulable ni con excepciones |
 | Cuota de la API de 42 | 1 200/h, 2/s | `integrations/forty-two/throttle.ts`, `replica/budget.ts` | La pone 42; pasarse corta a todo el mundo |
-| Recursos de Oracle (OCPU, memoria, disco) | 90 % de la capa gratuita | `limits-guard.sh` | Ídem, se cobra |
+| Recursos de Oracle (OCPU, memoria, disco) | 90 % de la capa gratuita; OCPU, las 4 (Alberto, 2026-11-14: Oracle cuenta horas encendida y 4 × 744 h = 2 976 < 3 000, no se puede pasar) | `limits-guard.sh` | Ídem, se cobra |
 | Intentos por IP sin sesión (login, clave de staff) | 200 / 10 por ventana | `auth.routes.ts` | Protegen contra fuerza bruta; sin sesión no hay persona a quien regular |
 | Segundo factor | 5 fallos en 15 min | `admin/second-factor.ts` | Seguridad |
 | Códigos de llegada fallidos | 5 por evento | `attendance.rules.ts` | Anti-trampas de la XP |
@@ -84,6 +84,9 @@ Medido el 2026-11-09 buscando topes, cuotas y máximos en `apps/api/src`.
 - Con el corte puesto, el gancho `onRequest` de `admin/index.ts` da 503 con
   `Retry-After` a quien no administra (al 95 %, a todo el mundo) y
   `halted()` para los trabajos de fondo (`build-app.ts`, réplica de 42).
+- Al 95 % la guardia para todos los contenedores de la máquina, no solo los de
+  Peer4U (en ella viven también img, ragputin y webar, y el tráfico es de todas);
+  al renovarse el límite arranca solo los que paró (decidido por Alberto el 2026-11-14).
 - Probado en `tests/integration/limits.test.ts` y `lifecycle.test.ts` justo en
   los bordes (89,9 → nada; 90 → solo admins; 95 → nadie) y en
   `tests/unit/admin.test.ts` (`halted`).

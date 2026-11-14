@@ -119,7 +119,9 @@ cambia también la skill que la repite.
   Un trabajo periódico nuevo va en `jobs` de su módulo, que es lo que se pausa
   con el corte; lo que se instale en la máquina y hable con internet se añade a
   `QUIET_UNITS` de la guardia. Nada de `infra/` puede pedir a Oracle recursos
-  que no sean de la capa gratuita o que pasen del 90 % de ella.
+  que no sean de la capa gratuita o que pasen del 90 % de ella (salvo las 4 OCPU,
+  que no se pueden pasar: ver `docs/limites.md`). En la máquina hay otras webs
+  (img, ragputin, webar): el corte del 95 % las para también.
 - Comentarios en español, explicando el porqué.
 - **Documentación al día en el mismo commit** (pedido por Alberto, 2026-11-01).
   Cada mejora, cambio o arreglo que se note por fuera actualiza, en el mismo
