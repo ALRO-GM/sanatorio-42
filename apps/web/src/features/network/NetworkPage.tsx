@@ -39,6 +39,7 @@ import { RankCard, ranked } from './RankCard'
 import type { Order } from './RankCard'
 import { StrictestCard } from './StrictestCard'
 import { Timeline } from './Timeline'
+import { usableDates } from './dates'
 import { SectionTitle } from '../../shared/ui/SectionTitle'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { NetworkTour } from './NetworkTour'
@@ -178,6 +179,8 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   )
   // `true` cuando unos filtros no dejaban a nadie y se ha vuelto a la vista de partida.
   const [wasEmpty, setWasEmpty] = useState(false)
+  // Las fechas a mano mientras se escriben y aún no se pueden pedir (`usableDates`).
+  const [draft, setDraft] = useState<{ from: string; to: string } | null>(null)
   const [mode, setMode] = useState<ColorMode>('community')
   const [selected, setSelected] = useState<string | null>(
     () => loginInUrl() ?? (poolHome === null ? me.login : null),
@@ -190,6 +193,10 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   const [reloads, setReloads] = useState(0)
 
   const params = useMemo(() => paramsOf(filters), [filters])
+  // Unas fechas puestas a mano no se cambian solas: si no dejan a nadie, se
+  // dice y se quedan para cambiarlas (#114 del buzón). Lo demás vuelve a la
+  // vista de partida, como siempre.
+  const byHand = filters.period === 'custom'
   // Lo último que llegó con estos filtros se ve al momento al volver a la Red.
   const keepKey = `network|${JSON.stringify(params)}`
   const remembered = keptValue(keepKey) as NetworkGraph | undefined
@@ -215,6 +222,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
   const generic = homeStep > 0
   const backToStart = useCallback(() => {
     setFilters(home)
+    setDraft(null)
     setSelected(home.login)
     setPersonMin((current) => ({ ...current, n: 0 }))
     setWasEmpty(true)
@@ -229,6 +237,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     if (next === undefined) return false
     setHomeStep(homeStep + 1)
     setFilters(next)
+    setDraft(null)
     setSelected(next.login)
     setPersonMin((current) => ({ ...current, n: 0 }))
 
@@ -263,6 +272,11 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
           if (!current) return
           // Se sigue viendo el grafo de antes mientras llega el de partida.
           if (result.nodes.length === 0) {
+            if (!atStart && byHand) {
+              setGraph(result)
+              setError(null)
+              return
+            }
             if (!atStart) {
               backToStart()
               return
@@ -286,7 +300,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
     }
     // `atStart` cambia con `params`, y `backToStart` y `nextHome`, solo con la
     // vista de partida: no piden de más.
-  }, [params, reloads, atStart, backToStart, nextHome])
+  }, [params, reloads, atStart, byHand, backToStart, nextHome])
 
   // Las opciones de los filtros (campus, meses, proyectos) salen del último
   // grafo con gente: si unos filtros no dejan a nadie, siguen ahí para
@@ -353,6 +367,7 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
 
   const change = useCallback((patch: Partial<Filters>) => {
     setFilters((current) => ({ ...current, ...patch }))
+    setDraft(null)
     setWasEmpty(false)
   }, [])
 
@@ -511,6 +526,12 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                 )}
               </div>
             )}
+            {/* Bajo el título, y no suelto en la rejilla (donde caía al final). */}
+            {(wasEmpty || generic) && (
+              <p className="hint" role="status">
+                {t(generic ? 'net.resetGeneric' : 'net.resetEmpty')}
+              </p>
+            )}
           </div>
 
           <div className="card net-filters">
@@ -544,10 +565,12 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
                 onChange={(period) => {
                   change({ period })
                 }}
-                from={filters.from}
-                to={filters.to}
+                from={draft?.from ?? filters.from}
+                to={draft?.to ?? filters.to}
                 onDates={(from, to) => {
-                  change({ from, to })
+                  // Se pide solo lo que ya es una fecha; mientras tanto, se ve lo escrito.
+                  if (usableDates(from, to)) change({ from, to })
+                  else setDraft({ from, to })
                 }}
               />
             </div>
@@ -985,16 +1008,13 @@ export function NetworkPage({ me }: { me: CurrentUser }) {
           </div>
         )}
 
-        {(wasEmpty || generic) && (
-          <p className="hint" role="status">
-            {t(generic ? 'net.resetGeneric' : 'net.resetEmpty')}
-          </p>
-        )}
-
         {graph !== null && (
           <>
-            {loading && <Refreshing />}
+            {/* La franja de recarga va encima del grafo, dentro de su marco: suelta
+                en la rejilla, se llevaba una fila propia y el grafo daba un salto
+                a cada filtro (#112 del buzón). */}
             <div className={`net-stage ${loading ? 'loading' : ''}`}>
+              {loading && <Refreshing />}
               {(shownGraph ?? graph).nodes.length === 0 ? (
                 <p className="estado">
                   {graph.query.login === null ? t('net.empty') : t('net.emptyPerson')}

@@ -22,9 +22,18 @@
 /* En pantalla ancha la red mide lo que queda de ventana bajo la cabecera: el
    grafo a la izquierda, quieto, y a la derecha una columna que se desliza por
    su cuenta. Así la rueda mueve las opciones y el grafo no se pierde de vista. */
+/* En un monitor muy ancho, la Red usa la pantalla entera (#112 del buzón): con
+   el tope de las secciones de datos (`--page-wide`, 1680 px) quedaba media
+   pantalla en negro a los lados de un grafo que pide sitio. La cabecera usa la
+   misma variable, así que sigue alineada con el contenido. */
+:root[data-page='wide']:has(section.network) {
+  --page-wide: 3840px;
+}
 .net-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 340px;
+  /* La columna crece un poco en pantallas muy anchas (#112 del buzón): con
+     340 px fijos, en un monitor grande las opciones quedaban apretadas. */
+  grid-template-columns: minmax(0, 1fr) clamp(340px, 22vw, 440px);
   grid-template-areas: 'stage rail';
   gap: 0.9rem;
   /* La cabecera, el aire de arriba de la página y un poco por abajo. */
@@ -64,7 +73,9 @@
 }
 .net-filter-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* `minmax(0, …)`: un proyecto de nombre largo no ensancha su columna y saca
+     la tarjeta de la pantalla en el móvil. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.6rem 0.8rem;
 }
 .net-filter-grid label,
@@ -155,8 +166,15 @@
   color: var(--text-3);
   font-size: 0.75rem;
 }
+.net-filter-grid select {
+  width: 100%;
+  min-width: 0;
+}
 .net-stage {
   grid-area: stage;
+  /* Lo que va encima (el aviso de vacío, la franja de recarga, la raya de
+     carga) se coloca respecto al marco del grafo, no de la página. */
+  position: relative;
   /* Ocupa todo el alto de la red, que es el de la ventana (ver `.net-layout`). */
   height: 100%;
   min-height: 0;
@@ -183,6 +201,18 @@
   to {
     background-position: 140% 0;
   }
+}
+.net-stage > .refreshing {
+  position: absolute;
+  z-index: 2;
+  top: 0.6rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  margin: 0;
+  padding: 0.35rem 0.7rem;
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 2px 8px var(--shadow-soft);
 }
 .net-stage > .estado {
   position: absolute;

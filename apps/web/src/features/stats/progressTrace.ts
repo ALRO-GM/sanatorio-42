@@ -64,6 +64,27 @@ export function stepped(points: readonly Point[]): Point[] {
 }
 
 /**
+ * Una línea de pace del Avance (`[día, %]`, de la API) tal como se dibuja
+ * (#87 del buzón: que cuadre con el health check del perfil).
+ *
+ * - `shift`: los días de bonus de quien mira. 42 cuenta los plazos desde un
+ *   día cero que retrasa con ellos (`originOf` en `shared/pace.ts`), no desde
+ *   el inicio del cursus, que es el día 0 del eje. Sin moverla, la línea de tu
+ *   pace iba por delante de lo que te pide 42.
+ * - `steps`: con las líneas a saltos, la de cada pace también va a saltos y
+ *   sube el día del plazo de cada círculo. Así ir a un pace es ir por encima de
+ *   su escalera, lo mismo que dice el health check; recta de plazo a plazo,
+ *   parecía que ibas por detrás a mitad de un círculo que aún llegabas a tiempo
+ *   de acabar.
+ */
+export function pacePoints(points: readonly Point[], shift: number, steps: boolean): Point[] {
+  const moved = points.map(([day, value]): Point => [day + shift, value])
+  const line: Point[] = shift > 0 ? [[0, 0], ...moved] : moved
+
+  return steps ? stepped(line) : line
+}
+
+/**
  * El tramo de después de terminar, a lo largo del 100 %: del día en que
  * terminó al último punto. `null` si no terminó o cae fuera del periodo.
  */
@@ -146,10 +167,46 @@ export function nextStop(stops: readonly Stop[], current: Stop | null, key: stri
 }
 
 /**
+ * Las esquinas de una línea: el primer punto de cada tramo con el mismo valor
+ * (el día en que llegó a él) y el último de todos (hoy). Son los puntos por los
+ * que pasan las formas «recta» y «suave» (#115 del buzón): entre dos proyectos
+ * no se está quieto y luego se sube de golpe, se va avanzando hacia el
+ * siguiente. Con los puntos de cada 15 días dentro, la curva tenía muchos
+ * tramos llanos y la monótona, para no pasarse, la dejaba horizontal en cada
+ * punto: subía en eses.
+ */
+export function corners(points: readonly Point[]): Point[] {
+  return points.filter((point, index) => {
+    const before = points[index - 1]
+
+    return before === undefined || index === points.length - 1 || before[1] !== point[1]
+  })
+}
+
+/**
+ * La forma «suave» del Avance (`[x, y]` ya en el dibujo): la monótona por las
+ * esquinas, sin tramos llanos entre medias, así que en cada punto la tangente
+ * es la media de las pendientes de los dos lados y no cero. Si al final se
+ * queda quieta (nada aprobado desde el último hito), ese llano va recto: con
+ * él dentro, la curva llegaría a su último hito tumbada.
+ */
+export function smoothPath(points: readonly Point[]): string {
+  const marks = corners(points)
+  const last = marks.at(-1)
+  const before = marks.at(-2)
+
+  if (marks.length < 3 || last === undefined || before?.[1] !== last[1]) {
+    return monotonePath(marks)
+  }
+
+  return `${monotonePath(marks.slice(0, -1))}L${last[0].toFixed(1)},${last[1].toFixed(1)}`
+}
+
+/**
  * Un trazo de SVG suave por esos puntos (ya en el dibujo, `[x, y]`): una curva
  * monótona (Fritsch–Carlson) que pasa por todos y no se pasa de ninguno, así
- * que no baja donde la línea no baja ni sube del 100 %. Es la forma «continua»
- * del Avance, en vez de los saltos de cada proyecto.
+ * que no baja donde la línea no baja ni sube del 100 %. Va por las esquinas de
+ * la línea (`smoothPath`), no por todos sus puntos.
  */
 export function monotonePath(points: readonly Point[]): string {
   const at = ([px, py]: Point): string => `${px.toFixed(1)},${py.toFixed(1)}`

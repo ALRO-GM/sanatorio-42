@@ -20,9 +20,9 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [curso-rag](curso-rag.md) | 206 | 0 | 0 | 0 | 0 |
 | [curso-shell](curso-shell.md) | 66 | 0 | 0 | 0 | 0 |
 | [demos](demos.md) | 372 | 0 | 0 | 0 | 0 |
-| [estadisticas](estadisticas.md) | 216 | 0 | 0 | 0 | 0 |
+| [estadisticas](estadisticas.md) | 219 | 0 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 71 | 0 | 0 | 0 | 0 |
-| [expediente](expediente.md) | 254 | 0 | 0 | 0 | 0 |
+| [expediente](expediente.md) | 262 | 0 | 0 | 0 | 0 |
 | [gestion](gestion.md) | 750 | 0 | 71 | 71 | 71 |
 | [guardia](guardia.md) | 80 | 0 | 0 | 0 | 0 |
 | [legal](legal.md) | 86 | 0 | 0 | 0 | 0 |

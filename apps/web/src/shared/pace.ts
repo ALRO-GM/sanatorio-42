@@ -139,3 +139,58 @@ export function stepsFor(origin: number, circle: number, now = Date.now()): Pace
 export function daysBetween(from: number, to: number): number {
   return Math.round((to - from) / DAY_MS)
 }
+
+/**
+ * Los días de bonus de alguien: lo que su día cero (`originOf`) se ha
+ * retrasado respecto al inicio del cursus. Los usan el health check y el
+ * Avance, que mueve con ellos sus líneas de pace para que digan lo mismo (#87
+ * del buzón). `null` sin inicio o sin pace anotado.
+ */
+export function bonusOf(health: {
+  startedAt: string | null
+  declared: { pace: number; circle: number; deadline: string } | null
+}): number | null {
+  const origin = health.declared === null ? null : originOf(health.declared)
+
+  if (origin === null || health.startedAt === null) return null
+
+  return Math.max(0, daysBetween(Date.parse(health.startedAt), origin))
+}
+
+type Climb = {
+  /** El pace al que se sube: el siguiente más rápido. */
+  pace: Pace
+  /** El círculo que hay que tener terminado (con los de antes)… */
+  circle: number
+  /** …antes de este día. */
+  date: Date
+  daysLeft: number
+}
+
+/**
+ * Cuándo tendrías que terminar para subir de pace (#106 del buzón), si vas a
+ * `pace` en el círculo `circle`: el plazo del siguiente pace más rápido para
+ * el primer círculo de después que aún llegue a tiempo. En el círculo en el
+ * que estás, los más rápidos ya se han pasado (si no, irías a ellos), así que
+ * se mira desde el siguiente. `null` si ya vas al más rápido o no queda
+ * ninguno a tiempo.
+ */
+export function climbOf(
+  origin: number,
+  circle: number,
+  pace: Pace,
+  now = Date.now(),
+): Climb | null {
+  const target = PACES[PACES.indexOf(pace) - 1]
+
+  if (target === undefined) return null
+
+  for (let next = circle + 1; next < DAYS[target].length; next++) {
+    const date = origin + (DAYS[target][next] ?? 0) * DAY_MS
+    const left = daysLeft(date, now)
+
+    if (left >= 0) return { pace: target, circle: next, date: new Date(date), daysLeft: left }
+  }
+
+  return null
+}

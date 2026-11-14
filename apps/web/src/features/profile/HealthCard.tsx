@@ -9,7 +9,16 @@ import { shows, useDetail } from '../../shared/detail'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import { INTRA_HOME, progressHref } from '../../shared/links'
-import { daysBetween, originOf, paceOn, PACES, SLOWEST, stepsFor } from '../../shared/pace'
+import {
+  bonusOf,
+  climbOf,
+  daysBetween,
+  originOf,
+  paceOn,
+  PACES,
+  SLOWEST,
+  stepsFor,
+} from '../../shared/pace'
 import type { PaceStep } from '../../shared/pace'
 import { Async } from '../../shared/ui/Async'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
@@ -51,11 +60,33 @@ export function HealthCard({ health }: HealthCardProps) {
     () => (health === undefined ? api.getHealth() : Promise.resolve(health)),
     [health],
   )
+  const [editing, setEditing] = useState(false)
+  // Actualizar el pace y el plazo, arriba y a la vista (#94 y #106 del buzón):
+  // plegado al fondo de los plazos, no se encontraba. Solo en el tuyo, con un
+  // pace ya anotado (si no, lo pregunta el propio cuadro) y sin haber terminado.
+  const mineNow = health === undefined ? own.data : undefined
+  const updatable =
+    mineNow === undefined
+      ? false
+      : mineNow.startedAt !== null &&
+        mineNow.declared !== null &&
+        mineNow.milestones.length <= LAST_CIRCLE
 
   return (
     <article className="card health">
       <div className="card-head">
         <span className="eyebrow">{t('health.title')}</span>
+        {updatable && !editing && (
+          <button
+            type="button"
+            className="pill health-update"
+            onClick={() => {
+              setEditing(true)
+            }}
+          >
+            <Icon name="lapiz" size={14} /> {t('health.update')}
+          </button>
+        )}
         {/* Tu estado, comparado: en el Avance, con tu plan, quien sigue y quien se
             tragó el black hole de tu campus, los paces y tu línea. El Avance sale
             desde el modo normal: en el simplificado, el enlace llevaría a una
@@ -75,6 +106,18 @@ export function HealthCard({ health }: HealthCardProps) {
           </a>
         )}
       </div>
+      {updatable && editing && own.data !== undefined && (
+        <PaceForm
+          health={own.data}
+          onSaved={(next) => {
+            setEditing(false)
+            own.setData(next)
+          }}
+          onCancel={() => {
+            setEditing(false)
+          }}
+        />
+      )}
       <Async state={own} loadingText={t('health.loading')}>
         {(data) =>
           data.startedAt === null ? (
@@ -109,7 +152,6 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
   const [now] = useState(() => Date.now())
   // Plegado por defecto: de un vistazo, el pace y hasta cuándo; el resto, al abrir.
   const [open, setOpen] = useState(false)
-  const [editing, setEditing] = useState(false)
   const circle = health.currentCircle
   const finished = health.milestones.length > LAST_CIRCLE
   const declared = health.declared
@@ -173,7 +215,11 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
   const current = steps.find((step) => step.daysLeft >= 0) ?? null
   const hole = steps.at(-1) ?? null
   // Lo que el día cero se ha retrasado respecto al inicio: los días de bonus.
-  const bonusDays = Math.max(0, daysBetween(Date.parse(startedAt), origin))
+  const bonusDays = bonusOf(health) ?? 0
+  // Si hoy ya vas más deprisa que en tu intra, terminar el círculo a tiempo te sube.
+  const rising = current !== null && current.pace < declared.pace
+  // Si no, cuándo tendrías que terminar para subir al siguiente (#106 del buzón).
+  const climb = current === null || rising ? null : climbOf(origin, circle, current.pace, now)
 
   const detail = open ? detailOf() : null
 
@@ -200,12 +246,32 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
         <p className="health-summary">
           {current === null
             ? t(mine ? 'health.summaryGone' : 'health.summaryGoneOther', { circle })
-            : tn(mine ? 'health.summary' : 'health.summaryOther', current.daysLeft, {
-                circle,
-                pace: current.pace,
-                date: day(current.date),
-                left: current.daysLeft,
+            : tn(
+                rising
+                  ? mine
+                    ? 'health.summaryUp'
+                    : 'health.summaryUpOther'
+                  : mine
+                    ? 'health.summary'
+                    : 'health.summaryOther',
+                current.daysLeft,
+                {
+                  circle,
+                  pace: current.pace,
+                  date: day(current.date),
+                  left: current.daysLeft,
+                },
+              )}
+          {climb !== null && (
+            <span className="health-climb">
+              {tn(mine ? 'health.climb' : 'health.climbOther', climb.daysLeft, {
+                pace: climb.pace,
+                circle: climb.circle,
+                date: day(climb.date),
+                left: climb.daysLeft,
               })}
+            </span>
+          )}
           {started}
         </p>
         <button
@@ -311,29 +377,6 @@ function HealthBody({ health, startedAt, mine, onSaved }: HealthBodyProps) {
           })}{' '}
           {bonusDays > 0 && tn(mine ? 'health.bonus' : 'health.bonusOther', bonusDays)}
         </p>
-        {mine &&
-          (editing ? (
-            <PaceForm
-              health={health}
-              onSaved={(next) => {
-                setEditing(false)
-                onSaved(next)
-              }}
-              onCancel={() => {
-                setEditing(false)
-              }}
-            />
-          ) : (
-            <button
-              type="button"
-              className="pill health-update"
-              onClick={() => {
-                setEditing(true)
-              }}
-            >
-              <Icon name="lapiz" size={14} /> {t('health.update')}
-            </button>
-          ))}
       </>
     )
   }

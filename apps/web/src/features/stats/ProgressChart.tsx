@@ -10,9 +10,11 @@ import { fineFactor } from '../../shared/ui/range'
 import { MAX_LINES, ME_STYLE, TRACKS, areasOf, groupSeries, personStyle } from './progressSeries'
 import type { GroupKey, LineStyle, Picked, Series } from './progressSeries'
 import {
+  corners,
   finishedStretch,
-  monotonePath,
   nextStop,
+  pacePoints,
+  smoothPath,
   stepped,
   stopNear,
   stopsOf,
@@ -77,20 +79,32 @@ const pathThrough = (x: Scale, y: Scale, points: readonly [number, number][]): s
     )
     .join('')
 
-/** Un trazo suave por esos puntos `[día, %]` (`monotonePath`). */
+/** Un trazo suave por esos puntos `[día, %]` (`smoothPath`). */
 const curveThrough = (x: Scale, y: Scale, points: readonly [number, number][]): string =>
-  monotonePath(points.map(([day, value]) => [x(day), y(value)]))
+  smoothPath(points.map(([day, value]) => [x(day), y(value)]))
+
+/**
+ * Una línea sin saltos con esa forma: recta de esquina a esquina o suave
+ * (`corners` y `smoothPath` en `progressTrace.ts`).
+ */
+const continuousThrough = (
+  x: Scale,
+  y: Scale,
+  points: readonly [number, number][],
+  shape: Exclude<LineShape, 'steps'>,
+): string => (shape === 'smooth' ? curveThrough(x, y, points) : pathThrough(x, y, corners(points)))
 
 /**
  * Los puntos de una línea en SVG, saltándose los huecos (`null`): cada racha
- * de días con valor, recta de punto a punto o, `smooth`, en curva suave.
+ * de días con valor, recta de punto a punto (`steps`: las medias no tienen
+ * hitos con los que hacer escalones) o con la forma elegida.
  */
 function pathOf(
   x: Scale,
   y: Scale,
   days: readonly number[],
   line: ProgressLine,
-  smooth = false,
+  shape: LineShape,
 ): string {
   const runs: [number, number][][] = [[]]
 
@@ -103,15 +117,18 @@ function pathOf(
 
   return runs
     .filter((run) => run.length > 0)
-    .map((run) => (smooth ? curveThrough(x, y, run) : pathThrough(x, y, run)))
+    .map((run) =>
+      shape === 'steps' ? pathThrough(x, y, run) : continuousThrough(x, y, run, shape),
+    )
     .join('')
 }
 
 /**
  * Cómo se dibuja cada línea: a saltos, subiendo de golpe el día en que se
  * aprueba cada proyecto, o continua y suave (pedido por Alberto, 2026-10-31).
+ * Y recta de esquina a esquina, sin curvas (#115 del buzón).
  */
-export type LineShape = 'steps' | 'smooth'
+export type LineShape = 'steps' | 'straight' | 'smooth'
 
 /**
  * El tramo entre dos líneas (los percentiles 25 y 75): arriba de ida y abajo de
@@ -297,6 +314,7 @@ export function ProgressChart({
   span,
   mine = true,
   shape = 'steps',
+  paceShift = 0,
 }: {
   data: StatsProgress
   measure: ProgressMeasure
@@ -305,8 +323,10 @@ export function ProgressChart({
   span: Span
   /** Si va tu línea (un enlace puede pedir que no). */
   mine?: boolean
-  /** A saltos por proyecto o continua y suave. */
+  /** A saltos por proyecto, recta o continua y suave. */
   shape?: LineShape
+  /** Días que se mueven las líneas de pace: tus días de bonus (`pacePoints`). */
+  paceShift?: number
 }) {
   const { t, tn } = useI18n()
   const { number } = useFormat()
@@ -380,6 +400,11 @@ export function ProgressChart({
       )
     : periodLast
   const x = scaleX(firstDay, lastDay)
+  // Las de pace como se dibujan: movidas por tus días de bonus y, a saltos, en escalera.
+  const paceLines = data.paces[measure].map((line) => ({
+    pace: line.pace,
+    points: pacePoints(line.points, paceShift, shape === 'steps'),
+  }))
   // Un día de margen: el pace de 8 meses acaba en el 244 y 8 meses son 243,3 días.
   const shown = (day: number): boolean => day >= firstDay - 1 && day <= lastDay + 1
   // Solo lo que cae en el periodo, más el punto de antes de su borde izquierdo
@@ -410,7 +435,7 @@ export function ProgressChart({
             value: milestone.value[measure],
           })),
         ),
-        paces ? data.paces[measure].map((line) => line.points) : [],
+        paces ? paceLines.map((line) => line.points) : [],
         firstDay,
         lastDay,
       )
@@ -570,7 +595,7 @@ export function ProgressChart({
   // Del más lento al más rápido: el de 24 meses, el que marca el plazo, siempre.
   let lastTag = Infinity
 
-  for (const line of [...data.paces[measure]].reverse()) {
+  for (const line of [...paceLines].reverse()) {
     const end = line.points.at(-1)
 
     if (end === undefined || !shown(end[0]) || lastTag - x(end[0]) < 36) continue
@@ -668,7 +693,7 @@ export function ProgressChart({
               </text>
             ))}
             {paces &&
-              data.paces[measure].map((line) => {
+              paceLines.map((line) => {
                 const end = line.points.at(-1)
 
                 return (
@@ -722,10 +747,10 @@ export function ProgressChart({
                     className="progress-line"
                     d={
                       points === null
-                        ? pathOf(x, y, days, each.line, shape === 'smooth')
-                        : shape === 'smooth'
-                          ? curveThrough(x, y, points)
-                          : pathThrough(x, y, stepped(points))
+                        ? pathOf(x, y, days, each.line, shape)
+                        : shape === 'steps'
+                          ? pathThrough(x, y, stepped(points))
+                          : continuousThrough(x, y, points, shape)
                     }
                     {...strokeOf(each.style)}
                   />
