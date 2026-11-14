@@ -129,6 +129,14 @@ un índice que no deje leer el texto.
   tenga una copia de la base y uno de esos dos ficheros puede leer lo cifrado:
   las copias que salen del servidor van además cifradas con gpg.
 
+- **La clave gpg de las copias** («Peer4U copias», ed25519/cv25519, creada el
+  2026-11-14): la pública en `infra/copias.asc`; la privada
+  (`peer4u-copias-privada.asc`, protegida con su frase) y la frase
+  (`peer4u-copias-frase.txt`) en `~/claves/` del ordenador de Alberto y del
+  servidor, por la misma decisión. Abrir una copia:
+  `gpg --pinentry-mode loopback --passphrase-file ~/claves/peer4u-copias-frase.txt -o x.db.gz -d x.db.gz.gpg`
+  (en otro ordenador, antes `gpg --import peer4u-copias-privada.asc`).
+
 ### Rotar la clave
 
 1. Genera la nueva: `openssl rand -base64 32`.
