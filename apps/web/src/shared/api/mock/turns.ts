@@ -385,6 +385,11 @@ export const turnsMock: Pick<
 
     const room = mustRoom(id)
 
+    // Como la API: blancas y negras se sortean al empezar. Si te tocan negras,
+    // el rival de mentira mueve primero.
+    if (Math.random() < 0.5) {
+      room.players = room.players.map((p) => ({ ...p, side: other(p.side) }))
+    }
     room.status = 'playing'
     room.mover = 'a'
     room.since = Date.now()

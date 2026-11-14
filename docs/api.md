@@ -1753,11 +1753,12 @@ mecánica es común (`modules/quiz/turns.rules.ts`) y cada juego aporta sus regl
 
 ```
 GET  /games/rooms              → TurnLobby[]: las salas sin empezar del campus y las tuyas recientes
-POST /games/rooms              → TurnSettings { game: 'chess', minutes: 3|5|10|15, pool, kinds, minCircle } → 201 TurnRoom
+POST /games/rooms              → TurnSettings { game: 'chess', minutes: 3|5|10|15, pool, kinds, language?, minCircle } → 201 TurnRoom
 GET  /games/rooms/:id          → TurnRoom (la web lo pide cada segundo jugando)
-POST /games/rooms/:id/join     → entra con el bando libre (a = blancas, b = negras)
+POST /games/rooms/:id/join     → entra en el sitio libre (su `side` es provisional hasta empezar)
 POST /games/rooms/:id/leave    → 204. Jugando, pierde quien se va. Vacía, la sala se borra
-POST /games/rooms/:id/start    → solo quien la creó, con los dos bandos ocupados. Mueven blancas
+POST /games/rooms/:id/start    → solo quien la creó, con los dos sitios ocupados. Sortea los colores
+                                 (a = blancas, b = negras; #95) y mueven blancas
 POST /games/rooms/:id/move     → { from, to, promotion? } (sin promotion, dama). 409 si no te toca; 400 si no vale
 POST /games/rooms/:id/answer   → { question, option }
 POST /games/rooms/:id/resign   → abandona: gana el otro bando
@@ -1769,6 +1770,9 @@ POST /games/rooms/:id/resign   → abandona: gana el otro bando
   mueve el rival. Sin respuestas, al acabarse el tiempo mueve a quien le tocaba.
 - Si a quien gana la pregunta el juego no le deja mover (en ajedrez, mover dos
   veces dejaría el rey contrario en jaque), mueve el otro.
+- Si nadie contesta, sale otra pregunta (hasta `MAX_REASKS`); las que se cierran
+  sin respuesta van al Repaso de los dos (#107).
+- `language` es la temática, como en las salas de preguntas (`any` si no se dice).
 - `last` cuenta cómo fue la pregunta anterior (quién contestó primero, si
   acertó, la buena, el porqué y quién perdió tiempo).
 - Final (`end`): jaque mate, ahogado o tablas, sin tiempo, abandono o se fue.
@@ -2317,10 +2321,12 @@ respuesta buena hasta que se cierra la pregunta. Tipos en
 GET  /quiz/rooms              → QuizLobby[]: salas abiertas del campus y las tuyas de las últimas 6 h.
 POST /quiz/rooms              → 201 QuizRoom. Cuerpo QuizSettings: mode (duel|teams|ffa|survival),
                                 competitive, pool (common|general), kinds (quick|long|mixed),
-                                difficulty (easy|medium|hard|rising), questions (5–30; 60 en
-                                supervivencia), minCircle (0–6 o null). Entras en ella.
+                                difficulty (easy|medium|hard|rising), language (temática:
+                                any|c|cpp|python|shell|git; any si no se dice), questions (5–30;
+                                60 en supervivencia), minCircle (0–6 o null). Entras en ella.
 GET  /quiz/rooms/:id          → QuizRoom: cómo va ahora. La web lo pide cada segundo jugando.
 POST /quiz/rooms/:id/join     → QuizRoom. { team?: 'a'|'b' }: entra, o cambia de equipo antes de empezar.
+                                Sin team, en equipos, al que tiene menos gente (el «Entrar» de la lista).
 POST /quiz/rooms/:id/leave    → 204. Sale de la sala, esté como esté. Si era quien la creó, pasa a quien
                                 entró después; vacía, se borra. Jugando, si ya no hay con quién (duelo o
                                 supervivencia con una persona, un equipo vacío), la partida acaba.
@@ -2331,18 +2337,25 @@ POST /quiz/rooms/:id/answer   → QuizRoom. { question, option }: option es el i
 
 - Cada jugador lleva su foto de 42 (`image`, o `null`).
 - **Repaso** (`GET /quiz/review` → `QuizReviewItem[]`): lo que ha fallado quien
-  pregunta, de cualquier juego, con título, definición, ejemplo, el porqué y una
-  de sus preguntas. `mastered` si lo acertó después del último fallo; primero lo
-  pendiente. Se guarda en `quiz_misses` (las salas se borran). Cada concepto del
-  banco tiene su repaso en `bank/review-a.ts` y `bank/review-b.ts`; un test exige
-  que no falte ninguno.
+  pregunta, o se le cerró sin contestar (#107), de cualquier juego y sala, con
+  título, tema (`topic`, traducido), definición, ejemplo, el porqué y
+  `questions`: las preguntas tal como le salieron, de la última a la primera
+  (hasta cinco distintas; #108). Los fallos de antes de guardarlas traen una del
+  concepto. `mastered` si lo acertó después del último fallo; primero lo
+  pendiente. Se guarda en `quiz_misses` (las salas se borran; `prompts`, desde
+  la migración 0094). Cada concepto del banco tiene su repaso en
+  `bank/review-*.ts`; un test exige que no falte ninguno.
+- **Temática** (`language`, #110): `c` (lo básico de C, la piscina de C y Unix),
+  `cpp`, `python`, `shell` y `git` (cualquier concepto con ese tema). Si no
+  quedan 3 preguntas que os valgan a todos, 409 al empezar.
+- `whyNot` va en español: fuera del español, la web enseña un motivo genérico.
 - Al acabar una partida se guarda el resultado de cada cual en `game_results`
   (común a todos los juegos), que queda para las estadísticas aunque la sala se
   borre.
 - Nadie está en dos salas a la vez (409). Salas sin empezar se borran a las 2 h;
   las jugadas, a la semana.
 - Preguntas: las de los conceptos que les valen a **todos** los que juegan según
-  sus proyectos (aprobados o en curso), o solo los generales. El banco está en
+  sus proyectos (aprobados o en curso), o solo los generales, de la temática elegida. El banco está en
   `modules/quiz/bank/`, un fichero por tema; la dificultad de cada concepto sale
   de lo que falla la gente (`quiz_stats`) a partir de 20 respuestas.
 - Cada pregunta se monta al sacarla: una forma de preguntar, una de sus buenas y

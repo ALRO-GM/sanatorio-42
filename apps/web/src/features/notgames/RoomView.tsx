@@ -12,7 +12,7 @@ import { timeLeft } from '../../shared/math'
 import { Avatar } from '../../shared/ui/Avatar'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
 import { Icon } from '../../shared/ui/Icon'
-import { settingsText } from './settings-text'
+import { settingsText, whyNotText } from './settings-text'
 import { SoundToggle } from './SoundToggle'
 import { useGameSounds } from './sounds'
 import { CodeText } from '../../shared/ui/CodeText'
@@ -129,7 +129,7 @@ type WaitingProps = {
 
 /** La sala antes de empezar: quién está, los equipos y los botones. */
 function Waiting({ room, me, busy, onJoin, onStart }: WaitingProps) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const inside = room.players.some((p) => p.login === me)
   const teams = room.settings.mode === 'teams'
 
@@ -161,7 +161,9 @@ function Waiting({ room, me, busy, onJoin, onStart }: WaitingProps) {
         <PlayerList players={room.players} me={me} />
       )}
 
-      {!inside && room.whyNot !== null && <p className="hint">{room.whyNot}</p>}
+      {!inside && room.whyNot !== null && (
+        <p className="hint">{whyNotText(t, lang, room.whyNot)}</p>
+      )}
       <div className="actions">
         {!inside && !teams && (
           <button

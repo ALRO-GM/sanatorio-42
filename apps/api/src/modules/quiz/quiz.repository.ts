@@ -8,7 +8,21 @@ import type { QuizSettings, QuizTeam } from '@sanatorio/contracts'
 import type { Db } from '../../core/db/database.js'
 import { toNumber, toText } from '../../core/db/rows.js'
 import { inList, listArg } from '../../core/db/sql.js'
+import { withPrompt } from './quiz.rules.js'
 import type { Round } from './quiz.rules.js'
+
+/** Las preguntas guardadas de un fallo (JSON); los de antes de guardarlas no traen ninguna. */
+function promptsOf(value: unknown): string[] {
+  if (typeof value !== 'string') return []
+
+  try {
+    const parsed: unknown = JSON.parse(value)
+
+    return Array.isArray(parsed) ? parsed.filter((each) => typeof each === 'string') : []
+  } catch {
+    return []
+  }
+}
 
 export type RoomRow = {
   id: number
@@ -333,25 +347,53 @@ export function createQuizRepository(db: Db) {
       return true
     },
 
-    /** Apunta para el Repaso que `login` ha fallado (o acertado) ese concepto. */
-    async remember(login: string, conceptId: string, correct: boolean, at: string): Promise<void> {
+    /**
+     * Apunta para el Repaso que `login` ha fallado (o acertado) ese concepto.
+     * `prompt` es la pregunta tal como le salió (en español): se guarda con
+     * las anteriores (`withPrompt`) para enseñarla en el Repaso.
+     */
+    async remember(
+      login: string,
+      conceptId: string,
+      correct: boolean,
+      at: string,
+      prompt: string | null = null,
+    ): Promise<void> {
+      if (correct) {
+        await db.execute({
+          sql: `UPDATE quiz_misses SET last_right_at = ? WHERE login = ? AND concept_id = ?`,
+          args: [at, login, conceptId],
+        })
+
+        return
+      }
+
+      const before = await db.execute({
+        sql: 'SELECT prompts FROM quiz_misses WHERE login = ? AND concept_id = ?',
+        args: [login, conceptId],
+      })
+      const prompts = withPrompt(promptsOf(before.rows[0]?.prompts), prompt)
+
       await db.execute({
-        sql: correct
-          ? `UPDATE quiz_misses SET last_right_at = ? WHERE login = ? AND concept_id = ?`
-          : `INSERT INTO quiz_misses (login, concept_id, misses, last_missed_at) VALUES (?, ?, 1, ?)
-             ON CONFLICT (login, concept_id) DO UPDATE SET misses = misses + 1, last_missed_at = excluded.last_missed_at`,
-        args: correct ? [at, login, conceptId] : [login, conceptId, at],
+        sql: `INSERT INTO quiz_misses (login, concept_id, misses, last_missed_at, prompts) VALUES (?, ?, 1, ?, ?)
+              ON CONFLICT (login, concept_id) DO UPDATE SET misses = misses + 1,
+                last_missed_at = excluded.last_missed_at, prompts = excluded.prompts`,
+        args: [login, conceptId, at, JSON.stringify(prompts)],
       })
     },
 
     /** Lo que ha fallado `login`, de lo último a lo primero. */
-    async misses(
-      login: string,
-    ): Promise<
-      { conceptId: string; misses: number; lastMissedAt: string; lastRightAt: string | null }[]
+    async misses(login: string): Promise<
+      {
+        conceptId: string
+        misses: number
+        lastMissedAt: string
+        lastRightAt: string | null
+        prompts: string[]
+      }[]
     > {
       const result = await db.execute({
-        sql: `SELECT concept_id, misses, last_missed_at, last_right_at FROM quiz_misses
+        sql: `SELECT concept_id, misses, last_missed_at, last_right_at, prompts FROM quiz_misses
               WHERE login = ? ORDER BY last_missed_at DESC`,
         args: [login],
       })
@@ -361,6 +403,7 @@ export function createQuizRepository(db: Db) {
         misses: toNumber(row.misses),
         lastMissedAt: toText(row.last_missed_at),
         lastRightAt: typeof row.last_right_at === 'string' ? row.last_right_at : null,
+        prompts: promptsOf(row.prompts),
       }))
     },
 

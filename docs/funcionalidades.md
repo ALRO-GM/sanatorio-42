@@ -253,10 +253,11 @@ No pide puesto en el clúster ni haber hecho otro curso. Detalle: [curso-rag.md]
 | Funcionalidad | Modo | Quién | Dónde |
 | --- | --- | --- | --- |
 | Salas abiertas de preguntas y de ajedrez: cada grupo (estudiantes o piscineros) solo ve las suyas y, de fábrica, solo las de su campus | N | Todos | `features/notgames/NotGamesPage.tsx`, API `quiz/room-access.ts` |
-| Crear sala de preguntas: duelo, equipos, todos contra todos (a solas, práctica) o supervivencia con 3 vidas; preguntas de lo que sabe todo el grupo o generales; rápidas, largas o mezcla; dificultad; cuántas; círculo mínimo; competitivo (fallar resta) | N | Todos | `NotGamesPage.tsx` |
+| Crear sala de preguntas: duelo, equipos, todos contra todos (a solas, práctica) o supervivencia con 3 vidas; preguntas de lo que sabe todo el grupo o generales; rápidas, largas o mezcla; dificultad; temática (C, C++, Python, shell, git o de todo); cuántas; círculo mínimo; competitivo (fallar resta) | N | Todos | `NotGamesPage.tsx` |
+| Entrar desde la lista: «Entrar» te sienta en cualquier sala con sitio (de preguntas o de ajedrez) y te lleva dentro; las tuyas, primero y marcadas | N | Todos | `NotGamesPage.tsx` (`LobbyCard`) |
 | Partida: espera y equipos, cuenta atrás con la hora del servidor, marcador, la buena y por qué | N | Quien está en la sala | `RoomView.tsx` |
-| Ajedrez con pregunta: reloj de 3, 5, 10 o 15 min, pregunta tras cada jugada (quien acierta primero mueve), rendirse, repasar la partida, estilo del tablero | N | Todos `[notgames.chess]` | `TurnRoomView.tsx`, `ChessBoard.tsx` |
-| Repaso: lo fallado con concepto, ejemplo y la pregunta; lo superado aparte | N | Todos `[notgames.review]` | `ReviewTab.tsx` |
+| Ajedrez con pregunta: reloj de 3, 5, 10 o 15 min, temática, colores sorteados al empezar, pregunta tras cada jugada (quien acierta primero mueve; en jaque se mueve sin pregunta; sin respuesta, otra pregunta), rendirse, repasar la partida, estilo del tablero | N | Todos `[notgames.chess]` | `TurnRoomView.tsx`, `ChessBoard.tsx` |
+| Repaso: lo fallado o sin contestar, de todas las salas, con concepto, tema, ejemplo y las preguntas tal como salieron; lo superado aparte | N | Todos `[notgames.review]` | `ReviewTab.tsx` |
 | Sonidos, que se pueden apagar | N | Todos | `SoundToggle.tsx` |
 | Demostraciones (salas y ajedrez) | N | Todos | `NotGamesTour.tsx`, `ChessTour.tsx` |
 

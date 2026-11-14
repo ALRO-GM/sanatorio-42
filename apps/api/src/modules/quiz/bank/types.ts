@@ -8,6 +8,8 @@
  * aprender de memoria qué botón pulsar.
  */
 
+import type { QuizLanguage } from '@sanatorio/contracts'
+
 /** Rápida: se contesta leyendo, en 10 s. Larga: hay que razonar o leer código. */
 export type ConceptKind = 'quick' | 'long'
 
@@ -38,6 +40,11 @@ export type Concept = {
   id: string
   /** Tema, para agrupar: `memoria`, `procesos`, `redes`… */
   topic: string
+  /**
+   * El lenguaje o la herramienta de la temática de una sala (#110). Lo pone
+   * `bank/index.ts` por fichero; `languageOf` (`quiz.rules.ts`) lo afina por tema.
+   */
+  language?: Exclude<QuizLanguage, 'any'>
   needs: ConceptNeeds
   kind: ConceptKind
   /** Segundos para contestar. Por defecto, 10 las rápidas y 30 las largas. */

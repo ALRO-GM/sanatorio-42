@@ -18,6 +18,12 @@ export type QuizPool = 'common' | 'general'
 
 export type QuizKinds = 'quick' | 'long' | 'mixed'
 
+/**
+ * Temática: solo preguntas de ese lenguaje o herramienta (#110). `any`, de
+ * todo. Las salas creadas antes no la llevan: valen como `any`.
+ */
+export type QuizLanguage = 'any' | 'c' | 'cpp' | 'python' | 'shell' | 'git'
+
 /** `rising`: de lo fácil a lo difícil a lo largo de la partida. */
 export type QuizDifficulty = 'easy' | 'medium' | 'hard' | 'rising'
 
@@ -30,6 +36,7 @@ export type QuizSettings = {
   pool: QuizPool
   kinds: QuizKinds
   difficulty: QuizDifficulty
+  language?: QuizLanguage
   /** Preguntas de la partida (en supervivencia, como mucho). */
   questions: number
   /** Círculo mínimo para entrar, o `null` si puede entrar cualquiera. */
@@ -136,12 +143,17 @@ export type TurnSettings = {
   /** Qué preguntas salen entre jugada y jugada, como en las salas de preguntas. */
   pool: QuizPool
   kinds: QuizKinds
+  language?: QuizLanguage
   minCircle: number | null
 }
 
 export type TurnPlayer = {
   login: string
   image: string | null
+  /**
+   * Su bando. Antes de empezar es solo su sitio en la sala: los colores se
+   * sortean al empezar la partida (#95), así que la web no lo enseña hasta entonces.
+   */
   side: TurnSide
   /** Lo que le queda de reloj, en ms, a la hora de `now`. */
   clockMs: number
@@ -238,8 +250,13 @@ export type QuizReviewItem = {
   example: string
   /** El porqué de la respuesta, el mismo que se ve al revelar. */
   why: string
-  /** Una de las preguntas del concepto, para recordar cómo salía. */
-  question: string
+  /**
+   * Las preguntas tal como te salieron, de la última a la primera (hasta cinco
+   * distintas), para reconocerlas aunque se fallaran en salas distintas. Los
+   * fallos de antes de guardarlas traen una de las del concepto.
+   */
+  questions: string[]
+  /** Veces que la fallaste o se cerró sin que contestaras. */
   misses: number
   lastMissedAt: string
   /** Lo acertaste después del último fallo. */

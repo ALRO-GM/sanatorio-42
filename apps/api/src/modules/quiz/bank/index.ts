@@ -39,23 +39,30 @@ import { UNIX } from './unix.js'
 
 export type { Concept } from './types.js'
 
+/** Los conceptos de un fichero, con el lenguaje de su temática (#110). */
+const inLanguage = (
+  concepts: readonly Concept[],
+  language: NonNullable<Concept['language']>,
+): Concept[] => concepts.map((concept) => ({ ...concept, language }))
+
 export const BANK: readonly Concept[] = [
   ...GENERAL,
-  ...C_BASICS,
-  ...UNIX,
+  ...inLanguage(C_BASICS, 'c'),
+  // Procesos, señales y pipes se programan en C (pipex, minishell, philosophers).
+  ...inLanguage(UNIX, 'c'),
   ...ALGORITHMS,
   ...GRAPHICS,
   ...NETWORK_BANK,
-  ...CPP,
-  ...PYTHON,
-  ...GIT,
+  ...inLanguage(CPP, 'cpp'),
+  ...inLanguage(PYTHON, 'python'),
+  ...inLanguage(GIT, 'git'),
   ...COURSES,
   ...COURSE_NET,
   ...COURSE_RAG,
-  ...PISCINE_SHELL,
-  ...PISCINE_C00_C03,
-  ...PISCINE_C04_C07,
-  ...PISCINE_C08_C13,
+  ...inLanguage(PISCINE_SHELL, 'shell'),
+  ...inLanguage(PISCINE_C00_C03, 'c'),
+  ...inLanguage(PISCINE_C04_C07, 'c'),
+  ...inLanguage(PISCINE_C08_C13, 'c'),
 ]
 
 /** El repaso de cada concepto, por id. Un test comprueba que no falta ninguno. */

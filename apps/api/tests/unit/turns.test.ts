@@ -28,6 +28,9 @@ import {
   unanswered,
 } from '../../src/modules/quiz/turns.rules.js'
 import type { TurnState } from '../../src/modules/quiz/turns.rules.js'
+import { BANK } from '../../src/modules/quiz/bank/index.js'
+import { createChessService } from '../../src/modules/quiz/games/index.js'
+import { createQuizRepository } from '../../src/modules/quiz/quiz.repository.js'
 import { actor, expectCode, MADRID, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
 import { projectUser } from '../helpers/fixtures.js'
@@ -212,32 +215,35 @@ describe('ajedrez: una partida', () => {
     return state.round.answer
   }
 
-  async function begin(minutes = 5): Promise<number> {
+  /**
+   * `ana` crea la sala y `leo` entra; los colores se sortean al empezar, así
+   * que se devuelve quién ha salido con blancas (`a`) y quién con negras.
+   */
+  async function begin(minutes = 5): Promise<{ id: number; white: string; black: string }> {
     const { chess } = services
     const { id } = await chess.create(actor('ana'), { game: 'chess', minutes, pool: 'general' })
 
     await chess.join(actor('leo'), id)
-    await chess.start(actor('ana'), id)
 
-    return id
+    const room = await chess.start(actor('ana'), id)
+    const white = room.players.find((p) => p.side === 'a')?.login ?? ''
+
+    return { id, white, black: white === 'ana' ? 'leo' : 'ana' }
   }
 
   it('mueve blancas, sale la pregunta a los dos, quien acierta primero mueve', async () => {
     const { chess } = services
-    const id = await begin()
+    const { id, white, black } = await begin()
     let room = await chess.view(actor('leo'), id)
 
     expect(room).toMatchObject({ status: 'playing', mover: 'a', question: null })
-    expect(room.players.map((p) => [p.login, p.side])).toEqual([
-      ['ana', 'a'],
-      ['leo', 'b'],
-    ])
+    expect(room.players.map((p) => p.side).sort()).toEqual(['a', 'b'])
     // Negras no pueden mover: no es su turno.
-    await expectCode(chess.move(actor('leo'), id, { from: 'e7', to: 'e5' }), 'conflict')
-    await expectCode(chess.move(actor('ana'), id, { from: 'e2', to: 'e5' }), 'invalid_input')
+    await expectCode(chess.move(actor(black), id, { from: 'e7', to: 'e5' }), 'conflict')
+    await expectCode(chess.move(actor(white), id, { from: 'e2', to: 'e5' }), 'invalid_input')
 
     clock.advance(5_000)
-    room = await chess.move(actor('ana'), id, { from: 'e2', to: 'e4' })
+    room = await chess.move(actor(white), id, { from: 'e2', to: 'e4' })
     expect(room.mover).toBeNull()
     expect(room.question?.options).toHaveLength(4)
     expect(room.board?.history).toEqual(['e4'])
@@ -248,72 +254,76 @@ describe('ajedrez: una partida', () => {
     room = await chess.view(actor('ana'), id)
     expect(room.players.find((p) => p.side === 'a')?.clockMs).toBe(5 * MINUTE - 5_000)
 
-    // ana acierta primero: vuelve a mover blancas.
-    room = await chess.answer(actor('ana'), id, { question: 0, option: await rightOf(room) })
+    // Blancas aciertan primero: vuelven a mover.
+    room = await chess.answer(actor(white), id, { question: 0, option: await rightOf(room) })
     expect(room.mover).toBe('a')
-    expect(room.last).toMatchObject({ first: { login: 'ana', correct: true }, winner: 'a' })
-    await expectCode(chess.answer(actor('leo'), id, { question: 0, option: 0 }), 'conflict')
+    expect(room.last).toMatchObject({ first: { login: white, correct: true }, winner: 'a' })
+    await expectCode(chess.answer(actor(black), id, { question: 0, option: 0 }), 'conflict')
 
-    room = await chess.move(actor('ana'), id, { from: 'd2', to: 'd4' })
+    room = await chess.move(actor(white), id, { from: 'd2', to: 'd4' })
     expect(room.board?.history).toEqual(['e4', 'd4'])
   })
 
   it('fallar quita el 10 % del reloj y da el turno al rival', async () => {
     const { chess } = services
-    const id = await begin()
-    let room = await chess.move(actor('ana'), id, { from: 'e2', to: 'e4' })
+    const { id, white, black } = await begin()
+    let room = await chess.move(actor(white), id, { from: 'e2', to: 'e4' })
     const wrong = ((await rightOf(room)) + 1) % 4
 
-    room = await chess.answer(actor('leo'), id, { question: 0, option: wrong })
+    room = await chess.answer(actor(black), id, { question: 0, option: wrong })
     expect(room.mover).toBe('a')
     expect(room.players.find((p) => p.side === 'b')?.clockMs).toBe(Math.floor(5 * MINUTE * 0.9))
-    expect(room.last).toMatchObject({ penalized: 'b', first: { login: 'leo', correct: false } })
+    expect(room.last).toMatchObject({ penalized: 'b', first: { login: black, correct: false } })
   })
 
   it('sin tiempo se pierde, y el resultado queda guardado', async () => {
     const { chess } = services
-    const id = await begin(3)
+    const { id, white, black } = await begin(3)
 
     clock.advance(3 * MINUTE + 1)
 
     const room = await chess.view(actor('leo'), id)
 
+    // Mueven blancas y se les acaba el tiempo: ganan negras.
     expect(room).toMatchObject({ status: 'done', end: { winner: 'b', reason: 'time' } })
 
-    const results = await db.execute(
-      'SELECT game, login, won, score FROM game_results ORDER BY login',
-    )
+    const results = await db.execute('SELECT game, login, won, score FROM game_results')
 
-    expect(results.rows).toEqual([
-      expect.objectContaining({ game: 'chess', login: 'ana', won: 0, score: 0 }),
-      expect.objectContaining({ game: 'chess', login: 'leo', won: 1, score: 2 }),
-    ])
+    expect(results.rows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ game: 'chess', login: white, won: 0, score: 0 }),
+        expect.objectContaining({ game: 'chess', login: black, won: 1, score: 2 }),
+      ]),
+    )
   })
 
   it('abandonar o irse da la partida al otro; vacía, la sala se borra', async () => {
     const { chess } = services
-    const id = await begin()
+    const first = await begin()
 
-    expect((await chess.resign(actor('leo'), id)).end).toEqual({ winner: 'a', reason: 'resign' })
+    expect((await chess.resign(actor(first.black), first.id)).end).toEqual({
+      winner: 'a',
+      reason: 'resign',
+    })
 
-    const other = await begin()
+    const { id: other, white, black } = await begin()
 
-    await chess.leave(actor('ana'), other)
-    expect((await chess.view(actor('leo'), other)).end).toEqual({ winner: 'b', reason: 'left' })
-    await chess.leave(actor('leo'), other)
-    await expectCode(chess.view(actor('leo'), other), 'not_found')
+    await chess.leave(actor(white), other)
+    expect((await chess.view(actor(black), other)).end).toEqual({ winner: 'b', reason: 'left' })
+    await chess.leave(actor(black), other)
+    await expectCode(chess.view(actor(black), other), 'not_found')
   })
 
   it('jaque mate acaba la partida', async () => {
     const { chess } = services
-    const id = await begin()
+    const { id, white, black } = await begin()
     // Mate del loco: f3 e5 g4 Dh4#. Tras cada jugada nadie contesta (ni las
     // preguntas de repuesto) y mueve a quien toca.
     const moves: [string, string, string][] = [
-      ['ana', 'f2', 'f3'],
-      ['leo', 'e7', 'e5'],
-      ['ana', 'g2', 'g4'],
-      ['leo', 'd8', 'h4'],
+      [white, 'f2', 'f3'],
+      [black, 'e7', 'e5'],
+      [white, 'g2', 'g4'],
+      [black, 'd8', 'h4'],
     ]
     let room: TurnRoom | null = null
 
@@ -327,23 +337,31 @@ describe('ajedrez: una partida', () => {
 
   it('si nadie contesta sale otra pregunta, y quien queda en jaque mueve sin pregunta', async () => {
     const { chess } = services
-    const id = await begin()
-    let room = await chess.move(actor('ana'), id, { from: 'e2', to: 'e4' })
+    const { id, white, black } = await begin()
+    let room = await chess.move(actor(white), id, { from: 'e2', to: 'e4' })
 
     expect(room.question?.index).toBe(0)
     clock.advance(12_000)
     room = await chess.view(actor('ana'), id)
     expect(room).toMatchObject({ mover: null, question: { index: 1 } })
 
-    // Ni esa ni la siguiente: mueve leo, que es a quien le tocaba.
+    // Ni esa ni la siguiente: mueven negras, que es a quien le tocaba.
     clock.advance(30_000)
-    room = await chess.move(actor('leo'), id, { from: 'f7', to: 'f5' })
+    room = await chess.move(actor(black), id, { from: 'f7', to: 'f5' })
     clock.advance(40_000)
-    // Dh5+: leo está en jaque y mueve ya, sin pregunta.
-    room = await chess.move(actor('ana'), id, { from: 'd1', to: 'h5' })
+    // Dh5+: negras están en jaque y mueven ya, sin pregunta.
+    room = await chess.move(actor(white), id, { from: 'd1', to: 'h5' })
     expect(room).toMatchObject({ mover: 'b', question: null })
-    room = await chess.move(actor('leo'), id, { from: 'g7', to: 'g6' })
+    room = await chess.move(actor(black), id, { from: 'g7', to: 'g6' })
     expect(room.question).not.toBeNull()
+
+    // Las tres preguntas que nadie contestó van al Repaso de los dos (#107).
+    for (const login of ['ana', 'leo']) {
+      const review = await services.quiz.review(actor(login))
+
+      expect(review.length).toBeGreaterThanOrEqual(1)
+      expect(review.every((item) => item.questions.length > 0)).toBe(true)
+    }
   })
 
   it('nadie juega dos partidas a la vez, ni de preguntas ni de ajedrez; y la sala tiene dos plazas', async () => {
@@ -356,6 +374,62 @@ describe('ajedrez: una partida', () => {
     await expectCode(chess.join(actor('eva'), id), 'conflict')
     await expectCode(chess.start(actor('leo'), id), 'forbidden')
     await expectCode(chess.create(actor('eva'), { game: 'chess', minutes: 7 }), 'invalid_input')
+  })
+})
+
+describe('ajedrez: los colores se sortean al empezar (#95)', () => {
+  const community = useCommunity()
+
+  /** Una sala de `ana` (que la crea) y `leo`, empezada con el azar que se diga. */
+  async function startWith(coin: number): Promise<TurnRoom> {
+    const { db, clock } = community
+    const chess = createChessService({
+      db,
+      quiz: createQuizRepository(db),
+      bank: BANK,
+      circlesOf: () => Promise.resolve(new Map<string, number>()),
+      imagesOf: () => Promise.resolve(new Map<string, string | null>()),
+      now: clock.now,
+      // La primera tirada es la moneda; las demás, para montar las preguntas.
+      random: (() => {
+        let first = true
+
+        return () => {
+          const value = first ? coin : 0.5
+
+          first = false
+
+          return value
+        }
+      })(),
+    })
+    const { id } = await chess.create(actor('ana'), { game: 'chess', pool: 'general' })
+
+    await chess.join(actor('leo'), id)
+
+    return chess.start(actor('ana'), id)
+  }
+
+  const sides = (room: TurnRoom): Record<string, string> =>
+    Object.fromEntries(room.players.map((p) => [p.login, p.side]))
+
+  it('con cara, quien creó la sala juega con blancas', async () => {
+    expect(sides(await startWith(0.9))).toEqual({ ana: 'a', leo: 'b' })
+  })
+
+  it('con cruz se cambian: quien creó la sala no se queda siempre las blancas', async () => {
+    const room = await startWith(0.1)
+
+    expect(sides(room)).toEqual({ ana: 'b', leo: 'a' })
+    // Y mueve quien ha salido con blancas.
+    expect(room).toMatchObject({ status: 'playing', mover: 'a' })
+  })
+
+  it('en el límite (0,5) no se cambia nada, y la sala sigue con dos personas', async () => {
+    const room = await startWith(0.5)
+
+    expect(room.players).toHaveLength(2)
+    expect(sides(room)).toEqual({ ana: 'a', leo: 'b' })
   })
 })
 

@@ -27,7 +27,14 @@ import { createLocks } from '../../../core/lock.js'
 import { parse } from '../../../core/validation.js'
 import type { Concept } from '../bank/index.js'
 import type { QuizRepository } from '../quiz.repository.js'
-import { buildRound, levelOf, localizeRound, orderFor, pickConcepts } from '../quiz.rules.js'
+import {
+  buildRound,
+  languageSchema,
+  levelOf,
+  localizeRound,
+  orderFor,
+  pickConcepts,
+} from '../quiz.rules.js'
 import type { Round } from '../quiz.rules.js'
 import {
   afterMove,
@@ -91,6 +98,7 @@ const settingsSchema = z.object({
   minutes: z.union([z.literal(3), z.literal(5), z.literal(10), z.literal(15)]).default(5),
   pool: z.enum(['common', 'general']).default('common'),
   kinds: z.enum(['quick', 'long', 'mixed']).default('quick'),
+  language: languageSchema,
   minCircle: z.number().int().min(0).max(6).nullable().default(null),
 })
 const answerSchema = z.object({
@@ -228,14 +236,30 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
     const work: TurnGameState<Board> = { ...state }
     let round = state.round
     let asked = false
+    // Las que se cierran sin que nadie conteste van al Repaso de los dos (#107).
+    const missed: StoredRound[] = []
 
     while (round !== null && unanswered(next, t, GRACE_MS)) {
+      missed.push(round)
       round = nextRound(work, round.index + 1)
       next = reask(next, round, GRACE_MS)
       asked = true
     }
 
     const settled = settleQuestion(next, t, (side) => game.canMove(state.board, side), GRACE_MS)
+
+    if (round !== null && settled !== next && (settled.last?.answers.length ?? 0) === 0) {
+      missed.push(round)
+    }
+    if (missed.length > 0) {
+      const players = await turns.players(start.id)
+
+      for (const each of missed) {
+        for (const player of players) {
+          await quiz.remember(player.login, each.conceptId, false, isoAt(t), each.prompt)
+        }
+      }
+    }
 
     if (settled === next && !asked) return start
     if (settled === next) {
@@ -476,7 +500,11 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
       })
     },
 
-    /** Empieza: quien creó la sala, con los dos bandos ocupados. Mueve primero `a`. */
+    /**
+     * Empieza: quien creó la sala, con los dos bandos ocupados. Los colores se
+     * sortean ahora (#95): en la sala de espera nadie sabe con cuáles jugará,
+     * ni quien la crea se queda siempre las blancas. Mueve primero `a`.
+     */
     async start(actor: Actor, id: number): Promise<TurnRoom> {
       return locked(id, async () => {
         const room = await mustRoom(id)
@@ -489,6 +517,9 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
 
         if (players.length !== 2) throw domainError('conflict', 'Hacen falta dos personas')
 
+        // A cara o cruz, antes que nada (es la primera tirada del azar): con
+        // cruz, cada cual pasa al otro bando. Se aplica al empezar de verdad.
+        const swap = random() < 0.5
         const slugs = await quiz.slugsOf(players.map((p) => p.login))
         const stats = await quiz.stats()
         const levels = new Map(
@@ -514,8 +545,14 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
         if (deck.length < 3) {
           throw domainError(
             'conflict',
-            'No hay preguntas suficientes que os valgan a los dos: probad solo con lo general',
+            'No hay preguntas suficientes que os valgan a los dos: probad con otra temática o solo con lo general',
           )
+        }
+
+        if (swap) {
+          for (const player of players) {
+            await turns.join(id, player.login, other(player.side), player.joinedAt)
+          }
         }
 
         const board = game.start()
@@ -623,7 +660,7 @@ export function createTurnsService<Board, View>(options: TurnsServiceOptions<Boa
 
         const correct = option === round.answer
 
-        await quiz.remember(actor.login, round.conceptId, correct, isoAt(now()))
+        await quiz.remember(actor.login, round.conceptId, correct, isoAt(now()), round.prompt)
         const counts = {
           ...state.counts,
           [side]: {

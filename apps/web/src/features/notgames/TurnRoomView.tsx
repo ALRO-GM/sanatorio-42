@@ -22,6 +22,7 @@ import { START_FEN } from '../../shared/chess'
 import { clock } from '../../shared/time'
 import { useGameSounds } from './sounds'
 import { CodeText } from '../../shared/ui/CodeText'
+import { turnSettingsText, whyNotText } from './settings-text'
 
 const PLAYING_MS = 1000
 const WAITING_MS = 2500
@@ -102,7 +103,7 @@ export function TurnRoomView({ id, me }: { id: number; me: string }) {
         <InfoTip title={t('notgames.game.chess')}>
           <ChessTour />
         </InfoTip>{' '}
-        · {t('notgames.minutesN', { n: room.settings.minutes })}
+        · {turnSettingsText(t, room.settings)}
       </p>
 
       {room.status === 'lobby' ? (
@@ -217,6 +218,10 @@ const pairs = (moves: readonly string[]): [string, string | undefined][] =>
     moves[index * 2 + 1],
   ])
 
+/**
+ * La sala de espera del ajedrez. Quién está, sin colores: blancas y negras se
+ * sortean al empezar (#95), así que aquí nadie sabe con cuáles jugará.
+ */
 function ChessLobby({
   room,
   me,
@@ -230,18 +235,18 @@ function ChessLobby({
   onJoin: () => void
   onStart: () => void
 }) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const inside = room.players.some((p) => p.login === me)
 
   return (
     <article className="card quiz-waiting">
       <span className="eyebrow">{t('notgames.waiting', { n: room.players.length })}</span>
       <ul className="quiz-players">
-        {(['a', 'b'] as const).map((side) => {
-          const player = room.players.find((p) => p.side === side)
+        {[0, 1].map((seat) => {
+          const player = room.players[seat]
 
           return (
-            <li key={side} className={player?.login === me ? 'me' : ''}>
+            <li key={seat} className={player?.login === me ? 'me' : ''}>
               {player === undefined ? (
                 <span className="hint">{t('notgames.chess.waitingRival')}</span>
               ) : (
@@ -250,12 +255,14 @@ function ChessLobby({
                   {player.login}
                 </>
               )}
-              <small> · {t(`notgames.chess.side.${side}`)}</small>
             </li>
           )
         })}
       </ul>
-      {!inside && room.whyNot !== null && <p className="hint">{room.whyNot}</p>}
+      <p className="hint">{t('notgames.chess.sidesDrawn')}</p>
+      {!inside && room.whyNot !== null && (
+        <p className="hint">{whyNotText(t, lang, room.whyNot)}</p>
+      )}
       <div className="actions">
         {!inside && (
           <button
