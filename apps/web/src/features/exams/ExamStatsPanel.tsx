@@ -15,9 +15,9 @@ import { useAsync } from '../../shared/hooks/useAsync'
 import { useI18n } from '../../shared/i18n'
 import { useFormat } from '../../shared/i18n/useFormat'
 import type { Translate } from '../../shared/i18n'
-import { recordHref } from '../../shared/links'
 import { ChartWithRail } from '../../shared/ui/ChartWithRail'
 import { ErrorNote } from '../../shared/ui/ErrorNote'
+import { PersonLink } from '../../shared/ui/PersonLink'
 import { PillGroup } from '../../shared/ui/PillGroup'
 import { StepPicker } from '../../shared/ui/StepPicker'
 
@@ -79,8 +79,9 @@ function Choice<T extends string>(props: {
  * la gente (C o Python), qué exámenes (los de C, los de Nexus o los dos, el
  * mismo rango en la misma fila) y una o varias kickoffs. Debajo, la duración
  * de los círculos y a cuánta gente se tragó el black hole en cada uno (lo que
- * 42 hizo al echarla, no su fecha, que no es de fiar: `docs/blackhole.md`);
- * con nombres, solo para quien administra.
+ * 42 hizo al echarla, no su fecha, que no es de fiar: `docs/blackhole.md`) y,
+ * con nombres, quién se fue y quién lo tiene más cerca: las dos cosas desde el
+ * modo normal y para todo el mundo (decidido por Alberto el 2026-11-14).
  *
  * Las opciones van en un panel a la derecha y las cifras a la izquierda
  * (`docs/interfaz.md`, «Gráficas con opciones»); en el modo de datos, además,
@@ -163,8 +164,8 @@ export function ExamStatsPanel() {
             </Show>
           </ChartWithRail>
           <Circles data={data} />
-          <BlackholeCircles data={data} />
-          <Show from="datos">
+          <Show from="normal">
+            <BlackholeCircles data={data} />
             <BlackholeHistory track={track} kickoffs={kickoffs} />
           </Show>
         </>
@@ -502,7 +503,8 @@ function KickoffCompare(props: { track: ExamTrack; family: FamilyFilter; pair: P
 
 /**
  * A cuánta gente se tragó el black hole en cada círculo (#81), de quien llegó
- * a él: en cifras y en %. Sin nombres, así que lo ve todo el mundo.
+ * a él: en cifras y en %. Desde el modo normal (2026-11-14, decidido por
+ * Alberto): es la cifra que la mayoría viene a mirar, no un desglose de más.
  */
 function BlackholeCircles({ data }: { data: ExamStats }) {
   const { t } = useI18n()
@@ -510,22 +512,20 @@ function BlackholeCircles({ data }: { data: ExamStats }) {
   if (data.blackhole.length === 0) return null
 
   return (
-    <Show from="datos">
-      <article className="card">
-        <span className="eyebrow">{t('exams.blackhole.title')}</span>
-        <ul className="rows">
-          {data.blackhole.map((row) => (
-            <li key={row.circle} className="row">
-              <span>{t('graph.circle', { n: row.circle })}</span>
-              <strong>{pctOf(t, row.absorbed, row.reached)}</strong>
-              <small className="hint">
-                {t('exams.blackhole.line', { absorbed: row.absorbed, reached: row.reached })}
-              </small>
-            </li>
-          ))}
-        </ul>
-      </article>
-    </Show>
+    <article className="card">
+      <span className="eyebrow">{t('exams.blackhole.title')}</span>
+      <ul className="rows">
+        {data.blackhole.map((row) => (
+          <li key={row.circle} className="row">
+            <span>{t('graph.circle', { n: row.circle })}</span>
+            <strong>{pctOf(t, row.absorbed, row.reached)}</strong>
+            <small className="hint">
+              {t('exams.blackhole.line', { absorbed: row.absorbed, reached: row.reached })}
+            </small>
+          </li>
+        ))}
+      </ul>
+    </article>
   )
 }
 
@@ -534,18 +534,11 @@ const BLACKHOLE_TABS = ['absorbed', 'closest'] as const
 
 /**
  * El historial del black hole de la selección (#81): a quién se tragó y quién
- * lo tiene más cerca. Lleva nombres y fechas de cada cual: solo para quien
- * administra (la API lo rechaza a los demás, y aquí ni se pide).
+ * lo tiene más cerca. Para todo el mundo desde el 2026-11-14 (decidido por
+ * Alberto): lleva lo que 42 ya publica al campus, y la API quita a piscineros,
+ * ocultos y cuentas anonimizadas.
  */
 function BlackholeHistory({ track, kickoffs }: { track: ExamTrack; kickoffs: readonly string[] }) {
-  const profile = useAsync(() => api.getProfile(), [])
-
-  if (profile.data?.admin !== true) return null
-
-  return <BlackholeLists track={track} kickoffs={kickoffs} />
-}
-
-function BlackholeLists({ track, kickoffs }: { track: ExamTrack; kickoffs: readonly string[] }) {
   const { t } = useI18n()
   const { date } = useFormat()
   const month = useMonth()
@@ -578,7 +571,7 @@ function BlackholeLists({ track, kickoffs }: { track: ExamTrack; kickoffs: reado
           <ul className="rows">
             {shown.map((person) => (
               <li key={person.login} className="row">
-                <a href={recordHref(person.login)}>{person.login}</a>
+                <PersonLink login={person.login} />
                 <span>
                   {t('graph.circle', { n: person.circle })} · {t(`exams.plan.${person.track}`)}
                   {person.kickoff === null ? '' : ` · ${month(person.kickoff)}`}

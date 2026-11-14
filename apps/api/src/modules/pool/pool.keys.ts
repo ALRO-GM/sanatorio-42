@@ -167,7 +167,7 @@ export const POOL_ROUTES: Record<PoolKey, readonly string[]> = {
   'avance.compare': ['/stats/progress/fastest'],
   examenes: [],
   'examenes.live': ['/exams/live', '/exams/live/refresh'],
-  'examenes.stats': ['/exams/stats'],
+  'examenes.stats': ['/exams/stats', '/exams/blackhole'],
   // El abandono de la piscina (`docs/abandono.md`): de entrada, cerrado.
   abandono: ['/stats/dropout', '/stats/dropout/compare'],
   clicker: [

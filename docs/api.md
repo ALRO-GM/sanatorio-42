@@ -2457,7 +2457,7 @@ DELETE /admin/hidden/:login     → HiddenPerson[]: la vuelve a enseñar (solo a
 GET  /exams/stats?track=all|classic|next&kickoffs=AAAA-MM,…  → ExamStats. Por plan y kickoff.
      (Un intento es un equipo cerrado: el vacío que 42 abre al cerrar otro no cuenta, #117.
      Para comparar dos kickoffs, la web la pide una vez por cada una.)
-GET  /admin/exams/blackhole?track=…&kickoffs=…  → ExamBlackholeList. Solo quien administra (#81).
+GET  /exams/blackhole?track=…&kickoffs=…  → ExamBlackholeList. Quién se fue y quién lo tiene más cerca (#81).
 GET  /exams/live          → LiveExam. El examen en marcha en tu campus o el siguiente (24 h).
 POST /exams/live/refresh  → LiveExam. Lo mismo, pidiendo antes lo nuevo a 42 si toca.
 ```
@@ -2471,12 +2471,17 @@ POST /exams/live/refresh  → LiveExam. Lo mismo, pidiendo antes lo nuevo a 42 s
   de `docs/blackhole.md` (lo que 42 hace al echar a alguien, no la fecha);
   quien está en duda no entra. Quien terminó llegó a todos; sin proyectos del
   common core, se está en el 0. Sin nombres: lo ve todo el mundo.
-- `GET /admin/exams/blackhole`: la misma selección (`track`, `kickoffs`, los
+- `GET /exams/blackhole`: la misma selección (`track`, `kickoffs`, los
   mismos `400`), con nombres: `absorbed`, a quién se tragó (lo más reciente
   primero, por `end_at`), y `closest`, quien sigue con la fecha de black hole
-  de 42 por llegar (lo más cercano primero). Como mucho 300 en cada lista.
-  Solo quien administra (`assertAdmin` y el candado de `/admin/…`), porque
-  lleva nombres y fechas de cada cual.
+  de 42 por llegar (lo más cercano primero). Como mucho 300 en cada lista,
+  contadas después de quitar a quien se anonimizó (`anon-…`), a los
+  piscineros y a quien está oculto para quien mira (`core/audience.ts`). Para
+  cualquiera con sesión (decidido por Alberto el 2026-11-14; antes era
+  `/admin/exams/blackhole`, solo para quien administraba, y ya no existe):
+  sin sesión, `401`; una sesión de staff no entra. Solo lleva lo que la
+  réplica ya copia de 42. Para un piscinero, en su permiso `examenes.stats`
+  (y sale vacío: no ve a la gente del 42cursus).
 - `track`: el plan de la gente (`classic`, el core en C; `next`, el core en
   Python). `kickoffs`: meses de las kickoffs reales del campus (como en
   `/stats/ranking`), separados por comas; sin él,

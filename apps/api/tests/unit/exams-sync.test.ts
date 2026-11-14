@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { actor, expectCode, MADRID, useCommunity } from '../helpers/community.js'
+import { actor, MADRID, useCommunity } from '../helpers/community.js'
 import type { Community } from '../helpers/community.js'
 import { projectUser } from '../helpers/fixtures.js'
 
@@ -84,7 +84,7 @@ describe('exámenes', () => {
     }
   })
 
-  it('cuenta a quien solo tiene su 42cursus y, a quien administra, le da el historial del black hole (#81)', async () => {
+  it('cuenta a quien solo tiene su 42cursus y da a cualquiera el historial del black hole (#81)', async () => {
     const { replica } = services.repositories
     const day = 86_400_000
     const now = community.clock.now()
@@ -115,18 +115,53 @@ describe('exámenes', () => {
     expect(stats.kickoffs).toContainEqual({ month: '2025-10', classic: 2, next: 0 })
     expect(stats.blackhole[0]).toEqual({ circle: 0, reached: 2, absorbed: 1 })
 
-    // Con nombres: solo quien administra.
-    await expectCode(services.exams.blackholeList(actor('eva')), 'forbidden')
-
-    const list = await services.exams.blackholeList(actor('eva', { admin: true }), {
-      kickoffs: '2025-10',
-    })
+    // Con nombres, para cualquiera con sesión (decidido por Alberto, 2026-11-14).
+    const list = await services.exams.blackholeList(actor('eva'), { kickoffs: '2025-10' })
 
     expect(list.absorbed.map((one) => one.login)).toEqual(['ida'])
     expect(list.closest.map((one) => one.login)).toEqual(['cerca'])
-    await expect(
-      services.exams.blackholeList(actor('eva', { admin: true }), { track: 'pascal' }),
-    ).rejects.toThrow()
+    await expect(services.exams.blackholeList(actor('eva'), { track: 'pascal' })).rejects.toThrow()
+  })
+
+  it('en el historial no salen cuentas anonimizadas, piscineros ni gente oculta (#81)', async () => {
+    const day = 86_400_000
+    const now = community.clock.now()
+    const iso = (ms: number): string => new Date(ms).toISOString()
+
+    // Las cuatro se fueron por el black hole; solo `ida` puede salir con nombre.
+    for (const [id, login] of [
+      [7101, 'ida'],
+      [7102, 'anon-1a2b3c4d5e6f'],
+      [7103, 'pisci'],
+      [7104, 'oculta'],
+    ] as const) {
+      await community.db.execute({
+        sql: `INSERT INTO core_cursus
+                (user_id, login, campus_id, begin_at, end_at, blackholed_at, grade, active, updated_at)
+              VALUES (?, ?, ?, '2025-10-06T08:00:00Z', ?, NULL, 'Cadet', 0, ?)`,
+        args: [id, login, MADRID, iso(now - 30 * day), iso(now)],
+      })
+    }
+    await community.db.execute({
+      sql: `INSERT INTO pool_members (campus_id, user_id, login, image, begin_at, updated_at)
+            VALUES (?, 7103, 'pisci', NULL, ?, ?)`,
+      args: [MADRID, iso(now - day), iso(now)],
+    })
+    await community.db.execute({
+      sql: `INSERT INTO hidden_people (login, from_students, from_pool, hidden_by, hidden_at)
+            VALUES ('oculta', 1, 0, 'albrodri', ?)`,
+      args: [iso(now)],
+    })
+
+    const list = await services.exams.blackholeList(actor('eva'))
+
+    expect(list.absorbed.map((one) => one.login)).toEqual(['ida'])
+    // Las cifras sí las cuentan a todas: no llevan nombres.
+    expect((await services.exams.stats(actor('eva'))).blackhole[0]).toMatchObject({ absorbed: 4 })
+    // Quien está oculto se ve a sí mismo, como en el resto de la web.
+    expect(
+      (await services.exams.blackholeList(actor('oculta'))).absorbed.map((one) => one.login),
+    ).toContain('oculta')
   })
 
   it('la copia de fondo baja los intentos antiguos página a página, y para al acabar', async () => {

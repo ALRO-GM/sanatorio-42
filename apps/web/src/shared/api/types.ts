@@ -302,7 +302,7 @@ export type Api = {
   getCampusMap: () => Promise<ClusterMap>
   /** Estadísticas de los exámenes, los círculos y el black hole del campus, por plan y kickoff. */
   getExamStats: (query: ExamQuery) => Promise<ExamStats>
-  /** Solo quien administra: a quién se tragó el black hole y quién lo tiene cerca (#81). */
+  /** A quién se tragó el black hole y quién lo tiene cerca (#81); para cualquiera con sesión. */
   getExamBlackhole: (query: ExamQuery) => Promise<ExamBlackholeList>
   /**
    * El examen que hay ahora en el campus (o el siguiente, en las próximas 24 h).

@@ -93,7 +93,7 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
     exams,
     sync,
     curriculum: deps.curriculum,
-    ...given({ now: deps.now }),
+    ...given({ audience: deps.audience, now: deps.now }),
   })
   const live = createExamsLive({
     db: deps.db,
@@ -125,11 +125,12 @@ export function createExamsModule(deps: ExamsModuleDeps): ExamsModule {
       })
 
       /**
-       * `GET /admin/exams/blackhole?track=…&kickoffs=…` → a quién se tragó el
-       * black hole y quién lo tiene más cerca (#81). Solo quien administra:
-       * lleva nombres y fechas de cada cual.
+       * `GET /exams/blackhole?track=…&kickoffs=…` → a quién se tragó el black
+       * hole y quién lo tiene más cerca (#81). Para cualquiera con sesión
+       * (decidido por Alberto el 2026-11-14; antes, solo quien administraba):
+       * `session.actor` rechaza sin sesión y a una sesión de staff.
        */
-      app.get('/admin/exams/blackhole', async (request, reply) => {
+      app.get('/exams/blackhole', async (request, reply) => {
         reply.header('Cache-Control', 'private, max-age=300')
 
         return reply.send(await service.blackholeList(await session.actor(request), request.query))

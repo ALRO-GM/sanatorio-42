@@ -133,6 +133,25 @@ El día 0 de cada línea del avance sigue siendo el inicio de cada cual.
   juntos», una sola línea. Te comparas con hasta 5 personas, y «Los más rápidos» sugiere a
   quien terminó antes (`GET /stats/progress/fastest`).
 
+## En Exámenes: por círculo y el historial (#81)
+
+En Campus → Exámenes → Estadísticas, con la misma regla y la misma selección
+(plan y kickoffs):
+
+- **Por círculo** (`blackhole` de `GET /exams/stats`): de quien llegó a cada
+  círculo, a cuánta gente se tragó en él, en cifras y en %. Sin nombres.
+- **Historial** (`GET /exams/blackhole`): quién se fue (lo más reciente
+  primero) y quién tiene la fecha de black hole de 42 más cerca. Hasta 300 en
+  cada lista.
+
+Las dos cosas salen desde el modo normal y para todo el mundo con sesión
+(decidido por Alberto el 2026-11-14; antes, el historial era solo de quien
+administraba y la tarjeta, del modo de datos). Solo enseñan lo que la réplica
+ya copia de 42 (login, foto, plan, kickoff, círculo y fechas del 42cursus). En
+el historial no sale quien se anonimizó (`anon-…`), ningún piscinero ni quien
+está oculto para quien mira (`core/audience.ts`); el tope de 300 se cuenta
+después de quitarlos. En las cifras sí cuentan: no llevan nombres.
+
 ## La gráfica: varias líneas a la vez
 
 `apps/web/src/features/stats/progressSeries.ts`. Cada combinación encendida de
