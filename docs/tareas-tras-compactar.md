@@ -22,7 +22,10 @@
 - [x] Cifrado de lo privado en la base (`DATA_KEY`, `docs/cifrado.md`) y de las copias (gpg).
 - [x] Black hole de Exámenes para todo el mundo (`GET /exams/blackhole`, modo normal).
 - [x] Guardia de límites: el 95 % para todas las webs de la máquina, 4 OCPU, disco en GiB.
-- [ ] Alberto: guardar `DATA_KEY` aparte; crear la clave gpg de las copias (`infra/copias.asc`).
+- [x] Alberto: guardar `DATA_KEY` aparte; crear la clave gpg de las copias (`infra/copias.asc`, 32c3113).
+  Queda recomendado: una tercera copia de `DATA_KEY` y de la clave gpg fuera del PC y del servidor.
+- [x] Examen en vivo en el mapa de clústeres (2026-11-20): contorno del color de cómo le va a quien
+  lo hace, si 42 da su puesto en `locations`. Check en verde; **sin commit ni despliegue**.
 - [ ] Responder cada ticket desde el panel (respuestas en el informe de la sesión).
 - [x] Decidido por Alberto (2026-11-14): sin plazo para borrar mensajes viejos y la lista del
   black hole no se oculta (tampoco a quien se anonimizó).
