@@ -696,6 +696,30 @@ describe('el examen en vivo', () => {
     expect((await build().live(actor('ana'))).last).toBeNull()
   })
 
+  it('para el mapa: cómo va quien ha entrado, sin pedir nada a 42', async () => {
+    const statuses = await build().statuses(actor('eva'))
+
+    // Quien está apuntado pero no ha entrado (`leo`, `eva`) no sale.
+    expect([...statuses]).toEqual([
+      ['ana', 'failed'],
+      ['mia', 'inProgress'],
+    ])
+    // Mirar el mapa no gasta cuota de 42, aunque la haya.
+    expect(calls).toEqual({ users: 0, pages: [] })
+  })
+
+  it('para el mapa: sin examen en marcha, nadie sale en examen', async () => {
+    expect((await build([]).statuses(actor('ana'))).size).toBe(0)
+
+    // El de mañana aún no ha empezado.
+    clock = Date.parse('2026-10-21T21:30:00.000Z')
+    expect((await build().statuses(actor('ana'))).size).toBe(0)
+
+    // Ya acabado, tampoco: la gente ya no está sentada en el examen.
+    clock = Date.parse(END) + 60 * MINUTE
+    expect((await build().statuses(actor('ana'))).size).toBe(0)
+  })
+
   it('sin examen no hay nada que enseñar', async () => {
     expect(await build([]).live(actor('ana'))).toEqual({
       exam: null,

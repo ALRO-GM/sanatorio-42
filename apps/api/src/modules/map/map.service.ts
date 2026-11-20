@@ -19,6 +19,7 @@ import type {
   Peer,
   PersonCard,
   SeatDuty,
+  SeatExam,
   SeatProblem,
   TitleId,
 } from '@sanatorio/contracts'
@@ -72,6 +73,11 @@ export type MapServiceOptions = {
   availableOf?: (login: string) => Promise<boolean>
   /** Quién de esos está en modo Pomodoro, y hasta cuándo. */
   focusOf?: (logins: readonly string[]) => Promise<Map<string, string>>
+  /**
+   * Cómo va en el examen en marcha cada persona que está dentro, por login
+   * (lo sabe `exams`). Sin esto, nadie sale en examen.
+   */
+  examsOf?: (actor: Actor) => Promise<Map<string, SeatExam>>
   /** El título que luce alguien: su ficha lleva el banner de ese título. */
   titleOf?: (login: string) => Promise<TitleId>
   now?: () => number
@@ -329,7 +335,7 @@ export function createMapService(options: MapServiceOptions) {
       const logins = present.map((person) => person.login)
       const mine = await replica.projectsOf(actor.login)
       const outers = options.finishedOf?.(logins) ?? new Set<string>()
-      const [activeProjects, circles, marks, focusing] = await Promise.all([
+      const [activeProjects, circles, marks, focusing, examining] = await Promise.all([
         replica.activeProjectsOf([...logins, actor.login]),
         options.circlesOf?.([...logins, actor.login]) ?? new Map<string, number>(),
         replica.bestMarksIn(
@@ -337,6 +343,9 @@ export function createMapService(options: MapServiceOptions) {
           mine.map((project) => project.id),
         ),
         options.focusOf?.(logins) ?? new Map<string, string>(),
+        // Sin el examen, el plano sale igual: no se cae por esto.
+        options.examsOf?.(actor).catch(() => new Map<string, SeatExam>()) ??
+          new Map<string, SeatExam>(),
       ])
 
       for (const person of present) {
@@ -359,6 +368,7 @@ export function createMapService(options: MapServiceOptions) {
           outer: outers.has(person.login),
           finishedMine: marks.get(person.login) ?? null,
           focusUntil: focusing.get(person.login) ?? null,
+          exam: examining.get(person.login) ?? null,
         }
       }
 

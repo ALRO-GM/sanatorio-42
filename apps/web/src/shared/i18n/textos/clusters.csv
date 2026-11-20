@@ -84,3 +84,6 @@ facility.category.temperature,Tipo de problema: frío o calor,Temperatura,Temper
 facility.category.light,Tipo de problema: la luz,Luz,Light,Llum,Argia,Éclairage
 facility.category.cleaning,Tipo de problema: limpieza,Limpieza,Cleaning,Neteja,Garbiketa,Ménage
 facility.category.other,Tipo de problema: otro,Otro,Other,Altre,Bestelakoa,Autre
+map.exam.inProgress,"Mapa: quien está sentado hace ahora el examen del campus (contorno azul, leyenda y ficha)",En el examen,In the exam,A l'examen,Azterketan,En examen
+map.exam.passed,"Mapa: quien está sentado ha aprobado el examen de hoy (contorno verde, leyenda y ficha)",Examen aprobado,Exam passed,Examen aprovat,Azterketa gaindituta,Examen validé
+map.exam.failed,"Mapa: quien está sentado ha suspendido el examen de hoy (contorno rojo, leyenda y ficha)",Examen suspendido,Exam failed,Examen suspès,Azterketa ez gaindituta,Examen échoué

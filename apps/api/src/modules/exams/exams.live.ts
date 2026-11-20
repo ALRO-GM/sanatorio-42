@@ -15,7 +15,13 @@
  * reinicio hacen que se pida más.
  */
 
-import type { LiveExam, LiveExamGroup, LiveExamResults, LiveExaminee } from '@sanatorio/contracts'
+import type {
+  LiveExam,
+  LiveExamGroup,
+  LiveExamResults,
+  LiveExaminee,
+  SeatExam,
+} from '@sanatorio/contracts'
 
 import type { Actor } from '../../core/actor.js'
 import { clockOf, loggerOf } from '../../core/options.js'
@@ -415,6 +421,29 @@ export function createExamsLive(options: ExamsLiveOptions) {
           Date.parse(event.beginAt) <= at &&
           Date.parse(event.endAt) > at,
       )
+    },
+
+    /**
+     * Cómo va cada persona que ha entrado en el examen en marcha del campus de
+     * quien pregunta, por login. Para el mapa: no pide nada a 42, solo junta
+     * lo que ya hay. Sin examen en marcha, vacío.
+     */
+    async statuses(actor: Actor): Promise<Map<string, SeatExam>> {
+      const pool = actor.pool === true
+      const { found } = await examOf(actor.campusId, now(), pool)
+      const statuses = new Map<string, SeatExam>()
+
+      if (found?.running !== true) return statuses
+
+      const state = await stateOf(liveKey(actor.campusId, found.exam.id))
+
+      for (const group of await groupsOf(actor.campusId, found.exam, state, true, pool)) {
+        for (const person of group.people) {
+          if (person.status !== 'pending') statuses.set(person.login, person.status)
+        }
+      }
+
+      return statuses
     },
 
     /** El examen de ahora en el campus de quien pregunta, o el siguiente. Refresca si toca. */

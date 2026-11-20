@@ -17,6 +17,7 @@ import type {
   PiscineGroup,
   ProjectSummary,
   ReactionKind,
+  SeatExam,
   TimeRange,
   TitleId,
 } from '@sanatorio/contracts'
@@ -197,6 +198,21 @@ export const BYSTANDERS: { login: string; host: string }[] = [
   { login: 'opardo', host: 'c3r2s3' },
   { login: 'sgil', host: 'c4r1s4' },
   { login: 'plopez-l', host: 'c1r2s2' },
+]
+
+/**
+ * Quién hace el examen en vivo de mentira (`exams.ts`) y dónde se sienta: en
+ * c3, la sala del examen. Los estados son los de allí; `rsoto`, que suspendió,
+ * ya ha vuelto a su sitio (`BYSTANDERS`).
+ */
+export const EXAM_SEATS: { login: string; host: string | null; exam: SeatExam }[] = [
+  { login: 'jdoe', host: 'c3r1s1', exam: 'passed' },
+  { login: 'llorente', host: 'c3r1s2', exam: 'failed' },
+  { login: 'pvidal', host: 'c3r1s3', exam: 'inProgress' },
+  { login: 'anavarro', host: 'c3r3s1', exam: 'inProgress' },
+  { login: 'mgarcia', host: 'c3r3s2', exam: 'passed' },
+  { login: 'cfernandez', host: 'c3r3s4', exam: 'inProgress' },
+  { login: 'rsoto', host: null, exam: 'failed' },
 ]
 
 /** Tamaño de cada cluster de mentira: filas × puestos por fila. */

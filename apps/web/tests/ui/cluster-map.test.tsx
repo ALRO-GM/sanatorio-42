@@ -57,6 +57,7 @@ function cluster(id: string, rows: number, seats: number, seated: string[]): Map
               circle: null,
               outer: false,
               finishedMine: null,
+              exam: null,
               focusUntil: null,
             }
           : null,
@@ -238,5 +239,67 @@ describe('Clústeres en la web (API de mentira con París)', () => {
 
     expect(names).toEqual(['F041', 'F1267', 'F1B0', 'F279', 'F451', 'F674'])
     await api.updateSettings({ campusId: 22 })
+  })
+})
+
+describe('Quien hace el examen en el plano', () => {
+  /** Un clúster pequeño con tres personas en el examen y una que no. */
+  function examMap(): ClusterMap {
+    const room = cluster('c3', 1, 4, ['1:1', '1:2', '1:3', '1:4'])
+    const states = ['inProgress', 'passed', 'failed', null] as const
+
+    room.seats.forEach((seat, index) => {
+      if (seat.occupant !== null) seat.occupant.exam = states[index] ?? null
+    })
+
+    return { clusters: [room], unplaced: [], me: { circle: null, projects: [] } }
+  }
+
+  it('cada cual lleva el contorno y el nombre de cómo le va, y la leyenda los explica', () => {
+    show(examMap())
+
+    const seats = within(grid())
+
+    // Normal: el nombre del puesto dice cómo le va a cada cual.
+    const inExam = seats.getByRole('button', { name: new RegExp(text('map.exam.inProgress')) })
+    const passed = seats.getByRole('button', { name: new RegExp(text('map.exam.passed')) })
+    const failed = seats.getByRole('button', { name: new RegExp(text('map.exam.failed')) })
+
+    expect(inExam.className).toContain('exam-in-progress')
+    expect(passed.className).toContain('exam-passed')
+    expect(failed.className).toContain('exam-failed')
+    // Quien no está en el examen no lleva contorno.
+    expect(document.querySelectorAll('.seat-grid .seat-exam')).toHaveLength(3)
+
+    const legend = must(document.querySelector<HTMLElement>('.map-legend'), 'la leyenda')
+
+    for (const key of ['map.exam.inProgress', 'map.exam.passed', 'map.exam.failed']) {
+      expect(within(legend).getByText(text(key))).toBeTruthy()
+    }
+  })
+
+  it('sin nadie en el examen, la leyenda no habla de él', () => {
+    show(paris())
+
+    const legend = must(document.querySelector<HTMLElement>('.map-legend'), 'la leyenda')
+
+    expect(within(legend).queryByText(text('map.exam.inProgress'))).toBeNull()
+    expect(document.querySelectorAll('.seat-exam')).toHaveLength(0)
+  })
+
+  it('en la web de mentira, la sala del examen sale con sus colores', async () => {
+    await openApp('#/clusters')
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 300))
+    })
+
+    const pills = within(screen.getByRole('group', { name: text('map.clusters') }))
+
+    // La sala del examen de mentira es c3 («Clúster 3» y su cuenta de gente).
+    await userEvent.setup().click(pills.getByRole('button', { name: /\s3\s*\d+$/ }))
+
+    expect(document.querySelectorAll('.seat-grid .exam-passed').length).toBeGreaterThan(0)
+    expect(document.querySelectorAll('.seat-grid .exam-failed').length).toBeGreaterThan(0)
+    expect(document.querySelectorAll('.seat-grid .exam-in-progress').length).toBeGreaterThan(0)
   })
 })

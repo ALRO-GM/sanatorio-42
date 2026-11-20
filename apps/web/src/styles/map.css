@@ -152,6 +152,35 @@
   border-width: 3px;
 }
 
+/* En el examen en vivo: un doble anillo del color de cómo le va, el mismo que
+   en Exámenes (azul dentro, verde aprobado, rojo suspenso). Doble para no
+   confundirlo con el marco de quien está disponible. Va después de la guardia:
+   si alguien saliera con las dos cosas, manda el examen. */
+.seat-exam {
+  --exam-ring: #3b82f6;
+}
+.exam-passed {
+  --exam-ring: var(--ok);
+}
+.exam-failed {
+  --exam-ring: var(--danger);
+}
+.seat.seat-exam {
+  border-width: 3px;
+  border-color: var(--exam-ring);
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--exam-ring),
+    0 5px 9px var(--shadow);
+}
+.badge.seat-exam {
+  color: var(--exam-ring);
+  border-color: color-mix(in srgb, var(--exam-ring) 45%, transparent);
+}
+.density-dots .seat.seat-exam {
+  background: var(--exam-ring);
+}
+
 /* Reservado para terapia: marco azul; si está libre, además fondo azulado. */
 .seat.reserved {
   border-color: var(--seat-blue);

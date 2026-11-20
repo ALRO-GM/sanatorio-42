@@ -287,6 +287,7 @@ Lo que va fuera de la página (temporizador, pantalla completa, sonido) está en
 | --- | --- | --- | --- |
 | Plano de cada clúster con leyenda (en la web, ocupado, reservado, libre, roto) y colores (senior disponible dorado, peer disponible verde) | N | Todos | `features/map/ClusterMapView.tsx` |
 | Resaltar a tu círculo o a quien hace tu proyecto, con cuánta gente cumple cada uno | N | Todos | `ClustersPage.tsx` |
+| Con un examen en marcha, quien está dentro sale con un doble contorno del color de cómo le va (azul en curso, verde aprobado, rojo suspenso), en la leyenda y en su ficha; si 42 da su puesto | N | Todos `[clusters]` | `ClusterMapView.tsx`, `look.ts`, `map.service.ts`, `exams.live.ts` |
 | Girar y alinear el plano; «Ajustar» o «100 %» en los clústeres grandes | N | Todos | `fit.ts` |
 | Ficha de un puesto al pasar; al pulsar se queda, con escribir y ver el perfil. El círculo de un piscinero es su último módulo de C aprobado (C 02 → «C02»; solo shell → 0) | N | Todos | `SeatHoverCard.tsx`, `shared/circle.ts` |
 | Los piscineros siguen en el plano (la sala tal cual), pero un estudiante no ve su foto | N | Estudiantes | `ClusterMapView.tsx` |

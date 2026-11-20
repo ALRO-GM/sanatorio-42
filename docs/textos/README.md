@@ -11,7 +11,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [avisos](avisos.md) | 54 | 0 | 0 | 0 | 0 |
 | [buzon](buzon.md) | 142 | 0 | 0 | 0 | 0 |
 | [calendario](calendario.md) | 105 | 0 | 0 | 0 | 0 |
-| [clusters](clusters.md) | 85 | 0 | 0 | 0 | 0 |
+| [clusters](clusters.md) | 88 | 0 | 0 | 0 | 0 |
 | [code-clicker](code-clicker.md) | 27 | 0 | 0 | 0 | 0 |
 | [comun](comun.md) | 534 | 0 | 0 | 0 | 0 |
 | [curso-docker](curso-docker.md) | 33 | 0 | 0 | 0 | 0 |

@@ -47,6 +47,13 @@ export type MapSeat = {
      * quien mira (125 es la máxima), o `null` si no aprobó ninguno.
      */
     finishedMine: number | null
+    /**
+     * Cómo le va en el examen en marcha del campus, si está dentro: en curso,
+     * aprobado o suspenso (lo mismo que en el examen en vivo). `null` sin
+     * examen o si no está en él. 42 no dice dónde se sienta cada cual en el
+     * examen: sale aquí si su sesión aparece en la foto de puestos.
+     */
+    exam: SeatExam | null
   } | null
   /**
    * Hay alguien sentado a quien quien mira no puede ver (a un piscinero, los
@@ -63,6 +70,9 @@ export type MapSeat = {
    */
   broken: { by: string | null; at: string; kind: SeatProblem | null } | null
 }
+
+/** El estado en el examen en vivo de quien está sentado (`LiveExaminee`, sin «sin entrar»). */
+export type SeatExam = 'inProgress' | 'passed' | 'failed'
 
 /** Qué falla en un puesto roto: el ordenador o la pantalla, el teclado o el ratón (#82). */
 export type SeatProblem = 'computer' | 'peripheral'

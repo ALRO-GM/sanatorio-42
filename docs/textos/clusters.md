@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-85 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+88 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -92,3 +92,6 @@ Generado desde `apps/web/src/shared/i18n/textos/clusters.csv` con
 | `facility.category.light` | Tipo de problema: la luz | features/facility/FacilityForm, features/facility/FacilityList, features/map/ClusterMapView | Luz | Light | Llum | Argia | Éclairage |
 | `facility.category.cleaning` | Tipo de problema: limpieza | features/facility/FacilityForm, features/facility/FacilityList, features/map/ClusterMapView | Limpieza | Cleaning | Neteja | Garbiketa | Ménage |
 | `facility.category.other` | Tipo de problema: otro | features/facility/FacilityForm, features/facility/FacilityList, features/map/ClusterMapView | Otro | Other | Altre | Bestelakoa | Autre |
+| `map.exam.inProgress` | Mapa: quien está sentado hace ahora el examen del campus (contorno azul, leyenda y ficha) | features/map/ClusterMapView, features/map/SeatHoverCard | En el examen | In the exam | A l'examen | Azterketan | En examen |
+| `map.exam.passed` | Mapa: quien está sentado ha aprobado el examen de hoy (contorno verde, leyenda y ficha) | features/map/ClusterMapView, features/map/SeatHoverCard | Examen aprobado | Exam passed | Examen aprovat | Azterketa gaindituta | Examen validé |
+| `map.exam.failed` | Mapa: quien está sentado ha suspendido el examen de hoy (contorno rojo, leyenda y ficha) | features/map/ClusterMapView, features/map/SeatHoverCard | Examen suspendido | Exam failed | Examen suspès | Azterketa ez gaindituta | Examen échoué |

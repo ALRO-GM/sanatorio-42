@@ -9,6 +9,7 @@ import { Avatar } from '../../shared/ui/Avatar'
 import { FocusBadge } from '../../shared/ui/FocusBadge'
 import { Icon } from '../../shared/ui/Icon'
 import { seatName } from '../../shared/seats'
+import { examClass } from './look'
 import { recordHref } from '../../shared/links'
 
 /** Un puesto y el botón que lo pinta: la ficha se coloca junto a él. */
@@ -98,6 +99,11 @@ export function SeatHoverCard({ hovered, pinned }: SeatHoverCardProps) {
         {occupant.finishedMine !== null && (
           <span className={`badge ${occupant.finishedMine >= 125 ? 'specialist' : 'on'}`}>
             {t('map.finishedMine', { n: occupant.finishedMine })}
+          </span>
+        )}
+        {occupant.exam !== null && (
+          <span className={`badge ${examClass(occupant.exam)}`}>
+            {t(`map.exam.${occupant.exam}`)}
           </span>
         )}
         {occupant.duty !== null && (

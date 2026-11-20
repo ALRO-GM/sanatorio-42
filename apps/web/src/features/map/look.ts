@@ -8,7 +8,7 @@
  * y cada puesto un poco desplazado hacia el lado contrario de su pantalla.
  */
 
-import type { ClusterMap, MapSeat } from '@sanatorio/contracts'
+import type { ClusterMap, MapSeat, SeatExam } from '@sanatorio/contracts'
 
 /** A quién se puede resaltar respecto de quien mira. */
 export type Mate = 'circle' | 'project' | 'done'
@@ -87,6 +87,14 @@ export function saveLook(look: MapLook, store: Store | null = storage()): void {
   } catch {
     // Sin guardar: la próxima vez se ve como de fábrica.
   }
+}
+
+/**
+ * Las clases de quien está en el examen en vivo (`seat-exam exam-in-progress`…):
+ * el contorno del puesto y la etiqueta de su ficha, del color de cómo le va.
+ */
+export function examClass(exam: SeatExam): string {
+  return `seat-exam exam-${exam.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`
 }
 
 /** Qué comparte quien ocupa un puesto con quien mira. */

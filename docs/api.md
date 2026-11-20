@@ -144,6 +144,13 @@ para elegir puestos al abrir un grupo de terapia.
   deduce de los puestos en los que se ha visto a alguien y el rectángulo se
   completa con puestos libres; alguno puede corresponder a un pasillo.
 - `occupant.projects`: nombres de los proyectos que tiene en curso (hasta cuatro).
+- `occupant.exam`: con un examen en marcha en el campus, cómo le va a quien
+  está sentado si ha entrado en él: `"inProgress"`, `"passed"` o `"failed"`
+  (lo mismo que `status` en `GET /exams/live`, del examen del mundo de quien
+  mira); si no, `null`. 42 no dice en qué puesto hace cada cual el examen:
+  sale si su sesión aparece en la foto de puestos (`locations`), que es lo
+  normal pero no siempre pasa. Se cruza con lo que ya hay del examen en vivo,
+  sin pedir nada a 42.
 - `unplaced`: gente en puestos cuyo nombre no sigue el patrón sala-fila-puesto.
 
 No gasta peticiones de 42: usa la misma foto de puestos que la lista de gente.

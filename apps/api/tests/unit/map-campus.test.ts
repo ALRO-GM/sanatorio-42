@@ -12,7 +12,7 @@ import type { MapServiceOptions } from '../../src/modules/map/map.service.js'
 type Person = { login: string; host: string }
 
 /** El servicio con una réplica de mentira: puestos conocidos y quién está sentado. */
-function serviceWith(known: string[], present: Person[]) {
+function serviceWith(known: string[], present: Person[], extra: Partial<MapServiceOptions> = {}) {
   const replica = {
     knownSeats: () => Promise.resolve(known),
     presenceIn: () =>
@@ -31,6 +31,7 @@ function serviceWith(known: string[], present: Person[]) {
     therapy: {
       reservations: () => Promise.resolve(new Map()),
     } as unknown as MapServiceOptions['therapy'],
+    ...extra,
   })
 }
 
@@ -104,5 +105,55 @@ describe('plano de un campus como el de París', () => {
       [['f1', 13, 23]],
     )
     expect(heat.clusters[0]).toMatchObject({ hours: 1, people: 1 })
+  })
+})
+
+describe('quien hace el examen en el plano', () => {
+  const seated = [
+    { login: 'ana', host: 'c3r1s1' },
+    { login: 'bea', host: 'c3r1s2' },
+    { login: 'carla', host: 'c3r1s3' },
+    { login: 'dani', host: 'c3r1s4' },
+  ]
+  const examOf = (map: Awaited<ReturnType<ReturnType<typeof serviceWith>['forCampus']>>) =>
+    map.clusters[0]?.seats.map((seat) => [seat.occupant?.login, seat.occupant?.exam])
+
+  it('cada cual sentado lleva cómo le va; quien no está en el examen, nada', async () => {
+    const asked: string[] = []
+    const map = await serviceWith(['c3r1s4'], seated, {
+      examsOf: (actor) => {
+        asked.push(actor.login)
+
+        return Promise.resolve(
+          new Map([
+            ['ana', 'inProgress'],
+            ['bea', 'passed'],
+            ['carla', 'failed'],
+            // Alguien del examen que no sale en la foto de puestos: no se inventa sitio.
+            ['eva', 'passed'],
+          ] as const),
+        )
+      },
+    }).forCampus(ACTOR)
+
+    expect(examOf(map)).toEqual([
+      ['ana', 'inProgress'],
+      ['bea', 'passed'],
+      ['carla', 'failed'],
+      ['dani', null],
+    ])
+    // Se pregunta con quien mira: su mundo (estudiante o piscinero) decide el examen.
+    expect(asked).toEqual(['yo'])
+  })
+
+  it('sin examen, o si saberlo falla, el plano sale igual y nadie en examen', async () => {
+    const none = await serviceWith(['c3r1s4'], seated).forCampus(ACTOR)
+    const broken = await serviceWith(['c3r1s4'], seated, {
+      examsOf: () => Promise.reject(new Error('sin base')),
+    }).forCampus(ACTOR)
+
+    for (const map of [none, broken]) {
+      expect(examOf(map)?.map(([, exam]) => exam)).toEqual([null, null, null, null])
+    }
   })
 })

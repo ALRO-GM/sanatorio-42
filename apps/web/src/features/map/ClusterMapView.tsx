@@ -5,6 +5,7 @@ import type {
   ClusterMap,
   MapCluster,
   MapSeat,
+  SeatExam,
   SeatProblem,
   SeatReservation,
 } from '@sanatorio/contracts'
@@ -21,6 +22,7 @@ import { fitSeats, ROW_LABEL } from './fit'
 import type { Density, SeatFit } from './fit'
 import {
   DEFAULT_LOOK,
+  examClass,
   loadLook,
   lookClasses,
   matesOf,
@@ -90,6 +92,9 @@ type LegendItem =
   | 'online'
   | 'broken'
 
+/** Los tres estados del examen en vivo: van en la leyenda solo si hay alguien en él. */
+const EXAM_LEGEND: readonly SeatExam[] = ['inProgress', 'passed', 'failed']
+
 const DEFAULT_LEGEND: readonly LegendItem[] = [
   'specialist',
   'patient',
@@ -116,6 +121,8 @@ function mostRelevant(clusters: readonly MapCluster[]): string | null {
 
 /** Clases de color de un puesto. El orden de prioridad lo pone el CSS. */
 function seatClasses(seat: MapSeat, picked: boolean, reserved: boolean): string {
+  const exam = seat.occupant?.exam ?? null
+
   return [
     'seat',
     seat.occupant === null && !seat.taken ? 'free' : 'occupied',
@@ -123,6 +130,8 @@ function seatClasses(seat: MapSeat, picked: boolean, reserved: boolean): string 
     seat.taken ? 'taken' : '',
     seat.occupant?.duty ?? '',
     seat.occupant?.me === true ? 'me' : '',
+    // En el examen en vivo: el contorno del color de cómo le va.
+    exam === null ? '' : examClass(exam),
     // Roto solo se pinta si está libre: si hay alguien sentado, funciona.
     seat.broken !== null && seat.occupant === null && !seat.taken ? 'broken' : '',
     reserved ? 'reserved' : '',
@@ -144,6 +153,7 @@ function seatLabel(seat: MapSeat, t: Translate, reserved: boolean): string {
   } else {
     parts.push(seat.occupant.login)
     if (seat.occupant.duty !== null) parts.push(t(`map.duty.${seat.occupant.duty}`))
+    if (seat.occupant.exam !== null) parts.push(t(`map.exam.${seat.occupant.exam}`))
   }
 
   if (reserved) parts.push(t('map.seatReserved'))
@@ -582,6 +592,10 @@ export function ClusterMapView({
   )
   // El puesto abierto, si hay alguien sentado: es el que lleva ficha fijada.
   const openTaken = open?.occupant === undefined || open.occupant === null ? null : open
+  // Con un examen en marcha y alguien de él sentado, sus colores en la leyenda.
+  const examining = map.clusters.some((entry) =>
+    entry.seats.some((seat) => (seat.occupant?.exam ?? null) !== null),
+  )
 
   return (
     <div className="cluster-map">
@@ -738,6 +752,13 @@ export function ClusterMapView({
             {t(`map.legend.${item}`)}
           </li>
         ))}
+        {examining &&
+          EXAM_LEGEND.map((exam) => (
+            <li key={exam}>
+              <span className={`seat sample occupied ${examClass(exam)}`} />
+              {t(`map.exam.${exam}`)}
+            </li>
+          ))}
       </ul>
 
       {tools && <p className="hint">{t('map.middleClick')}</p>}

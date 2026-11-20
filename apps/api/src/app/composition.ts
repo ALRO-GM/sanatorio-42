@@ -374,6 +374,8 @@ export function compose(db: Db, client: FortyTwoClient, config: CompositionConfi
     availableOf: (login) => peers.availabilityRepository.get(login),
     focusOf,
     titleOf: (login) => profile.xp.titleOf(login),
+    // `exams` se monta más abajo; se le pregunta al servir.
+    examsOf: (actor) => exams.live.statuses(actor),
     broken: createBrokenSeats(db),
     // `facility` se monta más abajo; se le pregunta al servir o al avisar (#82).
     problemsOf: (campusId, since) => facility.service.seatProblems(campusId, since),

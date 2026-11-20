@@ -4,6 +4,7 @@ import type { MapSeat } from '@sanatorio/contracts'
 
 import {
   DEFAULT_LOOK,
+  examClass,
   loadLook,
   lookClasses,
   matesOf,
@@ -46,6 +47,7 @@ const seat = (occupant: Partial<NonNullable<MapSeat['occupant']>> | null): MapSe
           circle: null,
           outer: false,
           finishedMine: null,
+          exam: null,
           focusUntil: null,
           ...occupant,
         },
@@ -114,5 +116,13 @@ describe('hacia dónde se ve el plano (docs/asientos.md)', () => {
     expect(screenSide(3, rows)).toBe('down')
     expect(screenSide(3, { ...rows, flipFacing: true })).toBe('up')
     expect(screenSide(3, { ...DEFAULT_LOOK, flipFacing: true })).toBe('down')
+  })
+})
+
+describe('el contorno del examen', () => {
+  it('da una clase por estado, con el nombre en guiones', () => {
+    expect(examClass('inProgress')).toBe('seat-exam exam-in-progress')
+    expect(examClass('passed')).toBe('seat-exam exam-passed')
+    expect(examClass('failed')).toBe('seat-exam exam-failed')
   })
 })

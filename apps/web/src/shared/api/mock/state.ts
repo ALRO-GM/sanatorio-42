@@ -21,11 +21,13 @@ import type {
   MeetMessage,
   MeetPresence,
   Notice,
+  SeatExam,
   Ticket,
 } from '@sanatorio/contracts'
 import { ApiError } from '../http'
 import {
   BYSTANDERS,
+  EXAM_SEATS,
   CLUSTER_SIZES,
   CORE,
   today,
@@ -169,6 +171,10 @@ function projectsOf(login: string): string[] {
 /** Puestos con alguien a quien no se ve (del otro grupo u oculto): salen ocupados, sin cara. */
 const TAKEN = new Set(['c1r3s2', 'c1r3s3', 'c2r1s4'])
 
+/** Cómo le va a alguien en el examen en vivo de mentira, si está en él. */
+const examOf = (login: string): SeatExam | null =>
+  EXAM_SEATS.find((seat) => seat.login === login)?.exam ?? null
+
 /** El plano de mentira: todos los puestos de `CLUSTER_SIZES`, con quien toque sentado. */
 export function buildMap(projectId?: number): ClusterMap {
   // Con París elegido en el pie, el campus grande (`paris.ts`).
@@ -190,6 +196,7 @@ export function buildMap(projectId?: number): ClusterMap {
       // Alguien que ya terminó el common core: lleva trofeo.
       outer: login === 'nmartin',
       finishedMine: null,
+      exam: examOf(login),
       // Alguien concentrado (Pomodoro), para que se vea en el plano.
       focusUntil: login === 'lsoto' ? new Date(Date.now() + 20 * 60_000).toISOString() : null,
     })
@@ -209,8 +216,28 @@ export function buildMap(projectId?: number): ClusterMap {
         focusUntil: peer.focusUntil,
         // Quien lo aprobó, uno sí y otro no con la nota máxima.
         finishedMine: peer.status === 'finished' ? (peer.login.length % 2 === 0 ? 125 : 100) : null,
+        exam: examOf(peer.login),
       })
     }
+  }
+
+  // La gente del examen en vivo, en la sala del examen.
+  for (const { login, host } of EXAM_SEATS) {
+    if (host === null || seated.has(host)) continue
+
+    seated.set(host, {
+      login,
+      image: portrait(login),
+      projects: [],
+      duty: null,
+      me: false,
+      online: false,
+      circle: login.length % 5,
+      outer: false,
+      finishedMine: null,
+      exam: examOf(login),
+      focusUntil: null,
+    })
   }
 
   return {

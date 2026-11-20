@@ -97,6 +97,7 @@ export function parisMap(projectId?: number): ClusterMap {
                   circle: seed % 6,
                   outer: seed % 41 === 0,
                   finishedMine: null,
+                  exam: null,
                   focusUntil: null,
                 }
               : null,
