@@ -188,10 +188,10 @@ const pools = (): NonNullable<PiscineProgress['pools']> =>
  * once días, así que ya pasaron Exam 00 y Exam 01; los otros dos, sin nadie.
  */
 const EXAMS: PiscineProgress['exams'] = [
-  { day: 4, name: 'Exam 00', people: 70, mean: 31.4, median: 30, min: 0, max: 70 },
-  { day: 11, name: 'Exam 01', people: 68, mean: 38.2, median: 40, min: 0, max: 90 },
-  { day: 18, name: 'Exam 02', people: 0, mean: null, median: null, min: null, max: null },
-  { day: 25, name: 'Final', people: 0, mean: null, median: null, min: null, max: null },
+  { day: 4, name: 'Exam 00', people: 70, mean: 31.4, median: 30 },
+  { day: 11, name: 'Exam 01', people: 68, mean: 38.2, median: 40 },
+  { day: 18, name: 'Exam 02', people: 0, mean: null, median: null },
+  { day: 25, name: 'Final', people: 0, mean: null, median: null },
 ]
 
 /** El Avance de un piscinero: su línea, la de su piscina y con quien se compara. */

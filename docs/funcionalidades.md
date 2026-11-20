@@ -322,7 +322,7 @@ Detalle: [asientos.md](asientos.md).
 | «Ver a fondo»: quién cuenta, campus, todos juntos (abierto de fábrica en datos) | N | Estudiantes | `ProgressPage.tsx` |
 | Comparar con hasta 5 personas y «los más rápidos» | N | Todos `[avance.compare]` | `ProgressCompare.tsx` |
 | Quién va más rápido: por círculo o %, plan, kickoff, rangos; tu fila fija. Las kickoffs son las reales de cada campus (los días con muchas entradas); quien entró a destiempo va con la anterior a su entrada | N | Estudiantes | `ProgressRanking.tsx` |
-| Notas de los exámenes de los viernes en la gráfica del Avance: la media de tu piscina en cada uno y, si se pide, la mediana con la más baja y la más alta; se ponen y se quitan en el panel de opciones | N | Piscineros | `PiscineProgressChart.tsx`, `PiscineProgressPage.tsx`, `stats/piscine.rules.ts` |
+| Notas de los exámenes de los viernes en la gráfica del Avance: la media de tu piscina en cada uno y, si se pide, la mediana, sin quien abandonó; se ponen y se quitan en el panel de opciones | N | Piscineros | `PiscineProgressChart.tsx`, `PiscineProgressPage.tsx`, `stats/piscine.rules.ts` |
 | Avance de la piscina: aprobado por día frente a la media de su piscina y los más avanzados; en la vista sin límites, las últimas 10 piscinas, la media de todas y quién cuenta (todos, quien sigue o quien abandonó); por semanas, con los viernes de examen marcados | N | Piscineros | `PiscineProgressPage.tsx`, `PiscineTop.tsx`, `PiscinePools.tsx` |
 | Demostración | N | Todos | `ProgressTour.tsx` |
 

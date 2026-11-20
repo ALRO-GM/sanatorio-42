@@ -243,8 +243,8 @@ export const EXAM_FRIDAYS: readonly { short: string; day: number }[] = [
 
 /**
  * Las cifras de un examen con las notas de quien se presentó: la media (con un
- * decimal), la mediana y la más baja y la más alta. Con menos de `min` notas,
- * `null`: como en `meanLine`, con tan poca gente no dice nada.
+ * decimal) y la mediana. Con menos de `min` notas, `null`: como en
+ * `meanLine`, con tan poca gente no dice nada.
  */
 export function examDayOf(
   exam: { short: string; day: number },
@@ -267,7 +267,5 @@ export function examDayOf(
       ? Math.round((sorted.reduce((sum, mark) => sum + mark, 0) / sorted.length) * 10) / 10
       : null,
     median: enough ? median : null,
-    min: enough ? (sorted[0] ?? null) : null,
-    max: enough ? (sorted.at(-1) ?? null) : null,
   }
 }

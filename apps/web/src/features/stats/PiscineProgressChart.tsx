@@ -29,10 +29,14 @@ const FRIDAYS = [4, 11, 18, 25]
 
 /**
  * Qué se ve: la media de tu piscina y, de los exámenes de los viernes, la nota
- * media y la mediana con la más baja y la más alta (pedido por Alberto el
- * 2026-11-20).
+ * media y la mediana (pedido por Alberto el 2026-11-20; sin la más baja ni la
+ * más alta).
  */
-export type PiscineShown = { cohort: boolean; examMean: boolean; examRange: boolean }
+export type PiscineShown = { cohort: boolean; examMean: boolean; examMedian: boolean }
+
+/** Las cifras de los exámenes que se dibujan, y la casilla de cada una. */
+const EXAM_SERIES = ['mean', 'median'] as const
+const SHOWN_OF = { mean: 'examMean', median: 'examMedian' } as const
 
 /** Una línea de más (la media de los mejores, quien cae entre dos percentiles). */
 export type Line = {
@@ -66,7 +70,7 @@ export function PiscineProgressChart(props: {
   const total = data.steps.length
   // Los exámenes con cifras que caen en lo dibujado (con poca gente no las hay).
   const exams = data.exams.filter((exam) => exam.median !== null && exam.day <= last)
-  const showExams = (props.shown.examMean || props.shown.examRange) && exams.length > 0
+  const showExams = (props.shown.examMean || props.shown.examMedian) && exams.length > 0
   const right = showExams ? EXAM_RIGHT : PAD.right
   const x = (day: number): number => PAD.left + (day / last) * (WIDTH - PAD.left - right)
   const y = (value: number): number =>
@@ -79,8 +83,6 @@ export function PiscineProgressChart(props: {
       name: exam.name,
       mean: exam.mean ?? 0,
       median: exam.median ?? 0,
-      min: exam.min ?? 0,
-      max: exam.max ?? 0,
     })} · ${tn('piscine.chart.people', exam.people)}`
   const pathOf = (line: ProgressLine): string => {
     let path = ''
@@ -234,56 +236,37 @@ export function PiscineProgressChart(props: {
             ))}
           </g>
         )}
-        {showExams && props.shown.examRange && (
-          <g className="piscine-exam-range">
-            {exams.map((exam) => (
-              <g key={exam.day}>
-                <title>{examTitle(exam)}</title>
-                <line
-                  x1={x(exam.day)}
-                  x2={x(exam.day)}
-                  y1={yMark(exam.min ?? 0)}
-                  y2={yMark(exam.max ?? 0)}
-                />
-                {[exam.min ?? 0, exam.max ?? 0].map((mark, index) => (
-                  <line
-                    key={index}
-                    className="cap"
-                    x1={x(exam.day) - 5}
-                    x2={x(exam.day) + 5}
-                    y1={yMark(mark)}
-                    y2={yMark(mark)}
-                  />
-                ))}
-                <rect
-                  className="median"
-                  x={x(exam.day) - 8}
-                  y={yMark(exam.median ?? 0) - 2}
-                  width={16}
-                  height={4}
-                  rx={1}
-                />
-              </g>
-            ))}
-          </g>
-        )}
-        {showExams && props.shown.examMean && (
-          <g className="piscine-exam-mean">
-            <path
-              d={exams
-                .map(
-                  (exam, index) =>
-                    `${index === 0 ? 'M' : 'L'}${x(exam.day).toFixed(1)},${yMark(exam.mean ?? 0).toFixed(1)}`,
-                )
-                .join('')}
-            />
-            {exams.map((exam) => (
-              <circle key={exam.day} cx={x(exam.day)} cy={yMark(exam.mean ?? 0)} r={4}>
-                <title>{examTitle(exam)}</title>
-              </circle>
-            ))}
-          </g>
-        )}
+        {/* La media (raya discontinua, círculos) y la mediana (punteada, cuadrados). */}
+        {showExams &&
+          EXAM_SERIES.filter((kind) => props.shown[SHOWN_OF[kind]]).map((kind) => (
+            <g key={kind} className={`piscine-exam-${kind}`}>
+              <path
+                d={exams
+                  .map(
+                    (exam, index) =>
+                      `${index === 0 ? 'M' : 'L'}${x(exam.day).toFixed(1)},${yMark(exam[kind] ?? 0).toFixed(1)}`,
+                  )
+                  .join('')}
+              />
+              {exams.map((exam) =>
+                kind === 'mean' ? (
+                  <circle key={exam.day} cx={x(exam.day)} cy={yMark(exam.mean ?? 0)} r={4}>
+                    <title>{examTitle(exam)}</title>
+                  </circle>
+                ) : (
+                  <rect
+                    key={exam.day}
+                    x={x(exam.day) - 3.5}
+                    y={yMark(exam.median ?? 0) - 3.5}
+                    width={7}
+                    height={7}
+                  >
+                    <title>{examTitle(exam)}</title>
+                  </rect>
+                ),
+              )}
+            </g>
+          ))}
         {lines.map((each) => (
           <path
             key={each.key}
@@ -337,24 +320,24 @@ export function PiscineProgressChart(props: {
               {each.label}
             </li>
           ))}
-        {showExams && props.shown.examMean && (
-          <li>
-            <svg className="progress-key piscine-exam-mean" viewBox="0 0 24 8" aria-hidden="true">
-              <path d="M0,4L24,4" />
-              <circle cx="12" cy="4" r="3" />
-            </svg>
-            {t('piscine.chart.examMean')}
-          </li>
-        )}
-        {showExams && props.shown.examRange && (
-          <li>
-            <svg className="progress-key piscine-exam-range" viewBox="0 0 24 12" aria-hidden="true">
-              <line x1="12" x2="12" y1="1" y2="11" />
-              <rect className="median" x="6" y="4.5" width="12" height="3" rx="1" />
-            </svg>
-            {t('piscine.chart.examRange')}
-          </li>
-        )}
+        {showExams &&
+          EXAM_SERIES.filter((kind) => props.shown[SHOWN_OF[kind]]).map((kind) => (
+            <li key={kind}>
+              <svg
+                className={`progress-key piscine-exam-${kind}`}
+                viewBox="0 0 24 8"
+                aria-hidden="true"
+              >
+                <path d="M0,4L24,4" />
+                {kind === 'mean' ? (
+                  <circle cx="12" cy="4" r="3" />
+                ) : (
+                  <rect x="9" y="1" width="6" height="6" />
+                )}
+              </svg>
+              {t(`piscine.chart.${SHOWN_OF[kind]}`)}
+            </li>
+          ))}
       </ul>
     </div>
   )

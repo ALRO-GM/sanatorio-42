@@ -35,11 +35,11 @@ import { timedLoad } from '../../shared/loadMemory'
 export function PiscineProgressPage({ me }: { me: string }) {
   const { t, tn } = useI18n()
   const [others, setOthers] = useState<string[]>([])
-  // La nota media de los exámenes, de entrada; la mediana con su rango, si se pide.
+  // La nota media de los exámenes, de entrada; la mediana, si se pide.
   const [shown, setShown] = useState<PiscineShown>({
     cohort: true,
     examMean: true,
-    examRange: false,
+    examMedian: false,
   })
   const [typed, setTyped] = useState('')
   const fetched = useAsync(
@@ -134,7 +134,7 @@ export function PiscineProgressPage({ me }: { me: string }) {
         <div className="progress-option">
           <span className="eyebrow">{t('piscine.chart.exams')}</span>
           {toggle('examMean')}
-          {toggle('examRange')}
+          {toggle('examMedian')}
           {data !== undefined && examsDone.length === 0 && (
             <p className="hint">{t('piscine.chart.noExams')}</p>
           )}

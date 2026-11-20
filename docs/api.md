@@ -2199,8 +2199,8 @@ GET /stats/progress/fastest → StatsFastest. Quien terminó el common core más
 GET /stats/progress/piscine?with=login,login → PiscineProgress. El Avance de un piscinero (403 a
                   un estudiante): lo aprobado de la piscina día a día, con la media de su
                   piscina y de las anteriores de su campus, y `exams`: la nota de su
-                  piscina en cada examen de los viernes (`PiscineExamDay`: media,
-                  mediana, más baja y más alta; `null` con menos de `minPeople`
+                  piscina en cada examen de los viernes (`PiscineExamDay`: media
+                  y mediana, sin quien abandonó; `null` con menos de `minPeople`
                   personas con nota). En la vista sin límites
                   del dueño trae además `everyone`: la línea de cada uno de la piscina,
                   y `pools`: la media de cada una de las últimas 10 piscinas del campus.

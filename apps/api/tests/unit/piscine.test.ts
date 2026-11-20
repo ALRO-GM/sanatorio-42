@@ -32,22 +32,18 @@ const NAMES = new Map([
 describe('las notas de un examen de viernes', () => {
   const EXAM_00 = { short: 'Exam 00', day: 4 }
 
-  it('media con un decimal, mediana y la más baja y la más alta', () => {
+  it('media con un decimal y mediana, sin la más baja ni la más alta', () => {
     expect(examDayOf(EXAM_00, [70, 0, 30, 40, 10], 3)).toEqual({
       day: 4,
       name: 'Exam 00',
       people: 5,
       mean: 30,
       median: 30,
-      min: 0,
-      max: 70,
     })
     // Con un número par, la mediana es la mitad de las dos del medio.
     expect(examDayOf(EXAM_00, [10, 40, 25, 100], 3)).toMatchObject({
       mean: 43.8,
       median: 32.5,
-      min: 10,
-      max: 100,
     })
   })
 
@@ -58,8 +54,6 @@ describe('las notas de un examen de viernes', () => {
       people: 2,
       mean: null,
       median: null,
-      min: null,
-      max: null,
     })
     expect(examDayOf(EXAM_00, [], 0)).toMatchObject({ people: 0, median: null })
   })
@@ -603,11 +597,59 @@ describe('el avance de la piscina', () => {
     }).progress(actor('pisci', { pool: true }), 22, [], () => true)
 
     expect(data.exams).toEqual([
-      { day: 4, name: 'Exam 00', people: 10, mean: 45, median: 45, min: 0, max: 90 },
+      { day: 4, name: 'Exam 00', people: 10, mean: 45, median: 45 },
       // Una sola nota: no llega a las diez personas, solo se dice cuánta gente.
-      { day: 11, name: 'Exam 01', people: 1, mean: null, median: null, min: null, max: null },
-      { day: 18, name: 'Exam 02', people: 0, mean: null, median: null, min: null, max: null },
-      { day: 25, name: 'Final', people: 0, mean: null, median: null, min: null, max: null },
+      { day: 11, name: 'Exam 01', people: 1, mean: null, median: null },
+      { day: 18, name: 'Exam 02', people: 0, mean: null, median: null },
+      { day: 25, name: 'Final', people: 0, mean: null, median: null },
     ])
+  })
+
+  it('las notas de los viernes no cuentan a quien abandonó; sin saberlo, cuentan todos', async () => {
+    const ids = await seedProjects()
+    const now = START + 13 * DAY
+    const exam00 = ids.get('c-piscine-exam-00') ?? 0
+
+    // Una piscina de 20: 18 siguen y sacaron un 50; dos la dejaron con un 0.
+    for (let n = 0; n < 20; n++) {
+      await person(
+        10 + n,
+        n === 0 ? 'pisci' : `mate${n}`,
+        START,
+        { 'c-piscine-exam-00': 4 },
+        ids,
+        true,
+      )
+      await db.execute({
+        sql: 'UPDATE project_users SET final_mark = ? WHERE user_id = ? AND project_id = ?',
+        args: [n >= 18 ? 0 : 50, 10 + n, exam00],
+      })
+    }
+
+    const asked: string[] = []
+    const withLeft = createPiscineProgressService({
+      piscine: createPiscineRepository(db),
+      now: () => now,
+      leftOf: (_campus, start) => {
+        asked.push(start)
+
+        return Promise.resolve(new Set(['mate18', 'mate19']))
+      },
+    })
+    const data = await withLeft.progress(actor('pisci', { pool: true }), 22, [], () => true)
+
+    expect(data.exams[0]).toEqual({ day: 4, name: 'Exam 00', people: 18, mean: 50, median: 50 })
+    // Solo se pregunta por tu piscina: las demás no se enseñan fuera de la vista sin límites.
+    expect(asked).toEqual([new Date(START).toISOString().slice(0, 10)])
+
+    // Si saber quién abandonó falla, el Avance sale igual, con todos.
+    const failing = createPiscineProgressService({
+      piscine: createPiscineRepository(db),
+      now: () => now,
+      leftOf: () => Promise.reject(new Error('sin abandono')),
+    })
+    const all = await failing.progress(actor('pisci', { pool: true }), 22, [], () => true)
+
+    expect(all.exams[0]).toEqual({ day: 4, name: 'Exam 00', people: 20, mean: 45, median: 50 })
   })
 })

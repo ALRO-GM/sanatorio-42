@@ -188,21 +188,27 @@ export function createPiscineProgressService(options: {
       )
 
       const trace = (person: Swimmer) => swimOf(person, t, pool.names)
-      // Quién abandonó cada piscina, solo en la vista sin límites (2026-11-07).
-      const days = view.everyone === true ? poolDaysOf(pool.everybody, t) : []
+      // Quién abandonó cada piscina: de todas en la vista sin límites
+      // (2026-11-07); si no, solo de la tuya, para las notas de los exámenes
+      // (2026-11-20). Lo calcula el abandono, que lo guarda un rato.
+      const days = poolDaysOf(pool.everybody, t)
+      const ownDay = days.find((day) => anchor !== null && samePool(day.first, anchor))?.start
       const left = new Map<string, ReadonlySet<string>>()
 
       if (options.leftOf !== undefined) {
         const leftOf = options.leftOf
 
         try {
-          for (const day of days) left.set(day.start, await leftOf(home, day.start))
+          for (const day of days) {
+            if (view.everyone === true || day.start === ownDay) {
+              left.set(day.start, await leftOf(home, day.start))
+            }
+          }
         } catch {
           // Sin saber quién abandonó, todo junto: el Avance se ve igual.
           left.clear()
         }
       }
-      const ownDay = days.find((day) => anchor !== null && samePool(day.first, anchor))?.start
       const ownLeft = ownDay === undefined ? undefined : left.get(ownDay)
       const averageOf = (list: readonly Swimmer[]): PiscineAverage => {
         const traces = list.map((person) => ({ login: person.login, ...trace(person) }))
@@ -242,13 +248,16 @@ export function createPiscineProgressService(options: {
               : []
           })
           .slice(0, MAX_OTHERS),
-        // Las notas de los viernes, de toda tu piscina (tú también): sin nombres.
+        // Las notas de los viernes, de toda tu piscina (tú también): sin nombres
+        // y sin quien abandonó (Alberto, 2026-11-20).
         exams: EXAM_FRIDAYS.map((exam, index) => {
           const id = pool.examIds[index]
           const marks =
             id === undefined
               ? []
               : inPool.flatMap((person) => {
+                  if (ownLeft?.has(person.login) === true) return []
+
                   const mark = pool.examMarks.get(person.login)?.get(id)
 
                   return mark === undefined ? [] : [mark]

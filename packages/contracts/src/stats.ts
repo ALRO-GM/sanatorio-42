@@ -273,9 +273,10 @@ export type PiscinePoolPart = { people: number; line: ProgressLine }
 /**
  * Las notas de tu piscina en uno de los exámenes de los viernes (pedido por
  * Alberto el 2026-11-20): Exam 00, 01 y 02 y el examen final. Cuenta la nota
- * con que cerró cada cual; quien no se presentó no entra. Con menos de
- * `minPeople` personas con nota, las cifras van a `null`: con tres no dicen
- * nada y casi dirían la nota de cada cual.
+ * con que cerró cada cual; quien no se presentó y quien abandonó la piscina no
+ * entran. Con menos de `minPeople` personas con nota, las cifras van a
+ * `null`: con tres no dicen nada y casi dirían la nota de cada cual. Sin la
+ * más baja ni la más alta (Alberto, 2026-11-20): la media y la mediana.
  */
 export type PiscineExamDay = {
   /** El día de piscina en que cae, desde 0 (el viernes: 4, 11, 18 y 25). */
@@ -287,8 +288,6 @@ export type PiscineExamDay = {
   /** La media, con un decimal. */
   mean: number | null
   median: number | null
-  min: number | null
-  max: number | null
 }
 
 /**

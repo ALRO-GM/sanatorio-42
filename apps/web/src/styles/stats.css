@@ -673,8 +673,8 @@ fieldset.progress-option > legend {
 }
 /* Las notas de los exámenes de los viernes: en gris, como los exámenes en el
    grafo de la piscina, para no confundirse con ninguna línea de gente. La
-   media, raya discontinua con puntos; la mediana, una barra entre la nota más
-   baja y la más alta. Su eje, de 0 a 100, va a la derecha. */
+   media, raya discontinua con círculos; la mediana, punteada con cuadrados.
+   Su eje, de 0 a 100, va a la derecha. */
 .piscine-exam-axis text {
   fill: var(--text-3);
   font-size: 11px;
@@ -694,11 +694,13 @@ fieldset.progress-option > legend {
   stroke: var(--text);
   stroke-width: 2;
 }
-.piscine-exam-range line {
+.piscine-exam-median path {
+  fill: none;
   stroke: var(--text-2);
   stroke-width: 2;
+  stroke-dasharray: 1 4;
   stroke-linecap: round;
 }
-.piscine-exam-range .median {
+.piscine-exam-median rect {
   fill: var(--text-2);
 }
