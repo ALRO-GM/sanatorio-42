@@ -10,6 +10,8 @@ import type { Db } from '../../src/core/db/database.js'
 import { actor } from '../helpers/community.js'
 import { PISCINE, PISCINE_PROGRESS } from '../../src/modules/replica/index.js'
 import {
+  EXAM_FRIDAYS,
+  examDayOf,
   meanLine,
   poolLinesOf,
   samePool,
@@ -26,6 +28,55 @@ const NAMES = new Map([
   [2, 'Shell 01'],
   [3, 'C 00'],
 ])
+
+describe('las notas de un examen de viernes', () => {
+  const EXAM_00 = { short: 'Exam 00', day: 4 }
+
+  it('media con un decimal, mediana y la más baja y la más alta', () => {
+    expect(examDayOf(EXAM_00, [70, 0, 30, 40, 10], 3)).toEqual({
+      day: 4,
+      name: 'Exam 00',
+      people: 5,
+      mean: 30,
+      median: 30,
+      min: 0,
+      max: 70,
+    })
+    // Con un número par, la mediana es la mitad de las dos del medio.
+    expect(examDayOf(EXAM_00, [10, 40, 25, 100], 3)).toMatchObject({
+      mean: 43.8,
+      median: 32.5,
+      min: 10,
+      max: 100,
+    })
+  })
+
+  it('con poca gente, o nadie, solo cuánta gente: las cifras no dirían nada', () => {
+    expect(examDayOf(EXAM_00, [50, 60], 3)).toEqual({
+      day: 4,
+      name: 'Exam 00',
+      people: 2,
+      mean: null,
+      median: null,
+      min: null,
+      max: null,
+    })
+    expect(examDayOf(EXAM_00, [], 0)).toMatchObject({ people: 0, median: null })
+  })
+
+  it('un examen cada viernes: días 4, 11, 18 y el final el 25', () => {
+    expect(EXAM_FRIDAYS.map((exam) => [exam.short, exam.day])).toEqual([
+      ['Exam 00', 4],
+      ['Exam 01', 11],
+      ['Exam 02', 18],
+      ['Final', 25],
+    ])
+    // Son exámenes de la piscina de verdad.
+    for (const exam of EXAM_FRIDAYS) {
+      expect(PISCINE.find((project) => project.short === exam.short)?.group).toBe('exam')
+    }
+  })
+})
 
 describe('el plan de la piscina', () => {
   it('cuentan 16, en orden: Shell 00 y 01 y C 00 a C 13; aparte, rushes, BSQ y exámenes', () => {
@@ -489,5 +540,74 @@ describe('el avance de la piscina', () => {
       individuals: [],
       since: null,
     })
+  })
+
+  it('las notas de los viernes: las de toda tu piscina, solo exámenes cerrados', async () => {
+    const ids = await seedProjects()
+    const now = START + 13 * DAY
+    const exam00 = ids.get('c-piscine-exam-00') ?? 0
+    const exam01 = ids.get('c-piscine-exam-01') ?? 0
+    const marks = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90]
+
+    // Diez de tu piscina con el Exam 00 cerrado (tú, con el 0, también cuentas).
+    for (const [n, mark] of marks.entries()) {
+      await person(
+        10 + n,
+        n === 0 ? 'pisci' : `mate${n}`,
+        START,
+        { 'c-piscine-exam-00': 4 },
+        ids,
+        true,
+      )
+      await db.execute({
+        sql: 'UPDATE project_users SET final_mark = ? WHERE user_id = ? AND project_id = ?',
+        args: [mark, 10 + n, exam00],
+      })
+    }
+    // Uno con el Exam 01 en marcha (la nota aún sube): no cuenta.
+    await person(30, 'dentro', START, { 'c-piscine-exam-01': null }, ids, true)
+    await db.execute({
+      sql: 'UPDATE project_users SET final_mark = 60 WHERE user_id = 30',
+      args: [],
+    })
+    // Otro con el Exam 01 cerrado solo en sus intentos: cuenta, con el más alto.
+    await person(31, 'intentos', START, {}, ids, true)
+    await db.batch(
+      [
+        [1, 40, 0],
+        [2, 75, 1],
+        [3, 90, null],
+      ].map(([team, mark, validated]) => ({
+        sql: `INSERT INTO exam_attempts (team_id, project_user_id, user_id, project_id, mark, validated, at)
+              VALUES (?, 0, 31, ?, ?, ?, ?)`,
+        args: [
+          team ?? 0,
+          exam01,
+          mark ?? 0,
+          validated ?? null,
+          new Date(START + 11 * DAY).toISOString(),
+        ],
+      })),
+      'write',
+    )
+    // Alguien de una piscina anterior con un 100: no es de la tuya.
+    await person(40, 'viejo', START - 120 * DAY, { 'c-piscine-exam-00': 4 }, ids, true)
+    await db.execute({
+      sql: 'UPDATE project_users SET final_mark = 100 WHERE user_id = 40',
+      args: [],
+    })
+
+    const data = await createPiscineProgressService({
+      piscine: createPiscineRepository(db),
+      now: () => now,
+    }).progress(actor('pisci', { pool: true }), 22, [], () => true)
+
+    expect(data.exams).toEqual([
+      { day: 4, name: 'Exam 00', people: 10, mean: 45, median: 45, min: 0, max: 90 },
+      // Una sola nota: no llega a las diez personas, solo se dice cuánta gente.
+      { day: 11, name: 'Exam 01', people: 1, mean: null, median: null, min: null, max: null },
+      { day: 18, name: 'Exam 02', people: 0, mean: null, median: null, min: null, max: null },
+      { day: 25, name: 'Final', people: 0, mean: null, median: null, min: null, max: null },
+    ])
   })
 })

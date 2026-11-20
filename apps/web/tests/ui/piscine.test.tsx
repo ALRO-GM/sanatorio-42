@@ -90,6 +90,44 @@ describe('un piscinero ve la piscina (docs/piscineros.md)', () => {
     expect(screen.queryByRole('group', { name: text('piscine.pools.title') })).toBeNull()
   }, 20_000)
 
+  it('las notas de los viernes: la media de entrada; la mediana con su rango, si se pide', async () => {
+    const user = userEvent.setup()
+
+    await api.updatePoolSettings({ allow: ['avance'] })
+    await openApp('#/avance', { pool: true })
+    await screen.findByRole('img', { name: /^Gráfica de tu avance en la piscina/ }, WAIT)
+
+    const chart = must(document.querySelector('.piscine-chart'), 'la gráfica')
+    // El dibujo, sin la leyenda (que lleva sus propias muestras).
+    const plot = must(chart.querySelector(':scope > svg'), 'el dibujo')
+    const mean = screen.getByRole('checkbox', { name: text('piscine.chart.examMean') })
+    const range = screen.getByRole('checkbox', { name: text('piscine.chart.examRange') })
+
+    // Normal: la media, con un punto por examen ya hecho (Exam 00 y 01) y su eje de notas.
+    expect((mean as HTMLInputElement).checked).toBe(true)
+    expect((range as HTMLInputElement).checked).toBe(false)
+    expect(plot.querySelectorAll('.piscine-exam-mean circle')).toHaveLength(2)
+    expect(plot.querySelector('.piscine-exam-mean title')?.textContent).toBe(
+      'Exam 00: media 31,4, mediana 30, de 0 a 70 · 70 personas',
+    )
+    expect(
+      [...chart.querySelectorAll('.piscine-exam-axis text')].map((each) => each.textContent),
+    ).toEqual([text('piscine.chart.markAxis'), '0', '50', '100'])
+    expect(within(chart as HTMLElement).getByText(text('piscine.chart.examMean'))).toBeTruthy()
+
+    // La mediana con la más baja y la más alta, al pedirla.
+    await user.click(range)
+    expect(plot.querySelectorAll('.piscine-exam-range .median')).toHaveLength(2)
+    expect(plot.querySelectorAll('.piscine-exam-range .cap')).toHaveLength(4)
+    expect(within(chart as HTMLElement).getByText(text('piscine.chart.examRange'))).toBeTruthy()
+
+    // Quitando las dos, ni notas ni su eje.
+    await user.click(mean)
+    await user.click(range)
+    expect(chart.querySelector('.piscine-exam-mean, .piscine-exam-range')).toBeNull()
+    expect(chart.querySelector('.piscine-exam-axis')).toBeNull()
+  }, 20_000)
+
   it('quien administra, en la vista de piscinero, lo ve como el más avanzado', async () => {
     await openApp('#/avance', { preview: 'full' })
 

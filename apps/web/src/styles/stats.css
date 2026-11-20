@@ -671,3 +671,34 @@ fieldset.progress-option > legend {
 .piscine-top-value small {
   color: var(--text-2);
 }
+/* Las notas de los exámenes de los viernes: en gris, como los exámenes en el
+   grafo de la piscina, para no confundirse con ninguna línea de gente. La
+   media, raya discontinua con puntos; la mediana, una barra entre la nota más
+   baja y la más alta. Su eje, de 0 a 100, va a la derecha. */
+.piscine-exam-axis text {
+  fill: var(--text-3);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.piscine-exam-axis .title {
+  font-weight: 600;
+}
+.piscine-exam-mean path {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+.piscine-exam-mean circle {
+  fill: var(--surface);
+  stroke: var(--text);
+  stroke-width: 2;
+}
+.piscine-exam-range line {
+  stroke: var(--text-2);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.piscine-exam-range .median {
+  fill: var(--text-2);
+}

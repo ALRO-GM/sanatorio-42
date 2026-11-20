@@ -183,6 +183,17 @@ const pools = (): NonNullable<PiscineProgress['pools']> =>
     }
   })
 
+/**
+ * Las notas de los exámenes de los viernes de la piscina de mentira: llevan
+ * once días, así que ya pasaron Exam 00 y Exam 01; los otros dos, sin nadie.
+ */
+const EXAMS: PiscineProgress['exams'] = [
+  { day: 4, name: 'Exam 00', people: 70, mean: 31.4, median: 30, min: 0, max: 70 },
+  { day: 11, name: 'Exam 01', people: 68, mean: 38.2, median: 40, min: 0, max: 90 },
+  { day: 18, name: 'Exam 02', people: 0, mean: null, median: null, min: null, max: null },
+  { day: 25, name: 'Final', people: 0, mean: null, median: null, min: null, max: null },
+]
+
 /** El Avance de un piscinero: su línea, la de su piscina y con quien se compara. */
 export function piscineProgress(others: readonly string[]): PiscineProgress {
   // Quien administra, en la vista de piscinero, lo ve como el más avanzado
@@ -203,6 +214,7 @@ export function piscineProgress(others: readonly string[]): PiscineProgress {
 
       return mate === undefined ? [] : [{ login, ...swim(mate[0], mate[1], ELAPSED) }]
     }),
+    exams: EXAMS,
     minPeople: 10,
     campus: 'Madrid',
     ...(poolUnrestricted() ? { everyone: everyone(), pools: pools() } : {}),

@@ -7,6 +7,7 @@
  */
 
 import type {
+  PiscineExamDay,
   PiscineMilestone,
   PiscinePoolLine,
   PiscinePoolPart,
@@ -227,4 +228,46 @@ export function poolLinesOf(
           }),
     }
   })
+}
+
+/**
+ * El viernes de cada examen de la piscina, en días desde 0: Exam 00 el de la
+ * primera semana, Exam 01 y 02 los siguientes y el final el último.
+ */
+export const EXAM_FRIDAYS: readonly { short: string; day: number }[] = [
+  { short: 'Exam 00', day: 4 },
+  { short: 'Exam 01', day: 11 },
+  { short: 'Exam 02', day: 18 },
+  { short: 'Final', day: 25 },
+]
+
+/**
+ * Las cifras de un examen con las notas de quien se presentó: la media (con un
+ * decimal), la mediana y la más baja y la más alta. Con menos de `min` notas,
+ * `null`: como en `meanLine`, con tan poca gente no dice nada.
+ */
+export function examDayOf(
+  exam: { short: string; day: number },
+  marks: readonly number[],
+  min: number,
+): PiscineExamDay {
+  const sorted = [...marks].sort((a, b) => a - b)
+  const half = Math.floor(sorted.length / 2)
+  const enough = sorted.length >= min && sorted.length > 0
+  const median =
+    sorted.length % 2 === 1
+      ? (sorted[half] ?? 0)
+      : ((sorted[half - 1] ?? 0) + (sorted[half] ?? 0)) / 2
+
+  return {
+    day: exam.day,
+    name: exam.short,
+    people: sorted.length,
+    mean: enough
+      ? Math.round((sorted.reduce((sum, mark) => sum + mark, 0) / sorted.length) * 10) / 10
+      : null,
+    median: enough ? median : null,
+    min: enough ? (sorted[0] ?? null) : null,
+    max: enough ? (sorted.at(-1) ?? null) : null,
+  }
 }

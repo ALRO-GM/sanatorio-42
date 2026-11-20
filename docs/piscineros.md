@@ -107,6 +107,17 @@ su valor en claro y en oscuro y su color de texto encima, `--on-piscine-*`).
   cual.
   Comparar con alguien (`?with=`, permiso `avance.compare`): solo gente de
   tu piscina que ves.
+  **Notas de los exámenes de los viernes** (pedido por Alberto el
+  2026-11-20): en la misma gráfica, con su eje de 0 a 100 a la derecha, la
+  nota media de tu piscina en cada examen (Exam 00, 01 y 02 y el final, en
+  su viernes) y, si se pide, la mediana con la más baja y la más alta. Dos
+  casillas en el panel de opciones («Exámenes de los viernes»): la media sale
+  de entrada; la mediana, no. Cuenta la nota con que cerró cada cual (la del
+  proyecto acabado o la de su intento cerrado, la más alta); lo que sigue
+  abierto aún no. Aquí sí entras tú: son cifras sin nombres de toda tu
+  piscina. Con menos de 10 personas con nota no se enseñan (como la media).
+  En gris, como los exámenes en el grafo de la piscina (`examDayOf` en
+  `piscine.rules.ts`, `examMarks` en `stats.repository.ts`).
   Quien administra viéndolo como piscinero (pedido por Alberto el
   2026-11-06) no es de la piscina, así que su perfil no cuenta: lo ve como
   **el piscinero que va más avanzado** de entre los que ve (más aprobados

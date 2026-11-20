@@ -35,7 +35,12 @@ import { timedLoad } from '../../shared/loadMemory'
 export function PiscineProgressPage({ me }: { me: string }) {
   const { t, tn } = useI18n()
   const [others, setOthers] = useState<string[]>([])
-  const [shown, setShown] = useState<PiscineShown>({ cohort: true })
+  // La nota media de los exámenes, de entrada; la mediana con su rango, si se pide.
+  const [shown, setShown] = useState<PiscineShown>({
+    cohort: true,
+    examMean: true,
+    examRange: false,
+  })
   const [typed, setTyped] = useState('')
   const fetched = useAsync(
     () =>
@@ -76,7 +81,7 @@ export function PiscineProgressPage({ me }: { me: string }) {
   // Y las últimas piscinas del campus, cada una y todas juntas (2026-11-07).
   const pools = usePoolLines(data, who)
   const extra: Line[] = [...(pools?.lines ?? []), ...(top?.lines ?? [])]
-  const toggle = (key: keyof PiscineShown) => (
+  const toggle = (key: keyof PiscineShown, people?: number) => (
     <label className="progress-toggle">
       <input
         type="checkbox"
@@ -86,9 +91,11 @@ export function PiscineProgressPage({ me }: { me: string }) {
         }}
       />{' '}
       {t(`piscine.chart.${key}`)}
-      {data !== undefined && ` · ${tn('piscine.chart.people', data[key].people)}`}
+      {people !== undefined && ` · ${tn('piscine.chart.people', people)}`}
     </label>
   )
+  // Los exámenes de los viernes que ya tienen cifras (con poca gente no las hay).
+  const examsDone = data?.exams.filter((exam) => exam.median !== null) ?? []
 
   return (
     <section className="progress-page" aria-labelledby="stats-progress">
@@ -122,7 +129,15 @@ export function PiscineProgressPage({ me }: { me: string }) {
       >
         <div className="progress-option">
           <span className="eyebrow">{t('piscine.chart.compareWith')}</span>
-          {toggle('cohort')}
+          {toggle('cohort', data?.cohort.people)}
+        </div>
+        <div className="progress-option">
+          <span className="eyebrow">{t('piscine.chart.exams')}</span>
+          {toggle('examMean')}
+          {toggle('examRange')}
+          {data !== undefined && examsDone.length === 0 && (
+            <p className="hint">{t('piscine.chart.noExams')}</p>
+          )}
         </div>
         <PoolWhoPicker data={data} value={who} onChange={setWho} />
         {top?.options}

@@ -19,9 +19,11 @@ import type { PiscineAverage, PiscineProgress } from '@sanatorio/contracts'
 
 import type { Actor } from '../../core/actor.js'
 import { createTtlCache } from '../../core/ttl-cache.js'
-import { PISCINE_PROGRESS } from '../replica/index.js'
+import { PISCINE, PISCINE_PROGRESS } from '../replica/index.js'
 import {
+  EXAM_FRIDAYS,
   POOL_AXIS,
+  examDayOf,
   leaderOf,
   meanLine,
   poolAnchorOf,
@@ -47,6 +49,10 @@ type Pool = {
   everybody: Swimmer[]
   names: Map<number, string>
   campus: string | null
+  /** La nota de cada cual en cada examen de los viernes (login → id → nota). */
+  examMarks: Map<string, Map<number, number>>
+  /** El id de cada examen de los viernes, en orden (`EXAM_FRIDAYS`); sin copiar, `undefined`. */
+  examIds: (number | undefined)[]
 }
 
 export function createPiscineProgressService(options: {
@@ -64,7 +70,15 @@ export function createPiscineProgressService(options: {
   const pools = createTtlCache<Pool>({ ttlMs: CACHE_MS, maxEntries: 20, now })
 
   async function load(campusId: number): Promise<Pool> {
-    const ids = await options.piscine.idsOf(PISCINE_PROGRESS.map((project) => project.slug))
+    const examSlugs = EXAM_FRIDAYS.map(
+      (exam) => PISCINE.find((project) => project.short === exam.short)?.slug ?? '',
+    )
+    const ids = await options.piscine.idsOf([
+      ...PISCINE_PROGRESS.map((project) => project.slug),
+      ...examSlugs,
+    ])
+    const examIds = examSlugs.map((slug) => ids.get(slug))
+    // Solo los que cuentan para el avance: los exámenes van aparte.
     const names = new Map(
       PISCINE_PROGRESS.flatMap((project) => {
         const id = ids.get(project.slug)
@@ -72,11 +86,15 @@ export function createPiscineProgressService(options: {
         return id === undefined ? [] : [[id, project.short] as const]
       }),
     )
-    const [rows, members, campus, history] = await Promise.all([
+    const [rows, members, campus, history, examMarks] = await Promise.all([
       options.piscine.rows(campusId, [...names.keys()]),
       options.piscine.members(campusId),
       options.piscine.campusName(campusId),
       options.piscine.history(campusId, [...names.keys()]),
+      options.piscine.examMarks(
+        campusId,
+        examIds.filter((id) => id !== undefined),
+      ),
     ])
     const people = new Map<string, Swimmer & { done: Map<number, number>; image: string | null }>()
 
@@ -119,7 +137,7 @@ export function createPiscineProgressService(options: {
       }
     }
 
-    return { people, everybody: [...past.values()], names, campus }
+    return { people, everybody: [...past.values()], names, campus, examMarks, examIds }
   }
 
   return {
@@ -224,6 +242,20 @@ export function createPiscineProgressService(options: {
               : []
           })
           .slice(0, MAX_OTHERS),
+        // Las notas de los viernes, de toda tu piscina (tú también): sin nombres.
+        exams: EXAM_FRIDAYS.map((exam, index) => {
+          const id = pool.examIds[index]
+          const marks =
+            id === undefined
+              ? []
+              : inPool.flatMap((person) => {
+                  const mark = pool.examMarks.get(person.login)?.get(id)
+
+                  return mark === undefined ? [] : [mark]
+                })
+
+          return examDayOf(exam, marks, MIN_PEOPLE)
+        }),
         minPeople: MIN_PEOPLE,
         campus: pool.campus,
         ...(standIn === null ? {} : { standIn: { login: standIn.login, image: standIn.image } }),

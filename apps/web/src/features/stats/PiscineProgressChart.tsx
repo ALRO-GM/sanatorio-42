@@ -1,4 +1,9 @@
-import type { PiscineProgress, PiscineTrace, ProgressLine } from '@sanatorio/contracts'
+import type {
+  PiscineExamDay,
+  PiscineProgress,
+  PiscineTrace,
+  ProgressLine,
+} from '@sanatorio/contracts'
 
 import { useI18n } from '../../shared/i18n'
 import { PERSON_COLORS } from './progressSeries'
@@ -7,6 +12,10 @@ const WIDTH = 640
 const HEIGHT = 320
 // A la izquierda caben los nombres del eje: «Shell 01», «C 13».
 const PAD = { left: 62, right: 16, top: 12, bottom: 34 }
+/** A la derecha, con las notas de los exámenes, cabe su eje: «100». */
+const EXAM_RIGHT = 34
+/** Las marcas del eje de notas, sobre 100. */
+const MARK_TICKS = [0, 50, 100]
 /** Cada cuántos días va una marca del eje: una por semana. */
 const WEEK = 7
 /**
@@ -18,8 +27,12 @@ const LAST_DAY = 3 * WEEK + 4
 /** Los viernes de examen: el 4.º día de cada semana contando desde 0. */
 const FRIDAYS = [4, 11, 18, 25]
 
-/** Qué medias se ven. */
-export type PiscineShown = { cohort: boolean }
+/**
+ * Qué se ve: la media de tu piscina y, de los exámenes de los viernes, la nota
+ * media y la mediana con la más baja y la más alta (pedido por Alberto el
+ * 2026-11-20).
+ */
+export type PiscineShown = { cohort: boolean; examMean: boolean; examRange: boolean }
 
 /** Una línea de más (la media de los mejores, quien cae entre dos percentiles). */
 export type Line = {
@@ -47,13 +60,28 @@ export function PiscineProgressChart(props: {
   /** Líneas de más, debajo de las tuyas (la vista sin límites del dueño). */
   extra?: readonly Line[]
 }) {
-  const { t } = useI18n()
+  const { t, tn } = useI18n()
   const { data } = props
   const last = Math.min(data.days.at(-1) ?? LAST_DAY, LAST_DAY)
   const total = data.steps.length
-  const x = (day: number): number => PAD.left + (day / last) * (WIDTH - PAD.left - PAD.right)
+  // Los exámenes con cifras que caen en lo dibujado (con poca gente no las hay).
+  const exams = data.exams.filter((exam) => exam.median !== null && exam.day <= last)
+  const showExams = (props.shown.examMean || props.shown.examRange) && exams.length > 0
+  const right = showExams ? EXAM_RIGHT : PAD.right
+  const x = (day: number): number => PAD.left + (day / last) * (WIDTH - PAD.left - right)
   const y = (value: number): number =>
     HEIGHT - PAD.bottom - (value / Math.max(1, total)) * (HEIGHT - PAD.top - PAD.bottom)
+  // Las notas, sobre 100, en la misma altura que los proyectos: su eje va a la derecha.
+  const yMark = (mark: number): number =>
+    HEIGHT - PAD.bottom - (Math.min(mark, 100) / 100) * (HEIGHT - PAD.top - PAD.bottom)
+  const examTitle = (exam: PiscineExamDay): string =>
+    `${t('piscine.chart.examTip', {
+      name: exam.name,
+      mean: exam.mean ?? 0,
+      median: exam.median ?? 0,
+      min: exam.min ?? 0,
+      max: exam.max ?? 0,
+    })} · ${tn('piscine.chart.people', exam.people)}`
   const pathOf = (line: ProgressLine): string => {
     let path = ''
     let open = false
@@ -128,20 +156,20 @@ export function PiscineProgressChart(props: {
           className="piscine-band shell"
           x={PAD.left}
           y={y(shells)}
-          width={WIDTH - PAD.left - PAD.right}
+          width={WIDTH - PAD.left - right}
           height={y(0) - y(shells)}
         />
         <rect
           className="piscine-band c"
           x={PAD.left}
           y={y(total)}
-          width={WIDTH - PAD.left - PAD.right}
+          width={WIDTH - PAD.left - right}
           height={y(shells) - y(total)}
         />
         <g className="progress-grid">
           {data.steps.map((step, index) => (
             <g key={step.short}>
-              <line x1={PAD.left} x2={WIDTH - PAD.right} y1={y(index + 1)} y2={y(index + 1)} />
+              <line x1={PAD.left} x2={WIDTH - right} y1={y(index + 1)} y2={y(index + 1)} />
               <text x={PAD.left - 6} y={y(index + 1) + 4} textAnchor="end">
                 {step.short}
               </text>
@@ -187,12 +215,75 @@ export function PiscineProgressChart(props: {
         </g>
         <text
           className="progress-axis"
-          x={(PAD.left + WIDTH - PAD.right) / 2}
+          x={(PAD.left + WIDTH - right) / 2}
           y={HEIGHT - 2}
           textAnchor="middle"
         >
           {t('piscine.chart.days')}
         </text>
+        {/* Las notas de los exámenes, con su eje a la derecha (0 a 100). */}
+        {showExams && (
+          <g className="piscine-exam-axis">
+            <text className="title" x={WIDTH - right + 6} y={PAD.top - 2}>
+              {t('piscine.chart.markAxis')}
+            </text>
+            {MARK_TICKS.map((mark) => (
+              <text key={mark} x={WIDTH - right + 6} y={yMark(mark) + 4}>
+                {mark}
+              </text>
+            ))}
+          </g>
+        )}
+        {showExams && props.shown.examRange && (
+          <g className="piscine-exam-range">
+            {exams.map((exam) => (
+              <g key={exam.day}>
+                <title>{examTitle(exam)}</title>
+                <line
+                  x1={x(exam.day)}
+                  x2={x(exam.day)}
+                  y1={yMark(exam.min ?? 0)}
+                  y2={yMark(exam.max ?? 0)}
+                />
+                {[exam.min ?? 0, exam.max ?? 0].map((mark, index) => (
+                  <line
+                    key={index}
+                    className="cap"
+                    x1={x(exam.day) - 5}
+                    x2={x(exam.day) + 5}
+                    y1={yMark(mark)}
+                    y2={yMark(mark)}
+                  />
+                ))}
+                <rect
+                  className="median"
+                  x={x(exam.day) - 8}
+                  y={yMark(exam.median ?? 0) - 2}
+                  width={16}
+                  height={4}
+                  rx={1}
+                />
+              </g>
+            ))}
+          </g>
+        )}
+        {showExams && props.shown.examMean && (
+          <g className="piscine-exam-mean">
+            <path
+              d={exams
+                .map(
+                  (exam, index) =>
+                    `${index === 0 ? 'M' : 'L'}${x(exam.day).toFixed(1)},${yMark(exam.mean ?? 0).toFixed(1)}`,
+                )
+                .join('')}
+            />
+            {exams.map((exam) => (
+              <circle key={exam.day} cx={x(exam.day)} cy={yMark(exam.mean ?? 0)} r={4}>
+                <title>{examTitle(exam)}</title>
+              </circle>
+            ))}
+          </g>
+        )}
         {lines.map((each) => (
           <path
             key={each.key}
@@ -246,6 +337,24 @@ export function PiscineProgressChart(props: {
               {each.label}
             </li>
           ))}
+        {showExams && props.shown.examMean && (
+          <li>
+            <svg className="progress-key piscine-exam-mean" viewBox="0 0 24 8" aria-hidden="true">
+              <path d="M0,4L24,4" />
+              <circle cx="12" cy="4" r="3" />
+            </svg>
+            {t('piscine.chart.examMean')}
+          </li>
+        )}
+        {showExams && props.shown.examRange && (
+          <li>
+            <svg className="progress-key piscine-exam-range" viewBox="0 0 24 12" aria-hidden="true">
+              <line x1="12" x2="12" y1="1" y2="11" />
+              <rect className="median" x="6" y="4.5" width="12" height="3" rx="1" />
+            </svg>
+            {t('piscine.chart.examRange')}
+          </li>
+        )}
       </ul>
     </div>
   )

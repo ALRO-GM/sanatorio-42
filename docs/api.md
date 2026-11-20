@@ -2198,7 +2198,10 @@ GET /stats/progress?with=login,login&campuses=22,1|all → StatsProgress. Tu ava
 GET /stats/progress/fastest → StatsFastest. Quien terminó el common core más deprisa, por plan.
 GET /stats/progress/piscine?with=login,login → PiscineProgress. El Avance de un piscinero (403 a
                   un estudiante): lo aprobado de la piscina día a día, con la media de su
-                  piscina y de las anteriores de su campus. En la vista sin límites
+                  piscina y de las anteriores de su campus, y `exams`: la nota de su
+                  piscina en cada examen de los viernes (`PiscineExamDay`: media,
+                  mediana, más baja y más alta; `null` con menos de `minPeople`
+                  personas con nota). En la vista sin límites
                   del dueño trae además `everyone`: la línea de cada uno de la piscina,
                   y `pools`: la media de cada una de las últimas 10 piscinas del campus.
 GET /stats/dropout?start=AAAA-MM-DD&likely=70&w.isolation=1… → DropoutReport. El abandono de una piscina del campus

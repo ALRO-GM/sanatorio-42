@@ -506,6 +506,46 @@ export function createPiscineRepository(db: Db) {
       }
     },
 
+    /**
+     * La nota con que cerró cada piscinero en curso de un campus cada uno de
+     * esos exámenes (login → id → nota): la del proyecto acabado o la de su
+     * intento cerrado, la más alta. Lo que sigue abierto (el examen en marcha,
+     * con la nota subiendo) no cuenta todavía.
+     */
+    async examMarks(
+      campusId: number,
+      ids: readonly number[],
+    ): Promise<Map<string, Map<number, number>>> {
+      const marks = new Map<string, Map<number, number>>()
+
+      if (ids.length === 0) return marks
+
+      const result = await db.execute({
+        sql: `SELECT pm.login, pu.project_id, pu.final_mark AS mark FROM project_users pu
+              JOIN pool_members pm ON pm.user_id = pu.user_id AND pm.campus_id = ?
+              WHERE ${inList('pu.project_id')} AND pu.status = 'finished'
+                AND pu.final_mark IS NOT NULL
+              UNION ALL
+              SELECT pm.login, ea.project_id, ea.mark FROM exam_attempts ea
+              JOIN pool_members pm ON pm.user_id = ea.user_id AND pm.campus_id = ?
+              WHERE ${inList('ea.project_id')} AND ea.validated IS NOT NULL
+                AND ea.mark IS NOT NULL`,
+        args: [campusId, listArg(ids), campusId, listArg(ids)],
+      })
+
+      for (const row of result.rows) {
+        const login = toText(row.login).toLowerCase()
+        const projectId = toNumber(row.project_id)
+        const mark = toNumber(row.mark)
+        const own = marks.get(login) ?? new Map<number, number>()
+
+        own.set(projectId, Math.max(mark, own.get(projectId) ?? mark))
+        marks.set(login, own)
+      }
+
+      return marks
+    },
+
     /** El id de cada uno de esos slugs que esté en la réplica. */
     async idsOf(slugs: readonly string[]): Promise<Map<string, number>> {
       return createProgressRepository(db).idsOf(slugs)

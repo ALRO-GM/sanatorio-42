@@ -271,6 +271,27 @@ export type PiscinePoolLine = {
 export type PiscinePoolPart = { people: number; line: ProgressLine }
 
 /**
+ * Las notas de tu piscina en uno de los exámenes de los viernes (pedido por
+ * Alberto el 2026-11-20): Exam 00, 01 y 02 y el examen final. Cuenta la nota
+ * con que cerró cada cual; quien no se presentó no entra. Con menos de
+ * `minPeople` personas con nota, las cifras van a `null`: con tres no dicen
+ * nada y casi dirían la nota de cada cual.
+ */
+export type PiscineExamDay = {
+  /** El día de piscina en que cae, desde 0 (el viernes: 4, 11, 18 y 25). */
+  day: number
+  /** El nombre corto del examen: «Exam 00» … «Final». */
+  name: string
+  /** Cuánta gente de tu piscina tiene nota en ese examen. */
+  people: number
+  /** La media, con un decimal. */
+  mean: number | null
+  median: number | null
+  min: number | null
+  max: number | null
+}
+
+/**
  * `GET /stats/progress/piscine?with=a,b`: el Avance de un piscinero
  * (`docs/piscineros.md`). El eje es el día de piscina; lo que cuenta son los
  * proyectos Shell 00 … C 13 aprobados. Los rushes, BSQ y los exámenes no suman.
@@ -287,6 +308,8 @@ export type PiscineProgress = {
   cohort: PiscineAverage
   /** Las personas con quien te comparas (`?with=`): piscineros de tu campus. */
   others: (PiscineTrace & { login: string })[]
+  /** Las notas de tu piscina en los exámenes de los viernes, del primero al final. */
+  exams: PiscineExamDay[]
   minPeople: number
   /** El nombre de tu campus, si se sabe. */
   campus: string | null
