@@ -120,7 +120,7 @@ function AdminTabs({ campusId, me }: { campusId?: number | undefined; me: string
       {tab === 'pool' && <QuizScopePanel />}
       {tab === 'hidden' && <HiddenPanel />}
       {tab === 'casts' && <BroadcastsTab campusId={campusId} />}
-      {tab === 'countdowns' && <CountdownsPanel campusId={campusId} />}
+      {tab === 'countdowns' && <CountdownsPanel />}
       {tab === 'maintenance' && <MaintenancePanel />}
       {tab === 'facility' && (
         <FacilityList

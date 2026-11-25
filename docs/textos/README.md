@@ -23,7 +23,7 @@ Cómo se trabaja con ellas: [docs/textos.md](../textos.md).
 | [estadisticas](estadisticas.md) | 225 | 0 | 0 | 0 | 0 |
 | [examenes](examenes.md) | 84 | 0 | 0 | 0 | 0 |
 | [expediente](expediente.md) | 264 | 0 | 0 | 0 | 0 |
-| [gestion](gestion.md) | 750 | 0 | 71 | 71 | 71 |
+| [gestion](gestion.md) | 751 | 0 | 71 | 71 | 71 |
 | [guardia](guardia.md) | 80 | 0 | 0 | 0 | 0 |
 | [legal](legal.md) | 88 | 0 | 0 | 0 | 0 |
 | [notgames](notgames.md) | 269 | 0 | 0 | 0 | 0 |

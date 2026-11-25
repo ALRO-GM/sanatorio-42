@@ -523,7 +523,7 @@ Detalle: [rendimiento.md](rendimiento.md#9-cargas-largas-2026-11-02).
 | Amigos | Pesos de los puestos de la red de asientos en una cuadrícula alrededor de la persona, con el grafo resultante y cuánto mejor separa en grupos frente a los pesos en uso |
 | Code Clicker | Uso y partidas; trampas (ver la partida, escribir, indultar, comunicado a quienes las hicieron); sanción a mano; resetear la pastilla |
 | Comunicados | A una persona, varias, un campus o todo el mundo, con opciones y respuestas |
-| Cuentas atrás | Limpieza de taquillas (día y hora) u otro aviso, para estudiantes, piscineros o todos |
+| Cuentas atrás | Limpieza de taquillas (día y hora) u otro aviso, para estudiantes, piscineros o todos, en todos los campus o en el que se elija |
 | Mantenimiento | Mensaje y hora de vuelta (atajos de 30 a 240 min) |
 | Avisos del edificio | Lista y «resuelto» |
 | Pomodoro | Uso por periodo, paradas y motivos, por tramo de gente |

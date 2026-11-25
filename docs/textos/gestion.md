@@ -3,7 +3,7 @@
 Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 `npm run textos -- --write`. **No se edita a mano**: se edita la tabla.
 
-750 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
+751 textos. «—» es que falta la traducción: sale en español (en francés, en inglés).
 
 | Clave | Contexto | Dónde | Español | Inglés | Catalán | Euskera | Francés |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -669,7 +669,8 @@ Generado desde `apps/web/src/shared/i18n/textos/gestion.csv` con
 | `admin.countdown.to.all` | Panel de gestión, cuentas atrás: a todo el mundo | features/admin/CountdownsPanel | Todo el mundo | Everyone | Tothom | Denentzat | Tout le monde |
 | `admin.countdown.to.students` | Panel de gestión, cuentas atrás: solo a estudiantes | features/admin/CountdownsPanel | Estudiantes | Students | Estudiants | Ikasleak | Cursus |
 | `admin.countdown.to.pool` | Panel de gestión, cuentas atrás: solo a piscineros | features/admin/CountdownsPanel | Piscineros | Piscine | Piscina | Igerilekukoak | Piscine |
-| `admin.countdown.onlyHere` | Panel de gestión, cuentas atrás: casilla para limitarlo al campus que se mira | features/admin/CountdownsPanel | Solo a quien mira este campus | Only people viewing this campus | Només a qui mira aquest campus | Campus hau ikusten dutenei bakarrik | Seulement pour qui consulte ce campus |
+| `admin.countdown.campus` | Panel de gestión, cuentas atrás: desplegable para elegir a qué campus va el aviso | features/admin/CountdownsPanel | Campus | Campus | Campus | Campusa | Campus |
+| `admin.countdown.campus.all` | Panel de gestión, cuentas atrás: opción del desplegable de campus para mandarlo a todos | features/admin/CountdownsPanel | Todos los campus | All campuses | Tots els campus | Campus guztiak | Tous les campus |
 | `admin.countdown.send` | Panel de gestión, cuentas atrás: botón para mandarlo | features/admin/AdminTour, features/admin/CountdownsPanel | Mandar aviso | Send notice | Envia l'avís | Oharra bidali | Envoyer l'annonce |
 | `admin.countdown.sent` | Panel de gestión, cuentas atrás: lista de los ya mandados | features/admin/CountdownsPanel | Avisos mandados | Sent notices | Avisos enviats | Bidalitako oharrak | Annonces envoyées |
 | `admin.countdown.none` | Panel de gestión, cuentas atrás: aún no hay ninguno | features/admin/CountdownsPanel | Aún no has mandado ninguno. | You haven't sent any yet. | Encara no n'has enviat cap. | Oraindik ez duzu bat ere bidali. | Tu n'en as encore envoyé aucune. |

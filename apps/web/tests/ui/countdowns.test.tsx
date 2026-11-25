@@ -267,12 +267,20 @@ describe('modo mantenimiento', () => {
       `${nextWeek.getFullYear()}-${pad(nextWeek.getMonth() + 1)}-${pad(nextWeek.getDate())}`,
     )
     await user.type(within(form).getByLabelText(text('countdown.time')), '09:00')
+    // A un solo campus, otro que el que se mira: cada campus limpia en su día.
+    await user.selectOptions(
+      await within(form).findByLabelText(text('admin.countdown.campus'), {}, WAIT),
+      'Barcelona',
+    )
     await user.click(within(form).getByRole('button', { name: text('admin.countdown.send') }))
 
     await waitFor(async () => {
-      expect(
-        (await api.getAdminCountdowns()).filter((each) => each.preset === 'lockers').length,
-      ).toBe(2)
+      const lockers = (await api.getAdminCountdowns()).filter((each) => each.preset === 'lockers')
+
+      expect(lockers.length).toBe(2)
+      expect(lockers.some((each) => each.campusId === 58)).toBe(true)
     }, WAIT)
+    // Y en la lista sale el nombre del campus, no su número.
+    expect(await screen.findByText(/· Barcelona ·/, {}, WAIT)).toBeTruthy()
   }, 30_000)
 })

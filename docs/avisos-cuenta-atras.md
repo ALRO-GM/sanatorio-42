@@ -35,8 +35,11 @@ hay algo que contar.
   (`countdown.lockers.*`: se abren todas y se tira lo que haya dentro) y solo
   pide el día y la hora. Otro aviso lleva título y, si se quiere, texto. Se
   manda a todo el mundo, a los estudiantes o a los piscineros (los mundos
-  separados de `docs/piscineros.md`) y, si se marca, solo a quien mira ese
-  campus. El panel enseña cuánta gente lo ha cerrado y deja retirarlo.
+  separados de `docs/piscineros.md`), en todos los campus o en el que se elija
+  en el desplegable **Campus** (cualquiera de la lista, no solo el que mira
+  quien administra; pedido por Alberto el 2026-11-25: cada campus limpia sus
+  taquillas en su día). Le llega a quien mira ese campus. El panel enseña a qué
+  campus va, cuánta gente lo ha cerrado y deja retirarlo.
 - **Un evento del calendario**: «Fijar cuenta atrás» en su ficha (pizarras,
   sprints, on-call, correcciones, exámenes, eventos de 42…), si aún no ha
   empezado. La API lo busca en tu calendario y guarda su título y hora.
